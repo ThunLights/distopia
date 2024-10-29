@@ -1,3 +1,5 @@
+import { errorHandling } from "$lib/error.js";
+
 import type { HandleServerError } from "@sveltejs/kit"
 
 export const handleError = (async (input) => {
@@ -7,5 +9,5 @@ export const handleError = (async (input) => {
 	if (input.status === 405) {
 		return;
 	};
-	console.log(input);
+	errorHandling(input);
 }) satisfies HandleServerError;
