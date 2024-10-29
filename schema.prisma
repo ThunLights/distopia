@@ -5,5 +5,11 @@ datasource db {
 
 generator client {
     provider = "prisma-client-js"
-//    output   = "./node_modules/@prisma-app/db"
+}
+
+model Token {
+    id String
+    token String
+
+    @@id([id, token])
 }
