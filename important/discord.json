@@ -1,0 +1,9 @@
+{
+    "bot": {
+        "id": "1300797373374529557",
+        "token": "MTMwMDc5NzM3MzM3NDUyOTU1Nw.GVjOLA.8cRbJGgzWKUvzVKbMFR1RBit_jKCt8A4SWg8y4",
+        "secret": "lId-xY873qv4pllKg9Mv-vfMnomqPggx",
+        "url": "https://distopia.top/auth"
+    },
+    "oauth": "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=identify+email"
+}
