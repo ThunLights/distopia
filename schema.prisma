@@ -1,10 +1,15 @@
 datasource db {
     provider = "sqlite"
-    url      = "file:./db/database.sqlite3"
+    url      = "file:./src/lib/db/database.sqlite3"
 }
 
 generator client {
     provider = "prisma-client-js"
+}
+
+model User {
+    id       String @id
+    username String
 }
 
 model Token {
