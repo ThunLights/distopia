@@ -6,7 +6,7 @@
         "Distopia.topはDiscordサーバー用掲示板です。",
         "沢山のサーバーが登録されていますので是非一度ご覧ください。"
     ].join("");
-    export let url = "/";
+    export let url = "https://distopia.top/";
 </script>
 
 <svelte:head>
