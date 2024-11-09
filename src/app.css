@@ -1,4 +1,8 @@
 
+:root {
+    --body-background-color: #313338;
+}
+
 * {
     margin: 0;
 }
