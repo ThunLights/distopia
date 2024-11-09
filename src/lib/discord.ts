@@ -4,6 +4,10 @@ import { sleep } from "./sleep.js";
 import fs from "fs";
 import path from "path";
 
+import cfg from "../../important/discord.json" assert { type: "json" };
+
+const __dirname = import.meta.dirname;
+
 type DiscordConfig = {
     bot: {
         id: string
@@ -36,7 +40,7 @@ export class DiscordController {
     config: DiscordConfig
 
     constructor() {
-        this.config = JSON.parse(fs.readFileSync(path.join(__dirname, "../../important/discord.json"), "utf-8"))
+        this.config = cfg;
     }
     public static async sendVerifyMessage<T extends object>(url: string, contents: T): Promise<boolean> {
         try {
@@ -66,6 +70,7 @@ export class DiscordController {
             if (data) {
                 const accoutInfo = await this.accessToken2data(data.access_token);
                 if (accoutInfo) {
+                    console.log(accoutInfo.avatar);
                     return {...data, ...accoutInfo};
                 }
             }
