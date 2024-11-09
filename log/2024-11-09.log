@@ -1,0 +1,21 @@
+
+----------2024年11月9日(土) 12時12分16.0秒----------
+{
+    "error":{
+        "stack":"ReferenceError: navigator is not defined\n    at _page (/root/distopia/src/routes/+page.svelte:7:31)\n    at children (/root/distopia/.svelte-kit/generated/root.svelte:69:5)\n    at Module.slot (/root/distopia/node_modules/svelte/src/internal/server/index.js:433:3)\n    at _layout (/root/distopia/src/routes/+layout.svelte:13:24)\n    at Root (/root/distopia/.svelte-kit/generated/root.svelte:64:3)\n    at Module.render (/root/distopia/node_modules/svelte/src/internal/server/index.js:117:2)\n    at Function._render [as render] (/root/distopia/node_modules/svelte/src/legacy/legacy-server.js:27:18)\n    at Module.render_response (/root/distopia/node_modules/@sveltejs/kit/src/runtime/server/page/render.js:171:29)\n    at async Module.render_page (/root/distopia/node_modules/@sveltejs/kit/src/runtime/server/page/index.js:302:10)\n    at async resolve (/root/distopia/node_modules/@sveltejs/kit/src/runtime/server/respond.js:454:18)"
+    },
+    "event":{
+        "cookies":{},
+        "locals":{},
+        "params":{},
+        "request":{},
+        "route":{
+            "id":"/"
+        },
+        "url":"http://distopia.top/",
+        "isDataRequest":false,
+        "isSubRequest":false
+    },
+    "status":500,
+    "message":"Internal Error"
+}
