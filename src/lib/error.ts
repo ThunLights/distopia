@@ -3,25 +3,17 @@ import path from "path"
 
 import { dayExchanger } from "./day.js"
 
-function errorHandlingAny<T>(error: T) {
-	if (error instanceof Error) {
-		if (error.stack === undefined) {
-			errorLog(error.message)
-		} else {
-			errorLog(error.stack)
-		}
-	} else {
-		errorLog(String(error))
-	}
-}
+const __dirname = import.meta.dirname;
 
-function errorHandling(error: unknown) {
+function errorHandling<T>(error: T) {
 	if (error instanceof Error) {
 		if (error.stack === undefined) {
 			errorLog(error.message)
 		} else {
 			errorLog(error.stack)
 		}
+	} else if (typeof error === "object") {
+		errorLog(JSON.stringify(error, null, "\t"));
 	} else {
 		errorLog(String(error))
 	}
@@ -37,6 +29,5 @@ function errorLog(content: string) {
 
 export {
 	errorHandling,
-	errorHandlingAny,
 	errorLog,
 }
