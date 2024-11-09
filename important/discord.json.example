@@ -1,0 +1,9 @@
+{
+    bot: {
+        id: "",
+        token: "",
+        secret: "",
+        url: "",
+    },
+    oauth: ""
+}
