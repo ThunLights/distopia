@@ -1,4 +1,4 @@
-import { errorHandling } from "$lib/error.js";
+import { errorHandling } from "$lib/error";
 
 import type { HandleServerError } from "@sveltejs/kit"
 
