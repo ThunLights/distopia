@@ -3,7 +3,7 @@
 </script>
 
 <main class="{ fixed ? "fixed" : "" }">
-    <p>Contact: <a href="https://x.com/thunlights">X ( @thunlights )</a> or robot@thunlights.com</p>
+    <p>Contact: <a href="https://discord.gg/QWUxsxWyYv">Official Discord Server</a></p>
     <p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
 </main>
 
