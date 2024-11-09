@@ -30,7 +30,7 @@
 
         .header-title p,
         .header-other {
-            font-family: fantasy;
+            font-family: "Inter";
         }
         .header-title {
             font-size: 30px;
