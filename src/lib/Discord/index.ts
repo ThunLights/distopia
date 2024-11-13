@@ -1,0 +1,38 @@
+import { ActivityType, Client, REST } from "discord.js";
+
+import { INTENTS } from "./Discord.intents";
+import { InteractionClient } from "./Discord.interaction";
+import cfg from "../../../important/discord.json" assert { type: "json" };
+
+export class DiscordBotClient {
+    private readonly token = cfg.bot.token;
+    private readonly clientId = cfg.bot.id;
+    private readonly client = new Client({ intents: INTENTS });
+    private readonly rest = new REST({ version: "10" }).setToken(this.token);
+    private readonly interactionClient = new InteractionClient();
+
+    constructor() {}
+
+    public async setEvents() {
+        this.client.on("ready", async (client) => {
+            client.user.setActivity({
+                name: "Supported by distopia.top",
+                type: ActivityType.Playing,
+            })
+            await this.rest.put(`/applications/${this.clientId}/commands`, {
+                body: InteractionClient.commands,
+            })
+        });
+        this.client.on("interactionCreate", async (interaction) => {
+            return await this.interactionClient.interactionCreate(interaction);
+        });
+        this.client.on("messageCreate", async (message) => {});
+    }
+
+    public async login(): Promise<void> {
+        await this.client.login(this.token)
+    }
+    public async logout(): Promise<void> {
+        await this.client.destroy();
+    }
+}
