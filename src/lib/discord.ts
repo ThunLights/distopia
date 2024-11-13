@@ -1,12 +1,9 @@
 import { errorHandling } from "./error.js";
 import { sleep } from "./sleep.js";
-
-import fs from "fs";
-import path from "path";
+import { DiscordBotClient } from "./Discord/index.js";
+import { database } from "./database.js";
 
 import cfg from "../../important/discord.json" assert { type: "json" };
-
-const __dirname = import.meta.dirname;
 
 type DiscordConfig = {
     bot: {
@@ -37,11 +34,109 @@ type CodeCheckResponse = {
 export type Code2dataResponse = CodeCheckResponse & AccessToken2dataResponse;
 
 export class DiscordController {
-    config: DiscordConfig
+    public readonly config: DiscordConfig = cfg;
+    public readonly bot = new DiscordBotClient();
+    private readonly prisma = database.prisma;
 
     constructor() {
-        this.config = cfg;
     }
+
+    private async getMoreInfo(accessToken: string) {
+        try {
+            const response = await fetch("https://discord.com/api/users/@me", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            if (response.ok) {
+                const json = await response.json();
+                return {
+                    id: json.id as string,
+                    username: json.username as string,
+                    email: json.email as string | null | undefined,
+                };
+            }
+
+            return null;
+        } catch (error) {
+            errorHandling(error);
+            return null;
+        }
+    }
+
+    private async addAccessToken(id: string, username: string, accessToken: string, refreshToken: string) {
+        try {
+            const time = BigInt(Date.now());
+            const element = await this.prisma.user.findFirst({
+                where: { id, username }
+            })
+            if (element) {
+                await this.prisma.user.updateMany({
+                    where: {
+                        id: element.id,
+                        username: element.username,
+                    },
+                    data: {
+                        accessToken,
+                        refreshToken,
+                        time,
+                    }
+                })
+            } else {
+                await this.prisma.user.create({
+                    data: {
+                        id,
+                        username,
+                        accessToken,
+                        refreshToken,
+                        time,
+                    }
+                })
+            }
+            return true;
+        } catch (error) {
+            errorHandling(error)
+            return false;
+        }
+    }
+
+    public async codeChecker(code: string) {
+        try {
+            const params = new URLSearchParams();
+            params.append("client_id", this.config.bot.id);
+            params.append("client_secret", this.config.bot.secret);
+            params.append("grant_type", "authorization_code");
+            params.append("redirect_uri", encodeURI(this.config.bot.url));
+            params.append("code", code);
+            const response = await fetch("https://discord.com/api/v10/oauth2/token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            });
+            if (response.ok) {
+                const json = await response.json()
+                if (typeof json.access_token === "string" && typeof json.refresh_token === "string") {
+                    const userInfo = await this.getMoreInfo(json.access_token);
+                    if (userInfo) {
+                        await this.addAccessToken(userInfo.id, userInfo.username, json.access_token, json.refresh_token);
+                        return {
+                            id: userInfo.id,
+                            username: userInfo.username,
+                            config: this.config,
+                            userInfo,
+                        };
+                    }
+                }
+            }
+        } catch (error) {
+            errorHandling(error);
+            return null;
+        }
+    }
+
     public static async sendVerifyMessage<T extends object>(url: string, contents: T): Promise<boolean> {
         try {
             const response = await fetch(url, {
@@ -63,72 +158,6 @@ export class DiscordController {
             return false;
         }
     }
-    public async code2data(code: string): Promise<Code2dataResponse | null> {
-        try {
-            const data = await this.codeCheck(code);
-
-            if (data) {
-                const accoutInfo = await this.accessToken2data(data.access_token);
-                if (accoutInfo) {
-                    console.log(accoutInfo.avatar);
-                    return {...data, ...accoutInfo};
-                }
-            }
-
-            return null
-        } catch (error) {
-            errorHandling(error);
-            return null
-        }
-    }
-    private async accessToken2data(accessToken: string): Promise<AccessToken2dataResponse | null> {
-        try {
-            const response = await fetch(`https://discord.com/api/users/@me`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                },
-            });
-
-            if (response.ok) {
-                const json = await response.json();
-                return json;
-            } else if (response.status === 429) {
-                await sleep(1000);
-                return await this.accessToken2data(accessToken);
-            }
-
-            return null;
-        } catch (error) {
-            errorHandling(error);
-            return null;
-        }
-    }
-    private async codeCheck(code: string): Promise<CodeCheckResponse | null> {
-        try {
-            const formDatas = {
-                client_id: this.config.bot.id,
-                client_secret: this.config.bot.secret,
-                grant_type: "authorization_code",
-                redirect_uri: this.config.bot.url,
-                code,
-            };
-            const form = new FormData();
-            for (const [key, value] of Object.entries(formDatas)) form.append(key, value);
-
-            const response = await fetch("https://discord.com/api/v10/oauth2/token", {
-                method: "POST",
-                body: form,
-            })
-
-            if (response.ok) {
-                return await response.json();
-            }
-
-            return null
-        } catch (error) {
-            errorHandling(error);
-            return null;
-        }
-    }
 }
+
+export const discord = new DiscordController();
