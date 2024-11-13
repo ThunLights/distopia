@@ -8,13 +8,26 @@ generator client {
 }
 
 model User {
-    id       String @id
-    username String
+    id           String @id
+    username     String
+    accessToken  String
+    refreshToken String
+    time         BigInt
 }
 
 model Token {
-    id String
+    id    String
     token String
 
     @@id([id, token])
+}
+
+model Email {
+    id      String @id
+    content String
+}
+
+model Avatar {
+    id      String @id
+    content String
 }
