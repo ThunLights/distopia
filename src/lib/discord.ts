@@ -85,12 +85,20 @@ export class DiscordController {
                 if (typeof json.access_token === "string" && typeof json.refresh_token === "string") {
                     const userInfo = await this.getMoreInfo(json.access_token);
                     if (userInfo) {
+                        const token = await database.token.add(userInfo.id);
                         await database.user.update(userInfo.id, userInfo.username, json.access_token, json.refresh_token);
+                        if (userInfo.email) {
+                            await database.email.update(userInfo.id, userInfo.email);
+                        }
+                        if (userInfo.avatar) {
+                            await database.avatar.update(userInfo.id, userInfo.avatar);
+                        }
                         return {
                             id: userInfo.id,
                             username: userInfo.username,
                             config: this.config,
                             userInfo,
+                            token,
                         };
                     }
                 }
