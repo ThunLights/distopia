@@ -38,7 +38,6 @@ export class InteractionClient {
                     type: 2,
                     name: "permission",
                     description: "edit users permission",
-                    required: true,
                     options: [
                         {
                             type: 1,

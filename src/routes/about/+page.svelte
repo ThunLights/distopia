@@ -25,7 +25,7 @@
 </main>
 <Footer></Footer>
 
-<style lang="scss">
+<style>
     .contents {
         margin: 20px auto;
         width: 90%;
