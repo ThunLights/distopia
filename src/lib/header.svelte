@@ -70,6 +70,7 @@
         margin: auto 20px auto 0;
     }
     .discord-login-content {
+        font-family: "Inter";
         margin: auto 0;
         line-height: var(--discord-login-height);
     }
