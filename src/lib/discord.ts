@@ -1,7 +1,7 @@
 import { errorHandling } from "./error.js";
 import { sleep } from "./sleep.js";
 import { DiscordBotClient } from "./Discord/index.js";
-import { database } from "./database.js";
+import { database } from "./Database/index.js";
 
 import cfg from "../../important/discord.json" assert { type: "json" };
 
@@ -36,7 +36,6 @@ export type Code2dataResponse = CodeCheckResponse & AccessToken2dataResponse;
 export class DiscordController {
     public readonly config: DiscordConfig = cfg;
     public readonly bot = new DiscordBotClient();
-    private readonly prisma = database.prisma;
 
     constructor() {
     }
@@ -55,6 +54,7 @@ export class DiscordController {
                     id: json.id as string,
                     username: json.username as string,
                     email: json.email as string | null | undefined,
+                    avatar: json.avatar as string | null | undefined,
                 };
             }
 
@@ -62,42 +62,6 @@ export class DiscordController {
         } catch (error) {
             errorHandling(error);
             return null;
-        }
-    }
-
-    private async addAccessToken(id: string, username: string, accessToken: string, refreshToken: string) {
-        try {
-            const time = BigInt(Date.now());
-            const element = await this.prisma.user.findFirst({
-                where: { id, username }
-            })
-            if (element) {
-                await this.prisma.user.updateMany({
-                    where: {
-                        id: element.id,
-                        username: element.username,
-                    },
-                    data: {
-                        accessToken,
-                        refreshToken,
-                        time,
-                    }
-                })
-            } else {
-                await this.prisma.user.create({
-                    data: {
-                        id,
-                        username,
-                        accessToken,
-                        refreshToken,
-                        time,
-                    }
-                })
-            }
-            return true;
-        } catch (error) {
-            errorHandling(error)
-            return false;
         }
     }
 
@@ -121,7 +85,7 @@ export class DiscordController {
                 if (typeof json.access_token === "string" && typeof json.refresh_token === "string") {
                     const userInfo = await this.getMoreInfo(json.access_token);
                     if (userInfo) {
-                        await this.addAccessToken(userInfo.id, userInfo.username, json.access_token, json.refresh_token);
+                        await database.user.update(userInfo.id, userInfo.username, json.access_token, json.refresh_token);
                         return {
                             id: userInfo.id,
                             username: userInfo.username,
