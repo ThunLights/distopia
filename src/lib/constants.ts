@@ -1,3 +1,4 @@
+import cfg from "../../important/discord.json";
 
 type SiteAbout = {
     title: string
@@ -51,3 +52,5 @@ export const siteAbout = [
         ]
     },
 ] satisfies Array<SiteAbout>;
+
+export const LoginUrl = cfg.oauth;
