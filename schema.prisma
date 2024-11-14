@@ -17,9 +17,7 @@ model User {
 
 model Token {
     id    String
-    token String
-
-    @@id([id, token])
+    token String @id
 }
 
 model Email {
