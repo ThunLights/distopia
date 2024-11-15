@@ -6,6 +6,15 @@ export class User {
     constructor(private readonly prisma: PrismaClient) {
     }
 
+    public async user(id: string) {
+        try {
+            return await this.prisma.user.findFirst({ where: { id } });
+        } catch (error) {
+            errorHandling(error);
+            return null
+        }
+    }
+
     public async update(id: string, username: string, accessToken: string, refreshToken: string) {
         try {
             const time = BigInt(Date.now());
