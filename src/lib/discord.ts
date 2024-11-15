@@ -109,6 +109,45 @@ export class DiscordController {
         }
     }
 
+    public async guilds(accessToken: string) {
+        try {
+            const response = await fetch("https://discord.com/api/v10/users/@me/guilds", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+//                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
+            if (response.ok) {
+                console.log(await response.json())
+            }
+        } catch (error) {
+            errorHandling(error)
+        }
+    }
+
+    public async resetAccessToken(refreshToken: string) {
+        try {
+            const params = new URLSearchParams();
+            params.append("client_id", this.config.bot.id);
+            params.append("client_secret", this.config.bot.secret);
+            params.append("grant_type", "refresh_token");
+            params.append("refresh_token", refreshToken);
+            const response = await fetch("", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: params.toString(),
+            })
+            if (response.ok) {
+                console.log(await response.json())
+            }
+        } catch (error) {
+            errorHandling(error);
+        }
+    }
+
     public static async sendVerifyMessage<T extends object>(url: string, contents: T): Promise<boolean> {
         try {
             const response = await fetch(url, {
