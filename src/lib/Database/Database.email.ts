@@ -6,6 +6,16 @@ export class Email {
     constructor(private readonly prisma: PrismaClient) {
     }
 
+    public async data(id: string) {
+        try {
+            const data = await this.prisma.email.findFirst({ where: { id } });
+            return data ? data.content : null;
+        } catch (error) {
+            errorHandling(error);
+            return null;
+        }
+    }
+
     public async update(id: string, email: string) {
         try {
             const element = await this.prisma.email.findFirst({ where: { id } });
