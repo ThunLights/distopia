@@ -5,6 +5,11 @@ import { dayExchanger } from "./day.js"
 
 const __dirname = import.meta.dirname;
 
+export class ServerError {
+	public static readonly codes: Record<string, number> = {}
+	constructor(public readonly content: string) {}
+}
+
 function errorHandling<T>(error: T) {
 	if (error instanceof Error) {
 		if (error.stack === undefined) {
