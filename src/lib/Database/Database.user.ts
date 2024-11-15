@@ -6,7 +6,7 @@ export class User {
     constructor(private readonly prisma: PrismaClient) {
     }
 
-    public async user(id: string) {
+    public async data(id: string) {
         try {
             return await this.prisma.user.findFirst({ where: { id } });
         } catch (error) {
