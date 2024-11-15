@@ -5,8 +5,8 @@ import { InteractionClient } from "./Discord.interaction";
 import cfg from "../../../important/discord.json" assert { type: "json" };
 
 export class DiscordBotClient {
-    private readonly token = cfg.bot.token;
-    private readonly clientId = cfg.bot.id;
+    public readonly token = cfg.bot.token;
+    public readonly clientId = cfg.bot.id;
     private readonly client = new Client({ intents: INTENTS });
     private readonly rest = new REST({ version: "10" }).setToken(this.token);
     private readonly interactionClient = new InteractionClient();
