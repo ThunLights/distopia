@@ -3,7 +3,7 @@ import path from "path"
 
 import { dayExchanger } from "./day.js"
 
-const __dirname = import.meta.dirname;
+const logFilesDir = path.join(process.cwd(), "log")
 
 export class ServerError {
 	public static readonly codes: Record<string, number> = {}
@@ -29,7 +29,7 @@ function errorLog(content: string) {
 	let date = new Date(base)
 	let now = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${dayExchanger.exchangeAbbreviation(date)}) ${date.getHours()}時${date.getMinutes()}分${date.getSeconds()}.${date.getMilliseconds()}秒`
 
-	fs.appendFileSync(path.join(__dirname, `../../log/${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${(date.getDate()).toString().padStart(2, "0")}.log`), (`\n----------${now}----------\n${content}\n`))
+	fs.appendFileSync(path.join(logFilesDir, `./${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${(date.getDate()).toString().padStart(2, "0")}.log`), (`\n----------${now}----------\n${content}\n`))
 }
 
 export {
