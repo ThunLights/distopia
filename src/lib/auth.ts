@@ -15,10 +15,13 @@ export async function authorization(e: RequestEvent) {
             return data;
         }
         return {
-            id: data.id,
-            username: data.username,
-            email: await database.email.data(data.id),
-            avatar: await database.avatar.data(data.id),
+            content: {
+                id: data.id,
+                username: data.username,
+                email: await database.email.data(data.id),
+                avatar: await database.avatar.data(data.id),
+            },
+            data,
         }
     } catch (error) {
         errorHandling(error);
