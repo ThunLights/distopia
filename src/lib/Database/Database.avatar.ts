@@ -6,6 +6,16 @@ export class Avatar {
     constructor(private readonly prisma: PrismaClient) {
     }
 
+    public async data(id: string) {
+        try {
+            const data = await this.prisma.avatar.findFirst({ where: { id } });
+            return data ? data.content : null;
+        } catch (error) {
+            errorHandling(error);
+            return null;
+        }
+    }
+
     public async update(id: string, avatar: string) {
         try {
             const element = await this.prisma.avatar.findFirst({ where: { id } });
