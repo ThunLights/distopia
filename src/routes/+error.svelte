@@ -25,7 +25,7 @@
 </main>
 <Footer fixed={true}></Footer>
 
-<style lang="scss">
+<style>
     main {
         width: 100%;
     }
