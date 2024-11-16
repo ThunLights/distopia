@@ -75,17 +75,19 @@
         padding: 5px 15px;
         border-radius: 25px;
         background-color: #5865F2;
-        margin: auto 20px auto 0;
     }
     .discord-login-content {
         font-family: "Inter";
         margin: auto 0;
         line-height: var(--discord-login-height);
     }
+    .discord-profile, .discord-login {
+        margin: auto 20px auto 0;
+    }
     div {
         display: inline-block;
     }
-    a {
+    p, a {
         text-decoration: none;
         color: white;
     }

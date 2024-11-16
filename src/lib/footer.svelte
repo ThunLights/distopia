@@ -7,7 +7,7 @@
     <p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
 </main>
 
-<style lang="scss">
+<style>
     main {
         background-color: #212227;
     }
