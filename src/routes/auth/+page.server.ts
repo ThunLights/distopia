@@ -1,4 +1,4 @@
-import { discord } from "$lib/discord";
+import { discord } from "$lib/server/discord";
 
 import type { ServerLoad } from "@sveltejs/kit";
 

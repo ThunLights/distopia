@@ -1,7 +1,7 @@
 import { json } from "@sveltejs/kit";
 
-import { authorization } from "$lib/auth";
-import { ServerError } from "$lib/error";
+import { authorization } from "$lib/server/auth";
+import { ServerError } from "$lib/server/error";
 
 import type { RequestHandler } from "@sveltejs/kit";
 import type { Response } from "$lib/api/auth/index";

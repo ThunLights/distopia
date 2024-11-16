@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { LoginUrl } from "./constants";
+    import { LOGIN_URL } from "$lib/constants";
 
     import "@fontsource/inter/900.css";
     import "@fontsource/open-sans/800-italic.css";
@@ -29,7 +29,7 @@
     <div>
         {#if !userData}
             <div class="discord-login">
-                <a href="{LoginUrl}">
+                <a href="{LOGIN_URL}">
                     <div class="login-block">
                         <p class="discord-login-content inline">Login</p>
                     </div>

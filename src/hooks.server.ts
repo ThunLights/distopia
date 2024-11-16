@@ -1,5 +1,5 @@
-import { errorHandling } from "$lib/error";
-import { discord } from "$lib/discord";
+import { errorHandling } from "$lib/server/error";
+import { discord } from "$lib/server/discord";
 
 import type { HandleServerError } from "@sveltejs/kit"
 

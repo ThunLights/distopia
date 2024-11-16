@@ -1,4 +1,4 @@
-import { errorHandling } from "$lib/error";
+import { errorHandling } from "$lib/server/error";
 
 import type { PrismaClient } from "@prisma/client";
 

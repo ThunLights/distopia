@@ -1,5 +1,5 @@
-import { errorHandling, ServerError } from "$lib/error";
-import { database } from "$lib/Database/index";
+import { errorHandling, ServerError } from "$lib/server/error";
+import { database } from "$lib/server/Database/index";
 
 import type { RequestEvent } from "@sveltejs/kit";
 

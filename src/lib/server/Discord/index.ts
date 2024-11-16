@@ -2,7 +2,7 @@ import { ActivityType, Client, REST } from "discord.js";
 
 import { INTENTS } from "./Discord.intents";
 import { InteractionClient } from "./Discord.interaction";
-import cfg from "../../../important/discord.json" assert { type: "json" };
+import cfg from "../../../../important/discord.json" assert { type: "json" };
 
 export class DiscordBotClient {
     public readonly token = cfg.bot.token;
