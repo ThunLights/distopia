@@ -1,9 +1,9 @@
 import { json } from "@sveltejs/kit";
 
 import { structChecker } from "$lib/struct";
-import { authorization } from "$lib/auth";
-import { ServerError } from "$lib/error";
-import { discord } from "$lib/discord";
+import { authorization } from "$lib/server/auth";
+import { ServerError } from "$lib/server/error";
+import { discord } from "$lib/server/discord";
 import { _RequestZod } from "$lib/api/guilds/index";
 
 import type { RequestHandler } from "@sveltejs/kit";

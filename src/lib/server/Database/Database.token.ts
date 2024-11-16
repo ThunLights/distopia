@@ -1,4 +1,4 @@
-import { errorHandling } from "$lib/error";
+import { errorHandling } from "$lib/server/error";
 import { tokenHash } from "$lib/hash";
 import { randomString } from "$lib/random";
 

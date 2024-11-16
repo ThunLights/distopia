@@ -1,9 +1,9 @@
 import { errorHandling } from "./error.js";
-import { sleep } from "./sleep.js";
+import { sleep } from "../sleep.js";
 import { DiscordBotClient } from "./Discord/index.js";
 import { database } from "./Database/index.js";
 
-import cfg from "../../important/discord.json" assert { type: "json" };
+import cfg from "../../../important/discord.json" assert { type: "json" };
 
 type DiscordConfig = {
     bot: {
