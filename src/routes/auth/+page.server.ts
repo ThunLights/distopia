@@ -20,15 +20,14 @@ export const load = (async (e) => {
 
     if (code) {
         const data = await discord.codeChecker(code);
-        if (!data) {
-            return null;
+        if (data) {
+            content = {
+                id: data.id,
+                username: data.username,
+                token: data.token,
+                avatar: data.userInfo.avatar ?? null
+            };
         }
-        content = {
-            id: data.id,
-            username: data.username,
-            token: data.token,
-            avatar: data.userInfo.avatar ?? null
-        };
     }
 
     return {
