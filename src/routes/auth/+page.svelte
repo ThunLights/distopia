@@ -29,7 +29,7 @@
     description={description}
 />
 
-<Header/>
+<Header userData={content} loginBlock={false}/>
 <main>
     <div class="contents">
         <p class="title">{result}</p>
