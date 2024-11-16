@@ -4,9 +4,13 @@
     import "@fontsource/inter/900.css";
     import "@fontsource/open-sans/800-italic.css";
 
+    import type { ResponseContent } from "$lib/api/auth/index";
+
+    type UserData = ResponseContent | null;
+
     export let title = "Distopia";
     export let titleLink = "/";
-    export let loginPanel = true;
+    export let userData: UserData = null;
 </script>
 
 <header>
@@ -23,13 +27,17 @@
         </div>
     </div>
     <div>
-        {#if loginPanel}
+        {#if !userData}
             <div class="discord-login">
                 <a href="{LoginUrl}">
                     <div class="login-block">
                         <p class="discord-login-content inline">Login</p>
                     </div>
                 </a>
+            </div>
+        {:else}
+            <div class="discord-profile">
+                <p>ログイン中: {userData.username}</p>
             </div>
         {/if}
     </div>
