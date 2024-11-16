@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { getMeridiem } from "$lib/time";
+    import { getMeridiem } from "$lib/time.svelte";
     import { token2data } from "$lib/auth.svelte";
 
     import Meta from "$lib/meta.svelte";
