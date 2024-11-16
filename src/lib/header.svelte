@@ -10,6 +10,7 @@
 
     export let title = "Distopia";
     export let titleLink = "/";
+    export let loginBlock = true;
     export let userData: UserData = null;
 </script>
 
@@ -26,24 +27,26 @@
             </a>
         </div>
     </div>
-    <div>
-        {#if !userData}
-            <div class="discord-login">
-                <a href="{LOGIN_URL}">
-                    <div class="login-block">
-                        <p class="discord-login-content inline">Login</p>
+    {#if loginBlock}
+        <div>
+            {#if !userData}
+                <div class="discord-login">
+                    <a href="{LOGIN_URL}">
+                        <div class="login-block">
+                            <p class="discord-login-content inline">Login</p>
+                        </div>
+                    </a>
+                </div>
+            {:else}
+                <a href="/account">
+                    <div class="discord-profile">
+                        <img src="{userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp` : "/discord.webp"}" alt="">
+                        <p>{userData.username}</p>
                     </div>
                 </a>
-            </div>
-        {:else}
-            <a href="/account">
-                <div class="discord-profile">
-                    <img src="{userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp` : "/discord.webp"}" alt="">
-                    <p>{userData.username}</p>
-                </div>
-            </a>
-        {/if}
-    </div>
+            {/if}
+        </div>
+    {/if}
 </header>
 
 <style>
