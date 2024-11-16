@@ -1,5 +1,5 @@
-import { _ResponseZod } from "../routes/api/auth/+server";
 import { structChecker } from "./struct";
+import { _ResponseZod } from "$lib/api/auth/index";
 
 export async function token2data() {
     try {
@@ -17,7 +17,7 @@ export async function token2data() {
                     if (typeof json.content === "string") {
                         console.log(`Error: ${json.content}`);
                     } else {
-                        return json.content
+                        return json.content;
                     }
                 }
             }
