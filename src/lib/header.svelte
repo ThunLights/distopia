@@ -37,7 +37,8 @@
             </div>
         {:else}
             <div class="discord-profile">
-                <p>ログイン中: {userData.username}</p>
+                <img src="{userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp` : "/discord.webp"}" alt="">
+                <p>{userData.username}</p>
             </div>
         {/if}
     </div>
@@ -83,6 +84,22 @@
     }
     .discord-profile, .discord-login {
         margin: auto 20px auto 0;
+    }
+    .discord-profile {
+        display: flex;
+    }
+    .discord-profile img {
+        border-radius: 25px;
+        height: 25px;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: relative;
+    }
+    .discord-profile p {
+        line-height: 25px;
+        margin: 0 0 0 5px;
+        padding: 0;
     }
     div {
         display: inline-block;
