@@ -16,7 +16,6 @@
 
     onMount(async () => {
         bgUrl = getMeridiem(navigator.language) === "AM" ? "/am.webp" : "/pm.webp";
-        document.body.style.setProperty("--body-background-color", "#313338")
         loginData = await token2data();
     })
 </script>
