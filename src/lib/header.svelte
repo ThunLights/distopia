@@ -36,10 +36,12 @@
                 </a>
             </div>
         {:else}
-            <div class="discord-profile">
-                <img src="{userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp` : "/discord.webp"}" alt="">
-                <p>{userData.username}</p>
-            </div>
+            <a href="/account">
+                <div class="discord-profile">
+                    <img src="{userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp` : "/discord.webp"}" alt="">
+                    <p>{userData.username}</p>
+                </div>
+            </a>
         {/if}
     </div>
 </header>
@@ -86,7 +88,13 @@
         margin: auto 20px auto 0;
     }
     .discord-profile {
+        cursor: pointer;
         display: flex;
+        padding: 3px 6px;
+    }
+    .discord-profile:hover {
+        border-radius: 25px;
+        background-color: rgb(107, 107, 107);
     }
     .discord-profile img {
         border-radius: 25px;
