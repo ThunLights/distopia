@@ -1,14 +1,26 @@
 <script lang="ts">
-    import { siteAbout } from "$lib/constants.svelte"
+    import "../aTag.css";
+
+    import { onMount } from "svelte";
+    import { siteAbout } from "$lib/constants.svelte";
+    import { token2data } from "$lib/auth.svelte";
 
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
+
+    import type { ResponseContent } from "$lib/api/auth";
+
+    let loginData = $state<ResponseContent | null>(null);
+
+    onMount(async () => {
+        loginData = await token2data();
+    })
 </script>
 
-<Meta></Meta>
+<Meta title="Distopiaについて / Distopia.top"/>
 
-<Header></Header>
+<Header userData={loginData}/>
 <main>
     <div class="contents">
         {#each siteAbout as about}
@@ -23,7 +35,7 @@
         {/each}
     </div>
 </main>
-<Footer></Footer>
+<Footer/>
 
 <style>
     .contents {
