@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { siteAbout } from "$lib/constants"
+    import { siteAbout } from "$lib/constants.svelte"
 
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
