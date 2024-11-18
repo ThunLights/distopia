@@ -5,10 +5,10 @@
 
     import { onMount } from "svelte";
     import { token2data } from "$lib/auth.svelte";
+    import { getGuilds } from "$lib/guilds.svelte";
 
     import type { ResponseContent } from "$lib/api/auth";
     import type { GuildsUser } from "$lib/server/discord";
-    import type { Response } from "$lib/api/guilds";
 
     let loginData = $state<ResponseContent | null>(null);
     let guilds = $state<GuildsUser[] | null>(null);
@@ -19,19 +19,9 @@
         if (!loginData) {
             return location.href = "/";
         }
-        const response = await fetch(`/api/guilds`, {
-            method: "POST",
-            headers: {
-                "Authorization": loginData.token,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({}),
-        })
-        if (response.ok) {
-            const data: Response = await response.json();
-            if (Array.isArray(data.content)) {
-                guilds = data.content;
-            }
+        const servers = await getGuilds(loginData.token);
+        if (Array.isArray(servers)) {
+            guilds = servers.filter(guild => guild.owner);
         }
         loading = false;
     })
@@ -42,14 +32,29 @@
 <Header userData={loginData}/>
 <main>
     <div class="contents">
+        <div class="guilds-public"></div>
         {#if guilds}
-            <div class="guilds">
-                {#each guilds as guild}
-                    <div class="guild">
-                        <p class="name">{guild.name}</p>
-                    </div>
-                {/each}
-            </div>
+            {#if guilds.length}
+                <div class="guilds">
+                    {#each guilds as guild}
+                        <div class="guild">
+                            <div>
+                                <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+                            </div>
+                            <div>
+                                <p class="name">{guild.name}</p>
+                                <div class="informations">
+                                    <p>ID: {guild.id}</p>
+                                    <p>ユーザー数: {guild.approximate_member_count} (アクティブ: {guild.approximate_presence_count})</p>
+                                </div>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {:else}
+                <p>掲載可能なサーバーが見つかりませんでした。</p>
+                <p>サーバーを掲載するにはサーバーの所有権を持っているアカウントである必要があります。</p>
+            {/if}
         {:else if !loading}
             <p>上手く読み込み出来ませんでした。</p>
         {/if}
