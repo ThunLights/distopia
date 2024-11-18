@@ -6,6 +6,7 @@ export type PageContent = {
     id: string
     username: string
     token: string
+    email: string | null
     avatar: string | null
 } | null
 
@@ -25,6 +26,7 @@ export const load = (async (e) => {
                 id: data.id,
                 username: data.username,
                 token: data.token,
+                email: data.userInfo.email ?? null,
                 avatar: data.userInfo.avatar ?? null
             };
         }
