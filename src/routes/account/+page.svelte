@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    import { getGuilds } from "$lib/guilds.svelte";
     import { token2data } from "$lib/auth.svelte";
 
     import Meta from "$lib/meta.svelte";
@@ -8,17 +9,23 @@
     import Footer from "$lib/footer.svelte";
 
     import type { ResponseContent } from "$lib/api/auth/index";
+    import type { GuildsUser } from "$lib/server/discord";
 
     let loginData = $state<ResponseContent | null>(null);
     let loading = $state(true);
+    let guilds = $state<GuildsUser[]>([]);
     let registerCount = $state(0);
-    let guildsCount = $state(0);
+    let guildsCount = $derived(guilds.filter(guild => guild.owner).length);
     let title = $state("ログインしてください");
 
     onMount(async () => {
         loginData = await token2data();
         if (!loginData) {
             return location.href = "/";
+        }
+        const servers = await getGuilds(loginData.token);
+        if (Array.isArray(servers)) {
+            guilds = servers;
         }
         loading = false;
         title = `「${loginData.username}」の詳細情報`
