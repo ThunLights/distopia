@@ -1,9 +1,22 @@
+import { z } from "zod";
+
 import { errorHandling } from "./error.js";
 import { sleep } from "../sleep.js";
 import { DiscordBotClient } from "./Discord/index.js";
 import { database } from "./Database/index.js";
 
 import cfg from "../../../important/discord.json" assert { type: "json" };
+
+export const GuildsUserZod = z.object({
+    id: z.string(),
+    name: z.string(),
+    icon: z.string().optional(),
+    banner: z.string().optional(),
+    owner: z.boolean(),
+    permissions: z.string(),
+    approximate_member_count: z.number(),
+    approximate_presence_count: z.number(),
+})
 
 type DiscordConfig = {
     bot: {
@@ -31,16 +44,7 @@ type CodeCheckResponse = {
     scope: string
 };
 
-export type GuildsUser = {
-    id: string
-    name: string
-    icon?: string
-    banner?: string
-    owner: boolean
-    permissions: string
-    approximate_member_count: number
-    approximate_presence_count: number
-}
+export type GuildsUser = z.infer<typeof GuildsUserZod>
 
 export type Code2dataResponse = CodeCheckResponse & AccessToken2dataResponse;
 
