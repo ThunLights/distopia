@@ -2,15 +2,16 @@ import { errorHandling } from "$lib/server/error";
 import { tokenHash } from "$lib/hash";
 import { randomString } from "$lib/random";
 
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class Token {
-    constructor(private readonly prisma: PrismaClient) {
+    constructor(private readonly table: Prisma.TokenDelegate<DefaultArgs>) {
     }
 
     private async generateToken() {
         let token = randomString(70)
-        while (await this.prisma.token.findFirst({ where: { token: tokenHash(token) } })) {
+        while (await this.table.findFirst({ where: { token: tokenHash(token) } })) {
             token = randomString(70)
         }
         return token;
@@ -18,7 +19,7 @@ export class Token {
 
     public async add(id: string): Promise<string> {
         const token = await this.generateToken();
-        await this.prisma.token.create({
+        await this.table.create({
             data: {
                 id,
                 token: tokenHash(token),
@@ -30,12 +31,12 @@ export class Token {
     public async remove(content: string, selectorType: "id" | "token"): Promise<void> {
         const where: Prisma.TokenWhereInput = {};
         where[selectorType] = content;
-        await this.prisma.token.deleteMany({ where })
+        await this.table.deleteMany({ where })
     }
 
     public async tokenCheck(token: string) {
         try {
-            const element = await this.prisma.token.findFirst({ where: { token: tokenHash(token) } });
+            const element = await this.table.findFirst({ where: { token: tokenHash(token) } });
             if (element) {
                 return element.id;
             }

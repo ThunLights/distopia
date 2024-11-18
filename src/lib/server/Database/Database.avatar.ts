@@ -1,14 +1,15 @@
 import { errorHandling } from "$lib/server/error";
 
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class Avatar {
-    constructor(private readonly prisma: PrismaClient) {
+    constructor(private readonly table: Prisma.AvatarDelegate<DefaultArgs>) {
     }
 
     public async data(id: string) {
         try {
-            const data = await this.prisma.avatar.findFirst({ where: { id } });
+            const data = await this.table.findFirst({ where: { id } });
             return data ? data.content : null;
         } catch (error) {
             errorHandling(error);
@@ -18,9 +19,9 @@ export class Avatar {
 
     public async update(id: string, avatar: string) {
         try {
-            const element = await this.prisma.avatar.findFirst({ where: { id } });
+            const element = await this.table.findFirst({ where: { id } });
             if (element) {
-                await this.prisma.avatar.updateMany({
+                await this.table.updateMany({
                     where: {
                         id: element.id
                     },
@@ -29,7 +30,7 @@ export class Avatar {
                     }
                 })
             } else {
-                await this.prisma.avatar.create({
+                await this.table.create({
                     data: {
                         id,
                         content: avatar,

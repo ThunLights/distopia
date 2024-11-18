@@ -1,14 +1,15 @@
 import { errorHandling } from "$lib/server/error";
 
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class User {
-    constructor(private readonly prisma: PrismaClient) {
+    constructor(private readonly table: Prisma.UserDelegate<DefaultArgs>) {
     }
 
     public async data(id: string) {
         try {
-            return await this.prisma.user.findFirst({ where: { id } });
+            return await this.table.findFirst({ where: { id } });
         } catch (error) {
             errorHandling(error);
             return null
@@ -18,11 +19,11 @@ export class User {
     public async update(id: string, username: string, accessToken: string, refreshToken: string) {
         try {
             const time = BigInt(Date.now());
-            const element = await this.prisma.user.findFirst({
+            const element = await this.table.findFirst({
                 where: { id, username }
             })
             if (element) {
-                await this.prisma.user.updateMany({
+                await this.table.updateMany({
                     where: {
                         id: element.id,
                         username: element.username,
@@ -34,7 +35,7 @@ export class User {
                     }
                 })
             } else {
-                await this.prisma.user.create({
+                await this.table.create({
                     data: {
                         id,
                         username,
