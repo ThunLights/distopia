@@ -31,6 +31,17 @@ type CodeCheckResponse = {
     scope: string
 };
 
+export type GuildsUser = {
+    id: string
+    name: string
+    icon?: string
+    banner?: string
+    owner: boolean
+    permissions: string
+    approximate_member_count: number
+    approximate_presence_count: number
+}
+
 export type Code2dataResponse = CodeCheckResponse & AccessToken2dataResponse;
 
 export class DiscordController {
@@ -111,18 +122,20 @@ export class DiscordController {
 
     public async guilds(accessToken: string) {
         try {
-            const response = await fetch("https://discord.com/api/v10/users/@me/guilds", {
-                method: "POST",
+            const response = await fetch("https://discord.com/api/v10/users/@me/guilds?with_counts=true", {
+                method: "GET",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
-//                    "Content-Type": "application/x-www-form-urlencoded",
                 },
             });
             if (response.ok) {
-                console.log(await response.json())
+                const data = await response.json();
+                return data as Array<GuildsUser>
             }
+            return null
         } catch (error) {
-            errorHandling(error)
+            errorHandling(error);
+            return null;
         }
     }
 
