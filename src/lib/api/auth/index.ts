@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const _ResponseContentZod = z.object({
+    token: z.string(),
     id: z.string(),
     username: z.string(),
     email: z.string().nullable(),
