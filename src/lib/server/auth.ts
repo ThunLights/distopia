@@ -16,6 +16,7 @@ export async function authorization(e: RequestEvent) {
         }
         return {
             content: {
+                token,
                 id: data.id,
                 username: data.username,
                 email: await database.email.data(data.id),
