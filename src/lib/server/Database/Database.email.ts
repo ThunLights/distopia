@@ -1,14 +1,15 @@
 import { errorHandling } from "$lib/server/error";
 
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class Email {
-    constructor(private readonly prisma: PrismaClient) {
+    constructor(private readonly table: Prisma.EmailDelegate<DefaultArgs>) {
     }
 
     public async data(id: string) {
         try {
-            const data = await this.prisma.email.findFirst({ where: { id } });
+            const data = await this.table.findFirst({ where: { id } });
             return data ? data.content : null;
         } catch (error) {
             errorHandling(error);
@@ -18,9 +19,9 @@ export class Email {
 
     public async update(id: string, email: string) {
         try {
-            const element = await this.prisma.email.findFirst({ where: { id } });
+            const element = await this.table.findFirst({ where: { id } });
             if (element) {
-                await this.prisma.email.updateMany({
+                await this.table.updateMany({
                     where: {
                         id: element.id
                     },
@@ -29,7 +30,7 @@ export class Email {
                     }
                 })
             } else {
-                await this.prisma.email.create({
+                await this.table.create({
                     data: {
                         id,
                         content: email,
