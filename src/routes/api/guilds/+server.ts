@@ -29,7 +29,7 @@ export const POST = (async (e) => {
         } satisfies Response, { status: 400 })
     }
     const response = {
-        content: guilds.filter(value => value.owner)
+        content: guilds,
     } satisfies Response;
     return json(response);
 }) satisfies RequestHandler;
