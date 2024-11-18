@@ -25,7 +25,7 @@
 <Header userData={loginData}/>
 <main style="--bg-url: url({bgUrl});">
     <div class="entrance-img">
-        <img src="{bgUrl}" alt="test">
+        <img src="{bgUrl}" alt="loading">
     </div>
 </main>
 <Footer fixed={true}></Footer>
