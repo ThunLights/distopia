@@ -7,7 +7,7 @@
 
     import type { PageData } from "./$types"
 
-    const { data } = $props<{ data: PageData }>();
+    const { data }: { data: PageData } = $props();
 
     const { content } = $state(data);
     const result = $state(content ? "認証に成功しました。" : "認証に失敗しました。");
