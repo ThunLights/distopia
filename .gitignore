@@ -23,3 +23,5 @@ vite.config.ts.timestamp-*
 important/discord.json
 
 db/database.sqlite3
+
+log/**.log
