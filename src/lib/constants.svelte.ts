@@ -10,7 +10,7 @@ type SupporterServer = {
     invite: string
 }
 
-type Stuff = {
+type Staff = {
     name: string
     icon: string
     description: string
@@ -98,7 +98,7 @@ export const supporters = [
     }
 ] satisfies Array<SupporterServer>;
 
-export const stuffs = [
+export const staffs = [
     {
         name: "ROBOT",
         icon: "/stuff/robot.webp",
@@ -129,6 +129,6 @@ export const stuffs = [
             }
         ],
     }
-] satisfies Array<Stuff>;
+] satisfies Array<Staff>;
 
 export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=email+guilds.join+identify+guilds";
