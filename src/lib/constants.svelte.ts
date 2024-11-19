@@ -10,6 +10,16 @@ type SupporterServer = {
     invite: string
 }
 
+type Stuff = {
+    name: string
+    icon: string
+    description: string
+    links: {
+        icon: string
+        url: string
+    }[]
+}
+
 export const siteAbout = [
     {
         title: "本サイトについて",
@@ -87,5 +97,38 @@ export const supporters = [
         invite: "https://discord.gg/hima",
     }
 ] satisfies Array<SupporterServer>;
+
+export const stuffs = [
+    {
+        name: "ROBOT",
+        icon: "/stuff/robot.webp",
+        description: "Distopiaの代表兼創設者でDistopiaの全てのプログラムを作成",
+        links: [
+            {
+                icon: "/service/github.webp",
+                url: "https://github.com/ROBOTofficial",
+            },
+            {
+                icon: "/service/twitter.webp",
+                url: "https://twitter.com/AlwaysHarapan",
+            },
+        ],
+    },
+    {
+        name: "Sumire",
+        icon: "stuff/sumire.webp",
+        description: "Distopiaのイラスト担当でDistopia内の全てのイラストを作成",
+        links: [
+            {
+                icon: "/service/twitter.webp",
+                url: "https://twitter.com/sumire_8691",
+            },
+            {
+                icon: "/service/tiktok.webp",
+                url: "https://www.tiktok.com/@sumire_8691",
+            }
+        ],
+    }
+] satisfies Array<Stuff>;
 
 export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=email+guilds.join+identify+guilds";
