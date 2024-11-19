@@ -71,6 +71,21 @@ export const supporters = [
         icon: "/supporters/hage.webp",
         invite: "https://discord.gg/hage",
     },
+    {
+        name: "Agares",
+        icon: "/supporters/agares.webp",
+        invite: "https://discord.gg/agares",
+    },
+    {
+        name: "Cappuccino",
+        icon: "/supporters/cappuccino.webp",
+        invite: "https://discord.gg/cappuccino",
+    },
+    {
+        name: "暇人鯖",
+        icon: "/supporters/hima.webp",
+        invite: "https://discord.gg/hima",
+    }
 ] satisfies Array<SupporterServer>;
 
 export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=email+guilds.join+identify+guilds";
