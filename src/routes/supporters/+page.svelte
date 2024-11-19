@@ -6,6 +6,7 @@
     import { onMount } from "svelte";
     import { token2data } from "$lib/auth.svelte";
     import { supporters } from "$lib/constants.svelte"
+    import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
 
     import type { ResponseContent } from "$lib/api/auth";
 
@@ -59,7 +60,7 @@
                     <p>サーバーのメンバー数などが比較的多く、アクティブに活動をされているサーバーが支援団体に入ることが出来ます。</p>
                     <p>応募サーバーがDistopiaの支援団体に適しているかどうかはDistopia運営が実際にサーバーに赴き判断させていただきます。</p>
                     <p>判断基準はサーバーメンバー数、アクティブ率、サーバーコンセプト、民度、などです。</p>
-                    <p>支援団体になりたいサーバーがありましたら<a class="underline" href="https://discord.gg/QWUxsxWyYv">公式Discordサーバー</a>にて問い合わせお願いします。</p>
+                    <p>支援団体になりたいサーバーがありましたら<a class="underline" href="{DISCORD_INVITE_LINK}">公式Discordサーバー</a>にて問い合わせお願いします。</p>
                 </div>
             </div>
         </div>
