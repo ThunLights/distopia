@@ -4,6 +4,12 @@ type SiteAbout = {
     description: string[]
 };
 
+type SupporterServer = {
+    name: string
+    icon: string
+    invite: string
+}
+
 export const siteAbout = [
     {
         title: "本サイトについて",
@@ -53,5 +59,18 @@ export const siteAbout = [
         ]
     },
 ] satisfies Array<SiteAbout>;
+
+export const supporters = [
+    {
+        name: "クリームパンと愉快な仲間たち",
+        icon: "/supporters/currypan.webp",
+        invite: "https://discord.gg/De8T2NS74X",
+    },
+    {
+        name: "はげさば",
+        icon: "/supporters/hage.webp",
+        invite: "https://discord.gg/hage",
+    },
+] satisfies Array<SupporterServer>;
 
 export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=email+guilds.join+identify+guilds";
