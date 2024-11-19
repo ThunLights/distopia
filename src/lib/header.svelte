@@ -26,6 +26,11 @@
                 <p>About</p>
             </a>
         </div>
+        <div class="header-other">
+            <a href="/supporters">
+                <p>Supporters</p>
+            </a>
+        </div>
     </div>
     {#if loginBlock}
         <div>
@@ -66,6 +71,9 @@
     .header-title p,
     .header-other {
         font-family: "Inter";
+    }
+    .header-other {
+        margin-right: 12px;
     }
     .header-title {
         font-size: 30px;
