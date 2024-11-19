@@ -31,6 +31,11 @@
                 <p>Supporters</p>
             </a>
         </div>
+        <div class="header-other">
+            <a href="/staff">
+                <p>Staff</p>
+            </a>
+        </div>
     </div>
     {#if loginBlock}
         <div>
