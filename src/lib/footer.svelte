@@ -1,9 +1,11 @@
 <script lang="ts">
+    import { DISCORD_INVITE_LINK } from "./invite.svelte";
+
     export let fixed = false;
 </script>
 
 <main class="{ fixed ? "fixed" : "" }">
-    <p>Contact: <a href="https://discord.gg/QWUxsxWyYv">Official Discord Server</a></p>
+    <p>Contact: <a href="{DISCORD_INVITE_LINK}">Official Discord Server</a></p>
     <p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
 </main>
 
