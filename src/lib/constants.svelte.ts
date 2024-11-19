@@ -120,13 +120,13 @@ export const staffs = [
         description: "Distopiaのイラスト担当でDistopia内の全てのイラストを作成",
         links: [
             {
+                icon: "/service/tiktok.webp",
+                url: "https://www.tiktok.com/@sumire_8691",
+            },
+            {
                 icon: "/service/twitter.webp",
                 url: "https://twitter.com/sumire_8691",
             },
-            {
-                icon: "/service/tiktok.webp",
-                url: "https://www.tiktok.com/@sumire_8691",
-            }
         ],
     }
 ] satisfies Array<Staff>;
