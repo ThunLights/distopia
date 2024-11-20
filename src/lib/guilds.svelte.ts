@@ -1,4 +1,4 @@
-import type { Response } from "$lib/types/guilds";
+import type { Response } from "$lib/types/guilds/index";
 
 export class GuildsApiError {
     constructor(public code: string) {}

@@ -9,7 +9,7 @@
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { ResponseContent } from "$lib/api/auth";
+    import type { ResponseContent } from "$lib/types/auth/index";
 
     let loginData = $state<ResponseContent | null>(null);
 
