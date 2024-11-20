@@ -9,10 +9,12 @@ import type { Response } from "$lib/types/auth/index";
 export const POST = (async (e) => {
     const user = await authorization(e);
     if (user instanceof ServerError) {
-        return json({}, { status: 400 })
+        return json({
+            content: user.content,
+        }, { status: 400 })
     }
     const response = {
         content: user.content,
     } satisfies Response;
-    return json(response)
+    return json(response, { status: 200 })
 }) satisfies RequestHandler;

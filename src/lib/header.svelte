@@ -4,7 +4,7 @@
     import "@fontsource/inter/900.css";
     import "@fontsource/open-sans/800-italic.css";
 
-    import type { ResponseContent } from "$lib/api/auth/index";
+    import type { ResponseContent } from "$lib/types/auth/index";
 
     type UserData = ResponseContent | null;
 

@@ -8,7 +8,7 @@
     import { supporters } from "$lib/constants.svelte"
     import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
 
-    import type { ResponseContent } from "$lib/api/auth";
+    import type { ResponseContent } from "$lib/types/auth/index";
 
     let loginData = $state<ResponseContent | null>(null);
     let title = "Supporters";

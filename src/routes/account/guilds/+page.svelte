@@ -7,7 +7,7 @@
     import { token2data } from "$lib/auth.svelte";
     import { getGuilds } from "$lib/guilds.svelte";
 
-    import type { ResponseContent } from "$lib/api/auth";
+    import type { ResponseContent } from "$lib/types/auth/index";
     import type { GuildsUser } from "$lib/server/discord";
 
     let loginData = $state<ResponseContent | null>(null);
