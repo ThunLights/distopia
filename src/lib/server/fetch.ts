@@ -6,6 +6,7 @@ import { database } from "./Database";
 import type { BotConfig } from "./config";
 import type { UserElement } from "./Database/Database.user";
 import { discord } from "./discord";
+import { sleep } from "$lib/sleep";
 
 export type ResetAccessToken = {
     token_type: string
@@ -42,6 +43,7 @@ export class OriginalFetch {
                 return await response.json();
             }
             if (response.status === 429) {
+                await sleep(1000);
                 return await this.resetAccessToken(refreshToken);
             }
             return new FetchError("HTTP_RESPONSE_ERROR");
@@ -68,6 +70,7 @@ export class OriginalFetch {
                 }
             }
             if (response.status === 429) {
+                await sleep(1000);
                 return await this.useAccessToken(url, options, user);
             }
             if (response.ok) {
