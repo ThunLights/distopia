@@ -22,7 +22,7 @@ export const POST = (async (e) => {
             content: user.content,
         } satisfies Response, { status: 400 });
     }
-    const guilds = await discord.guilds(user.data.accessToken);
+    const guilds = await discord.guilds(user.data);
     if (!guilds) {
         return json({
             content: "GUILDS_NOT_FOUND"
