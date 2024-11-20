@@ -4,6 +4,16 @@ import type { UserElement } from "../Database.user";
 import { errorHandling } from "$lib/server/error";
 import { DatabaseError } from "../index";
 
+export type Guild = {
+    name: string
+    icon: string | null
+    banner: string | null
+    guildId: string
+    userId: string
+    category: string
+    description: string
+}
+
 export class GuildTable {
     constructor(private readonly table: Prisma.GuildDelegate<DefaultArgs>) {}
 
