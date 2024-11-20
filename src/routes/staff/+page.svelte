@@ -122,7 +122,7 @@
         position: relative;
         padding: 1rem 0 0.6rem 0;
         border-bottom: 5px solid;
-        color: #878787;
+        color: #acacac;
         font-size: 26px;
         font-weight: bold;
     }
