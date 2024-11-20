@@ -29,3 +29,41 @@ model Avatar {
     id      String @id
     content String
 }
+
+model Guild {
+    guildId     String @id
+    userId      String
+
+    name        String
+    icon        String?
+    banner      String?
+
+    category    String
+    description String
+}
+
+model GuildReview {
+    userId  String
+    guildId String
+    star    Int
+    content String?
+
+    @@id([userId, guildId])
+}
+
+model GuildTag {
+    guildId String
+    tag     String
+
+    @@id([guildId, tag])
+}
+
+model GuildLevel {
+    guildId String @id
+    level   BigInt
+    point   BigInt
+}
+
+//model ServerActiveRate {
+//    guildId String @id
+//}
