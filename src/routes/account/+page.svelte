@@ -12,11 +12,13 @@
     import type { GuildsUser } from "$lib/server/discord";
     import type { Guild } from "$lib/server/Database/Guild/Guild";
 
+    type Guilds = GuildsUser & { joinBot: boolean };
+
     let loginData = $state<ResponseContent | null>(null);
     let loading = $state(true);
-    let guilds = $state<GuildsUser[]>([]);
+    let guilds = $state<Guilds[]>([]);
     let publicGuilds = $state<Guild[]>([]);
-    let guildsCount = $derived(guilds.filter(guild => guild.owner).length);
+    let guildsCount = $derived(guilds.filter(guild => guild.owner && !publicGuilds.map(value => value.guildId).includes(guild.id)).length);
     let publicGuildsCount = $derived(publicGuilds.length);
     let title = $state("ログインしてください");
 
@@ -83,7 +85,11 @@
                 <div>
                     <p class="title">登録済みサーバー</p>
                     {#if publicGuilds.length}
-                        <div></div>
+                        <div class="guild">
+                            {#each publicGuilds as guild}
+                                {@render generatePublicGuild(guild)}
+                            {/each}
+                        </div>
                     {:else}
                         <p class="not-found">現在登録されているサーバーはありません</p>
                     {/if}
@@ -94,19 +100,8 @@
                     <p class="title">登録可能サーバー</p>
                     {#if guilds.length}
                         <div class="guilds">
-                            {#each guilds.filter(value => value.owner) as guild}
-                                <div class="guild">
-                                    <div>
-                                        <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : "/discord.webp"}" alt="">
-                                    </div>
-                                    <div>
-                                        <p class="name">{guild.name}</p>
-                                        <div class="informations">
-                                            <p>ID: {guild.id}</p>
-                                            <p>ユーザー数: {guild.approximate_member_count} (アクティブ: {guild.approximate_presence_count})</p>
-                                        </div>
-                                    </div>
-                                </div>
+                            {#each guilds.filter(value => value.owner && !publicGuilds.map(value => value.guildId).includes(value.id)) as guild}
+                                {@render generateGuild(guild, guild.joinBot)}
                             {/each}
                         </div>
                     {:else}
@@ -123,6 +118,38 @@
     </div>
 </main>
 <Footer/>
+
+{#snippet generatePublicGuild(guild: Guild)}
+    <div class="guild">
+        <div>
+            <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+        </div>
+        <div>
+            <p class="name">{guild.name}</p>
+            <div class="informations">
+                <p>ID: {guild.guildId}</p>
+            </div>
+        </div>
+    </div>
+{/snippet}
+
+{#snippet generateGuild(guild: GuildsUser, joinBot?: boolean)}
+    <div class="guild">
+        <div>
+            <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+        </div>
+        <div>
+            <p class="name">{guild.name}</p>
+            <div class="informations">
+                <p>ID: {guild.id}</p>
+                <p>ユーザー数: {guild.approximate_member_count} (アクティブ: {guild.approximate_presence_count})</p>
+                {#if joinBot !== undefined}
+                    <p style={`color: ${joinBot ? "green" : "red"};`}>{joinBot ? "ボット導入済み" : "ボット未導入"}</p>
+                {/if}
+            </div>
+        </div>
+    </div>
+{/snippet}
 
 <style>
     .guilds {
