@@ -29,7 +29,7 @@ export const POST = (async (e) => {
         } satisfies Response, { status: 400 })
     }
     const response = {
-        content: guilds,
+        content: guilds.map(value => { return {...value, ...{ joinBot: discord.bot.guilds.fetchGuild(value.id) }} }),
     } satisfies Response;
     return json(response);
 }) satisfies RequestHandler;

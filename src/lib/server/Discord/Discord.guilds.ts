@@ -14,7 +14,7 @@ export class GuildClient {
         return this.client.guilds.cache;
     }
 
-    public async fetchGuild(guildId: string): Promise<boolean> {
+    public fetchGuild(guildId: string): boolean {
         try {
             return this.client.guilds.cache.map(value => value.id).includes(guildId);
         } catch (error) {

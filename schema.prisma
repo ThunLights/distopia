@@ -35,6 +35,7 @@ model Guild {
     userId      String
 
     name        String
+    invite      String
     icon        String?
     banner      String?
 
