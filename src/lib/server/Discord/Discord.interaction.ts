@@ -1,4 +1,4 @@
-import type { CacheType, Interaction } from "discord.js";
+import type { CacheType, Client, Interaction } from "discord.js";
 
 export type InteractionCommand = {
     name: string
@@ -55,7 +55,8 @@ export class InteractionClient {
         }
     ];
 
-    constructor() {}
+    constructor(private readonly client: Client) {
+    }
 
     public async interactionCreate(interaction: Interaction<CacheType>): Promise<void> {
         if (interaction.isContextMenuCommand()) {
@@ -66,6 +67,8 @@ export class InteractionClient {
                 const group = interaction.options.getSubcommandGroup(true);
                 if (group === "permission") {
                     const commandName = interaction.options.getSubcommand();
+                    if (commandName === "add") {}
+                    if (commandName === "remove") {}
                 }
             }
         }

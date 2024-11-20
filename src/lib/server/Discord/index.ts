@@ -2,14 +2,17 @@ import { ActivityType, Client, REST } from "discord.js";
 
 import { INTENTS } from "./Discord.intents";
 import { InteractionClient } from "./Discord.interaction";
+
 import cfg from "../../../../important/discord.json" assert { type: "json" };
+import { GuildClient } from "./Discord.guilds";
 
 export class DiscordBotClient {
     public readonly token = cfg.bot.token;
     public readonly clientId = cfg.bot.id;
-    private readonly client = new Client({ intents: INTENTS });
+    public readonly client = new Client({ intents: INTENTS });
+    public readonly guilds = new GuildClient(this.client);
     private readonly rest = new REST({ version: "10" }).setToken(this.token);
-    private readonly interactionClient = new InteractionClient();
+    private readonly interactionClient = new InteractionClient(this.client);
 
     constructor() {}
 
