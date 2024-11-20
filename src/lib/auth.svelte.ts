@@ -1,5 +1,5 @@
 import { structChecker } from "./struct";
-import { _ResponseZod } from "$lib/api/auth/index";
+import { _ResponseZod } from "$lib/types/auth/index";
 
 export async function token2data() {
     try {

@@ -4,10 +4,10 @@ import { structChecker } from "$lib/struct";
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { discord } from "$lib/server/discord";
-import { _RequestZod } from "$lib/api/guilds/index";
+import { _RequestZod } from "$lib/types/guilds/index";
 
 import type { RequestHandler } from "@sveltejs/kit";
-import type { Response } from "$lib/api/guilds/index";
+import type { Response } from "$lib/types/guilds/index";
 
 export const POST = (async (e) => {
     const body = structChecker(e.request.body, _RequestZod);
