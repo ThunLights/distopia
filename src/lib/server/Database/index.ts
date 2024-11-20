@@ -6,7 +6,11 @@ import { Email } from "./Database.email";
 import { Avatar } from "./Database.avatar";
 import { DatabaseGuildTables } from "./Guild/index";
 
-class DatabaseClient {
+export class DatabaseError {
+    constructor(public readonly content: string) {}
+}
+
+export class DatabaseClient {
     public readonly prisma = new PrismaClient();
     public readonly token = new Token(this.prisma.token);
     public readonly user = new User(this.prisma.user);
