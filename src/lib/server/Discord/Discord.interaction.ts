@@ -67,11 +67,6 @@ export class InteractionClient {
                     type: 1,
                     name: "invite",
                     description: "招待リンクをこのチャンネルに変える。",
-                },
-                {
-                    type: 1,
-                    name: "invite",
-                    description: "このサーバーのページを閲覧",
                 }
             ],
         },
