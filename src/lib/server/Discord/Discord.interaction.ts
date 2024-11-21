@@ -61,7 +61,7 @@ export class InteractionClient {
                 {
                     type: 1,
                     name: "register",
-                    description: "サーバーを登録する。",
+                    description: "サーバーの仮登録をする。",
                 },
                 {
                     type: 1,
