@@ -16,9 +16,13 @@ export class Commands {
 
     async reply(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
         for (const command of this.commands) {
-            const result = await command.commands(interaction);
-            if (!result) {
-                return result;
+            if (command.commandName === interaction.commandName) {
+                const result = await command.reply(interaction);
+                if (result) {
+                    return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+                } else {
+                    return result;
+                }
             }
         }
 
