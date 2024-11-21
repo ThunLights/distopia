@@ -1,4 +1,5 @@
 import type { CacheType, Client, Interaction } from "discord.js";
+import { InteractionResponse } from "./Interactions/index";
 
 export type InteractionCommand = {
     name: string
@@ -95,24 +96,13 @@ export class InteractionClient {
             ],
         }
     ];
+    public readonly interactionRespnse: InteractionResponse;
 
     constructor(private readonly client: Client) {
+        this.interactionRespnse = new InteractionResponse(this.client);
     }
 
     public async interactionCreate(interaction: Interaction<CacheType>): Promise<void> {
-        if (interaction.isContextMenuCommand()) {
-            return void await interaction.reply({ content: "Err", ephemeral: true })
-        }
-        if (interaction.isCommand()) {
-            if (interaction.commandName === "admin") {
-                const group = interaction.options.getSubcommandGroup(true);
-                if (group === "permission") {
-//                    const commandName = interaction.options.getSubcommand();
-//                    if (commandName === "add") {}
-//                    if (commandName === "remove") {}
-                    return void await interaction.reply({ content: "このコマンドは準備中です。", ephemeral: true });
-                }
-            }
-        }
+        return void await this.interactionRespnse.reply(interaction);
     }
 }
