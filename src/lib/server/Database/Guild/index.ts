@@ -13,7 +13,7 @@ export class DatabaseGuildTables {
     public readonly review: GuildReviewTable
     public readonly level: GuildLevelTable
     public readonly bump: GuildBumpTable
-    public readonly inviteTemp: GuildInviteTempTable
+    public readonly tmp: GuildInviteTempTable
 
     constructor(private readonly prisma: PrismaClient) {
         this.guild = new GuildTable(this.prisma.guild);
@@ -21,6 +21,6 @@ export class DatabaseGuildTables {
         this.review = new GuildReviewTable(this.prisma.guildReview);
         this.level = new GuildLevelTable(this.prisma.guildLevel);
         this.bump = new GuildBumpTable(this.prisma.guildBump);
-        this.inviteTemp = new GuildInviteTempTable(this.prisma.guildTmp);
+        this.tmp = new GuildInviteTempTable(this.prisma.guildTmp);
     }
 }
