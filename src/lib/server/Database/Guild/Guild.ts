@@ -30,4 +30,13 @@ export class GuildTable {
             return new DatabaseError("ERROR")
         }
     }
+
+    public async id2Data(id: string) {
+        try {
+            return await this.table.findFirst({ where: { guildId: id } });
+        } catch (error) {
+            errorHandling(error);
+            return new DatabaseError("ERROR")
+        }
+    }
 }
