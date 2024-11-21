@@ -1,10 +1,13 @@
 import { Client } from "discord.js";
 
 import { WebCommands } from "./Commands.web";
+import { AdminCommands } from "./Commands.admin";
+import { HelpCommands } from "./Commands.help";
+import { BumpCommands } from "./Commands.bump";
+import { StaffCommands } from "./Commands.staff";
 
 import type { ChatInputCommandInteraction, CacheType } from "discord.js";
 import type { CommandsBase } from "./Commands.base";
-import { AdminCommands } from "./Commands.admin";
 
 export class Commands {
     public readonly commands: CommandsBase[]
@@ -13,6 +16,9 @@ export class Commands {
         this.commands = [
             new WebCommands(this.client),
             new AdminCommands(this.client),
+            new HelpCommands(this.client),
+            new BumpCommands(this.client),
+            new StaffCommands(this.client),
         ]
     }
 
