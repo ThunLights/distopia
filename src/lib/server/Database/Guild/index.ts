@@ -5,7 +5,7 @@ import { GuildTagTable } from "./Guild.tag";
 import { GuildReviewTable } from "./Guild.review";
 import { GuildLevelTable } from "./Guild.level";
 import { GuildBumpTable } from "./Guild.bump";
-import { GuildInviteTempTable } from "./Guild.inviteTemp";
+import { GuildInviteTempTable } from "./Guild.tmp";
 
 export class DatabaseGuildTables {
     public readonly guild: GuildTable
@@ -21,6 +21,6 @@ export class DatabaseGuildTables {
         this.review = new GuildReviewTable(this.prisma.guildReview);
         this.level = new GuildLevelTable(this.prisma.guildLevel);
         this.bump = new GuildBumpTable(this.prisma.guildBump);
-        this.inviteTemp = new GuildInviteTempTable(this.prisma.guildInviteTemp);
+        this.inviteTemp = new GuildInviteTempTable(this.prisma.guildTmp);
     }
 }

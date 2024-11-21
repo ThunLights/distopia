@@ -59,9 +59,14 @@ model GuildTag {
     @@id([guildId, tag])
 }
 
-model GuildInviteTemp {
-    id     String @id
-    invite String
+model GuildTmp {
+    guildId     String @id
+    userId      String
+
+    name        String
+    invite      String
+    icon        String?
+    banner      String?
 }
 
 model GuildBump {
