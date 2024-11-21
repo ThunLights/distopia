@@ -59,6 +59,16 @@ model GuildTag {
     @@id([guildId, tag])
 }
 
+model GuildInviteTemp {
+    id     String @id
+    invite String
+}
+
+model GuildBump {
+    id   String @id
+    time BigInt
+}
+
 model GuildLevel {
     guildId String @id
     level   BigInt
