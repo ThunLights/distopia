@@ -52,6 +52,47 @@ export class InteractionClient {
                     ]
                 }
             ]
+        },
+        {
+            name: "web",
+            description: "web",
+            options: [
+                {
+                    type: 1,
+                    name: "register",
+                    description: "サーバーを登録する。",
+                },
+                {
+                    type: 1,
+                    name: "invite",
+                    description: "招待リンクをこのチャンネルに変える。",
+                },
+                {
+                    type: 1,
+                    name: "invite",
+                    description: "このサーバーのページを閲覧",
+                }
+            ],
+        },
+        {
+            name: "bump",
+            description: "サーバーの表示順を上げる",
+        },
+        {
+            name: "help",
+            description: "ヘルプを表示",
+        },
+        {
+            name: "staff",
+            description: "スタッフかどうかチェックできるよ",
+            options: [
+                {
+                    type: 6,
+                    name: "user",
+                    description: "ユーザーを指定することも出来ます。",
+                    required: false,
+                }
+            ],
         }
     ];
 
@@ -66,9 +107,10 @@ export class InteractionClient {
             if (interaction.commandName === "admin") {
                 const group = interaction.options.getSubcommandGroup(true);
                 if (group === "permission") {
-                    const commandName = interaction.options.getSubcommand();
-                    if (commandName === "add") {}
-                    if (commandName === "remove") {}
+//                    const commandName = interaction.options.getSubcommand();
+//                    if (commandName === "add") {}
+//                    if (commandName === "remove") {}
+                    return void await interaction.reply({ content: "このコマンドは準備中です。", ephemeral: true });
                 }
             }
         }
