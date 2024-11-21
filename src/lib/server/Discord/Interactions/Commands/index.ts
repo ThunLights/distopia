@@ -4,6 +4,7 @@ import { WebCommands } from "./Commands.web";
 
 import type { ChatInputCommandInteraction, CacheType } from "discord.js";
 import type { CommandsBase } from "./Commands.base";
+import { AdminCommands } from "./Commands.admin";
 
 export class Commands {
     public readonly commands: CommandsBase[]
@@ -11,6 +12,7 @@ export class Commands {
     constructor(private readonly client: Client) {
         this.commands = [
             new WebCommands(this.client),
+            new AdminCommands(this.client),
         ]
     }
 
