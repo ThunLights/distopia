@@ -1,10 +1,10 @@
 {
-    bot: {
-        id: "",
-        token: "",
-        secret: "",
-        url: "",
+    "bot": {
+        "id": "",
+        "token": "",
+        "secret": "",
+        "url": "",
     },
-    oauth: "",
+    "oauth": "",
     "owner": ""
 }
