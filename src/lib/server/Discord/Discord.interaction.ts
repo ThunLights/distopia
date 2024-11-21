@@ -67,6 +67,11 @@ export class InteractionClient {
                     type: 1,
                     name: "invite",
                     description: "招待リンクをこのチャンネルに変える。",
+                },
+                {
+                    type: 1,
+                    name: "page",
+                    description: "このサーバーのページを表示",
                 }
             ],
         },
@@ -89,7 +94,7 @@ export class InteractionClient {
                     required: false,
                 }
             ],
-        }
+        },
     ];
     public readonly interactionRespnse: InteractionResponse;
 
