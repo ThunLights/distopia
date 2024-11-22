@@ -12,7 +12,7 @@
     import type { GuildsUser } from "$lib/server/discord";
     import type { Guild } from "$lib/server/Database/Guild/Guild";
 
-    type Guilds = GuildsUser & { joinBot: boolean };
+    type Guilds = GuildsUser & { joinBot: boolean, tmp: boolean };
 
     let loginData = $state<ResponseContent | null>(null);
     let loading = $state(true);
@@ -101,7 +101,7 @@
                     {#if guilds.length}
                         <div class="guilds">
                             {#each guilds.filter(value => value.owner && !publicGuilds.map(value => value.guildId).includes(value.id)) as guild}
-                                {@render generateGuild(guild, guild.joinBot)}
+                                {@render generateGuild(guild, guild.joinBot, guild.tmp)}
                             {/each}
                         </div>
                     {:else}
@@ -133,7 +133,7 @@
     </div>
 {/snippet}
 
-{#snippet generateGuild(guild: GuildsUser, joinBot?: boolean)}
+{#snippet generateGuild(guild: GuildsUser, joinBot?: boolean, tmp?: boolean)}
     <div class="guild">
         <div>
             <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : "/discord.webp"}" alt="">
@@ -143,9 +143,14 @@
             <div class="informations">
                 <p>ID: {guild.id}</p>
                 <p>ユーザー数: {guild.approximate_member_count} (アクティブ: {guild.approximate_presence_count})</p>
-                {#if joinBot !== undefined}
-                    <p style={`color: ${joinBot ? "green" : "red"};`}>{joinBot ? "ボット導入済み" : "ボット未導入"}</p>
-                {/if}
+                <div>
+                    {#if joinBot !== undefined}
+                        <p class="inline-block" style={`color: ${joinBot ? "green" : "red"};`}>{joinBot ? "ボット導入済み" : "ボット未導入"}</p>
+                    {/if}
+                    {#if tmp !== undefined}
+                        <p class="inline-block" style={`color: ${tmp ? "green" : "red"};`}>{tmp ? "仮登録済み" : "仮登録なし"}</p>
+                    {/if}
+                </div>
             </div>
         </div>
     </div>
@@ -209,6 +214,9 @@
     }
     .contents>div {
         padding: 5px 10px;
+    }
+    .inline-block {
+        display: inline-block;
     }
     .main-div {
         min-height: 90vh;
