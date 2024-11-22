@@ -168,7 +168,7 @@
         margin-top: 10px;
     }
     .guild .icon {
-        height: 50px;
+        height: 64px;
         border-radius: 50%;
     }
     .guild .name {
