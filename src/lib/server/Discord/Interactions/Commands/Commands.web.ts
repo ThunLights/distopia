@@ -5,7 +5,7 @@ import { database, DatabaseError } from "$lib/server/Database";
 import type { CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";
 
 export class WebCommands extends CommandsBase {
-    public commandName = "web";
+    public readonly commandName = "web";
     public changeInviteRateLimit: string[] = [];
 
     constructor(client: Client) {
