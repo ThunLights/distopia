@@ -10,12 +10,26 @@ export type Guild = {
     banner: string | null
     guildId: string
     userId: string
+    invite: string
     category: string
     description: string
 }
 
 export class GuildTable {
     constructor(private readonly table: Prisma.GuildDelegate<DefaultArgs>) {}
+
+    public async update(guild: Guild) {
+        try {
+            await this.table.updateMany({
+                where: { guildId: guild.guildId },
+                data: guild,
+            });
+            return true;
+        } catch (error) {
+            errorHandling(error);
+            return false;
+        }
+    }
 
     public async userGuilds(user: UserElement) {
         try {
