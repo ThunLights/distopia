@@ -3,6 +3,8 @@
 
     import { getGuilds, getPublicGuilds } from "$lib/guilds.svelte";
     import { token2data } from "$lib/auth.svelte";
+    import { logout } from "$lib/token.svelte";
+    import { redirectUrl } from "$lib/redirect.svelte";
 
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
@@ -66,7 +68,10 @@
             <div class="contents">
                 <div>
                     <p class="title">アカウント操作</p>
-                    <p class="not-found">現状コマンドがありません</p>
+                    <div>
+                        <button class="account-operation-btn" onclick={redirectUrl("/account/settings")}>アカウント設定</button>
+                        <button class="account-operation-btn" onclick={logout}>ログアウト</button>
+                    </div>
                 </div>
             </div>
             <div class="contents">
@@ -157,6 +162,19 @@
 {/snippet}
 
 <style>
+    .account-operation-btn {
+        cursor: pointer;
+        border-radius: 25px;
+        color: white;
+        background-color: rgb(49, 49, 49);
+        opacity: 0.8;
+        padding: 3px 6px;
+        border: 1px solid rgb(85, 85, 85);
+    }
+    .account-operation-btn:active {
+        border: 1px solid rgb(49, 49, 49);
+        background-color: rgb(85, 85, 85);
+    }
     .guilds {
         width: 95%;
         margin: 20px auto;
