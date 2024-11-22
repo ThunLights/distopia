@@ -4,6 +4,7 @@ export type Response = {
         name: string
         icon: string | null
         banner: string | null
+        invite: string
         guildId: string
         userId: string
         category: string

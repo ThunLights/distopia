@@ -4,6 +4,7 @@ import { structChecker } from "$lib/struct";
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { discord } from "$lib/server/discord";
+import { database } from "$lib/server/Database";
 import { _RequestZod } from "$lib/types/guilds/index";
 
 import type { RequestHandler } from "@sveltejs/kit";
@@ -23,13 +24,14 @@ export const POST = (async (e) => {
         } satisfies Response, { status: 400 });
     }
     const guilds = await discord.guilds(user.data);
+    const tmpGuilds = await database.guildTables.tmp.datas();
     if (!guilds) {
         return json({
             content: "GUILDS_NOT_FOUND"
         } satisfies Response, { status: 400 })
     }
     const response = {
-        content: guilds.map(value => { return {...value, ...{ joinBot: discord.bot.guilds.fetchGuild(value.id) }} }),
+        content: guilds.map(value => { return {...value, ...{ joinBot: discord.bot.guilds.fetchGuild(value.id), tmp: tmpGuilds.map(value => value.guildId).includes(value.id) }} }),
     } satisfies Response;
     return json(response);
 }) satisfies RequestHandler;
