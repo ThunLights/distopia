@@ -23,7 +23,7 @@ export const POST = (async (e) => {
             content: user.content,
         } satisfies Response, { status: 400 });
     }
-    const guilds = await discord.guilds(user.data);
+    const guilds = await discord.oauth.guild.guilds.fetch(user.data);
     const tmpGuilds = await database.guildTables.tmp.datas();
     if (!guilds) {
         return json({

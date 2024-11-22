@@ -1,13 +1,9 @@
 import { z } from "zod";
 
-import { errorHandling } from "./error.js";
-import { sleep } from "../sleep.js";
 import { DiscordBotClient } from "./Discord/index.js";
-import { database } from "./Database/index.js";
-import { FetchError, originalFetch } from "./fetch.js";
+import { DiscordOauth } from "./Discord/Oauth/index.js";
 
 import cfg from "../../../important/discord.json" assert { type: "json" };
-import type { UserElement } from "./Database/Database.user.js";
 
 export const GuildsUserZod = z.object({
     id: z.string(),
@@ -53,122 +49,7 @@ export type Code2dataResponse = CodeCheckResponse & AccessToken2dataResponse;
 export class DiscordController {
     public readonly config: DiscordConfig = cfg;
     public readonly bot = new DiscordBotClient();
-
-    constructor() {
-    }
-
-    public async getMoreInfo(accessToken: string) {
-        try {
-            const response = await fetch("https://discord.com/api/users/@me", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
-            if (response.ok) {
-                const json = await response.json();
-                return {
-                    id: json.id as string,
-                    username: json.username as string,
-                    email: json.email as string | null | undefined,
-                    avatar: json.avatar as string | null | undefined,
-                };
-            }
-
-            return null;
-        } catch (error) {
-            errorHandling(error);
-            return null;
-        }
-    }
-
-    public async codeChecker(code: string) {
-        try {
-            const params = new URLSearchParams();
-            params.append("client_id", this.config.bot.id);
-            params.append("client_secret", this.config.bot.secret);
-            params.append("grant_type", "authorization_code");
-            params.append("redirect_uri", encodeURI(this.config.bot.url));
-            params.append("code", code);
-            const response = await fetch("https://discord.com/api/v10/oauth2/token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: params.toString(),
-            });
-            if (response.ok) {
-                const json = await response.json()
-                if (typeof json.access_token === "string" && typeof json.refresh_token === "string") {
-                    const userInfo = await this.getMoreInfo(json.access_token);
-                    if (userInfo) {
-                        const token = await database.token.add(userInfo.id);
-                        await database.user.update(userInfo.id, userInfo.username, json.access_token, json.refresh_token);
-                        if (userInfo.email) {
-                            await database.email.update(userInfo.id, userInfo.email);
-                        }
-                        if (userInfo.avatar) {
-                            await database.avatar.update(userInfo.id, userInfo.avatar);
-                        }
-                        return {
-                            id: userInfo.id,
-                            username: userInfo.username,
-                            config: this.config,
-                            userInfo,
-                            token,
-                        };
-                    }
-                }
-            }
-        } catch (error) {
-            errorHandling(error);
-            return null;
-        }
-    }
-
-    public async guilds(user: UserElement) {
-        try {
-            const response = await originalFetch.useAccessToken<Array<GuildsUser>>(
-                "https://discord.com/api/v10/users/@me/guilds?with_counts=true",
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${user.accessToken}`,
-                    },
-                },
-                user
-            )
-            if (response instanceof FetchError) {
-                return null
-            }
-            return response
-        } catch (error) {
-            errorHandling(error);
-            return null;
-        }
-    }
-
-    public static async sendVerifyMessage<T extends object>(url: string, contents: T): Promise<boolean> {
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                body: JSON.stringify(contents),
-                headers: {
-				    "Content-Type": "application/json"
-                },
-            });
-
-            if (response.status === 429) {
-                await sleep(1000);
-                return await this.sendVerifyMessage(url, contents);
-            }
-
-            return response.ok;
-        } catch (error) {
-            errorHandling(error);
-            return false;
-        }
-    }
+    public readonly oauth = new DiscordOauth()
 }
 
 export const discord = new DiscordController();

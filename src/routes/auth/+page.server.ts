@@ -20,7 +20,7 @@ export const load = (async (e) => {
     let content: PageContent = null;
 
     if (code) {
-        const data = await discord.codeChecker(code);
+        const data = await discord.oauth.code.codeChecker(code);
         if (data) {
             content = {
                 id: data.id,

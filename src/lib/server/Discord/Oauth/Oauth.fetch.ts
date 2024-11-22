@@ -1,12 +1,11 @@
-import { errorHandling } from "./error";
+import { errorHandling } from "$lib/server/error";
 
-import { config } from "./config";
-import { database } from "./Database";
-
-import type { BotConfig } from "./config";
-import type { UserElement } from "./Database/Database.user";
-import { discord } from "./discord";
+import { config } from "$lib/server/config";
+import { database } from "$lib/server/Database/index";
+import { discord } from "$lib/server/discord";
 import { sleep } from "$lib/sleep";
+
+import type { UserElement } from "$lib/server/Database/Database.user";
 
 export type ResetAccessToken = {
     token_type: string
@@ -20,10 +19,8 @@ export class FetchError {
     constructor(public readonly content: string) {}
 }
 
-export class OriginalFetch {
-    constructor(
-        private readonly config: BotConfig,
-    ) {}
+export class OauthFetch {
+    private readonly config = config;
 
     private async resetAccessToken(refreshToken: string): Promise<ResetAccessToken | FetchError> {
         try {
@@ -84,5 +81,3 @@ export class OriginalFetch {
         }
     }
 }
-
-export const originalFetch = new OriginalFetch(config)
