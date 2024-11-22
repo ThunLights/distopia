@@ -5,7 +5,7 @@ import { CommandsBase, CommandsError } from "./Commands.base";
 import type { CacheType, InteractionReplyOptions } from "discord.js";
 
 export class BumpCommands extends CommandsBase {
-    public commandName = "bump";
+    public readonly commandName = "bump";
 
     constructor(client: Client) {
         super(client);

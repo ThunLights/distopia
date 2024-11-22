@@ -5,7 +5,7 @@ import { CommandsBase, CommandsError } from "./Commands.base";
 import type { CacheType, InteractionReplyOptions } from "discord.js";
 
 export class StaffCommands extends CommandsBase {
-    public commandName = "staff";
+    public readonly commandName = "staff";
 
     constructor(client: Client) {
         super(client);
