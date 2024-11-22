@@ -1,6 +1,7 @@
-import { ChatInputCommandInteraction, Client, MessagePayload } from "discord.js";
+import { ChatInputCommandInteraction, Client, EmbedBuilder, MessagePayload } from "discord.js";
 
 import { CommandsBase, CommandsError } from "./Commands.base";
+import { database, DatabaseError } from "$lib/server/Database";
 
 import type { CacheType, InteractionReplyOptions } from "discord.js";
 
@@ -12,6 +13,22 @@ export class BumpCommands extends CommandsBase {
     }
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-        return { content: "このコマンドは準備中だよ。ごめんね。", ephemeral: true } satisfies InteractionReplyOptions;
+        if (!(interaction.guildId && interaction.guild)) {
+            return new CommandsError("GUILD_ID_NOT_FOUND");
+        }
+        const guild = await database.guildTables.guild.id2Data(interaction.guildId);
+        if (guild === null || guild instanceof DatabaseError) {
+            return { content: "サーバーを本登録していないとこのコマンドは使えません。", ephemeral: true } satisfies InteractionReplyOptions;
+        }
+        const result = await database.guildTables.bump.update(guild.guildId);
+        if (!result) {
+            return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
+        }
+        const embed = new EmbedBuilder()
+            .setColor("Gold")
+            .setTitle("Distopia: Discordサーバー掲示板")
+            .setURL(`https://distopia.top/`)
+            .setDescription(`表示順を上げました。[こちら](https://distopia.top/)で確認できます。`);
+        return { embeds: [ embed ] } satisfies InteractionReplyOptions;
     }
 }
