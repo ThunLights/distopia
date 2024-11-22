@@ -34,25 +34,6 @@ export class InteractionClient {
         {
             name: "admin",
             description: "only admin",
-            options: [
-                {
-                    type: 2,
-                    name: "permission",
-                    description: "edit users permission",
-                    options: [
-                        {
-                            type: 1,
-                            name: "add",
-                            description: "権限追加",
-                        },
-                        {
-                            type: 1,
-                            name: "remove",
-                            description: "権限削除",
-                        }
-                    ]
-                }
-            ]
         },
         {
             name: "web",
