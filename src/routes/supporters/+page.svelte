@@ -35,9 +35,7 @@
                     <div>
                         <p>{supporter.name}</p>
                         <p>
-                            <a href="{supporter.invite}">
-                                {supporter.invite}
-                            </a>
+                            <a class="link" href="{supporter.invite}">{supporter.invite}</a>
                         </p>
                     </div>
                 </div>
@@ -71,6 +69,9 @@
 <style>
     .underline {
         text-decoration: underline;
+    }
+    .guild .link {
+        color: rgb(50, 50, 197);
     }
     .guild .icon {
         height: 50px;
