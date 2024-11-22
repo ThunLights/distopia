@@ -3,7 +3,7 @@ import { _ResponseZod } from "$lib/types/auth/index";
 
 export async function token2data() {
     try {
-        const token = sessionStorage.getItem("token");
+        const token = localStorage.getItem("token");
         if (token) {
             const response = await fetch("/api/auth", {
                 method: "POST",

@@ -16,7 +16,7 @@
 
     onMount(async () => {
         if (content) {
-            sessionStorage.setItem("token", content.token);
+            localStorage.setItem("token", content.token);
             setTimeout(async () => {
                 location.href = "/"
             }, 3000);
