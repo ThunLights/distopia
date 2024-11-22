@@ -11,13 +11,6 @@ export class AdminCommands extends CommandsBase {
     }
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-        const group = interaction.options.getSubcommandGroup(true);
-        if (group === "permission") {
-//            const commandName = interaction.options.getSubcommand();
-//            if (commandName === "add") {}
-//            if (commandName === "remove") {}
-            return { content: "このコマンドは準備中です。", ephemeral: true } satisfies InteractionReplyOptions;
-        }
-        return null;
+        return { content: "このコマンドは準備中です。", ephemeral: true } satisfies InteractionReplyOptions;
     }
 }
