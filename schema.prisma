@@ -83,3 +83,7 @@ model GuildLevel {
 //model ServerActiveRate {
 //    guildId String @id
 //}
+
+model Staff {
+    id String @id
+}

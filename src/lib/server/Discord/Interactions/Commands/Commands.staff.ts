@@ -1,8 +1,9 @@
-import { ChatInputCommandInteraction, Client, MessagePayload } from "discord.js";
+import { ChatInputCommandInteraction, Client, EmbedBuilder, MessagePayload } from "discord.js";
 
 import { CommandsBase, CommandsError } from "./Commands.base";
 
 import type { CacheType, InteractionReplyOptions } from "discord.js";
+import { database } from "$lib/server/Database";
 
 export class StaffCommands extends CommandsBase {
     public readonly commandName = "staff";
@@ -12,6 +13,20 @@ export class StaffCommands extends CommandsBase {
     }
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-        return { content: "このコマンドは準備中だよ。ごめんね。", ephemeral: true } satisfies InteractionReplyOptions;
+        const user = interaction.options.getUser("user");
+        const id = user ? user.id : interaction.user.id;
+        const staff = await database.staff.check(id);
+        if (!staff) {
+            const embed = new EmbedBuilder()
+                .setColor("Red")
+                .setTitle("No Staff")
+                .setDescription(`<@!${id}> はスタッフではありません`);
+            return { embeds: [ embed ] } satisfies InteractionReplyOptions;
+        }
+        const embed = new EmbedBuilder()
+            .setColor("Green")
+            .setTitle("Staff")
+            .setDescription(`<@!${id}> はスタッフです。`);
+        return { embeds: [ embed ] } satisfies InteractionReplyOptions;
     }
 }

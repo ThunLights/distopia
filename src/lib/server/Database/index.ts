@@ -5,6 +5,7 @@ import { User } from "./Database.user";
 import { Email } from "./Database.email";
 import { Avatar } from "./Database.avatar";
 import { DatabaseGuildTables } from "./Guild/index";
+import { Staff } from "./Database.staff";
 
 export class DatabaseError {
     constructor(public readonly content: string) {}
@@ -17,9 +18,7 @@ export class DatabaseClient {
     public readonly email = new Email(this.prisma.email);
     public readonly avatar = new Avatar(this.prisma.avatar);
     public readonly guildTables = new DatabaseGuildTables(this.prisma);
-
-    constructor() {
-    }
+    public readonly staff = new Staff(this.prisma.staff);
 }
 
 export const database = new DatabaseClient();
