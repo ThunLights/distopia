@@ -18,7 +18,41 @@ export class WebCommands extends CommandsBase {
             return new CommandsError("GUILD_ID_NOT_FOUND");
         }
 
-        if (commandName === "register") {}
+        if (commandName === "register") {
+            if (!(interaction.channel && interaction.channel.type === ChannelType.GuildText)) {
+                return { content: "テキストチャンネル以外に招待リンクを設定することはできません", ephemeral: true } satisfies InteractionReplyOptions;
+            }
+            const guild = await database.guildTables.guild.id2Data(interaction.guildId);
+            if (guild instanceof DatabaseError) {
+                return { content: "登録チェック時にデータベースエラーが発生しました。", ephemeral: true } satisfies InteractionReplyOptions;
+            }
+            if (guild) {
+                return { content: "正式登録が済んでいます。", ephemeral: true } satisfies InteractionReplyOptions;
+            }
+            const invite = await interaction.channel.createInvite({
+                maxAge: 0,
+                maxUses: 0,
+            });
+            const result = await database.guildTables.tmp.update({
+                guildId: interaction.guild.id,
+                userId: interaction.user.id,
+                name: interaction.guild.name,
+                invite: invite.code,
+                icon: interaction.guild.icon ?? undefined,
+                banner: interaction.guild.banner ?? undefined,
+            });
+            if (!result) {
+                return { content: "データベースへの書き込みがうまく行きませんでした", ephemeral: true } satisfies InteractionReplyOptions;
+            }
+            const embed = new EmbedBuilder()
+                .setColor("Gold")
+                .setTitle("サーバーの仮登録に成功しました。")
+                .setDescription(`現在招待リンクは、このチャンネルに設定されています。正式登録後に変えることが出来ます。`)
+                .setFields(
+                    { name: "本登録について", value: "本登録は https://distopia.top/ にて行う事が出来ます。" }
+                );
+            return { embeds: [ embed ] } satisfies InteractionReplyOptions;
+        }
         if (commandName === "invite") {
             const guild = await database.guildTables.guild.id2Data(interaction.guildId);
             if (guild instanceof DatabaseError) {
