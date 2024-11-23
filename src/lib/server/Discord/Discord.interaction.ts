@@ -83,7 +83,7 @@ export class InteractionClient {
         this.interactionRespnse = new InteractionResponse(this.client);
     }
 
-    public async interactionCreate(interaction: Interaction<CacheType>): Promise<void> {
+    public async create(interaction: Interaction<CacheType>): Promise<void> {
         return void await this.interactionRespnse.reply(interaction);
     }
 }
