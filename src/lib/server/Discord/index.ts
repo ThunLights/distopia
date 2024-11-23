@@ -31,7 +31,9 @@ export class DiscordBotClient {
         this.client.on("interactionCreate", async (interaction) => {
             return await this.interactionClient.create(interaction);
         });
-        this.client.on("messageCreate", async (message) => {});
+        this.client.on("messageCreate", async (message) => {
+            return await this.messageClient.create(message);
+        });
     }
 
     public async login(): Promise<void> {
