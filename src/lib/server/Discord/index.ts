@@ -3,6 +3,7 @@ import { ActivityType, Client, REST } from "discord.js";
 import { INTENTS } from "./Discord.intents";
 import { InteractionClient } from "./Discord.interaction";
 import { GuildClient } from "./Discord.guilds";
+import { MessageClient } from "./Discord.message";
 
 import cfg from "../../../../important/discord.json" assert { type: "json" };
 
@@ -13,6 +14,7 @@ export class DiscordBotClient {
     public readonly guilds = new GuildClient(this.client);
     private readonly rest = new REST({ version: "10" }).setToken(this.token);
     private readonly interactionClient = new InteractionClient(this.client);
+    private readonly messageClient = new MessageClient(this.client);
 
     constructor() {}
 
@@ -27,7 +29,7 @@ export class DiscordBotClient {
             })
         });
         this.client.on("interactionCreate", async (interaction) => {
-            return await this.interactionClient.interactionCreate(interaction);
+            return await this.interactionClient.create(interaction);
         });
         this.client.on("messageCreate", async (message) => {});
     }
