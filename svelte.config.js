@@ -9,6 +9,7 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			"$routes/*": "src/routes",
+			"$project/*": "/",
 		}
 	},
 	runes: true,
