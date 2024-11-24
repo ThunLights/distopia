@@ -10,10 +10,6 @@ export type PageContent = {
     avatar: string | null
 } | null
 
-export type PageData = {
-    content: PageContent
-}
-
 export const load = (async (e) => {
     const { searchParams } = e.url;
     const code = searchParams.get("code")
@@ -34,5 +30,5 @@ export const load = (async (e) => {
 
     return {
         content,
-    } satisfies PageData;
+    };
 }) satisfies ServerLoad;
