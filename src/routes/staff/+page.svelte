@@ -3,20 +3,14 @@
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import { onMount } from "svelte";
-    import { token2data } from "$lib/auth.svelte";
     import { staffs } from "$lib/constants.svelte"
     import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
 
-    import type { ResponseContent } from "$lib/types/auth/index";
+    import type { PageData } from "./$types";
 
+    const { data }: { data: PageData } = $props();
     let title = "スタッフ情報";
-
-    let loginData = $state<ResponseContent | null>(null);
-
-    onMount(async () => {
-        loginData = await token2data();
-    })
+    let loginData = $state(data.auth);
 </script>
 
 <Meta

@@ -8,11 +8,12 @@
     const { data }: { data: PageData } = $props();
     const { guild, tags } = $state(data);
     const title = $state(guild ? `${guild.name} / Discordサーバー` : "サーバーがありませんでした。");
+    const loginData = $state(data.auth);
 </script>
 
 <Meta/>
 
-<Header title={title}/>
+<Header title={title} userData={loginData}/>
 <main>
     <div class="contents">
         {#if guild}

@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
 
     import { getGuilds, getPublicGuilds } from "$lib/guilds.svelte";
-    import { token2data } from "$lib/auth.svelte";
     import { logout } from "$lib/token.svelte";
     import { redirectUrl } from "$lib/redirect.svelte";
 
@@ -10,13 +9,14 @@
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { ResponseContent } from "$lib/types/auth/index";
     import type { GuildsUser } from "$lib/server/discord";
     import type { Guild } from "$lib/server/Database/Guild/Guild";
+    import type { PageData } from "./$types";
 
     type Guilds = GuildsUser & { joinBot: boolean, tmp: boolean };
 
-    let loginData = $state<ResponseContent | null>(null);
+    const { data }: { data: PageData } = $props();
+    const loginData = $state(data.auth);
     let loading = $state(true);
     let guilds = $state<Guilds[]>([]);
     let publicGuilds = $state<Guild[]>([]);
@@ -25,7 +25,6 @@
     let title = $state("ログインしてください");
 
     onMount(async () => {
-        loginData = await token2data();
         if (!loginData) {
             return location.href = "/";
         }
