@@ -34,6 +34,9 @@ export class DiscordBotClient {
         this.client.on("messageCreate", async (message) => {
             return await this.messageClient.create(message);
         });
+        this.client.on("guildUpdate", async (oldGuild, newGuild) => {
+            return this.guilds.guildUpdate(oldGuild, newGuild);
+        })
     }
 
     public async login(): Promise<void> {
