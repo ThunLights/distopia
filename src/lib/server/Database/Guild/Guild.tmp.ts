@@ -15,8 +15,11 @@ export type GuildElement = {
 export class GuildInviteTempTable {
     constructor(private readonly table: Prisma.GuildTmpDelegate<DefaultArgs>) {}
 
-    public async datas() {
+    public async datas(userId?: string) {
         try {
+            if (userId) {
+                return await this.table.findMany({ where: { userId } });
+            }
             return await this.table.findMany();
         } catch (error) {
             errorHandling(error);
