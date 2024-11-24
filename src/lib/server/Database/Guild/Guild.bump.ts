@@ -8,7 +8,12 @@ export class GuildBumpTable {
 
     async guilds(take: number): Promise<string[]> {
         try {
-            const data = await this.table.findMany({ take });
+            const data = await this.table.findMany({
+				orderBy: {
+					time: "desc",
+				},
+				take,
+			});
             return data.map(value => value.id);
         } catch (error) {
             errorHandling(error);
