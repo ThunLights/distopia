@@ -69,6 +69,11 @@ model GuildTmp {
     banner      String?
 }
 
+model GuildNSFW {
+    id      String @id
+    content Boolean
+}
+
 model GuildBump {
     id   String @id
     time BigInt
