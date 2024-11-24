@@ -1,8 +1,8 @@
-import { database, DatabaseError } from "$lib/server/Database";
-
 import type { PageServerLoad } from "./$types";
 
 export const load = (async (e) => {
+    const guildId = e.params.id;
     return {
+        guildId
     }
 }) satisfies PageServerLoad;
