@@ -5,7 +5,19 @@ import { ServerError } from "$lib/server/error";
 import { database, DatabaseError } from "$lib/server/Database/index";
 
 import type { RequestHandler } from "@sveltejs/kit";
-import type { Response } from "$lib/types/guilds/public/index";
+
+export type Response = {
+    content: string | {
+        name: string
+        icon: string | null
+        banner: string | null
+        invite: string
+        guildId: string
+        userId: string
+        category: string
+        description: string
+    }[]
+}
 
 export const POST = (async (e) => {
     const user = await authorization(e);

@@ -1,5 +1,5 @@
-import type { Response } from "$lib/types/guilds/index";
-import type { Response as PublicGuildsResponse } from "$lib/types/guilds/public/index";
+import type { Response } from "$routes/api/guilds/+server";
+import type { Response as PublicGuildsResponse } from "$routes/api/guilds/public/+server";
 import type { Response as TmpGuildsResponse} from "$routes/api/guilds/tmp/+server"
 
 export class GuildsApiError {
