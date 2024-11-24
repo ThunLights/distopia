@@ -4,6 +4,7 @@ import { INTENTS } from "./Discord.intents";
 import { InteractionClient } from "./Discord.interaction";
 import { GuildClient } from "./Discord.guilds";
 import { MessageClient } from "./Discord.message";
+import { Controller } from "./Controller/index";
 
 import cfg from "$project/important/discord.json";
 
@@ -12,6 +13,7 @@ export class DiscordBotClient {
     public readonly clientId = cfg.bot.id;
     public readonly client = new Client({ intents: INTENTS });
     public readonly guilds = new GuildClient(this.client);
+	public readonly control = new Controller(this.client);
     private readonly rest = new REST({ version: "10" }).setToken(this.token);
     private readonly interactionClient = new InteractionClient(this.client);
     private readonly messageClient = new MessageClient(this.client);
