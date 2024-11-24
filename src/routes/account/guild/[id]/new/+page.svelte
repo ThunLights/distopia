@@ -4,18 +4,26 @@
     import Footer from "$lib/footer.svelte";
 
     import { onMount } from "svelte";
+    import { getGuilds, getPublicGuilds } from "$lib/guilds.svelte";
 
     import type { PageData } from "./$types";
 
     const { data }: { data: PageData } = $props();
     const loginData = $state(data.auth);
+    let title = $state("Loading...");
 
-    onMount(async () => {})
+    onMount(async () => {
+        if (!loginData) {
+            return location.href = "/";
+        }
+        const servers = await getGuilds(loginData.token);
+        const publicServers = await getPublicGuilds(loginData.token);
+    })
 </script>
 
 <Meta/>
 
-<Header userData={loginData}/>
+<Header title={title}/>
 <main>
 </main>
 <Footer/>

@@ -1,22 +1,20 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { getMeridiem } from "$lib/time.svelte";
-    import { token2data } from "$lib/auth.svelte";
 
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { ResponseContent } from "$lib/types/auth/index";
+    import type { PageData } from "./$types"
 
-    type LoginData = ResponseContent | null;
+    const { data }: { data: PageData } = $props();
 
     let bgUrl = $state("");
-    let loginData: LoginData = $state(null);
+    let loginData = $state(data.auth);
 
     onMount(async () => {
         bgUrl = getMeridiem(navigator.language) === "AM" ? "/am.webp" : "/pm.webp";
-        loginData = await token2data();
     })
 </script>
 

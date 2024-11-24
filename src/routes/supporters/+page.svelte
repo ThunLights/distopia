@@ -3,19 +3,15 @@
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import { onMount } from "svelte";
-    import { token2data } from "$lib/auth.svelte";
-    import { supporters } from "$lib/constants.svelte"
+    import { supporters } from "$lib/constants.svelte";
     import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
 
-    import type { ResponseContent } from "$lib/types/auth/index";
+    import type { PageData } from "./$types";
 
-    let loginData = $state<ResponseContent | null>(null);
+    const { data }: { data: PageData } = $props();
+
+    let loginData = $state(data.auth);
     let title = "Supporters";
-
-    onMount(async () => {
-        loginData = await token2data();
-    })
 </script>
 
 <Meta
