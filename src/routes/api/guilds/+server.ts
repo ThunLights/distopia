@@ -1,14 +1,25 @@
 import { json } from "@sveltejs/kit";
+import { z } from "zod";
 
 import { structChecker } from "$lib/struct";
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { discord } from "$lib/server/discord";
 import { database } from "$lib/server/Database";
-import { _RequestZod } from "$lib/types/guilds/index";
 
 import type { RequestHandler } from "@sveltejs/kit";
-import type { Response } from "$lib/types/guilds/index";
+
+import { GuildsUserZod } from "$lib/server/discord";
+
+export const _GuildUser = GuildsUserZod.extend({ joinBot: z.boolean(), tmp: z.boolean() })
+
+export const _RequestZod = z.object({});
+export const _ResponseZod = z.object({
+    content: z.string().or(_GuildUser.array())
+});
+
+export type Request = z.infer<typeof _RequestZod>;
+export type Response = z.infer<typeof _ResponseZod>;
 
 export const POST = (async (e) => {
     const body = structChecker(e.request.body, _RequestZod);

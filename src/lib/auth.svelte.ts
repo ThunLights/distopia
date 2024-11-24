@@ -1,5 +1,4 @@
-import { structChecker } from "./struct";
-import { _ResponseZod } from "$lib/types/auth/index";
+import type { Response } from "$routes/api/auth/+server";
 
 export async function token2data() {
     try {
@@ -12,7 +11,7 @@ export async function token2data() {
                 }
             })
             if (response.ok) {
-                const json = structChecker(await response.json(), _ResponseZod);
+                const json: Response = await response.json();
                 if (json && json.content) {
                     if (typeof json.content === "string") {
                         console.log(`Error: ${json.content}`);
