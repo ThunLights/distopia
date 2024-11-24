@@ -4,11 +4,12 @@
     import Footer from "$lib/footer.svelte";
 
     import { onMount } from "svelte";
-    import { getGuilds, getPublicGuilds } from "$lib/guilds.svelte";
+    import { getTmpGuilds } from "$lib/guilds.svelte";
 
     import type { PageData } from "./$types";
 
     const { data }: { data: PageData } = $props();
+    const { guildId } = data;
     const loginData = $state(data.auth);
     let title = $state("Loading...");
 
@@ -16,8 +17,7 @@
         if (!loginData) {
             return location.href = "/";
         }
-        const servers = await getGuilds(loginData.token);
-        const publicServers = await getPublicGuilds(loginData.token);
+        const servers = await getTmpGuilds(loginData.token);
     })
 </script>
 
