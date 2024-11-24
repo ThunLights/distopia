@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 
-import { dayExchanger } from "./day.js"
+import { dayExchanger } from "$lib/server/day"
 
 const logFilesDir = path.join(process.cwd(), "log")
 

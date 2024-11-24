@@ -1,3 +1,3 @@
-import cfg from "../../../important/discord.json";
+import cfg from "$project/important/discord.json";
 
 export const LoginUrl = cfg.oauth;
