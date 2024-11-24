@@ -1,21 +1,16 @@
 <script lang="ts">
-    import "../aTag.css";
+    import "$routes/aTag.css";
 
-    import { onMount } from "svelte";
     import { siteAbout } from "$lib/constants.svelte";
-    import { token2data } from "$lib/auth.svelte";
 
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { ResponseContent } from "$lib/types/auth/index";
+	import type { PageData } from "./$types";
 
-    let loginData = $state<ResponseContent | null>(null);
-
-    onMount(async () => {
-        loginData = await token2data();
-    })
+    const { data }: { data: PageData } = $props();
+    const loginData = $state(data.auth);
 </script>
 
 <Meta title="Distopiaについて / Distopia.top"/>
