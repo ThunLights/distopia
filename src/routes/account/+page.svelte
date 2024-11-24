@@ -91,7 +91,9 @@
                     {#if publicGuilds.length}
                         <div class="guild">
                             {#each publicGuilds as guild}
-                                {@render generatePublicGuild(guild)}
+								<a href="/account/guild/{guild.guildId}">
+									{@render generatePublicGuild(guild)}
+								</a>
                             {/each}
                         </div>
                     {:else}
@@ -105,7 +107,9 @@
                     {#if guilds.length}
                         <div class="guilds">
                             {#each guilds.filter(value => value.owner && !publicGuilds.map(value => value.guildId).includes(value.id)) as guild}
-                                {@render generateGuild(guild, guild.joinBot, guild.tmp)}
+                                <a href="/account/guild/{guild.id}/new">
+									{@render generateGuild(guild, guild.joinBot, guild.tmp)}
+								</a>
                             {/each}
                         </div>
                     {:else}
@@ -238,6 +242,9 @@
     .main-div {
         min-height: 90vh;
     }
+	a {
+		text-decoration: none;
+	}
     p {
         color: white;
     }
