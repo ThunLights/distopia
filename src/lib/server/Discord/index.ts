@@ -35,8 +35,11 @@ export class DiscordBotClient {
             return await this.messageClient.create(message);
         });
         this.client.on("guildUpdate", async (oldGuild, newGuild) => {
-            return this.guilds.guildUpdate(oldGuild, newGuild);
-        })
+            return await this.guilds.guildUpdate(oldGuild, newGuild);
+        });
+		this.client.on("guildMemberUpdate", async (oldMember, newMember) => {
+			return await this.guilds.guildMemberUpdate(oldMember, newMember);
+		});
     }
 
     public async login(): Promise<void> {
