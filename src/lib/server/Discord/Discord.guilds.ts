@@ -1,6 +1,8 @@
-import { database, DatabaseError } from "../Database";
+import { database, DatabaseError } from "../Database/index";
 import { errorHandling } from "$lib/server/error";
-import { Client, Guild } from "discord.js";
+import { Client, Guild, GuildMember } from "discord.js";
+
+import type { PartialGuildMember } from "discord.js";
 
 export class GuildClientError {
     constructor(public readonly content: string) {
@@ -38,4 +40,7 @@ export class GuildClient {
             }
         }
     }
+
+	public async guildMemberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): Promise<void> {
+	}
 }
