@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DiscordBotClient } from "./Discord/index.js";
 import { DiscordOauth } from "./Discord/Oauth/index.js";
 
-import cfg from "../../../important/discord.json" assert { type: "json" };
+import cfg from "$project/important/discord.json";
 
 export const GuildsUserZod = z.object({
     id: z.string(),

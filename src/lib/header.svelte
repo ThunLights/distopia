@@ -4,7 +4,7 @@
     import "@fontsource/inter/900.css";
     import "@fontsource/open-sans/800-italic.css";
 
-    import type { ResponseContent } from "$lib/types/auth/index";
+    import type { ResponseContent } from "$routes/api/auth/+server";
 
     type UserData = ResponseContent | null;
 
@@ -39,7 +39,7 @@
     </div>
     {#if loginBlock}
         <div>
-            {#if !userData}
+            {#if userData === null}
                 <div class="discord-login">
                     <a href="{LOGIN_URL}">
                         <div class="login-block">

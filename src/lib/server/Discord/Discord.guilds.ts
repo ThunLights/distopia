@@ -1,5 +1,5 @@
 import { database, DatabaseError } from "../Database";
-import { errorHandling } from "../error";
+import { errorHandling } from "$lib/server/error";
 import { Client, Guild } from "discord.js";
 
 export class GuildClientError {

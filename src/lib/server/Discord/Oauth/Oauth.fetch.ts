@@ -58,7 +58,7 @@ export class OauthFetch {
                 if (newAccessToken instanceof FetchError) {
                     return newAccessToken;
                 }
-                const data = await discord.getMoreInfo(newAccessToken.access_token);
+                const data = await discord.oauth.code.getMoreInfo(newAccessToken.access_token);
                 if (!data) {
                     return new FetchError("FETCH_USER_DATA_ERROR");
                 }

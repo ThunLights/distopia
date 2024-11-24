@@ -5,7 +5,7 @@ import { InteractionClient } from "./Discord.interaction";
 import { GuildClient } from "./Discord.guilds";
 import { MessageClient } from "./Discord.message";
 
-import cfg from "../../../../important/discord.json" assert { type: "json" };
+import cfg from "$project/important/discord.json";
 
 export class DiscordBotClient {
     public readonly token = cfg.bot.token;
