@@ -137,3 +137,5 @@ export const CHARACTER_LIMIT = {
 	description: 250,
 	tag: 25,
 };
+
+export const TAG_COUNT_LIMIT = 5;

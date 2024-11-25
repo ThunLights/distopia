@@ -36,6 +36,16 @@ export class GuildInviteTempTable {
         }
     }
 
+	public async delete(guildId: string) {
+		try {
+			await this.table.deleteMany({ where: { guildId }});
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
     public async update(guild: GuildElement) {
         try {
             const { guildId } = guild;
