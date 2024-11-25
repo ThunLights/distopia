@@ -1,5 +1,6 @@
 import { database, DatabaseError } from "$lib/server/Database";
 import { structChecker } from "$lib/struct";
+import { generateErrorJson } from "$lib/server/json";
 import { json } from "@sveltejs/kit";
 import { z } from "zod";
 
@@ -19,9 +20,7 @@ export type Response = {
 export const POST = (async (e) => {
 	const body = structChecker(await e.request.json(), _RequestZod);
 	if (!body) {
-		return json({
-			content: "BODY_ERROR",
-		}, { status: 400 });
+		return generateErrorJson("BODY_ERROR");
 	}
 	const guilds: Guild[] = [];
 	const bumpGuilds = await database.guildTables.bump.guilds(body.take);
