@@ -7,6 +7,7 @@ import { database } from "$lib/server/Database";
 import { foundCategory } from "$lib/category.svelte";
 import { descriptionFormatCheck } from "$lib/description.svelte";
 import { tagCountCheck, tagFormatCheck } from "$lib/tag.svelte";
+import { generateErrorJson } from "$lib/server/json";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -24,46 +25,30 @@ export const POST = (async (e) => {
 	const auth = await authorization(e);
 	const body = structChecker(await e.request.json(), _RequestZod);
 	if (auth instanceof ServerError) {
-		return json({
-			content: "AUTH_ERROR",
-		}, { status: 400 });
+		return generateErrorJson("AUTH_ERROR");
 	}
 	if (!body) {
-		return json({
-			content: "BODY_FORMAT_ERROR",
-		}, { status: 400 });
+		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 	const guildTmp = await database.guildTables.tmp.data(body.guildId);
 	if (!guildTmp) {
-		return json({
-			content: "TMP_NOT_FOUND",
-		}, { status: 400 });
+		return generateErrorJson("TMP_NOT_FOUND");
 	}
 	if (guildTmp.userId !== auth.data.id) {
-		return json({
-			content: "THIS_GUILD_IS_NOT_YOURS",
-		}, { status: 400 });
+		return generateErrorJson("THIS_GUILD_IS_NOT_YOURS");
 	}
 	if (!foundCategory(body.category)) {
-		return json({
-			content: "CATEGORY_NOT_FOUND",
-		}, { status: 400 });
+		return generateErrorJson("CATEGORY_NOT_FOUND");
 	}
 	if (!descriptionFormatCheck(body.description)) {
-		return json({
-			content: "DESCRIPTION_CHARACTER_LIMIT_ERROR",
-		}, { status: 400 });
+		return generateErrorJson("DESCRIPTION_CHARACTER_LIMIT_ERROR");
 	}
 	if (!tagCountCheck(body.tags)) {
-		return json({
-			content: "TAG_LIMIT_ERROR",
-		}, { status: 400 });
+		return generateErrorJson("TAG_LIMIT_ERROR");
 	}
 	for (const tag of body.tags) {
 		if (!tagFormatCheck(tag)) {
-			return json({
-				content: "TAG_CHARACTER_LIMIT_ERROR",
-			}, { status: 400 });
+			return generateErrorJson("TAG_CHARACTER_LIMIT_ERROR");
 		}
 	}
 	const result = await database.guildTables.guild.update({
@@ -74,9 +59,7 @@ export const POST = (async (e) => {
 		}
 	});
 	if (!result) {
-		return json({
-			content: "DATABASE_ERROR",
-		}, { status: 400 });
+		return generateErrorJson("DATABASE_ERROR");
 	}
 	await database.guildTables.bump.update(guildTmp.guildId);
 	await database.guildTables.nsfw.update(guildTmp.guildId, body.nsfw);
