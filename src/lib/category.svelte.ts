@@ -42,3 +42,7 @@ export const CATEGORIES = [
 		name: "その他",
 	}
 ] satisfies Array<Category>;
+
+export function foundCategory(content: string): boolean {
+	return CATEGORIES.map(value => value.id).includes(content);
+}
