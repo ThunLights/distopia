@@ -1,12 +1,15 @@
-import type { Client } from "discord.js";
+import type { Client, PresenceStatus } from "discord.js";
 
 export class Guild {
 	constructor(private readonly client: Client) {}
 
-	public memberCount(guildId: string) {
+	public memberCount(guildId: string, status?: PresenceStatus) {
 		const guild = this.client.guilds.cache.get(guildId);
 		if (!guild) {
 			return null;
+		}
+		if (status) {
+			return Array.from(guild.members.cache.filter(value => (value.presence && value.presence.status === status)).values()).length;
 		}
 		return guild.memberCount;
 	}
