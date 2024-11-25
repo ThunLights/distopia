@@ -32,6 +32,9 @@ export class GuildClient {
             return;
         }
         if (guild) {
+			if (oldGuild.name !== newGuild.name) {
+				await database.guildTables.guild.update({...guild, ...{ name: newGuild.name }});
+			}
             if (oldGuild.icon !== newGuild.icon) {
                 await database.guildTables.guild.update({...guild, ...{ icon: newGuild.icon }})
             }
