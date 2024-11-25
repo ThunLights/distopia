@@ -132,3 +132,8 @@ export const staffs = [
 ] satisfies Array<Staff>;
 
 export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=email+guilds.join+identify+guilds";
+
+export const CHARACTER_LIMIT = {
+	description: 250,
+	tag: 25,
+};
