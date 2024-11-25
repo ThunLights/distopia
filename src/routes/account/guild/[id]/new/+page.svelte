@@ -5,9 +5,10 @@
 
     import { onMount } from "svelte";
     import { getTmpGuild, GuildsApiError } from "$lib/guilds.svelte";
+	import { CATEGORIES } from "$lib/category.svelte";
+	import { CHARACTER_LIMIT } from "$lib/constants.svelte"
 
     import type { PageData } from "./$types";
-	import { CATEGORIES } from "$project/src/lib/category.svelte";
 
 	type TmpGuild = {
 		guildId: string;
@@ -77,11 +78,11 @@
 						</select>
 					</div>
 					<div class="section">
-						<p class="title">タグ <small>(Enterで確定)</small></p>
-						<input type="text">
+						<p class="title">タグ <small>(Enterで確定・{CHARACTER_LIMIT.tag}文字制限)</small></p>
+						<input type="text" maxlength="{CHARACTER_LIMIT.tag}">
 					</div>
 					<div class="section">
-						<p class="title">サーバーの説明 <strong style={`color: ${descriptionLength > 250 ? "red" : "green" };`}>({descriptionLength} / 250)</strong></p>
+						<p class="title">サーバーの説明 <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.description ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.description})</strong></p>
 						<textarea bind:value={description}></textarea>
 					</div>
 					<div class="section">
