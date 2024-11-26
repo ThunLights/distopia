@@ -2,11 +2,12 @@
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
+	import Tag from "$project/src/lib/tags.svelte";
 
     import { onMount } from "svelte";
     import { getTmpGuild, GuildsApiError } from "$lib/guilds.svelte";
 	import { CATEGORIES } from "$lib/category.svelte";
-	import { CHARACTER_LIMIT } from "$lib/constants.svelte"
+	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte"
 
     import type { PageData } from "./$types";
 
@@ -25,6 +26,7 @@
 	let tmpGuild = $state<TmpGuild | null>(null);
     let title = $state("Loading...");
 	let category = $state("other");
+	let tags = $state<string[]>([]);
 	let description = $state("");
 	let nsfw = $state(false);
 	let agreement = $state(false);
@@ -34,6 +36,9 @@
 		if (tmpGuild) {
 			title = `「${tmpGuild.name}」を本登録する。`;
 		}
+	}
+
+	async function register() {
 	}
 
     onMount(async () => {
@@ -78,8 +83,8 @@
 						</select>
 					</div>
 					<div class="section">
-						<p class="title">タグ <small>(Enterで確定・{CHARACTER_LIMIT.tag}文字制限)</small></p>
-						<input type="text" maxlength="{CHARACTER_LIMIT.tag}">
+						<p class="title">タグ <small>(Enterで確定・{CHARACTER_LIMIT.tag}文字制限・{TAG_COUNT_LIMIT}個まで)</small></p>
+						<Tag tags={tags} tagsUpdate={(newTags) => { tags = newTags }}></Tag>
 					</div>
 					<div class="section">
 						<p class="title">サーバーの説明 <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.description ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.description})</strong></p>
@@ -92,7 +97,7 @@
 						<p class="title"><input type="checkbox" bind:checked={agreement}>本サービス規約に同意する。</p>
 					</div>
 					<div class="section">
-						<button>サーバーを公開</button>
+						<button onclick={register}>サーバーを公開</button>
 					</div>
 				</div>
 			</div>
@@ -104,10 +109,6 @@
 <style>
 	.section input[type="checkbox"] {
 		margin: 0 5px 0 0;
-	}
-	.section input[type="text"] {
-		font-size: 20px;
-		width: 70%;
 	}
 	.section textarea {
 		resize: none;
