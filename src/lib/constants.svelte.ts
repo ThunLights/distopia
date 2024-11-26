@@ -139,3 +139,7 @@ export const CHARACTER_LIMIT = {
 };
 
 export const TAG_COUNT_LIMIT = 5;
+
+export const INVALID_TAG_CHARACTOR = [
+	"\n"
+];
