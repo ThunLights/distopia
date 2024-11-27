@@ -101,7 +101,7 @@
             </div>
             <div class="contents">
                 <div>
-                    <p class="title">登録可能サーバー <small>更新には数分かかる可能性がございます。</small></p>
+                    <p class="title">登録可能サーバー <small>*更新には数分かかる可能性がございます。</small></p>
                     {#if guilds.length}
                         <div class="guilds">
                             {#each guilds.filter(value => value.owner && !publicGuilds.map(value => value.guildId).includes(value.id)) as guild}
