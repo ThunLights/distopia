@@ -52,25 +52,36 @@
 						</div>
 					</div>
 				</div>
+				<div class="control">
+					<div>
+						<p class="title">コントロール</p>
+					</div>
+					<div>
+						<button>サーバー上位表示</button>
+					</div>
+					<div>
+						<button>イベントブーストを設定</button>
+					</div>
+				</div>
 				<div class="page">
 					<div>
 						<p class="title">現在の設定 <button>編集</button></p>
 					</div>
 					<div class="content">
 						<p>タグ</p>
-						<div class="content tags">
+						<div class="tags">
 							{@render generateTagsElement(guild.tags)}
 						</div>
 					</div>
 					<div class="content">
 						<p>カテゴリ</p>
-						<div class="content">
+						<div>
 							<p>{category ?? "ロード中です。"}</p>
 						</div>
 					</div>
 					<div class="content">
 						<p>説明欄</p>
-						<div class="content">
+						<div>
 							{@render description(guild.description)}
 						</div>
 					</div>
@@ -85,7 +96,7 @@
 					<div>
 						<p class="title">詳細情報</p>
 					</div>
-					<div class="content">
+					<div>
 						<p>オーナーID</p>
 						<div>
 							<p>{guild.userId}</p>
@@ -100,6 +111,23 @@
 							</div>
 						</div>
 					{/if}
+				</div>
+				<div class="data">
+					<div>
+						<p class="title">データ (月間)</p>
+					</div>
+					<div class="content">
+						<p>サーバー参加人数</p>
+						<div>
+							<p>0人</p>
+						</div>
+					</div>
+					<div class="content">
+						<p>アクティブレート</p>
+						<div>
+							<p>0.0</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -122,6 +150,9 @@
 {/snippet}
 
 <style>
+	.control>div {
+		margin-top: 5px;
+	}
 	.tag {
 		padding: 3px 5px;
 		border-radius: 25px;
