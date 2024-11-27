@@ -8,10 +8,11 @@ export class GuildNSFWTable {
 
 	async data(guildId: string) {
 		try {
-			return await this.table.findFirst({ where: { id: guildId }});
+			const data = await this.table.findFirst({ where: { id: guildId }});
+			return data ? data.content : false;
 		} catch (error) {
 			errorHandling(error);
-			return null;
+			return false;
 		}
 	}
 

@@ -73,10 +73,15 @@ export async function getTmpGuilds(token: string) {
 
 export async function getPublicGuild(token: string, guildId: string) {
 	try {
-		const response = await fetch(`/api/guilds/public/${guildId}`);
+		const response = await fetch(`/api/guilds/public/${guildId}`, {
+			method: "POST",
+			headers: {
+				Authorization: token,
+			}
+		});
 		if (response.ok) {
 			const data: PublicGuildResponse = await response.json();
-			return data.content;
+			return data;
 		}
 		return new GuildsApiError(`API_STATUS_${response.status}`)
 	} catch (error) {
