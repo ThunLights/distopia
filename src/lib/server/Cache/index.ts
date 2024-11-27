@@ -1,4 +1,4 @@
-import { DiscordCache } from "./Discord";
+import { DiscordCache } from "./Discord/index";
 
 export class CacheClient {
     public readonly discord = new DiscordCache();
