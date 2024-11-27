@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants.svelte";
 	import { tagFormatCheck } from "$lib/tag.svelte";
+	import { blank } from "./blank.svelte";
 
 	type KeyUpEvent = KeyboardEvent & {
 		currentTarget: EventTarget & HTMLInputElement;
@@ -14,7 +15,7 @@
 
 	function controller(e: KeyUpEvent) {
 		if (e.key === "Enter") {
-			if (!tags.includes(e.currentTarget.value) && TAG_COUNT_LIMIT > tags.length && !tagFormatCheck(e.currentTarget.value)) {
+			if (!tags.includes(e.currentTarget.value) && TAG_COUNT_LIMIT > tags.length && tagFormatCheck(e.currentTarget.value)) {
 				tags.push(e.currentTarget.value);
 				e.currentTarget.value = "";
 				tagsUpdate(tags);

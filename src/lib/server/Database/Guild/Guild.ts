@@ -20,10 +20,17 @@ export class GuildTable {
 
     public async update(guild: Guild) {
         try {
-            await this.table.updateMany({
-                where: { guildId: guild.guildId },
-                data: guild,
-            });
+			const element = await this.table.findFirst({ where: { guildId: guild.guildId }});
+			if (element) {
+				await this.table.updateMany({
+					where: { guildId: guild.guildId },
+					data: guild,
+				});
+			} else {
+				await this.table.create({
+					data: guild,
+				})
+			}
             return true;
         } catch (error) {
             errorHandling(error);

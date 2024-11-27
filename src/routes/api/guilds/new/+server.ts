@@ -21,6 +21,24 @@ export const _RequestZod = z.object({
 
 export type Request = z.infer<typeof _RequestZod>;
 
+async function invalidElementCheck(body: Request) {
+	if (!foundCategory(body.category)) {
+		return generateErrorJson("CATEGORY_NOT_FOUND");
+	}
+	if (!descriptionFormatCheck(body.description)) {
+		return generateErrorJson("DESCRIPTION_CHARACTER_LIMIT_ERROR");
+	}
+	if (!tagCountCheck(body.tags)) {
+		return generateErrorJson("TAG_LIMIT_ERROR");
+	}
+	for (const tag of body.tags) {
+		if (!tagFormatCheck(tag)) {
+			return generateErrorJson("TAG_CHARACTER_LIMIT_ERROR");
+		}
+	}
+	return null;
+}
+
 export const POST = (async (e) => {
 	const auth = await authorization(e);
 	const body = structChecker(await e.request.json(), _RequestZod);
@@ -37,19 +55,9 @@ export const POST = (async (e) => {
 	if (guildTmp.userId !== auth.data.id) {
 		return generateErrorJson("THIS_GUILD_IS_NOT_YOURS");
 	}
-	if (!foundCategory(body.category)) {
-		return generateErrorJson("CATEGORY_NOT_FOUND");
-	}
-	if (!descriptionFormatCheck(body.description)) {
-		return generateErrorJson("DESCRIPTION_CHARACTER_LIMIT_ERROR");
-	}
-	if (!tagCountCheck(body.tags)) {
-		return generateErrorJson("TAG_LIMIT_ERROR");
-	}
-	for (const tag of body.tags) {
-		if (!tagFormatCheck(tag)) {
-			return generateErrorJson("TAG_CHARACTER_LIMIT_ERROR");
-		}
+	const checkedBody = await invalidElementCheck(body);
+	if (checkedBody) {
+		return checkedBody;
 	}
 	const result = await database.guildTables.guild.update({
 		...guildTmp,
@@ -79,19 +87,9 @@ export const PATCH = (async (e) => {
 	if (!body) {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
-	if (!foundCategory(body.category)) {
-		return generateErrorJson("CATEGORY_NOT_FOUND");
-	}
-	if (!descriptionFormatCheck(body.description)) {
-		return generateErrorJson("DESCRIPTION_CHARACTER_LIMIT_ERROR");
-	}
-	if (!tagCountCheck(body.tags)) {
-		return generateErrorJson("TAG_LIMIT_ERROR");
-	}
-	for (const tag of body.tags) {
-		if (!tagFormatCheck(tag)) {
-			return generateErrorJson("TAG_CHARACTER_LIMIT_ERROR");
-		}
+	const checkedBody = await invalidElementCheck(body);
+	if (checkedBody) {
+		return checkedBody;
 	}
 	const guild = await database.guildTables.guild.id2Data(body.guildId);
 	if (guild instanceof DatabaseError || guild === null) {
