@@ -2,14 +2,13 @@
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
-	import Tag from "$project/src/lib/tags.svelte";
+	import Tag from "$lib/tags.svelte";
 
     import { onMount } from "svelte";
     import { getTmpGuild, GuildsApiError } from "$lib/guilds.svelte";
 	import { CATEGORIES } from "$lib/category.svelte";
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte"
 	import { descriptionFormatCheck } from "$lib/description.svelte";
-	import { tagFormatCheck } from "$lib/tag.svelte";
 
     import type { PageData } from "./$types";
 
