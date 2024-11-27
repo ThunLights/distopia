@@ -8,6 +8,8 @@
     import { getTmpGuild, GuildsApiError } from "$lib/guilds.svelte";
 	import { CATEGORIES } from "$lib/category.svelte";
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte"
+	import { descriptionFormatCheck } from "$lib/description.svelte";
+	import { tagFormatCheck } from "$lib/tag.svelte";
 
     import type { PageData } from "./$types";
 
@@ -23,6 +25,8 @@
     const { data }: { data: PageData } = $props();
     const { guildId } = data;
     const loginData = $state(data.auth);
+	let disabled = $state(true);
+	let result = $state("");
 	let tmpGuild = $state<TmpGuild | null>(null);
     let title = $state("Loading...");
 	let category = $state("other");
@@ -39,6 +43,30 @@
 	}
 
 	async function register() {
+		if (!data.auth) return;
+		disabled = false;
+		const response = await fetch(`/api/guilds/new`, {
+			method: "POST",
+			headers: {
+				Authorization: data.auth.token,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				guildId, nsfw, tags, category, description,
+			}),
+		});
+		if (response.ok) {
+			location.href = `/account/guild/${guildId}`;
+		} else {
+			result = "エラーが発生しました。"
+			disabled = true;
+		}
+	}
+
+	function isTransmittable() {
+		const data = descriptionFormatCheck(description)
+			&& agreement;
+		disabled = !data;
 	}
 
     onMount(async () => {
@@ -52,6 +80,10 @@
 		tmpGuild = response;
 		updateSettings();
     })
+
+	setInterval(() => {
+		isTransmittable();
+	}, 500)
 </script>
 
 <Meta title={title}/>
@@ -75,7 +107,7 @@
 				</div>
 				<div class="registers">
 					<div class="section">
-						<p class="title">カテゴリ</p>
+						<p class="title"><small class="indispensable">*</small>カテゴリ</p>
 						<select onchange={e => { category = e.currentTarget.value; }} bind:value={category}>
 							{#each CATEGORIES as category}
 								<option value="{category.id}">{category.name}</option>
@@ -87,17 +119,20 @@
 						<Tag tags={tags} tagsUpdate={(newTags) => { tags = newTags }}></Tag>
 					</div>
 					<div class="section">
-						<p class="title">サーバーの説明 <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.description ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.description})</strong></p>
+						<p class="title"><small class="indispensable">*</small>サーバーの説明 <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.description ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.description})</strong></p>
 						<textarea bind:value={description}></textarea>
 					</div>
 					<div class="section">
 						<p class="title"><input type="checkbox" bind:checked={nsfw}>NSFWサーバー</p>
 					</div>
 					<div class="section">
-						<p class="title"><input type="checkbox" bind:checked={agreement}>本サービス規約に同意する。</p>
+						<p class="title"><input type="checkbox" bind:checked={agreement}><small class="indispensable">*</small>本サービス規約に同意する。</p>
 					</div>
 					<div class="section">
-						<button onclick={register}>サーバーを公開</button>
+						<button style={disabled ? "" : "cursor: pointer;"} onclick={register} disabled={disabled}>サーバーを公開</button>
+					</div>
+					<div class="section">
+						<p style="color: red;">{result}</p>
 					</div>
 				</div>
 			</div>
@@ -107,6 +142,9 @@
 <Footer/>
 
 <style>
+	.indispensable {
+		color: red;
+	}
 	.section input[type="checkbox"] {
 		margin: 0 5px 0 0;
 	}
@@ -116,7 +154,6 @@
 		height: 35vh;
 	}
 	.section button {
-		cursor: pointer;
 		background-color: rgb(39, 39, 39);
 		border-color: rgb(134, 134, 134);
 		color: rgb(193, 193, 193);
