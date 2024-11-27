@@ -9,7 +9,7 @@ export class Guild {
 			return null;
 		}
 		if (status) {
-			return Array.from(guild.members.cache.filter(value => (value.presence && value.presence.status === status)).values()).length;
+			return guild.members.cache.filter(value => (value.presence && value.presence.status === status)).size;
 		}
 		return guild.memberCount;
 	}
