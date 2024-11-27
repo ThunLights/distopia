@@ -14,6 +14,7 @@
 	const { guildId } = data;
     const loginData = $state(data.auth);
 	let guild = $state<Response | null>(null);
+	let title = $derived(guild ? `「${guild.name}」の詳細情報` : "ロード中です。");
 	let category = $derived<string | null>(getCategory(guild ? guild.category : null));
 
 	function getCategory(category: string | null) {
@@ -33,7 +34,7 @@
 	})
 </script>
 
-<Meta/>
+<Meta title={title}/>
 
 <Header userData={loginData}/>
 <main>
