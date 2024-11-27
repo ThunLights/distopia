@@ -91,9 +91,7 @@
                     {#if publicGuilds.length}
                         <div class="guilds">
                             {#each publicGuilds as guild}
-								<a href="/account/guild/{guild.guildId}">
-									{@render generatePublicGuild(guild)}
-								</a>
+								{@render generatePublicGuild(guild)}
                             {/each}
                         </div>
                     {:else}
@@ -107,9 +105,7 @@
                     {#if guilds.length}
                         <div class="guilds">
                             {#each guilds.filter(value => value.owner && !publicGuilds.map(value => value.guildId).includes(value.id)) as guild}
-                                <a href="/account/guild/{guild.id}/new">
-									{@render generateGuild(guild, guild.joinBot, guild.tmp)}
-								</a>
+								{@render generateGuild(guild, guild.joinBot, guild.tmp)}
                             {/each}
                         </div>
                     {:else}
@@ -130,10 +126,12 @@
 {#snippet generatePublicGuild(guild: SuccessResponse)}
     <div class="guild">
         <div>
-            <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+			<a href="/account/guild/{guild.guildId}">
+				<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+			</a>
         </div>
         <div>
-            <p class="name">{guild.name}</p>
+            <p class="name"><a href="/account/guild/{guild.guildId}">{guild.name}</a></p>
             <div class="informations">
                 <p>ID: {guild.guildId}</p>
                 <p>ユーザー数: {guild.members ?? "測定不可"} (アクティブ: {guild.online ?? "測定不可"})</p>
@@ -149,10 +147,12 @@
 {#snippet generateGuild(guild: GuildsUser, joinBot?: boolean, tmp?: boolean)}
     <div class="guild">
         <div>
-            <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+			<a href="/account/guild/{guild.id}/new">
+				<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+			</a>
         </div>
         <div>
-            <p class="name">{guild.name}</p>
+            <p class="name"><a href="/account/guild/{guild.id}/new">{guild.name}</a></p>
             <div class="informations">
                 <p>ID: {guild.id}</p>
                 <p>ユーザー数: {guild.approximate_member_count} (アクティブ: {guild.approximate_presence_count})</p>
@@ -247,10 +247,8 @@
     .main-div {
         min-height: 90vh;
     }
-	a {
+	a, p {
 		text-decoration: none;
-	}
-    p {
         color: white;
     }
 </style>
