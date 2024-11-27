@@ -3,7 +3,7 @@ import type { Client, PresenceStatus } from "discord.js";
 export class Guild {
 	constructor(private readonly client: Client) {}
 
-	public memberCount(guildId: string, status?: PresenceStatus) {
+	public async memberCount(guildId: string, status?: PresenceStatus) {
 		const guild = this.client.guilds.cache.get(guildId);
 		if (!guild) {
 			return null;
