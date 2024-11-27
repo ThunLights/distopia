@@ -6,4 +6,6 @@ export const INTENTS = [
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates,
+	GatewayIntentBits.GuildPresences,
+	GatewayIntentBits.MessageContent,
 ];
