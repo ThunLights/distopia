@@ -3,9 +3,9 @@ export abstract class CacheClientBase<T> {
     public abstract caches: Record<string, T>;
     public abstract readonly deleteRate: number;
 
-    public abstract insert(userId: string, data: T): void
+    public abstract insert(userId: string, data: T): Promise<void>
 
-    public checkCache(id: string) {
+    public async checkCache(id: string) {
         if (Object.keys(this.caches).includes(id)) {
             return this.caches[id]
         }
