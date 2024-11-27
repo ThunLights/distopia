@@ -6,10 +6,11 @@ import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { discord } from "$lib/server/discord";
 import { database } from "$lib/server/Database";
+import { GuildsUserZod } from "$lib/server/discord";
+import { cache } from "$lib/server/Cache";
 
 import type { RequestHandler } from "@sveltejs/kit";
-
-import { GuildsUserZod } from "$lib/server/discord";
+import type { UserElement } from "$project/src/lib/server/Database/Database.user";
 
 export const _GuildUser = GuildsUserZod.extend({ joinBot: z.boolean(), tmp: z.boolean() })
 
@@ -20,6 +21,18 @@ export const _ResponseZod = z.object({
 
 export type Request = z.infer<typeof _RequestZod>;
 export type Response = z.infer<typeof _ResponseZod>;
+
+async function getGuilds(user: UserElement) {
+	const guildsCache = await cache.discord.guilds.checkCache(user.id);
+	if (guildsCache) {
+		return guildsCache;
+	}
+	const data = await discord.oauth.guild.guilds.fetch(user);
+	if (data) {
+		await cache.discord.guilds.insert(user.id, data);
+	}
+	return data;
+}
 
 export const POST = (async (e) => {
     const body = structChecker(e.request.body, _RequestZod);
@@ -34,7 +47,7 @@ export const POST = (async (e) => {
             content: user.content,
         } satisfies Response, { status: 400 });
     }
-    const guilds = await discord.oauth.guild.guilds.fetch(user.data);
+    const guilds = await getGuilds(user.data);
     const tmpGuilds = await database.guildTables.tmp.datas();
     if (!guilds) {
         return json({
