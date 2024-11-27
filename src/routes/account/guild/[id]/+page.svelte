@@ -54,7 +54,7 @@
 				</div>
 				<div class="page">
 					<div>
-						<p class="title">現在の設定</p>
+						<p class="title">現在の設定 <button>編集</button></p>
 					</div>
 					<div class="content">
 						<p>タグ</p>
@@ -76,10 +76,30 @@
 					</div>
 					<div class="content">
 						<p>NSFW</p>
-						<div class="content">
+						<div>
 							<p>{guild.nsfw ? "有効" : "無効"}</p>
 						</div>
 					</div>
+				</div>
+				<div class="moreinfo">
+					<div>
+						<p class="title">詳細情報</p>
+					</div>
+					<div class="content">
+						<p>オーナーID</p>
+						<div>
+							<p>{guild.userId}</p>
+						</div>
+					</div>
+					{#if guild.level}
+						<div class="content">
+							<p>レベル</p>
+							<div>
+								<p>{guild.level.level}レベル</p>
+								<p>{guild.level.point}ポイント</p>
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -103,7 +123,7 @@
 
 <style>
 	.tag {
-		padding: 1px 3px;
+		padding: 3px 5px;
 		border-radius: 25px;
 		background-color: rgb(59, 59, 59);
 		margin-right: 5px;
@@ -142,7 +162,7 @@
 		margin-top: 10px;
 	}
 	.contents>div {
-		margin: 10px 0 15px 0;
+		margin: 10px 0;
 		overflow: hidden;
 	}
 	.contents {

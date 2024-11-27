@@ -18,6 +18,11 @@ export type Response = {
 	description: string;
 	tags: string[];
 	nsfw: boolean;
+	level: {
+		guildId: string;
+		level: bigint;
+		point: bigint;
+	} | null;
 }
 
 export const POST = (async (e) => {
@@ -30,10 +35,11 @@ export const POST = (async (e) => {
 		return generateErrorJson("AUTHORIZATION_ERROR");
 	}
 	const guild = await database.guildTables.guild.id2Data(guildId);
+	const level = await database.guildTables.level.data(guildId);
 	const tags = await database.guildTables.tag.data(guildId);
 	const nsfw = await database.guildTables.nsfw.data(guildId);
 	if (guild instanceof DatabaseError || guild === null) {
 		return generateErrorJson("SERVER_NOT_FOUND");
 	}
-	return json({...guild, ...{ nsfw, tags, members: await discord.bot.control.guild.memberCount(guildId), online: await discord.bot.control.guild.memberCount(guildId, "online") }} satisfies Response, { status: 200 })
+	return json({...guild, ...{ nsfw, tags, level, members: await discord.bot.control.guild.memberCount(guildId), online: await discord.bot.control.guild.memberCount(guildId, "online") }} satisfies Response, { status: 200 })
 }) satisfies RequestHandler;
