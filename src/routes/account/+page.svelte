@@ -10,7 +10,7 @@
     import Footer from "$lib/footer.svelte";
 
     import type { GuildsUser } from "$lib/server/discord";
-    import type { Guild } from "$lib/server/Database/Guild/Guild";
+	import type { SuccessResponse } from "$routes/api/guilds/public/+server";
     import type { PageData } from "./$types";
 
     type Guilds = GuildsUser & { joinBot: boolean, tmp: boolean };
@@ -19,7 +19,7 @@
     const loginData = $state(data.auth);
     let loading = $state(true);
     let guilds = $state<Guilds[]>([]);
-    let publicGuilds = $state<Guild[]>([]);
+    let publicGuilds = $state<SuccessResponse[]>([]);
     let guildsCount = $derived(guilds.filter(guild => guild.owner && !publicGuilds.map(value => value.guildId).includes(guild.id)).length);
     let publicGuildsCount = $derived(publicGuilds.length);
     let title = $state("ログインしてください");
@@ -89,7 +89,7 @@
                 <div>
                     <p class="title">登録済みサーバー</p>
                     {#if publicGuilds.length}
-                        <div class="guild">
+                        <div class="guilds">
                             {#each publicGuilds as guild}
 								<a href="/account/guild/{guild.guildId}">
 									{@render generatePublicGuild(guild)}
@@ -127,7 +127,7 @@
 </main>
 <Footer/>
 
-{#snippet generatePublicGuild(guild: Guild)}
+{#snippet generatePublicGuild(guild: SuccessResponse)}
     <div class="guild">
         <div>
             <img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
@@ -136,6 +136,11 @@
             <p class="name">{guild.name}</p>
             <div class="informations">
                 <p>ID: {guild.guildId}</p>
+                <p>ユーザー数: {guild.members ?? "測定不可"} (アクティブ: {guild.online ?? "測定不可"})</p>
+				<div>
+					<p class="inline-block">ランキング: 未実装</p>
+					<p class="inline-block">イベント: 未実装</p>
+				</div>
             </div>
         </div>
     </div>
