@@ -17,7 +17,7 @@ function errorHandling<T>(error: T) {
 		} else {
 			errorLog(error.stack)
 		}
-	} else if (typeof error === "object") {
+	} else if (error && typeof error === "object") {
 		errorLog(JSON.stringify(error, null, "\t"));
 	} else {
 		errorLog(String(error))

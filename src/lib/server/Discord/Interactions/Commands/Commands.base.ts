@@ -1,4 +1,5 @@
 import { Client } from "discord.js";
+import { codeBlock } from "$lib/codeblock";
 
 import type { CacheType, ChatInputCommandInteraction, InteractionReplyOptions, MessagePayload } from "discord.js";
 
