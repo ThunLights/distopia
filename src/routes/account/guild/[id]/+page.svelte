@@ -64,7 +64,7 @@
 						<button>イベントブーストを設定</button>
 					</div>
 					<div>
-						<button>サーバーをDistopiaから消す</button>
+						<button onclick={() => {location.href=`/account/guild/${guildId}`}}>サーバーをDistopiaから消す</button>
 					</div>
 				</div>
 				<div class="page">
