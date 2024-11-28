@@ -1,7 +1,7 @@
 import { deDepulication } from "$lib/array";
 import { errorHandling, ServerError } from "$lib/server/error";
 
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class GuildTagTable {

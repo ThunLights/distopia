@@ -1,8 +1,8 @@
 import { database, DatabaseError } from "../Database/index";
 import { errorHandling } from "$lib/server/error";
-import { Client, Guild, GuildMember } from "discord.js";
+import { Client } from "discord.js";
 
-import type { PartialGuildMember } from "discord.js";
+import type { PartialGuildMember, GuildMember, Guild } from "discord.js";
 
 export class GuildClientError {
     constructor(public readonly content: string) {
