@@ -10,8 +10,47 @@ export type Review = {
 	content?: string
 }
 
+class DeleteReview {
+    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
+	}
+
+	public async target(guildId: string, userId: string) {
+		try {
+			await this.table.deleteMany({ where: { guildId, userId }});
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
+	public async guilds(guildId: string) {
+		try {
+			await this.table.deleteMany({ where: { guildId } });
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
+	public async users(userId: string) {
+		try {
+			await this.table.deleteMany({ where: { userId }});
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+}
+
 export class GuildReviewTable {
-    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {}
+	public readonly delete: DeleteReview;
+
+    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
+		this.delete = new DeleteReview(table);
+	}
 
 	async update(data: Review) {
 		try {

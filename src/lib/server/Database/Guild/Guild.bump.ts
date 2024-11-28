@@ -6,6 +6,16 @@ import type { DefaultArgs } from "@prisma/client/runtime/library";
 export class GuildBumpTable {
     constructor(private readonly table: Prisma.GuildBumpDelegate<DefaultArgs>) {}
 
+	public async delete(guildId: string) {
+		try {
+			await this.table.deleteMany({ where: { id: guildId } });
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
     async guilds(take: number): Promise<string[]> {
         try {
             const data = await this.table.findMany({
