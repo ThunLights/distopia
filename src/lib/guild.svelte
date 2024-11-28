@@ -58,7 +58,8 @@
 		if (response.ok) {
 			location.href = `/account/guild/${guildId}`;
 		} else {
-			result = "エラーが発生しました。"
+			const json = await response.json();
+			result = `エラーが発生しました: ${json.content}`
 			disabled = true;
 		}
 	}
