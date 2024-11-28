@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants.svelte";
 	import { tagFormatCheck } from "$lib/tag.svelte";
-	import { blank } from "./blank.svelte";
 
 	type KeyUpEvent = KeyboardEvent & {
 		currentTarget: EventTarget & HTMLInputElement;
