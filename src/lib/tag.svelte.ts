@@ -16,5 +16,5 @@ export function tagFormatCheck(content: string) {
 }
 
 export function tagCountCheck<T>(content: T[]) {
-	return !(content.length > TAG_COUNT_LIMIT);
+	return content.length <= TAG_COUNT_LIMIT;
 }
