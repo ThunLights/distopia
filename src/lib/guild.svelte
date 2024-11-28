@@ -117,4 +117,43 @@
 	</div>
 </main>
 
-<style></style>
+<style>
+	.guild .info div {
+		display: inline-block;
+	}
+    .guild .icon {
+        height: 90px;
+        border-radius: 50%;
+    }
+	.guild .name {
+		font-weight: 700;
+        font-size: 30px;
+	}
+	.guild .informations p {
+		font-size: 10px;
+	}
+	.guild {
+        overflow: hidden;
+        display: block;
+        background-color: rgb(37, 36, 41);
+        border-radius: 20px;
+        width: 90%;
+        margin: 20px auto;
+	}
+	.contents>div .title {
+		font-weight: 700;
+		font-size: 24px;
+		margin-top: 10px;
+	}
+	.contents>div {
+		margin: 10px 0;
+		overflow: hidden;
+	}
+	.contents {
+		margin: 10px 20px;
+		overflow: hidden;
+	}
+	p {
+		color: white;
+	}
+</style>
