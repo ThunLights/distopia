@@ -1,4 +1,5 @@
 import { Client } from "discord.js";
+import { codeBlock } from "$lib/codeblock";
 
 import { WebCommands } from "./Commands.web";
 import { AdminCommands } from "./Commands.admin";
