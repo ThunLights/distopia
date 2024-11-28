@@ -18,6 +18,16 @@ export type Guild = {
 export class GuildTable {
     constructor(private readonly table: Prisma.GuildDelegate<DefaultArgs>) {}
 
+	public async delete(guildId: string) {
+		try {
+			await this.table.deleteMany({ where: { guildId }});
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
     public async update(guild: Guild) {
         try {
 			const element = await this.table.findFirst({ where: { guildId: guild.guildId }});
