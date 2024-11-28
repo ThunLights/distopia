@@ -73,7 +73,7 @@
 				</div>
 				<div class="control">
 					<div class="section">
-						<p class="title">本当に削除しますか?</p>
+						<p class="title">本当に削除しますか? <small>サーバーレベルなどすべてリセットされます。</small></p>
 						<div>
 							<button onclick={guildDelete}>削除する</button>
 							<button onclick={goBack}>戻る</button>
