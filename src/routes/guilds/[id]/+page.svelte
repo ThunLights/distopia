@@ -4,31 +4,38 @@
     import Footer from "$lib/footer.svelte";
 
 	import { onMount } from "svelte";
+	import { token2data } from "$lib/auth.svelte";
 	import { getCategory } from "$lib/category.svelte";
-	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
+//	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
 
+	type Auth = {
+		token: string;
+		id: string;
+		username: string;
+		email: string | null;
+		avatar: string | null;
+	}
+
     const { data }: { data: PageData } = $props();
-	const { guildId } = data;
-    const loginData = $state(data.auth);
-	let guild = $state<Response | null>(null);
-	let reviews = $state([]);
+	const { guildId, content } = data;
+	const guild = $state<Response | null>(content);
+	const title = $state(content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`);
+	const reviews = $state([]);
+
+    let loginData = $state<Auth | null>(data.auth);
 
 	onMount(async () => {
-		if (!loginData) {
-			return location.href = "/";
-		}
-		const response = await getPublicGuild(loginData.token, guildId);
-		if (response instanceof GuildsApiError) {
-			return location.href = "/";
-		}
-		guild = response;
+		loginData = await token2data();
 	})
 </script>
 
-<Meta/>
+<Meta
+	title={title}
+	description={guild ? guild.description.replaceAll("\n", "") : undefined}
+/>
 
 <Header userData={loginData}/>
 <main>
