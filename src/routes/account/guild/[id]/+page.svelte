@@ -65,9 +65,10 @@
 					</div>
 					<div>
 						<button>サーバー上位表示</button>
+						<button>イベントブーストを設定</button>
 					</div>
 					<div>
-						<button>イベントブーストを設定</button>
+						<button onclick={redirectBtn(`/guilds/${guildId}`)}>サーバーページを見る</button>
 					</div>
 					<div>
 						<button onclick={redirectBtn(`/account/guild/${guildId}`)}>サーバーをDistopiaから消す</button>

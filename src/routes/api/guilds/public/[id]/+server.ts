@@ -23,6 +23,9 @@ export type Response = {
 		level: bigint;
 		point: bigint;
 	} | null;
+	online: number | null
+	members: number | null
+	boost: number | null
 }
 
 export const POST = (async (e) => {
@@ -41,5 +44,12 @@ export const POST = (async (e) => {
 	if (guild instanceof DatabaseError || guild === null) {
 		return generateErrorJson("SERVER_NOT_FOUND");
 	}
-	return json({...guild, ...{ nsfw, tags, level, members: await discord.bot.control.guild.memberCount(guildId), online: await discord.bot.control.guild.memberCount(guildId, "online") }} satisfies Response, { status: 200 })
+	return json({...guild, ...{
+		nsfw,
+		tags,
+		level,
+		members: await discord.bot.control.guild.memberCount(guildId),
+		online: await discord.bot.control.guild.memberCount(guildId, "online"),
+		boost: await discord.bot.control.guild.boost(guildId),
+	}} satisfies Response, { status: 200 })
 }) satisfies RequestHandler;

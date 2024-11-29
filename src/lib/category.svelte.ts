@@ -46,3 +46,12 @@ export const CATEGORIES = [
 export function foundCategory(content: string): boolean {
 	return CATEGORIES.map(value => value.id).includes(content);
 }
+
+export function getCategory(content: string): string | null {
+	for (const category of CATEGORIES) {
+		if (category.id === content) {
+			return category.name;
+		}
+	}
+	return null;
+}
