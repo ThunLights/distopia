@@ -1,9 +1,9 @@
-import { ChatInputCommandInteraction, Client, EmbedBuilder, MessagePayload } from "discord.js";
+import { Client, EmbedBuilder } from "discord.js";
 
 import { database } from "$lib/server/Database";
 import { CommandsBase, CommandsError } from "./Commands.base";
 
-import type { CacheType, InteractionReplyOptions } from "discord.js";
+import type { CacheType, InteractionReplyOptions, ChatInputCommandInteraction, MessagePayload } from "discord.js";
 
 export class StaffCommands extends CommandsBase {
     public readonly commandName = "staff";

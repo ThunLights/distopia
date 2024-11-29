@@ -1,7 +1,7 @@
-import { ChatInputCommandInteraction, Client } from "discord.js";
+import { Client } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 
-import type { CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";
+import type { CacheType, InteractionReplyOptions, MessagePayload, ChatInputCommandInteraction } from "discord.js";
 
 export class AdminCommands extends CommandsBase {
     public readonly commandName = "admin";
