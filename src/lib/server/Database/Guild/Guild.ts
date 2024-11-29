@@ -9,7 +9,6 @@ export type Guild = {
     icon: string | null
     banner: string | null
     guildId: string
-    userId: string
     invite: string
     category: string
     description: string
@@ -45,20 +44,6 @@ export class GuildTable {
         } catch (error) {
             errorHandling(error);
             return false;
-        }
-    }
-
-    public async userGuilds(user: UserElement) {
-        try {
-            const data = await this.table.findMany({
-                where: {
-                    userId: user.id,
-                },
-            });
-            return data;
-        } catch (error) {
-            errorHandling(error);
-            return new DatabaseError("ERROR")
         }
     }
 

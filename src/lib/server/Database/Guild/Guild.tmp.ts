@@ -5,7 +5,6 @@ import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export type GuildElement = {
     guildId: string
-    userId: string
     name: string
     invite: string
     icon?: string
@@ -15,11 +14,8 @@ export type GuildElement = {
 export class GuildInviteTempTable {
     constructor(private readonly table: Prisma.GuildTmpDelegate<DefaultArgs>) {}
 
-    public async datas(userId?: string) {
+    public async datas() {
         try {
-            if (userId) {
-                return await this.table.findMany({ where: { userId } });
-            }
             return await this.table.findMany();
         } catch (error) {
             errorHandling(error);

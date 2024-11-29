@@ -7,7 +7,6 @@
 
 	export type Guild = {
 		guildId: string
-		userId: string
 		name: string
 		invite: string
 		icon: string | null

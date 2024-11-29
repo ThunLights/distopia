@@ -8,6 +8,7 @@ import { foundCategory } from "$lib/category.svelte";
 import { descriptionFormatCheck } from "$lib/description.svelte";
 import { tagCountCheck, tagFormatCheck } from "$lib/tag.svelte";
 import { generateErrorJson } from "$lib/server/json";
+import { discord } from "$lib/server/discord";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -49,10 +50,11 @@ export const POST = (async (e) => {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 	const guildTmp = await database.guildTables.tmp.data(body.guildId);
+	const ownerId = await discord.bot.control.guild.owner(body.guildId);
 	if (!guildTmp) {
 		return generateErrorJson("TMP_NOT_FOUND");
 	}
-	if (guildTmp.userId !== auth.data.id) {
+	if (ownerId !== auth.data.id) {
 		return generateErrorJson("THIS_GUILD_IS_NOT_YOURS");
 	}
 	const checkedBody = await invalidElementCheck(body);

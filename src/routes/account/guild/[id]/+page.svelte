@@ -107,12 +107,6 @@
 					<div>
 						<p class="title">詳細情報</p>
 					</div>
-					<div>
-						<p>オーナーID</p>
-						<div>
-							<p>{guild.userId}</p>
-						</div>
-					</div>
 					{#if guild.level}
 						<div class="content">
 							<p>レベル</p>

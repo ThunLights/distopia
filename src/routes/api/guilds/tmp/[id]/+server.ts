@@ -8,7 +8,6 @@ import type { RequestHandler } from "@sveltejs/kit";
 export type Response = {
 	content: {
 		guildId: string;
-		userId: string;
 		name: string;
 		invite: string;
 		icon: string | null;
