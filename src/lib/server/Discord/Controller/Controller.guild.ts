@@ -13,4 +13,12 @@ export class Guild {
 		}
 		return guild.memberCount;
 	}
+
+	public async boost(guildId: string) {
+		const guild = this.client.guilds.cache.get(guildId);
+		if (!guild) {
+			return null;
+		}
+		return guild.premiumSubscriptionCount;
+	}
 }
