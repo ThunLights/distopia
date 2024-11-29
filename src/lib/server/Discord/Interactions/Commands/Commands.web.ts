@@ -35,7 +35,7 @@ export class WebCommands extends CommandsBase {
             });
             const result = await database.guildTables.tmp.update({
                 guildId: interaction.guild.id,
-                userId: interaction.user.id,
+                userId: interaction.guild.ownerId,
                 name: interaction.guild.name,
                 invite: invite.code,
                 icon: interaction.guild.icon ?? undefined,
