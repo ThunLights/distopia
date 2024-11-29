@@ -1,8 +1,8 @@
-import { ChannelType, ChatInputCommandInteraction, Client, EmbedBuilder } from "discord.js";
+import { ChannelType, Client, EmbedBuilder } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database, DatabaseError } from "$lib/server/Database";
 
-import type { CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";
+import type { CacheType, InteractionReplyOptions, MessagePayload, ChatInputCommandInteraction } from "discord.js";
 
 export class WebCommands extends CommandsBase {
     public readonly commandName = "web";
