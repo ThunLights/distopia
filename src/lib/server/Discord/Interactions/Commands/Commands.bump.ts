@@ -7,6 +7,7 @@ import type { CacheType, InteractionReplyOptions, ChatInputCommandInteraction, M
 
 export class BumpCommands extends CommandsBase {
     public readonly commandName = "bump";
+	public lateLimit: string[] = [];
 
     constructor(client: Client) {
         super(client);
@@ -24,6 +25,18 @@ export class BumpCommands extends CommandsBase {
         if (!result) {
             return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
         }
+		if (this.lateLimit.includes(guild.guildId)) {
+			const embed = new EmbedBuilder()
+				.setColor("Red")
+				.setTitle("Distopia: Discordサーバー掲示板")
+				.setURL(`https://distopia.top/`)
+				.setDescription(`レートリミットです。時間を置いて再度実行してください`);
+			return { embeds: [ embed ] } satisfies InteractionReplyOptions;
+		}
+		this.lateLimit.push(guild.guildId);
+		setTimeout(() => {
+			this.lateLimit = this.lateLimit.filter(value => value !== guild.guildId);
+		}, 2 * 60 * 60 * 1000)
         const embed = new EmbedBuilder()
             .setColor("Gold")
             .setTitle("Distopia: Discordサーバー掲示板")
