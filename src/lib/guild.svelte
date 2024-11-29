@@ -108,7 +108,7 @@
 					<p class="title"><input type="checkbox" bind:checked={agreement}><small class="indispensable">*</small>本サービス規約に同意する。</p>
 				</div>
 				<div class="section">
-					<button style={disabled ? "" : "cursor: pointer;"} onclick={register} disabled={disabled}>サーバーを公開</button>
+					<button class={disabled ? "" : "button"} style={disabled ? "" : "cursor: pointer;"} onclick={register} disabled={disabled}>サーバーを公開</button>
 				</div>
 				<div class="section">
 					<p style="color: red;">{result}</p>
@@ -119,6 +119,25 @@
 </main>
 
 <style>
+	textarea {
+		resize: none;
+		width: 95%;
+		height: 45vh;
+	}
+    button {
+		width: 100%;
+        border-radius: 25px;
+        color: white;
+        background-color: rgb(49, 49, 49);
+        opacity: 0.8;
+		font-size: 14px;
+        padding: 4px 8px;
+        border: 1px solid rgb(85, 85, 85);
+    }
+    .button:active {
+        border: 1px solid rgb(49, 49, 49);
+        background-color: rgb(85, 85, 85);
+    }
 	.guild .info div {
 		display: inline-block;
 	}
