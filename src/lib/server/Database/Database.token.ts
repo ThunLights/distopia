@@ -17,6 +17,16 @@ export class Token {
         return token;
     }
 
+	public async delete(userId: string) {
+		try {
+			await this.table.deleteMany({ where: { id: userId } });
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false
+		}
+	}
+
     public async add(id: string): Promise<string> {
         const token = await this.generateToken();
         await this.table.create({
