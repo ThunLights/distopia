@@ -6,6 +6,7 @@ import { ServerError } from "$lib/server/error";
 import { generateErrorJson } from "$lib/server/json";
 import { structChecker } from "$lib/struct";
 import { database, DatabaseError } from "$lib/server/Database";
+import { discord } from "$lib/server/discord";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -25,10 +26,11 @@ export const DELETE = (async (e) => {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 	const guild = await database.guildTables.guild.id2Data(body.guildId);
+	const ownerId = await discord.bot.control.guild.owner(body.guildId);
 	if (guild === null || guild instanceof DatabaseError) {
 		return generateErrorJson("SERVER_NOT_FOUND");
 	}
-	if (guild.userId !== auth.data.id) {
+	if (ownerId !== auth.data.id) {
 		return generateErrorJson("SERVER_OWNER_ERROR");
 	}
 	const { guildId } = guild;

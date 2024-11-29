@@ -32,7 +32,6 @@ model Avatar {
 
 model Guild {
     guildId     String @id
-    userId      String
 
     name        String
     invite      String
@@ -61,7 +60,6 @@ model GuildTag {
 
 model GuildTmp {
     guildId     String @id
-    userId      String
 
     name        String
     invite      String

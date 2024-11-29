@@ -1,5 +1,4 @@
 import { database, DatabaseError } from "../Database/index";
-import { errorHandling } from "$lib/server/error";
 import { Client } from "discord.js";
 
 import type { PartialGuildMember, GuildMember, Guild } from "discord.js";
@@ -15,15 +14,6 @@ export class GuildClient {
 
     public get guilds() {
         return this.client.guilds.cache;
-    }
-
-    public fetchGuild(guildId: string): boolean {
-        try {
-            return this.client.guilds.cache.map(value => value.id).includes(guildId);
-        } catch (error) {
-            errorHandling(error);
-            return false;
-        }
     }
 
     public async guildUpdate(oldGuild: Guild, newGuild: Guild): Promise<void> {

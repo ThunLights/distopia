@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
-    import { getGuilds, getPublicGuilds } from "$lib/guilds.svelte";
+    import { getAccountGuilds } from "$lib/guilds.svelte";
     import { logout } from "$lib/token.svelte";
     import { redirectUrl } from "$lib/redirect.svelte";
 
@@ -9,32 +9,26 @@
     import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { GuildsUser } from "$lib/server/discord";
-	import type { SuccessResponse } from "$routes/api/guilds/public/+server";
+	import type { Response } from "$routes/api/auth/owner/+server";
     import type { PageData } from "./$types";
-
-    type Guilds = GuildsUser & { joinBot: boolean, tmp: boolean };
 
     const { data }: { data: PageData } = $props();
     const loginData = $state(data.auth);
     let loading = $state(true);
-    let guilds = $state<Guilds[]>([]);
-    let publicGuilds = $state<SuccessResponse[]>([]);
-    let guildsCount = $derived(guilds.filter(guild => guild.owner && !publicGuilds.map(value => value.guildId).includes(guild.id)).length);
-    let publicGuildsCount = $derived(publicGuilds.length);
-    let title = $state("ログインしてください");
+    let guilds = $state<Response>([]);
+
+    let guildsCount = $derived(guilds.filter(guild => !guild.guild).length);
+    let publicGuildsCount = $derived(guilds.filter(guild => guild.guild).length);
+
+	let title = $state("ログインしてください");
 
     onMount(async () => {
         if (!loginData) {
             return location.href = "/";
         }
-        const servers = await getGuilds(loginData.token);
-        const publicServers = await getPublicGuilds(loginData.token);
+        const servers = await getAccountGuilds(loginData.token);
         if (Array.isArray(servers)) {
-            guilds = servers;
-        }
-        if (Array.isArray(publicServers)) {
-            publicGuilds = publicServers;
+        	guilds = servers;
         }
         loading = false;
         title = `「${loginData.username}」の詳細情報`
@@ -88,9 +82,9 @@
             <div class="contents">
                 <div>
                     <p class="title">登録済みサーバー</p>
-                    {#if publicGuilds.length}
+                    {#if publicGuildsCount}
                         <div class="guilds">
-                            {#each publicGuilds as guild}
+                            {#each guilds.filter(value => value.guild) as guild}
 								{@render generatePublicGuild(guild)}
                             {/each}
                         </div>
@@ -102,9 +96,9 @@
             <div class="contents">
                 <div>
                     <p class="title">登録可能サーバー <small>*更新には数分かかる可能性がございます。</small></p>
-                    {#if guilds.length}
+                    {#if guildsCount}
                         <div class="guilds">
-                            {#each guilds.filter(value => value.owner && !publicGuilds.map(value => value.guildId).includes(value.id)) as guild}
+                            {#each guilds.filter(value => !value.guild) as guild}
 								{@render generateGuild(guild, guild.joinBot, guild.tmp)}
                             {/each}
                         </div>
@@ -123,28 +117,30 @@
 </main>
 <Footer/>
 
-{#snippet generatePublicGuild(guild: SuccessResponse)}
-    <div class="guild">
-        <div>
-			<a href="/account/guild/{guild.guildId}">
-				<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
-			</a>
-        </div>
-        <div>
-            <p class="name"><a href="/account/guild/{guild.guildId}">{guild.name}</a></p>
-            <div class="informations">
-                <p>ID: {guild.guildId}</p>
-                <p>ユーザー数: {guild.members ?? "測定不可"} (アクティブ: {guild.online ?? "測定不可"})</p>
-				<div>
-					<p class="inline-block">ランキング: 未実装</p>
-					<p class="inline-block">イベント: 未実装</p>
+{#snippet generatePublicGuild(data: Response[number])}
+	{#if data.guild}
+		<div class="guild">
+			<div>
+				<a href="/account/guild/{data.guild.guildId}">
+					<img class="icon" src="{data.guild.icon ? `https://cdn.discordapp.com/icons/${data.guild.guildId}/${data.guild.icon}.webp` : "/discord.webp"}" alt="">
+				</a>
+			</div>
+			<div>
+				<p class="name"><a href="/account/guild/{data.guild.guildId}">{data.guild.name}</a></p>
+				<div class="informations">
+					<p>ID: {data.guild.guildId}</p>
+					<p>ユーザー数: {data.approximate_member_count ?? "測定不可"} (アクティブ: {data.approximate_presence_count ?? "測定不可"})</p>
+					<div>
+						<p class="inline-block">ランキング: 未実装</p>
+						<p class="inline-block">イベント: 未実装</p>
+					</div>
 				</div>
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	{/if}
 {/snippet}
 
-{#snippet generateGuild(guild: GuildsUser, joinBot?: boolean, tmp?: boolean)}
+{#snippet generateGuild(guild: Response[number], joinBot?: boolean, tmp?: boolean)}
     <div class="guild">
         <div>
 			<a href="/account/guild/{guild.id}/new">

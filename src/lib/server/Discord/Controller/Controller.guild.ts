@@ -1,3 +1,5 @@
+import { errorHandling } from "$lib/server/error";
+
 import type { Client, PresenceStatus } from "discord.js";
 
 export class Guild {
@@ -28,5 +30,22 @@ export class Guild {
 			return null;
 		}
 		return Array.from(guild.scheduledEvents.cache.values());
+	}
+
+	public async owner(guildId: string) {
+		const guild = this.client.guilds.cache.get(guildId);
+		if (!guild) {
+			return null;
+		}
+		return guild.ownerId;
+	}
+
+	public async isJoined(guildId: string): Promise<boolean> {
+        try {
+            return this.client.guilds.cache.map(value => value.id).includes(guildId);
+        } catch (error) {
+            errorHandling(error);
+            return false;
+        }
 	}
 }
