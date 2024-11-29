@@ -32,6 +32,12 @@
 		}
 		guild = response;
 	})
+
+	function redirectBtn(url: string) {
+		return () => {
+			location.href = url;
+		}
+	}
 </script>
 
 <Meta title={title}/>
@@ -64,12 +70,12 @@
 						<button>イベントブーストを設定</button>
 					</div>
 					<div>
-						<button onclick={() => {location.href=`/account/guild/${guildId}`}}>サーバーをDistopiaから消す</button>
+						<button onclick={redirectBtn(`/account/guild/${guildId}`)}>サーバーをDistopiaから消す</button>
 					</div>
 				</div>
 				<div class="page">
 					<div>
-						<p class="title">現在の設定 <button>編集</button></p>
+						<p class="title">現在の設定 <button onclick={redirectBtn(`/account/guild/${guildId}/edit`)}>編集</button></p>
 					</div>
 					<div class="content">
 						<p>タグ</p>
@@ -154,6 +160,20 @@
 {/snippet}
 
 <style>
+    button {
+        cursor: pointer;
+        border-radius: 25px;
+        color: white;
+        background-color: rgb(49, 49, 49);
+        opacity: 0.8;
+		font-size: 14px;
+        padding: 4px 8px;
+        border: 1px solid rgb(85, 85, 85);
+    }
+    button:active {
+        border: 1px solid rgb(49, 49, 49);
+        background-color: rgb(85, 85, 85);
+    }
 	.control>div {
 		margin-top: 5px;
 	}
