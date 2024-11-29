@@ -21,4 +21,12 @@ export class Guild {
 		}
 		return guild.premiumSubscriptionCount;
 	}
+
+	public async events(guildId: string) {
+		const guild = this.client.guilds.cache.get(guildId);
+		if (!guild) {
+			return null;
+		}
+		return Array.from(guild.scheduledEvents.cache.values());
+	}
 }
