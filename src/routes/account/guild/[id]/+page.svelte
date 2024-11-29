@@ -71,7 +71,7 @@
 						<button onclick={redirectBtn(`/guilds/${guildId}`)}>サーバーページを見る</button>
 					</div>
 					<div>
-						<button onclick={redirectBtn(`/account/guild/${guildId}`)}>サーバーをDistopiaから消す</button>
+						<button onclick={redirectBtn(`/account/guild/${guildId}/delete`)}>サーバーをDistopiaから消す</button>
 					</div>
 				</div>
 				<div class="page">
