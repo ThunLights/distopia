@@ -4,6 +4,7 @@ import { INTENTS } from "./Discord.intents";
 import { InteractionClient } from "./Discord.interaction";
 import { GuildClient } from "./Discord.guilds";
 import { MessageClient } from "./Discord.message";
+import { VoiceClient } from "./Discord.voice";
 import { Controller } from "./Controller/index";
 
 import cfg from "$project/important/discord.json";
@@ -17,8 +18,13 @@ export class DiscordBotClient {
     private readonly rest = new REST({ version: "10" }).setToken(this.token);
     private readonly interactionClient = new InteractionClient(this.client);
     private readonly messageClient = new MessageClient(this.client);
+	private readonly voiceClient = new VoiceClient(this.client);
 
-    constructor() {}
+    constructor() {
+		setInterval(async () => {
+			await this.voiceClient.levelUpdate();
+		}, 20 * 60 * 1000);
+	}
 
     public async setEvents() {
         this.client.on("ready", async (client) => {
