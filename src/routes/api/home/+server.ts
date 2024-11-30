@@ -1,11 +1,12 @@
-import { database, DatabaseError } from "$lib/server/Database";
+import { database } from "$lib/server/Database";
 import { structChecker } from "$lib/struct";
 import { generateErrorJson } from "$lib/server/json";
+import { id2Guild } from "$lib/server/guild";
 import { json } from "@sveltejs/kit";
 import { z } from "zod";
 
 import type { RequestHandler } from "@sveltejs/kit";
-import type { Guild } from "$lib/server/Database/Guild/Guild";
+import type { Guild } from "$lib/server/guild";
 
 export const _RequestZod = z.object({
 	take: z.number().min(1).max(50),
@@ -25,8 +26,8 @@ export const POST = (async (e) => {
 	const guilds: Guild[] = [];
 	const bumpGuilds = await database.guildTables.bump.guilds(body.take);
 	for (const bumpGuild of bumpGuilds) {
-		const guild = await database.guildTables.guild.id2Data(bumpGuild);
-		if (guild === null || guild instanceof DatabaseError) {
+		const guild = await id2Guild(bumpGuild);
+		if (typeof guild === "string") {
 			continue;
 		}
 		guilds.push(guild);

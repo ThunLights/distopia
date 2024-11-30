@@ -6,6 +6,7 @@
 	import { onMount } from "svelte";
 	import { token2data } from "$lib/auth.svelte";
 	import { getCategory } from "$lib/category.svelte";
+	import { redirectUrl } from "$lib/redirect.svelte";
 //	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
 
     import type { PageData } from "./$types";
@@ -95,7 +96,7 @@
 					</div>
 				</div>
 				<div>
-					<button class="join-button">「{guild.name}」に参加</button>
+					<button onclick={redirectUrl(`https://discord.gg/${guild.invite}`)} class="join-button">「{guild.name}」に参加</button>
 				</div>
 			</div>
 		</div>

@@ -18,7 +18,11 @@ function errorHandling<T>(error: T) {
 			errorLog(error.stack)
 		}
 	} else if (error && typeof error === "object") {
-		errorLog(JSON.stringify(error, null, "\t"));
+		try {
+			errorLog(JSON.stringify(error, null, "\t"));
+		} catch {
+			console.log(error);
+		}
 	} else {
 		errorLog(String(error))
 	}
