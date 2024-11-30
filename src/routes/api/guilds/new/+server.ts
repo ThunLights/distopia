@@ -65,7 +65,7 @@ export const POST = (async (e) => {
 		...guildTmp,
 		...{
 			category: body.category,
-			description: body.description,
+			description: body.description.trim(),
 		}
 	});
 	if (!result) {
@@ -97,7 +97,7 @@ export const PATCH = (async (e) => {
 	if (guild instanceof DatabaseError || guild === null) {
 		return generateErrorJson("GUILD_NOT_FOUND");
 	}
-	const result = await database.guildTables.guild.update({...guild, ...{ category: body.category, description: body.description}});
+	const result = await database.guildTables.guild.update({...guild, ...{ category: body.category, description: body.description.trim() }});
 	if (!result) {
 		return generateErrorJson("DATABASE_ERROR");
 	}
