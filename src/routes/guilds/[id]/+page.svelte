@@ -35,7 +35,7 @@
 
 <Meta
 	title={title}
-	description={guild ? guild.description.replaceAll("\n", "") : undefined}
+	description={guild ? guild.description.replaceAll("\n", "").replaceAll(/\s+/g, "") : undefined}
 />
 
 <Header userData={loginData}/>
