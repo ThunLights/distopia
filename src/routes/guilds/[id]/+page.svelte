@@ -84,7 +84,7 @@
 					<p class="name">詳細</p>
 					<div>
 						<div>
-							<p>レベル: 未実装</p>
+							<p>{guild.level ? `Lv.${guild.level.level} ${guild.level.point}pt` : "Lv.0"}</p>
 							<p>アクティブレート: 未実装</p>
 						</div>
 					</div>
