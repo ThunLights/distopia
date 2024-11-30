@@ -17,6 +17,9 @@
         padding: 3px 5px;
         color: #9ca3af;
     }
+	a {
+		color: rgb(109, 75, 182);
+	}
     .fixed {
         width: 100%;
         position: fixed;
