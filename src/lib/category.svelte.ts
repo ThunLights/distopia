@@ -6,6 +6,10 @@ export type Category = {
 
 export const CATEGORIES = [
 	{
+		id: "general",
+		name: "雑談",
+	},
+	{
 		id: "game",
 		name: "ゲーム",
 	},
@@ -36,6 +40,10 @@ export const CATEGORIES = [
 	{
 		id: "movie",
 		name: "映画",
+	},
+	{
+		id: "nsfw",
+		name: "NSFW",
 	},
 	{
 		id: "other",
