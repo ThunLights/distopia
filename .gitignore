@@ -27,3 +27,5 @@ db/database.sqlite3
 log/**.log
 
 migrations/**
+
+test.ts
