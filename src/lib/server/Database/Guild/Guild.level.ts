@@ -65,4 +65,18 @@ export class GuildLevelTable {
 			return null;
 		}
 	}
+
+	public async ranking(take?: number) {
+		try {
+			return await this.table.findMany({
+				orderBy: {
+					level: "desc",
+				},
+				take: take ?? 50,
+			})
+		} catch (error) {
+			errorHandling(error);
+			return []
+		}
+	}
 }
