@@ -23,8 +23,8 @@
     const { data }: { data: PageData } = $props();
 	const { guildId, content } = data;
 	const guild = $state<Response | null>(content);
-	const title = $state(content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`);
 	const reviews = $state([]);
+	const title = $derived(content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`);
 
     let loginData = $state<Auth | null>(data.auth);
 
