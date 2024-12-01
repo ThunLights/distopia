@@ -9,12 +9,10 @@ export const load = (async (e) => {
 		return {
 			guildId,
 			content: null,
-			auth: null,
 		}
 	}
     return {
         guildId,
 		content: guild,
-		auth: null,
     }
 }) satisfies PageServerLoad;
