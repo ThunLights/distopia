@@ -62,7 +62,7 @@
 										<div class="tags">
 											{#each guild.tags as tag}
 												<div class="tag">
-													<p>{tag}</p>
+													<p class="content">{tag}</p>
 												</div>
 											{/each}
 										</div>
@@ -90,9 +90,26 @@
 		</div>
 	</div>
 </main>
-<Footer fixed={true}></Footer>
+<Footer></Footer>
 
 <style>
+	.tags {
+		margin: 7px auto;
+		width: 100%;
+	}
+	.tag {
+		border-radius: 25px;
+		background-color: rgb(66, 66, 66);
+		display: inline-block;
+		margin-right: 10px;
+	}
+	.tag p {
+		display: inline-block;
+		color: white;
+	}
+	.tag .content {
+		margin: 3px 5px;
+	}
 	.guild-info .icon {
 		border-radius: 50%;
 		height: 60px;
@@ -118,7 +135,7 @@
 	}
 	.guilds {
 		display: grid;
-		grid-template-columns: 30% 30% 30%;
+		grid-template-columns: 32% 32% 32%;
 		grid-template-rows: auto auto auto auto auto auto auto auto auto auto auto;
 	}
 	.guild-context>div {
