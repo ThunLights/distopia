@@ -4,6 +4,7 @@
 	import { home } from "$lib/api.svelte";
 	import { getCategory } from "$lib/category.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
+	import { guildJoin } from "$lib/join.svelte";
 
     import Meta from "$lib/meta.svelte";
     import Header from "$lib/header.svelte";
@@ -25,6 +26,17 @@
         bgUrl = getMeridiem(navigator.language) === "AM" ? "/am.webp" : "/pm.webp";
 		servers = await home() ?? initServersData;
     })
+
+	function joinBtn(guildId: string, invite: string, name: string) {
+		if (loginData) {
+			const { token } = loginData;
+			return async () => {
+				await guildJoin(token, guildId, name);
+			}
+		} else {
+			return redirectUrl(`https://discord.gg/${invite}`);
+		}
+	}
 </script>
 
 <Meta></Meta>
@@ -75,9 +87,7 @@
 								<button onclick={redirectUrl(`/guilds/${guild.guildId}`)}>
 									<a href="/guilds/{guild.guildId}" class="button-a-tag">詳細を閲覧</a>
 								</button>
-								<button onclick={redirectUrl(`https://discord.gg/${guild.invite}`)}>
-									<a href="https://discord.gg/{guild.invite}" class="button-a-tag">サーバーに参加</a>
-								</button>
+								<button onclick={joinBtn(guild.guildId, guild.invite, guild.name)}>サーバーに参加</button>
 							</div>
 						</div>
 					</div>

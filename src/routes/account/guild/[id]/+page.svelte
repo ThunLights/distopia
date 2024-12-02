@@ -6,6 +6,7 @@
     import { onMount } from "svelte";
 	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
 	import { CATEGORIES } from "$lib/category.svelte";
+	import { redirectUrl } from "$lib/redirect.svelte";
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
@@ -32,12 +33,6 @@
 		}
 		guild = response;
 	})
-
-	function redirectBtn(url: string) {
-		return () => {
-			location.href = url;
-		}
-	}
 </script>
 
 <Meta title={title}/>
@@ -68,15 +63,15 @@
 						<button>イベントブーストを設定</button>
 					</div>
 					<div>
-						<button onclick={redirectBtn(`/guilds/${guildId}`)}>サーバーページを見る</button>
+						<button onclick={redirectUrl(`/guilds/${guildId}`)}>サーバーページを見る</button>
 					</div>
 					<div>
-						<button onclick={redirectBtn(`/account/guild/${guildId}/delete`)}>サーバーをDistopiaから消す</button>
+						<button onclick={redirectUrl(`/account/guild/${guildId}/delete`)}>サーバーをDistopiaから消す</button>
 					</div>
 				</div>
 				<div class="page">
 					<div>
-						<p class="title">現在の設定 <button onclick={redirectBtn(`/account/guild/${guildId}/edit`)}>編集</button></p>
+						<p class="title">現在の設定 <button onclick={redirectUrl(`/account/guild/${guildId}/edit`)}>編集</button></p>
 					</div>
 					<div class="content">
 						<p>タグ</p>
