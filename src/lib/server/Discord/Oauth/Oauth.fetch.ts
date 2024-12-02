@@ -15,12 +15,14 @@ export type ResetAccessToken = {
     scope: string
 }
 
+export type Options = {}
+
 export class FetchError {
     constructor(public readonly content: string) {}
 }
 
 export class OauthFetch {
-    private readonly config = config;
+    public readonly config = config;
 
     private async resetAccessToken(refreshToken: string): Promise<ResetAccessToken | FetchError> {
         try {
@@ -50,8 +52,8 @@ export class OauthFetch {
         }
     }
 
-    public async useAccessToken<T>(url: string, options: RequestInit, user: UserElement): Promise<T | FetchError> {
-        try {
+	private async fetchCore(url: string, options: RequestInit, user: UserElement): Promise<Response | FetchError> {
+		try {
             const response = await fetch(url, options);
             if (response.status === 401) {
                 const newAccessToken = await this.resetAccessToken(user.refreshToken);
@@ -68,15 +70,42 @@ export class OauthFetch {
 					await database.token.delete(user.id);
                     return new FetchError("DATABASE_ERROR");
                 }
-				return await this.useAccessToken<T>(url, options, await database.user.data(user.id) ?? user);
+				return await this.fetchCore(url, options, await database.user.data(user.id) ?? user);
             }
             if (response.status === 429) {
                 await sleep(1000);
                 return await this.useAccessToken(url, options, user);
             }
-            if (response.ok) {
-                return await response.json();
-            }
+            return response;
+        } catch (error) {
+            errorHandling(error);
+            return new FetchError("ERROR");
+		}
+	}
+
+	public async useAccessTokenUltra(url: string, options: RequestInit, user: UserElement): Promise<Response | FetchError> {
+		try {
+            const response = await this.fetchCore(url, options, user);
+			if (response instanceof FetchError) {
+				return response;
+			}
+            return response;
+        } catch (error) {
+            errorHandling(error);
+            return new FetchError("ERROR");
+		}
+	}
+
+    public async useAccessToken<T>(url: string, options: RequestInit, user: UserElement): Promise<T | FetchError> {
+        try {
+            const response = await this.fetchCore(url, options, user);
+			if (response instanceof FetchError) {
+				return response;
+			}
+			if (response.ok) {
+				const json: T = await response.json();
+				return json;
+			}
 
             return new FetchError("ERROR");
         } catch (error) {
