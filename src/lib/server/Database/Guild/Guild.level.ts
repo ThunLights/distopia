@@ -12,7 +12,7 @@ export class GuildLevelTable {
     constructor(private readonly table: Prisma.GuildLevelDelegate<DefaultArgs>) {}
 
 	private async levelUpCheck(level: bigint, point: bigint, plus: bigint): Promise<LevelObj> {
-		const nextLvPt = level * 10n;
+		const nextLvPt = level ** 2n;
 		const ptSum = point + plus;
 
 		if (nextLvPt <= ptSum) {
