@@ -7,7 +7,8 @@
 	import { token2data } from "$lib/auth.svelte";
 	import { getCategory } from "$lib/category.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
-//	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
+	import { toast } from "@zerodevx/svelte-toast";
+	import { guildJoin } from "$lib/join.svelte";
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
@@ -31,6 +32,26 @@
 	onMount(async () => {
 		loginData = await token2data();
 	})
+
+	function joinBtn() {
+		if (!guild) {
+			toast.push(`ERROR: GUILD_DATA_NOT_FOUND`, {
+				theme: {
+					"--toastBackground": "rgb(168, 13, 13)",
+				}
+			})
+			return () => {};
+		}
+		const { guildId, invite, name } = guild;
+		if (loginData) {
+			const { token } = loginData;
+			return async () => {
+				await guildJoin(token, guildId, name);
+			}
+		} else {
+			return redirectUrl(`https://discord.gg/${invite}`);
+		}
+	}
 </script>
 
 <Meta
@@ -96,7 +117,7 @@
 					</div>
 				</div>
 				<div>
-					<button onclick={redirectUrl(`https://discord.gg/${guild.invite}`)} class="join-button">「{guild.name}」に参加</button>
+					<button onclick={joinBtn()} class="join-button">「{guild.name}」に参加</button>
 				</div>
 			</div>
 		</div>
