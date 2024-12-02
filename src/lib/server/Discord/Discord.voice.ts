@@ -48,7 +48,7 @@ export class VoiceClient {
 		}
 		for (const [channelId, content] of Object.entries(this.channelArchives)) {
 			if (await this.registerChecker(content.guildId)) {
-				await database.guildTables.level.plus(content.guildId, BigInt(content.memberAverage * 15))
+				await database.guildTables.level.plus(content.guildId, BigInt(Math.ceil(content.memberAverage * 15)))
 			} else {
 				await this.deleteArchive(channelId);
 			}
