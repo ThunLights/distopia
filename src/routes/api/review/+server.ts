@@ -5,12 +5,13 @@ import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { generateErrorJson } from "$lib/server/json";
 import { database } from "$lib/server/Database";
+import { blank } from "$lib/blank.svelte";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const _RequestZod = z.object({
 	guildId: z.string(),
-	star: z.number().min(0).max(5),
+	star: z.number().min(1).max(5),
 	content: z.string().optional(),
 });
 
@@ -25,7 +26,8 @@ export const POST = (async (e) => {
 	if (!body) {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
-	const result = await database.guildTables.review.update({...body, ...{ userId: auth.data.id }});
+	const content = body.content && blank(body.content) ? undefined : body.content
+	const result = await database.guildTables.review.update({...body, ...{ userId: auth.data.id, content }});
 	if (!result) {
 		return generateErrorJson("DATABASE_ERROR");
 	}
