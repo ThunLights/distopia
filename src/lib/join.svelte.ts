@@ -20,7 +20,7 @@ export async function guildJoin(token: string, guildId: string, guildName: strin
 				? `「${guildName}」に参加しました。Discordを確認してください`
 				: json.content === "joined"
 					? `「${guildName}」には既に参加しています。`
-					: `エラー: 「${guildName}」参加できませんでした`;
+					: `エラー: 「${guildName}」参加できませんでした。数分待ってから再度試し見てください。`;
 			toast.push(content, {
 				theme: {
 				  "--toastColor": "mintcream",
