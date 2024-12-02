@@ -130,7 +130,7 @@
 		</div>
 		<div class="contents">
 			<div class="context">
-				<p class="name">レビュー</p>
+				<p class="name">レビュー <button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}><a href="/guilds/{guildId}/review">レビューを投稿する</a></button></p>
 				<div>
 					{#if reviews.length}
 						<div></div>
@@ -151,6 +151,12 @@
 <Footer/>
 
 <style>
+	.review-button {
+		padding: 2px 4px;
+	}
+	.review-button a {
+		font-size: 10px;
+	}
 	.join-button {
 		margin-top: 15px;
 		cursor: pointer;
@@ -164,6 +170,20 @@
         border: 1px solid rgb(85, 85, 85);
 	}
 	.join-button:active {
+        border: 1px solid rgb(49, 49, 49);
+        background-color: rgb(85, 85, 85);
+    }
+    button {
+        cursor: pointer;
+        border-radius: 25px;
+        color: white;
+        background-color: rgb(49, 49, 49);
+        opacity: 0.8;
+		font-size: 14px;
+        padding: 4px 8px;
+        border: 1px solid rgb(85, 85, 85);
+    }
+    button:active {
         border: 1px solid rgb(49, 49, 49);
         background-color: rgb(85, 85, 85);
     }
