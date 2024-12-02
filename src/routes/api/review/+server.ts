@@ -8,11 +8,12 @@ import { database } from "$lib/server/Database";
 import { blank } from "$lib/blank.svelte";
 
 import type { RequestHandler } from "@sveltejs/kit";
+import { CHARACTER_LIMIT } from "$project/src/lib/constants.svelte";
 
 export const _RequestZod = z.object({
 	guildId: z.string(),
 	star: z.number().min(1).max(5),
-	content: z.string().optional(),
+	content: z.string().max(CHARACTER_LIMIT.review).optional(),
 });
 
 export type Request = z.infer<typeof _RequestZod>;

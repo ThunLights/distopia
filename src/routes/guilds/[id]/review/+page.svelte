@@ -5,9 +5,10 @@
 
 	import { toast } from "@zerodevx/svelte-toast";
 	import { getCategory } from "$lib/category.svelte";
+	import { blank } from "$lib/blank.svelte";
 
 	import type { PageData } from "./$types";
-	import { blank } from "$project/src/lib/blank.svelte";
+	import { CHARACTER_LIMIT } from "$project/src/lib/constants.svelte";
 
 	const { data }: { data: PageData } = $props();
 	const { guildId, content, auth } = data;
@@ -16,6 +17,7 @@
 	let description = $state("");
 	let agreement = $state(false);
 	let stars = $state(1);
+	let descriptionLength = $derived(description.length);
 	let disabled = $derived(!agreement);
 
 	function setStar(star: number) {
@@ -101,7 +103,7 @@
 						</div>
 					</div>
 					<div>
-						<p class="name">内容 (任意)</p>
+						<p class="name">内容 (任意) <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.review ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.review})</strong></p>
 						<div>
 							<textarea bind:value={description}></textarea>
 						</div>

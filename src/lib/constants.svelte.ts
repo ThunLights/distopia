@@ -136,6 +136,7 @@ export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797
 export const CHARACTER_LIMIT = {
 	description: 250,
 	tag: 25,
+	review: 100,
 };
 
 export const TAG_COUNT_LIMIT = 5;
