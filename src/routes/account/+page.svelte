@@ -6,7 +6,6 @@
     import { redirectUrl } from "$lib/redirect.svelte";
 
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
 	import type { Response } from "$routes/api/auth/owner/+server";
@@ -39,7 +38,6 @@
     title={title}
 />
 
-<Header userData={loginData}/>
 <main>
     <div class="main-div">
         {#if loginData}

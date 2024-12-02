@@ -7,7 +7,6 @@
 	import { guildJoin } from "$lib/join.svelte";
 
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
     import type { PageData } from "./$types"
@@ -41,7 +40,6 @@
 
 <Meta></Meta>
 
-<Header userData={loginData}/>
 <main>
     <div class="entrance-img">
         <img src="{bgUrl}" alt="loading">

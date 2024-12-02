@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Meta from "$lib/meta.svelte";
-	import Header from "$lib/header.svelte";
 	import Footer from "$lib/footer.svelte";
 
 	import { toast } from "@zerodevx/svelte-toast";
@@ -76,7 +75,6 @@
 	title={title}
 />
 
-<Header userData={auth}/>
 <main>
 	<div class="contents">
 		<div class="context">

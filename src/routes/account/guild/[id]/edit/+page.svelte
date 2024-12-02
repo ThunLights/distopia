@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Meta from "$lib/meta.svelte";
-	import Header from "$lib/header.svelte";
 	import Footer from "$lib/footer.svelte";
 	import Guild from "$lib/guild.svelte";
 
@@ -28,7 +27,6 @@
 
 <Meta/>
 
-<Header userData={data.auth}/>
 <main>
 	{#if guild}
 		<Guild
