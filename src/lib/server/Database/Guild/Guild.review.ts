@@ -76,7 +76,7 @@ export class GuildReviewTable {
 			};
 			const element = await this.table.findFirst({ where });
 			if (element) {
-				await this.table.updateMany({where, data})
+				await this.table.updateMany({ where, data})
 			} else {
 				await this.table.create({ data });
 			}

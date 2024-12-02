@@ -1,7 +1,16 @@
 import { database, DatabaseError } from "./Database/index";
 import { discord } from "./discord";
 
-import type { Review } from "./Database/Guild/Guild.review";
+export type Review = {
+	guildId: string;
+	userId: string;
+	star: number;
+	content?: string | null;
+	user: {
+		username: string
+		avatar: string | null
+	};
+}
 
 export type Guild = {
 	guildId: string;
@@ -30,10 +39,23 @@ export async function id2Guild(guildId: string) {
 	const level = await database.guildTables.level.data(guildId);
 	const tags = await database.guildTables.tag.data(guildId);
 	const nsfw = await database.guildTables.nsfw.data(guildId);
-	const reviews = await database.guildTables.review.data.guilds(guildId);
-	const stars = reviews.map(value => value.star);
+	const baserReviews = await database.guildTables.review.data.guilds(guildId);
+	const stars = baserReviews.map(value => value.star);
+	const reviews: Review[] = []
 	if (guild instanceof DatabaseError || guild === null) {
 		return "SERVER_NOT_FOUND";
+	}
+	for (const review of baserReviews) {
+		const user = await database.user.data(review.userId);
+		const avatar = await database.avatar.data(review.userId);
+		if (user) {
+			reviews.push({...review, ...{
+				user: {
+					username: user.username,
+					avatar,
+				},
+			}});
+		}
 	}
 	return {...guild, ...{
 		nsfw,

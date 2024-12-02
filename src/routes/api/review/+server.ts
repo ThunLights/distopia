@@ -31,7 +31,12 @@ export const POST = (async (e) => {
 			? undefined
 			: body.content.trim()
 		: body.content;
-	const result = await database.guildTables.review.update({...body, ...{ userId: auth.data.id, content }});
+	const result = await database.guildTables.review.update({
+		guildId: body.guildId,
+		userId: auth.data.id,
+		star: body.star,
+		content,
+	});
 	if (!result) {
 		return generateErrorJson("DATABASE_ERROR");
 	}
