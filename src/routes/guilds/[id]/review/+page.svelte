@@ -44,7 +44,7 @@
 			body: JSON.stringify({
 				guildId,
 				star: stars,
-				description: blank(description) ? undefined : description,
+				content: blank(description) ? undefined : description,
 			}),
 		});
 		if (response.ok) {

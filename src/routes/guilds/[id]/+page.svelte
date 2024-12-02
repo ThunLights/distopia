@@ -12,7 +12,6 @@
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
-	import type { Review } from "$lib/server/Database/Guild/Guild.review";
 
 	type Auth = {
 		token: string;
@@ -25,7 +24,7 @@
     const { data }: { data: PageData } = $props();
 	const { guildId, content } = data;
 	const guild = $state<Response | null>(content);
-	const reviews = $derived<Review[]>(guild ? guild.reviews : []);
+	const reviews = $derived(guild ? guild.reviews : []);
 	const title = $derived(content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`);
 
     let loginData = $state<Auth | null>(data.auth);
@@ -129,7 +128,7 @@
 					{#each Array(5) as _, i}
 						<div class="star">
 							<p><img src="/review/star.webp" alt="">{i+1}</p>
-							<p>{reviews.filter(value => value.star === i+1).length}個</p>
+							<p><progress max="{reviews.length}" value="{reviews.filter(value => value.star === i+1).length}"></progress> {reviews.filter(value => value.star === i+1).length}個</p>
 						</div>
 					{/each}
 				</div>
@@ -140,7 +139,38 @@
 				<p class="name">レビュー <button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}><a href="/guilds/{guildId}/review">レビューを投稿する</a></button></p>
 				<div>
 					{#if reviews.length}
-						<div></div>
+						<div class="reviews">
+							{#each reviews as review}
+								<div class="review">
+									<div class="context">
+										<div class="user">
+											<div>
+												<img class="icon" src="{review.user.avatar ? `https://cdn.discordapp.com/avatars/${review.userId}/${review.user.avatar}.webp` : "/discord.webp"}" alt="">
+											</div>
+											<div>
+												<p class="name">{review.user.username}</p>
+											</div>
+										</div>
+										<div class="stars">
+											<div class="inline-block">
+												<p class="section-title">評価</p>
+											</div>
+											{#each Array(5) as _, i}
+												<div class="star inline-block">
+													<img src={i + 1 <= review.star ? "/review/star.webp" : "/review/blackstar.webp"} alt="">
+												</div>
+											{/each}
+										</div>
+										{#if review.content}
+											<div>
+												<p class="section-title">内容</p>
+												<pre>{review.content}</pre>
+											</div>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
 					{:else}
 						<p>「{guild.name}」はまだレビューされていません</p>
 					{/if}
@@ -158,6 +188,34 @@
 <Footer/>
 
 <style>
+	.section-title {
+		font-weight: 700;
+	}
+	.review {
+		overflow: hidden;
+		border-radius: 20px;
+		background-color: rgb(46, 46, 46);
+		margin-top: 12px;
+	}
+	.review .user>div {
+		display: inline-block;
+	}
+	.review .user .icon {
+		margin: 0;
+		height: 18px;
+	}
+	.review .user .name {
+		margin: 0;
+		line-height: 16px;
+		font-size: 16px;
+		font-weight: 500;
+	}
+	.reviews {
+		overflow: hidden;
+	}
+	.inline-block {
+		display: inline-block;
+	}
 	.star {
 		font-size: 20px;
 	}
@@ -251,7 +309,7 @@
 	.guild-info {
 		margin-top: 15px;
 	}
-	a, p {
+	a, p, pre {
 		font-size: 15px;
 		text-decoration: none;
 		color: white;
