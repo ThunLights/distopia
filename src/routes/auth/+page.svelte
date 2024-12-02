@@ -1,20 +1,21 @@
 <script lang="ts">
     import { onMount } from "svelte";
+//	import { headerStore } from "$lib/stores";
 
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { PageData } from "./$types"
-
-    const { data }: { data: PageData } = $props();
+    const { data } = $props();
 
     const { content } = $state(data);
     const result = $state(content ? "認証に成功しました。" : "認証に失敗しました。");
     const title = $state(result);
     const description = $state(result ? `${result}数秒後にリダイレクトされます。` : `${result}再度試してみてください。`);
 
-    onMount(async () => {
+    onMount(() => {
+//		headerStore.set({
+//			loginBlock: false,
+//		});
         if (content) {
             localStorage.setItem("token", content.token);
             setTimeout(async () => {
@@ -29,7 +30,6 @@
     description={description}
 />
 
-<Header userData={content} loginBlock={false}/>
 <main>
     <div class="contents">
         <p class="title">{result}</p>

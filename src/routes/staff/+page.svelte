@@ -1,6 +1,5 @@
 <script lang="ts">
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
     import { staffs } from "$lib/constants.svelte"
@@ -17,7 +16,6 @@
     title={title}
 />
 
-<Header userData={loginData}/>
 <main>
     <div class="contents">
         <div class="sections">

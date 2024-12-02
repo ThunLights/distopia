@@ -4,7 +4,6 @@
     import { siteAbout } from "$lib/constants.svelte";
 
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
 	import type { PageData } from "./$types";
@@ -15,7 +14,6 @@
 
 <Meta title="Distopiaについて / Distopia.top"/>
 
-<Header userData={loginData}/>
 <main>
     <div class="contents">
         {#each siteAbout as about}

@@ -1,6 +1,5 @@
 <script lang="ts">
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
     const title = "ページが見つかりませんでした";
@@ -16,7 +15,6 @@
     description={description}
 />
 
-<Header></Header>
 <main>
     <div class="contents">
         <p class="contents-title">404</p>

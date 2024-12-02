@@ -1,6 +1,5 @@
 <script lang="ts">
     import Meta from "$lib/meta.svelte";
-    import Header from "$lib/header.svelte";
     import Footer from "$lib/footer.svelte";
 
 	import { onMount } from "svelte";
@@ -59,7 +58,6 @@
 	description={guild ? guild.description.replaceAll("\n", "").replaceAll(/\s+/g, "") : undefined}
 />
 
-<Header userData={loginData}/>
 <main>
 	{#if guild}
 		<div class="contents">
