@@ -38,7 +38,7 @@ export class VoiceClient {
 		const channels = this.client.channels.cache.values();
 		for (const channel of channels) {
 			if (channel.type === ChannelType.GuildVoice && await this.registerChecker(channel.guildId)) {
-				const memberCount = channel.members.filter(member => !member.user.bot && !(member.voice.mute || member.voice.deaf)).size;
+				const memberCount = channel.members.filter(member => (!member.user.bot) && !(member.voice.mute || member.voice.deaf)).size;
 				if (memberCount) {
 					await this.addArchive(channel.id, channel.guildId, memberCount);
 				} else {
