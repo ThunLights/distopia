@@ -101,7 +101,7 @@ export const supporters = [
 export const staffs = [
     {
         name: "ROBOT",
-        icon: "/stuff/robot.webp",
+        icon: "/staff/robot.webp",
         description: "Distopiaの代表兼創設者でDistopiaの全てのプログラムを作成",
         links: [
             {
@@ -116,7 +116,7 @@ export const staffs = [
     },
     {
         name: "Sumire",
-        icon: "stuff/sumire.webp",
+        icon: "/staff/sumire.webp",
         description: "Distopiaのイラスト担当でDistopia内の全てのイラストを作成",
         links: [
             {
@@ -128,7 +128,18 @@ export const staffs = [
                 url: "https://twitter.com/sumire_8691",
             },
         ],
-    }
+    },
+	{
+		name: "yuzu",
+		icon: "/staff/yuzu.webp",
+		description: "レベルシステムやアクティブレートなどの数学的アルゴリズムの調整",
+		links: [
+			{
+				icon: "/service/github.webp",
+				url: "https://github.com/yuzu-machan",
+			}
+		],
+	},
 ] satisfies Array<Staff>;
 
 export const LOGIN_URL = "https://discord.com/oauth2/authorize?client_id=1300797373374529557&response_type=code&redirect_uri=https%3A%2F%2Fdistopia.top%2Fauth&scope=email+guilds.join+identify+guilds";
