@@ -12,6 +12,7 @@
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
+	import type { Review } from "$lib/server/Database/Guild/Guild.review";
 
 	type Auth = {
 		token: string;
@@ -24,7 +25,7 @@
     const { data }: { data: PageData } = $props();
 	const { guildId, content } = data;
 	const guild = $state<Response | null>(content);
-	const reviews = $state([]);
+	const reviews = $derived<Review[]>(guild ? guild.reviews : []);
 	const title = $derived(content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`);
 
     let loginData = $state<Auth | null>(data.auth);
@@ -123,8 +124,14 @@
 		</div>
 		<div class="contents">
 			<div class="context">
-				<p class="name">評価: 未実装</p>
+				<p class="name">評価: {guild.review}</p>
 				<div>
+					{#each Array(5) as _, i}
+						<div class="star">
+							<p><img src="/review/star.webp" alt="">{i+1}</p>
+							<p>{reviews.filter(value => value.star === i+1).length}個</p>
+						</div>
+					{/each}
 				</div>
 			</div>
 		</div>
@@ -151,6 +158,15 @@
 <Footer/>
 
 <style>
+	.star {
+		font-size: 20px;
+	}
+	.star img {
+		width: 20px;
+	}
+	.star p {
+		display: inline-block;
+	}
 	.review-button {
 		padding: 2px 4px;
 	}

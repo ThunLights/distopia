@@ -7,7 +7,7 @@ export type Review = {
 	guildId: string
 	userId: string
 	star: number
-	content?: string
+	content?: string | null
 }
 
 class DeleteReview {
@@ -45,11 +45,27 @@ class DeleteReview {
 	}
 }
 
+class GetData {
+    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
+	}
+
+	public async guilds(guildId: string) {
+		try {
+			return await this.table.findMany({ where: { guildId } });
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+}
+
 export class GuildReviewTable {
 	public readonly delete: DeleteReview;
+	public readonly data: GetData;
 
     constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
 		this.delete = new DeleteReview(table);
+		this.data = new GetData(table);
 	}
 
 	async update(data: Review) {
