@@ -32,6 +32,30 @@ export type Guild = {
 	boost: number | null
 	review: number
 	reviews: Review[]
+	archives: {
+		level: {
+			ranking: number;
+		};
+		activeRate: {
+			max: number;
+			ranking: number;
+		};
+	}
+}
+
+async function getArchives(guildId: string) {
+	const activeRateMax = await database.archives.activeRate.max.data(guildId);
+	const activeRateRanking = await database.archives.activeRate.ranking.data(guildId);
+	const levelRanking = await database.archives.level.ranking.data(guildId);
+	return {
+		level: {
+			ranking: levelRanking ? Number(levelRanking.content) : 0,
+		},
+		activeRate: {
+			max: activeRateMax ? Number(activeRateMax.content) : 0,
+			ranking: activeRateRanking ? Number(activeRateRanking.content) : 0,
+		}
+	};
 }
 
 export async function id2Guild(guildId: string) {
@@ -40,6 +64,7 @@ export async function id2Guild(guildId: string) {
 	const tags = await database.guildTables.tag.data(guildId);
 	const nsfw = await database.guildTables.nsfw.data(guildId);
 	const baserReviews = await database.guildTables.review.data.guilds(guildId);
+	const archives = await getArchives(guildId);
 	const stars = baserReviews.map(value => value.star);
 	const reviews: Review[] = []
 	if (guild instanceof DatabaseError || guild === null) {
@@ -66,5 +91,6 @@ export async function id2Guild(guildId: string) {
 		boost: await discord.bot.control.guild.boost(guildId),
 		review: stars.length ? stars.reduce((sum, element) => sum + element) / reviews.length : 0,
 		reviews,
+		archives,
 	}} satisfies Guild;
 }
