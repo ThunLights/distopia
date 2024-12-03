@@ -38,6 +38,7 @@ export class GuildBumpTable {
                 await this.table.updateMany({
                     where: { id },
                     data: {
+                        time: BigInt(Date.now()),
                     }
                 })
             } else {
