@@ -7,6 +7,7 @@ import { GuildLevelTable } from "./Guild.level";
 import { GuildBumpTable } from "./Guild.bump";
 import { GuildInviteTempTable } from "./Guild.tmp";
 import { GuildNSFWTable } from "./Guild.nsfw";
+import { GuildActiveRateTable } from "./Guild.activeRate";
 
 export class DatabaseGuildTables {
     public readonly guild: GuildTable
@@ -16,6 +17,7 @@ export class DatabaseGuildTables {
     public readonly bump: GuildBumpTable
     public readonly tmp: GuildInviteTempTable
 	public readonly nsfw: GuildNSFWTable
+	public readonly activeRate: GuildActiveRateTable
 
     constructor(private readonly prisma: PrismaClient) {
         this.guild = new GuildTable(this.prisma.guild);
@@ -25,5 +27,6 @@ export class DatabaseGuildTables {
         this.bump = new GuildBumpTable(this.prisma.guildBump);
         this.tmp = new GuildInviteTempTable(this.prisma.guildTmp);
 		this.nsfw = new GuildNSFWTable(this.prisma.guildNSFW);
+		this.activeRate = new GuildActiveRateTable(this.prisma.guildActiveRate);
     }
 }

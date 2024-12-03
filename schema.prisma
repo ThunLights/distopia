@@ -83,9 +83,19 @@ model GuildLevel {
     point   BigInt
 }
 
-//model ServerActiveRate {
-//    guildId String @id
-//}
+model GuildNewMember {
+    guildId String @id
+    count   Int
+}
+
+model GuildNewMessage {
+    guildId String @id
+}
+
+model GuildActiveRate {
+    guildId String @id
+    content BigInt
+}
 
 model Staff {
     id String @id
