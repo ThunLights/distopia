@@ -97,6 +97,21 @@ model GuildActiveRate {
     content BigInt
 }
 
+model ArchiveLevelRanking {
+    guildId String @id
+    content BigInt
+}
+
+model ArchiveActiveRateRanking {
+    guildId String @id
+    content BigInt
+}
+
+model ArchiveActiveRateMax {
+    guildId String @id
+    content BigInt
+}
+
 model Staff {
     id String @id
 }
