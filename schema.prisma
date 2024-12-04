@@ -7,6 +7,7 @@ generator client {
     provider = "prisma-client-js"
 }
 
+//ユーザーの為のテーブル
 model User {
     id           String @id
     username     String
@@ -30,6 +31,7 @@ model Avatar {
     content String
 }
 
+//登録サーバーの為のテーブル
 model Guild {
     guildId     String @id
 
@@ -83,6 +85,7 @@ model GuildLevel {
     point   BigInt
 }
 
+//アクティブレートの為のテーブル
 model GuildNewMember {
     guildId String
     count   Int
@@ -120,6 +123,7 @@ model GuildActiveRate {
     content BigInt
 }
 
+//レベル関係のアーカイブテーブル
 model ArchiveLevelRanking {
     guildId String @id
     content BigInt
@@ -135,6 +139,7 @@ model ArchiveActiveRateMax {
     content BigInt
 }
 
+//スタッフ
 model Staff {
     id String @id
 }
