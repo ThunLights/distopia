@@ -1,6 +1,7 @@
 import { errorHandling } from "$lib/server/error";
 import { database } from "../Database/index";
 import { discord } from "../discord";
+import { activeRate } from "../rate";
 
 import type { Client } from "discord.js";
 
@@ -9,16 +10,23 @@ export class ActiveRateClient {
 
 	private async updateGuild(guildId: string) {
 		try {
-			const newMember = await database.guildTables.newMember.thirtyDays(guildId);
-			const newMessage = await database.guildTables.newMessage.thirtyDays(guildId);
+			const newMember = (await database.guildTables.newMember.thirtyDays(guildId)).map(value => value.count).reduce((sum, element) => sum + element);
+			const newMessage = (await database.guildTables.newMessage.thirtyDays(guildId)).map(value => value.count).reduce((sum, element) => sum + element);
+			const vcMemberSum = (await database.guildTables.vcMemberSum.thirtyDays(guildId)).length;
+			const vcMemberUpperTwo = (await database.guildTables.vcMemberUpperTwo.thirtyDays(guildId)).map(value => value.count).reduce((sum, element) => sum + element);
 			const activeMember = await discord.bot.control.guild.memberCount(guildId, "online");
 			const allMember = await discord.bot.control.guild.memberCount(guildId);
-			if (activeMember && allMember) {}
-//			const rate = BigInt(await activeRate.calc({
-//				newMember,
-//				newMessage,
-//			}));
-//			return await database.guildTables.activeRate.update(guildId, rate);
+			if (activeMember && allMember) {
+				const rate = BigInt(await activeRate.calc({
+					newMember,
+					newMessage,
+					vcMemberSum,
+					vcMemberUpperTwo,
+					activeMember,
+					allMember,
+				}));
+				return await database.guildTables.activeRate.update(guildId, rate);
+			}
 			return false;
 		} catch (error) {
 			errorHandling(error);
