@@ -34,6 +34,16 @@ export class GuildClient {
         }
     }
 
+	public async guildMemberAdd(member: GuildMember): Promise<void> {
+        const guild = await database.guildTables.guild.id2Data(member.guild.id);
+        if (guild instanceof DatabaseError) {
+            return;
+        }
+		if (guild) {
+			await database.guildTables.newMember.update(guild.guildId);
+		}
+	}
+
 	public async guildMemberUpdate(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember): Promise<void> {
 	}
 }
