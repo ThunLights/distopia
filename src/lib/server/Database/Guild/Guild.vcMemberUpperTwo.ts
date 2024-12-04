@@ -7,7 +7,7 @@ import type { DefaultArgs } from "@prisma/client/runtime/library";
 export class VcMemberUpperTwo {
     constructor(private readonly table: Prisma.GuildVcMemberUpperTwoDelegate<DefaultArgs>) {}
 
-	public async update(guildId: string) {
+	public async update(guildId: string, count: number) {
 		try {
 			const now = new Date(formatDate(new Date()));
 			const element = await this.table.findFirst({
@@ -17,9 +17,14 @@ export class VcMemberUpperTwo {
 				await this.table.updateMany({
 					where: { guildId, date: now },
 					data: {
+						count: element.count + count,
 					}
 				})
-			} else {}
+			} else {
+				await this.table.create({
+					data: { guildId, count, date: now },
+				})
+			}
 			return true;
 		} catch (error) {
 			errorHandling(error);
