@@ -10,6 +10,8 @@ import { GuildNSFWTable } from "./Guild.nsfw";
 import { GuildActiveRateTable } from "./Guild.activeRate";
 import { GuildNewMemberTable } from "./Guild.newMember";
 import { GuildNewMessageTable } from "./Guild.newMessage";
+import { GuildVcMemberSum } from "./Guild.vcMemberSum";
+import { GuildVcMemberUpperTwo } from "./Guild.vcMemberUpperTwo";
 
 export class DatabaseGuildTables {
     public readonly guild: GuildTable
@@ -22,6 +24,8 @@ export class DatabaseGuildTables {
 	public readonly activeRate: GuildActiveRateTable
 	public readonly newMessage: GuildNewMessageTable
 	public readonly newMember: GuildNewMemberTable
+	public readonly vcMemberSum: GuildVcMemberSum
+	public readonly vcMemberUpperTwo: GuildVcMemberUpperTwo
 
     constructor(private readonly prisma: PrismaClient) {
         this.guild = new GuildTable(this.prisma.guild);
@@ -34,5 +38,7 @@ export class DatabaseGuildTables {
 		this.activeRate = new GuildActiveRateTable(this.prisma.guildActiveRate);
 		this.newMessage = new GuildNewMessageTable(this.prisma.guildNewMessage);
 		this.newMember = new GuildNewMemberTable(this.prisma.guildNewMember);
+		this.vcMemberSum = new GuildVcMemberSum(this.prisma.guildVcMemberSum);
+		this.vcMemberUpperTwo = new GuildVcMemberUpperTwo(this.prisma.guildVcMemberUpperTwo);
     }
 }

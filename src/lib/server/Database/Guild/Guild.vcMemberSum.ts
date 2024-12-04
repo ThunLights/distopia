@@ -1,10 +1,10 @@
-import { formatDate } from "$lib/server/date";
+import { formatDate, getThirtyDaysAgo } from "$lib/server/date";
 import { errorHandling } from "$lib/server/error";
 
 import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
-export class VcMemberSum {
+export class GuildVcMemberSum {
     constructor(private readonly table: Prisma.GuildVcMemberSumDelegate<DefaultArgs>) {}
 
 	public async update(guildId: string, userId: string) {
@@ -27,6 +27,23 @@ export class VcMemberSum {
 		} catch (error) {
 			errorHandling(error);
 			return false;
+		}
+	}
+
+	public async thirtyDays(guildId: string) {
+		try {
+			const thirtyDaysAgo = getThirtyDaysAgo(new Date());
+			return await this.table.findMany({
+				where: {
+					guildId,
+					date: {
+						gte: thirtyDaysAgo,
+					}
+				}
+			})
+		} catch (error) {
+			errorHandling(error);
+			return [];
 		}
 	}
 }
