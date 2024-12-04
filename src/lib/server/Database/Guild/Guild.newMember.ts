@@ -17,9 +17,7 @@ export class GuildNewMemberTable {
 				await this.table.updateMany({
 					where: { guildId, date: now },
 					data: {
-						guildId,
 						count: element.count + 1,
-						date: now,
 					}
 				})
 			} else {
