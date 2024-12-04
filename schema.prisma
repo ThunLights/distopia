@@ -107,15 +107,16 @@ model GuildVcMemberSum {
     userId  String
     date    DateTime
 
-    @@id([guildId, userId])
+    @@id([guildId, userId, date])
 }
 
 model GuildVcMemberUpperTwo {
     guildId String
-    userId  String
     date    DateTime
 
-    @@id([guildId, userId])
+    count   Int
+
+    @@id([guildId, date])
 }
 
 model GuildActiveRate {
