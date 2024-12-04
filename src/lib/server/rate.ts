@@ -18,7 +18,7 @@ class ActiveRate {
 
     constructor() {}
 
-    public async culc(data: RateData) {
+    public async calc(data: RateData) {
         const { newMember, newMessage, vcMemberSum, vcMemberUpperTwo, activeMember, allMember } = data;
         return Math.ceil((
             newMember * this.h1 +
