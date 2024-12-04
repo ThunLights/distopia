@@ -84,12 +84,19 @@ model GuildLevel {
 }
 
 model GuildNewMember {
-    guildId String @id
+    guildId String
     count   Int
+    date    DateTime
+
+    @@id([guildId, date])
 }
 
 model GuildNewMessage {
-    guildId String @id
+    guildId String
+    count   Int
+    date    DateTime
+
+    @@id([guildId, date])
 }
 
 model GuildActiveRate {
