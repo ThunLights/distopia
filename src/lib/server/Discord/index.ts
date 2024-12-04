@@ -5,6 +5,7 @@ import { InteractionClient } from "./Discord.interaction";
 import { GuildClient } from "./Discord.guilds";
 import { MessageClient } from "./Discord.message";
 import { VoiceClient } from "./Discord.voice";
+import { ActiveRateClient } from "./Discord.activeRate";
 import { Controller } from "./Controller/index";
 
 import cfg from "$project/important/discord.json";
@@ -19,10 +20,12 @@ export class DiscordBotClient {
     private readonly interactionClient = new InteractionClient(this.client);
     private readonly messageClient = new MessageClient(this.client);
 	private readonly voiceClient = new VoiceClient(this.client);
+	private readonly activeRateClient = new ActiveRateClient(this.client);
 
     constructor() {
 		setInterval(async () => {
 			await this.voiceClient.levelUpdate();
+			await this.activeRateClient.update();
 		}, 20 * 60 * 1000);
 	}
 
@@ -42,6 +45,9 @@ export class DiscordBotClient {
         this.client.on("messageCreate", async (message) => {
             return await this.messageClient.create(message);
         });
+		this.client.on("guildMemberAdd", async (member) => {
+			return await this.guilds.guildMemberAdd(member);
+		})
         this.client.on("guildUpdate", async (oldGuild, newGuild) => {
             return await this.guilds.guildUpdate(oldGuild, newGuild);
         });
