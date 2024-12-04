@@ -1,8 +1,9 @@
 import { database, DatabaseError } from "$lib/server/Database/index";
+import { errorHandling } from "$lib/server/error";
 
 import { ChannelType } from "discord.js";
 
-import type { Client } from "discord.js";
+import type { Client, VoiceChannel } from "discord.js";
 
 export type ArchiveContent = {
 	guildId: string
@@ -34,12 +35,29 @@ export class VoiceClient {
 		delete this.channelArchives[channelId];
 	}
 
+	private async addActiveRate(channel: VoiceChannel) {
+		try {
+			const members = channel.members.filter(member => (!member.user.bot) && !(member.voice.mute || member.voice.deaf));
+			if (members.size >= 2) {
+				await database.guildTables.vcMemberUpperTwo.update(channel.guildId, 1);
+			}
+			for (const member of members.values()) {
+				await database.guildTables.vcMemberSum.update(channel.guildId, member.user.id);
+			}
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
 	public async levelUpdate() {
 		const channels = this.client.channels.cache.values();
 		for (const channel of channels) {
 			if (channel.type === ChannelType.GuildVoice && await this.registerChecker(channel.guildId)) {
 				const memberCount = channel.members.filter(member => (!member.user.bot) && !(member.voice.mute || member.voice.deaf)).size;
 				if (memberCount) {
+					await this.addActiveRate(channel);
 					await this.addArchive(channel.id, channel.guildId, memberCount);
 				} else {
 					await this.deleteArchive(channel.id);
