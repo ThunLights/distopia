@@ -55,4 +55,13 @@ export class GuildTable {
             return new DatabaseError("ERROR")
         }
     }
+
+	public async datas() {
+		try {
+			return await this.table.findMany();
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
 }
