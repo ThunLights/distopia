@@ -38,11 +38,12 @@ export class GuildNewMemberTable {
 		}
 	}
 
-	public async thirtyDays() {
+	public async thirtyDays(guildId: string) {
 		try {
 			const thirtyDaysAgo = getThirtyDaysAgo(new Date());
 			return await this.table.findMany({
 				where: {
+					guildId,
 					date: {
 						gte: thirtyDaysAgo,
 					}
