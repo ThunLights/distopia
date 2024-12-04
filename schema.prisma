@@ -99,6 +99,22 @@ model GuildNewMessage {
     @@id([guildId, date])
 }
 
+model GuildVcMemberSum {
+    guildId String
+    userId  String
+    date    DateTime
+
+    @@id([guildId, userId])
+}
+
+model GuildVcMemberUpperTwo {
+    guildId String
+    userId  String
+    date    DateTime
+
+    @@id([guildId, userId])
+}
+
 model GuildActiveRate {
     guildId String @id
     content BigInt
