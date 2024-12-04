@@ -74,6 +74,7 @@ export const POST = (async (e) => {
 	await database.guildTables.bump.update(guildTmp.guildId);
 	await database.guildTables.nsfw.update(guildTmp.guildId, body.nsfw);
 	await database.guildTables.tag.update(guildTmp.guildId, body.tags);
+	await database.guildTables.bump.update(guildTmp.guildId);
 	await database.guildTables.tmp.delete(guildTmp.guildId);
 	return json({
 		content: "SUCCESS"
