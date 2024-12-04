@@ -1,11 +1,11 @@
-import { database } from "../Database/index";
+import { database, DatabaseError } from "../Database/index";
 
 import type { Client, Message, OmitPartialGroupDMChannel } from "discord.js";
 
 export class MessageClient {
     constructor(private readonly client: Client) {}
 
-	private async culcScore(x: number) {
+	private async calcScore(x: number) {
 		return Math.ceil(Math.sqrt(x));
 	}
 
@@ -14,8 +14,14 @@ export class MessageClient {
 			return;
 		}
 		const guild = await database.guildTables.guild.id2Data(message.guildId);
-		if (guild && message.content.length) {
-			await database.guildTables.level.plus(message.guildId, BigInt(await this.culcScore(message.content.length)));
+		if (guild instanceof DatabaseError) {
+			return;
+		}
+		if (guild) {
+			await database.guildTables.newMessage.update(guild.guildId);
+			if (message.content.length) {
+				await database.guildTables.level.plus(message.guildId, BigInt(await this.calcScore(message.content.length)));
+			}
 		}
     }
 }
