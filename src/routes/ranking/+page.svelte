@@ -130,4 +130,34 @@
 		text-decoration: none;
 		color: white;
 	}
+	@media (max-width: 800px) {
+		.guild .name {
+			font-size: 16px;
+		}
+		.move-page {
+			font-size: 14px;
+		}
+	}
+	@media (max-width: 600px) {
+		.guild .name {
+			font-size: 14px;
+		}
+		.move-page {
+			font-size: 12px;
+		}
+		p {
+			font-size: 10px;
+		}
+	}
+	@media (max-width: 450px) {
+		.guild .name {
+			font-size: 12px;
+		}
+		.move-page {
+			font-size: 10px;
+		}
+		p {
+			font-size: 8px;
+		}
+	}
 </style>
