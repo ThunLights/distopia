@@ -6,6 +6,7 @@ import { GuildClient } from "./Discord.guilds";
 import { MessageClient } from "./Discord.message";
 import { VoiceClient } from "./Discord.voice";
 import { ActiveRateClient } from "./Discord.activeRate";
+import { RankingClient } from "./Discord.ranking";
 import { Controller } from "./Controller/index";
 
 import cfg from "$project/important/discord.json";
@@ -21,11 +22,13 @@ export class DiscordBotClient {
     private readonly messageClient = new MessageClient(this.client);
 	private readonly voiceClient = new VoiceClient(this.client);
 	private readonly activeRateClient = new ActiveRateClient(this.client);
+	private readonly rankingClient = new RankingClient(this.client);
 
     constructor() {
 		setInterval(async () => {
 			await this.voiceClient.levelUpdate();
 			await this.activeRateClient.update();
+			await this.rankingClient.udpate();
 		}, 20 * 60 * 1000);
 	}
 
