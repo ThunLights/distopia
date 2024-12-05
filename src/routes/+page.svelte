@@ -148,7 +148,7 @@
 	}
 	.guild {
 		overflow: hidden;
-		border-radius: 10%;
+		border-radius: 30px;
 		background-color: rgb(40, 40, 40);
 		margin: 8px;
 	}
@@ -207,4 +207,20 @@
         border: 1px solid rgb(49, 49, 49);
         background-color: rgb(85, 85, 85);
     }
+	@media (max-width: 1100px) {
+		.guilds {
+			grid-template-columns: 48% 48%;
+		}
+		.contents>div .name {
+			font-size: 24px;
+		}
+	}
+	@media (max-width: 800px) {
+		.guilds {
+			grid-template-columns: 98%;
+		}
+		.contents>div .name {
+			font-size: 20px;
+		}
+	}
 </style>
