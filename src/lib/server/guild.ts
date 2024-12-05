@@ -1,5 +1,6 @@
 import { database, DatabaseError } from "./Database/index";
 import { discord } from "./discord";
+import { parseRanking } from "./ranking";
 
 export type Review = {
 	guildId: string;
@@ -23,16 +24,20 @@ export type Guild = {
 	tags: string[];
 	nsfw: boolean;
 	activeRate: number | null;
+	online: number | null;
+	members: number | null;
+	boost: number | null;
+	review: number;
+	reviews: Review[];
+	ranking: {
+		level: number | null;
+		activeRate: number | null;
+	};
 	level: {
 		guildId: string;
 		level: number;
 		point: number;
 	} | null;
-	online: number | null
-	members: number | null
-	boost: number | null
-	review: number
-	reviews: Review[]
 	archives: {
 		level: {
 			ranking: number;
@@ -87,6 +92,13 @@ export async function id2Guild(guildId: string) {
 	return {...guild, ...{
 		nsfw,
 		tags,
+		ranking: {
+			level: parseRanking(guildId, (await database.guildTables.level.ranking()).map(value => {return {
+				guildId: value.guildId,
+				content: value.level,
+			}})),
+			activeRate: parseRanking(guildId, await database.guildTables.activeRate.ranking()),
+		},
 		activeRate: activeRate ? Number(activeRate.content) : activeRate,
 		level: level ? {...level, ...{ level: Number(level.level), point: Number(level.point)}} : level,
 		members: await discord.bot.control.guild.memberCount(guildId),

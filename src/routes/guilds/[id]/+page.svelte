@@ -93,10 +93,17 @@
 					</div>
 				</div>
 				<div>
-					<p class="name">ランキング</p>
+					<p class="name">ランキング (アクティブレート)</p>
 					<div>
-						<p>現在: 未実装</p>
-						<p>最高: 未実装</p>
+						<p>現在: {guild.ranking.activeRate ?? "圏外"}</p>
+						<p>最高: {guild.archives.activeRate.ranking}</p>
+					</div>
+				</div>
+				<div>
+					<p class="name">ランキング (レベル)</p>
+					<div>
+						<p>現在: {guild.ranking.level ?? "圏外"}</p>
+						<p>最高: {guild.archives.level.ranking}</p>
 					</div>
 				</div>
 				<div>
@@ -104,7 +111,7 @@
 					<div>
 						<div>
 							<p>{guild.level ? `Lv.${guild.level.level} ${guild.level.point}pt` : "Lv.0"}</p>
-							<p>アクティブレート: 未実装</p>
+							<p>アクティブレート: {guild.activeRate ?? 0} (最大: {guild.archives.activeRate.max})</p>
 						</div>
 					</div>
 				</div>
