@@ -36,6 +36,11 @@
                 <p>Staff</p>
             </a>
         </div>
+        <div class="header-other">
+            <a href="/ranking">
+                <p>Ranking</p>
+            </a>
+        </div>
     </div>
     {#if loginBlock}
         <div>
