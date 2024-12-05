@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import type { RequestHandler } from "@sveltejs/kit";
 import type { Guild } from "$lib/server/guild";
+import { errorHandling } from "$project/src/lib/server/error";
 
 export const _RequestZod = z.object({
 	take: z.number().min(1).max(50),
@@ -16,7 +17,26 @@ export type Request = z.infer<typeof _RequestZod>;
 
 export type Response = {
 	content: Guild[]
+	active: Guild[]
 };
+
+async function getActiveGuilds() {
+	try {
+		const guilds: Guild[] = [];
+		const guildsBase = await database.guildTables.activeRate.ranking(20);
+		for (const guildBase of guildsBase) {
+			const guild = await id2Guild(guildBase.guildId);
+			if (typeof guild === "string") {
+				continue;
+			}
+			guilds.push(guild);
+		}
+		return guilds
+	} catch (error) {
+		errorHandling(error);
+		return [];
+	}
+}
 
 export const POST = (async (e) => {
 	const body = structChecker(await e.request.json(), _RequestZod);
@@ -34,5 +54,6 @@ export const POST = (async (e) => {
 	}
 	return json({
 		content: guilds,
+		active: await getActiveGuilds(),
 	} satisfies Response, { status: 200 });
 }) satisfies RequestHandler;

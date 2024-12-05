@@ -9,12 +9,14 @@
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import type { PageData } from "./$types"
-	import type { Response } from "./api/home/+server";
+    import type { PageData } from "./$types";
+	import type { Guild } from "$lib/server/guild";
+	import type { Response } from "$routes/api/home/+server";
 
 	const { data }: { data: PageData } = $props();
 	const initServersData = {
 		content: [],
+		active: [],
 	} satisfies Response;
 
     let bgUrl = $state("");
@@ -53,52 +55,60 @@
 			<p class="name">最近更新されたサーバー</p>
 			<div class="guilds">
 				{#each servers.content as guild}
-					<div class="guild">
-						<div class="guild-context">
-							<div>
-								<div class="guild-info">
-									<div>
-										<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
-									</div>
-									<div>
-										<p class="guild-name">{guild.name}</p>
-										<p>ブースト: {guild.boost}</p>
-										<p>カテゴリ: {getCategory(guild.category)}</p>
-									</div>
-								</div>
-								<div>
-									{#if guild.tags.length}
-										<p>タグ</p>
-										<div class="tags">
-											{#each guild.tags as tag}
-												<div class="tag">
-													<p class="content">{tag}</p>
-												</div>
-											{/each}
-										</div>
-									{/if}
-									<p>説明</p>
-									<pre>{guild.description}</pre>
-								</div>
-							</div>
-							<div>
-								<button onclick={redirectUrl(`/guilds/${guild.guildId}`)}>
-									<a href="/guilds/{guild.guildId}" class="button-a-tag">詳細を閲覧</a>
-								</button>
-								<button onclick={joinBtn(guild.guildId, guild.invite, guild.name)}>サーバーに参加</button>
-							</div>
-						</div>
-					</div>
+					{@render generateGuildElement(guild)}
 				{/each}
 			</div>
 		</div>
 		<div>
 			<p class="name">アクティブなサーバー</p>
-			<div></div>
+			<div class="guilds">
+				{#each servers.active as guild}
+					{@render generateGuildElement(guild)}
+				{/each}
+			</div>
 		</div>
 	</div>
 </main>
 <Footer></Footer>
+
+{#snippet generateGuildElement(guild: Guild)}
+	<div class="guild">
+		<div class="guild-context">
+			<div>
+				<div class="guild-info">
+					<div>
+						<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+					</div>
+					<div>
+						<p class="guild-name">{guild.name}</p>
+						<p>ブースト: {guild.boost}</p>
+						<p>カテゴリ: {getCategory(guild.category)}</p>
+					</div>
+				</div>
+				<div>
+					{#if guild.tags.length}
+						<p>タグ</p>
+						<div class="tags">
+							{#each guild.tags as tag}
+								<div class="tag">
+									<p class="content">{tag}</p>
+								</div>
+							{/each}
+						</div>
+					{/if}
+					<p>説明</p>
+					<pre>{guild.description}</pre>
+				</div>
+			</div>
+			<div>
+				<button onclick={redirectUrl(`/guilds/${guild.guildId}`)}>
+					<a href="/guilds/{guild.guildId}" class="button-a-tag">詳細を閲覧</a>
+				</button>
+				<button onclick={joinBtn(guild.guildId, guild.invite, guild.name)}>サーバーに参加</button>
+			</div>
+		</div>
+	</div>
+{/snippet}
 
 <style>
 	.tags {
