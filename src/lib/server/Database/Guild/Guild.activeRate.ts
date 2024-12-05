@@ -18,10 +18,10 @@ export class GuildActiveRateTable {
 	public async ranking(take?: number) {
 		try {
 			return await this.table.findMany({
-				take: take ?? 50,
 				orderBy: {
 					content: "desc",
-				}
+				},
+				take,
 			});
 		} catch (error) {
 			errorHandling(error);
