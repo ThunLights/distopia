@@ -59,8 +59,26 @@
         }
     }
 
-    onMount(() => {
-        generateIcon(iconPath, edgePath);
+    async function fetchData(url: string) {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        return arrayBufferToDataUrl(arrayBuffer);
+    }
+
+    function arrayBufferToDataUrl(buffer: ArrayBuffer) {
+        let binary = "";
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        const base = window.btoa(binary);
+        return `data:image/jpeg;base64,${base}`;
+    }
+
+    onMount(async () => {
+        const iconData = await fetchData(iconPath);
+        generateIcon(iconData, edgePath);
     });
 </script>
 
