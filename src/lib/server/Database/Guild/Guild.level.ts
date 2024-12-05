@@ -72,7 +72,7 @@ export class GuildLevelTable {
 				orderBy: {
 					level: "desc",
 				},
-				take: take ?? 50,
+				take: take,
 			})
 		} catch (error) {
 			errorHandling(error);
