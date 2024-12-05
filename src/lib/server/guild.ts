@@ -22,6 +22,7 @@ export type Guild = {
 	description: string;
 	tags: string[];
 	nsfw: boolean;
+	activeRate: number | null;
 	level: {
 		guildId: string;
 		level: number;
@@ -60,6 +61,7 @@ async function getArchives(guildId: string) {
 
 export async function id2Guild(guildId: string) {
 	const guild = await database.guildTables.guild.id2Data(guildId);
+	const activeRate = await database.guildTables.activeRate.data(guildId);
 	const level = await database.guildTables.level.data(guildId);
 	const tags = await database.guildTables.tag.data(guildId);
 	const nsfw = await database.guildTables.nsfw.data(guildId);
@@ -85,6 +87,7 @@ export async function id2Guild(guildId: string) {
 	return {...guild, ...{
 		nsfw,
 		tags,
+		activeRate: activeRate ? Number(activeRate.content) : activeRate,
 		level: level ? {...level, ...{ level: Number(level.level), point: Number(level.point)}} : level,
 		members: await discord.bot.control.guild.memberCount(guildId),
 		online: await discord.bot.control.guild.memberCount(guildId, "online"),
