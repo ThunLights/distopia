@@ -319,4 +319,12 @@
 		text-decoration: none;
 		color: white;
 	}
+	@media (max-width: 800px) {
+		.guild-name {
+			font-size: 22px;
+		}
+		.name {
+			font-size: 18px;
+		}
+	}
 </style>
