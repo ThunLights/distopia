@@ -26,6 +26,7 @@ export class ActiveRateClient {
 					activeMember,
 					allMember,
 				}));
+                await database.archives.activeRate.max.update(guildId, rate);
 				return await database.guildTables.activeRate.update(guildId, rate);
 			}
 			return false;
