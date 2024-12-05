@@ -23,22 +23,22 @@
         </div>
         <div class="header-other">
             <a href="/about">
-                <p>About</p>
+                <p class="header-other-content">About</p>
             </a>
         </div>
         <div class="header-other">
             <a href="/supporters">
-                <p>Supporters</p>
+                <p class="header-other-content">Supporters</p>
             </a>
         </div>
         <div class="header-other">
             <a href="/staff">
-                <p>Staff</p>
+                <p class="header-other-content">Staff</p>
             </a>
         </div>
         <div class="header-other">
             <a href="/ranking">
-                <p>Ranking</p>
+                <p class="header-other-content">Ranking</p>
             </a>
         </div>
     </div>
@@ -56,7 +56,7 @@
                 <a href="/account">
                     <div class="discord-profile">
                         <img src="{userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp` : "/discord.webp"}" alt="">
-                        <p>{userData.username}</p>
+                        <p class="discord-logined-content">{userData.username}</p>
                     </div>
                 </a>
             {/if}
@@ -65,9 +65,6 @@
 </header>
 
 <style>
-    :root {
-        --discord-login-height: 25px;
-    }
     header {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -100,10 +97,11 @@
         border-radius: 25px;
         background-color: #5865F2;
     }
+	.discord-logined-content,
     .discord-login-content {
         font-family: "Inter";
         margin: auto 0;
-        line-height: var(--discord-login-height);
+		font-size: 16px;
     }
     .discord-profile, .discord-login {
         margin: auto 20px auto 0;
@@ -137,4 +135,64 @@
         text-decoration: none;
         color: white;
     }
+    @media (max-width: 800px) {
+		.header-other-content {
+			font-size: 14px;
+		}
+		.header-title {
+			font-size: 24px;
+		}
+	}
+	@media (max-width: 650px) {
+		.header-other-content {
+			font-size: 10px;
+		}
+		.header-title {
+			font-size: 20px;
+		}
+		.discord-logined-content,
+		.discord-login-content {
+			font-size: 14px;
+		}
+	}
+	@media (max-width: 540px) {
+		.header-other-content {
+			font-size: 10px;
+		}
+		.header-title {
+			font-size: 16px;
+		}
+		.discord-logined-content,
+		.discord-login-content {
+			font-size: 12px;
+		}
+	}
+	@media (max-width: 500px) {
+		.header-other-content {
+			font-size: 8px;
+		}
+		.header-title {
+			font-size: 12px;
+		}
+		.discord-logined-content,
+		.discord-login-content {
+			font-size: 8px;
+		}
+	}
+	@media (max-width: 480px) {
+		.header-other-content {
+			font-size: 6px;
+		}
+		.header-title {
+			font-size: 10px;
+		}
+	}
+	@media (max-width: 450px) {
+		.header-other-content {
+			font-size: 4px;
+		}
+		.header-title {
+			font-size: 8px;
+		}
+	}
 </style>
