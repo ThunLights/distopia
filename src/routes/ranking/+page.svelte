@@ -1,7 +1,12 @@
 <script lang="ts">
+	import Meta from "$lib/meta.svelte";
 	import Icon from "$lib/icon.svelte";
 
 	import type { Guild } from "$lib/server/guild";
+
+	type OnChangeEvent = Event & {
+		currentTarget: EventTarget & HTMLSelectElement;
+	};
 
 	const { data } = $props();
 	const { searchType, level, activeRate } = data;
@@ -14,22 +19,34 @@
 		if (rank < 30) return 30;
 		return 50;
 	}
+
+	function moveOtherType(e: OnChangeEvent) {
+		location.href = `/ranking?type=${e.currentTarget.value}`;
+	}
 </script>
+
+<Meta title="Distopiaサーバーランキング"/>
 
 <main>
 	<div class="contents">
 		<div class="context">
-			<div>
+			<div class="context-menu">
 				<p class="title">ランキング</p>
+				<div class="search-type-changer">
+					<select value={searchType} onchange={moveOtherType}>
+						<option value="level">レベル</option>
+						<option value="activeRate">アクティブレート</option>
+					</select>
+				</div>
 			</div>
 			<div class="ranking">
 				{#if searchType === "activeRate"}
 					{#each activeRate as guild, i}
-						{@render generateGuild(guild, i)}
+						{@render generateGuild(guild, i, true)}
 					{/each}
 				{:else}
-					{#each level as guild}
-						{@render generateGuild(guild)}
+					{#each level as guild, i}
+						{@render generateGuild(guild, i, false)}
 					{/each}
 				{/if}
 			</div>
@@ -37,32 +54,64 @@
 	</div>
 </main>
 
-{#snippet generateGuild(guild: Guild, rank?: number)}
+{#snippet generateGuild(guild: Guild, rank: number, edge: boolean)}
 	<div class="guild">
 		<div>
-			{#if rank === undefined}
-				<img src={`https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`} alt="">
+			{#if edge}
+				<Icon imgStyle="width: 10vw;" iconPath={`https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
 			{:else}
-				<Icon imgStyle="" iconPath={`https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
+				<img class="icon" src={`https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`} alt="">
 			{/if}
 		</div>
 		<div>
-			<p class="name">{guild.name}</p>
+			<p class="name">{rank+1}: {guild.name}</p>
 			<div class="informations">
-				<p>Lv.{guild.level ? guild.level.level : 0}</p>
+				<p>Rate {guild.activeRate ?? 0} Lv.{guild.level ? guild.level.level : 0} {guild.level ? guild.level.point : 0}pt</p>
+				<p>{guild.members ?? 0}人(アクティブ: {guild.online})</p>
 			</div>
 		</div>
 		<div>
-			<p><a href="/guilds/{guild.guildId}">詳細</a></p>
+			<a href="/guilds/{guild.guildId}"><p class="move-page">詳細→</p></a>
 		</div>
 	</div>
 {/snippet}
 
 <style>
+	.guild .name {
+		font-size: 20px;
+		font-weight: 700;
+	}
+	.guild .icon {
+		border-radius: 50%;
+		width: 10vw;
+	}
+	.guild {
+		margin-bottom: 10px;
+		display: grid;
+		gap: 20px;
+		grid-template-columns: auto 1fr auto;
+		align-items: center;
+	}
+	.move-page {
+		font-size: 20px;
+	}
 	.title {
-		font-size: 22px;
+		font-size: 30px;
 		font-weight: 700;
 		margin-top: 10px;
+	}
+	.search-type-changer select {
+		color: rgb(201, 201, 201);
+		border-radius: 25px;
+		background-color: rgb(85, 85, 85);
+		padding: 5px 10px;
+		font-weight: 700;
+	}
+	.search-type-changer {
+		text-align: right;
+	}
+	.context-menu {
+		margin-bottom: 18px;
 	}
 	.context {
 		overflow: hidden;
