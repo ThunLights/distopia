@@ -7,7 +7,7 @@
 		edgePath: string
     }
 
-    export const { imgStyle, iconPath, edgePath }: Props = $props();
+	const { imgStyle, iconPath, edgePath }: Props = $props();
 
     const size = 512;
     const iconCanvasSize = 350;
