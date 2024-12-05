@@ -1,6 +1,7 @@
 <script lang="ts">
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";
+	import Icon from "$lib/icon.svelte";
 
 	import { onMount } from "svelte";
 	import { token2data } from "$lib/auth.svelte";
@@ -8,6 +9,7 @@
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { guildJoin } from "$lib/join.svelte";
+	import { generateEdge } from "$lib/edge.svelte.js";
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
@@ -64,7 +66,11 @@
 			<div class="context">
 				<div class="guild-info">
 					<div>
-						<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+						{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
+							<Icon imgStyle="height: 128px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+						{:else}
+							<img class="guild-icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+						{/if}
 					</div>
 					<div>
 						<p class="guild-name">{guild.name}</p>
@@ -193,6 +199,9 @@
 <Footer/>
 
 <style>
+	.guild-icon {
+		height: 128px;
+	}
 	.section-title {
 		font-weight: 700;
 	}

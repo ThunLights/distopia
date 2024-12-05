@@ -2,6 +2,8 @@
 	import Meta from "$lib/meta.svelte";
 	import Icon from "$lib/icon.svelte";
 
+	import { generateEdge } from "$lib/edge.svelte.js";
+
 	import type { Guild } from "$lib/server/guild";
 
 	type OnChangeEvent = Event & {
@@ -10,15 +12,6 @@
 
 	const { data } = $props();
 	const { searchType, level, activeRate } = data;
-
-	function generateEdge(rank: number) {
-		if (rank < 1) return 1;
-		if (rank < 2) return 2;
-		if (rank < 3) return 3;
-		if (rank < 10) return 10;
-		if (rank < 30) return 30;
-		return 50;
-	}
 
 	function moveOtherType(e: OnChangeEvent) {
 		location.href = `/ranking?type=${e.currentTarget.value}`;

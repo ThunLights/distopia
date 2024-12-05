@@ -5,9 +5,11 @@
 	import { getCategory } from "$lib/category.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { guildJoin } from "$lib/join.svelte";
+	import { generateEdge } from "$lib/edge.svelte";
 
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";
+	import Icon from "$lib/icon.svelte";
 
     import type { PageData } from "./$types";
 	import type { Guild } from "$lib/server/guild";
@@ -77,7 +79,11 @@
 			<div>
 				<div class="guild-info">
 					<div>
-						<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+						{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
+							<Icon imgStyle="height: 60px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+						{:else}
+							<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+						{/if}
 					</div>
 					<div>
 						<p class="guild-name">{guild.name}</p>
