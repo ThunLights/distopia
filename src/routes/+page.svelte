@@ -110,6 +110,7 @@
 		background-color: rgb(66, 66, 66);
 		display: inline-block;
 		margin-right: 10px;
+		margin-bottom: 6px;
 	}
 	.tag p {
 		display: inline-block;
