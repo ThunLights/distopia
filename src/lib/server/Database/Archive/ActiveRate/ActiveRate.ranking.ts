@@ -20,8 +20,10 @@ export class ActiveRateRankingTable {
 		try {
 			const data = { guildId, content };
 			const element = await this.table.findFirst({ where: { guildId } });
-			if (element && content < element.content) {
-				await this.table.updateMany({ where: { guildId }, data });
+			if (element) {
+				if (content < element.content) {
+					await this.table.updateMany({ where: { guildId }, data });
+				}
 			} else {
 				await this.table.create({ data });
 			}
