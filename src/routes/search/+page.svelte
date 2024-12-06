@@ -64,8 +64,13 @@
 	<div class="contents">
 		<div class="context">
 			<div>
-				<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
-				<button onclick={search}>検索</button>
+				<div>
+					<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+					<button onclick={search}>検索</button>
+				</div>
+				<div class="guilds-count">
+					<p>{guilds.length}件のサーバーがヒット</p>
+				</div>
 			</div>
 			{#if guilds.length}
 				<div class="guilds">
@@ -129,6 +134,9 @@
 		font-size: 15px;
 		border-radius: 25px;
 		padding: 4px 8px;
+	}
+	.guilds-count {
+		text-align: right;
 	}
 	.tags {
 		margin: 7px auto;
