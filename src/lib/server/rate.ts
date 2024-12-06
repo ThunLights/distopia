@@ -11,8 +11,8 @@ export type RateData = {
 class ActiveRate {
     public readonly h1 = 25;
     public readonly h2 = 2;
-    public readonly h3 = 3;
-    public readonly h4 = 2;
+    public readonly h3 = 7;
+    public readonly h4 = 5;
     public readonly h5 = 1;
     public readonly h6 = 35;
 
