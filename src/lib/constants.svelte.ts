@@ -77,11 +77,6 @@ export const supporters = [
         invite: "https://discord.gg/De8T2NS74X",
     },
     {
-        name: "はげさば",
-        icon: "/supporters/hage.webp",
-        invite: "https://discord.gg/hage",
-    },
-    {
         name: "Agares",
         icon: "/supporters/agares.webp",
         invite: "https://discord.gg/agares",
@@ -95,7 +90,12 @@ export const supporters = [
         name: "暇人鯖",
         icon: "/supporters/hima.webp",
         invite: "https://discord.gg/hima",
-    }
+    },
+	{
+		name: "大檸檬帝国",
+		icon: "/supporters/lemon.webp",
+		invite: "https://discord.gg/BgZddsVPMH",
+	}
 ] satisfies Array<SupporterServer>;
 
 export const staffs = [
