@@ -3,13 +3,13 @@ import { z } from "zod";
 import { structChecker } from "$lib/struct";
 import { generateErrorJson } from "$lib/server/json";
 import { blank } from "$lib/blank.svelte";
-import { deDepulication } from "$lib/array";
+import { deDepulicationObject } from "$lib/array";
 import { errorHandling } from "$lib/server/error";
 import { database } from "$lib/server/Database";
 import { id2Guild } from "$lib/server/guild";
 
 import type { RequestHandler } from "@sveltejs/kit";
-import type { Guild } from "$lib/guild.svelte";
+import type { Guild } from "$lib/server/guild";
 
 export const _RequestZod = z.object({
 	content: z.string(),
@@ -31,7 +31,7 @@ async function searchName(names: string[]) {
 				guilds.push(data);
 			}
 		}
-		return deDepulication(guilds);
+		return guilds;
 	} catch (error) {
 		errorHandling(error);
 		return []
@@ -48,7 +48,7 @@ async function searchTag(names: string[]) {
 				guilds.push(data);
 			}
 		}
-		return deDepulication(guilds);
+		return guilds;
 	} catch (error) {
 		errorHandling(error);
 		return []
@@ -64,8 +64,10 @@ export const POST = (async (e) => {
 		return generateErrorJson("BODY_CONTENT_ERROR");
 	}
 	const words = body.content.split(/\s+/g);
-	const guilds = [...(await searchName(words)), ...(await searchTag(words))];
+	const nameElement = await searchName(words);
+	const tagElement = await searchTag(words);
+	const guilds = deDepulicationObject(nameElement.concat(tagElement));
 	return json({
-		guilds: deDepulication(guilds),
+		guilds,
 	} satisfies Response, { status: 200 });
 }) satisfies RequestHandler;
