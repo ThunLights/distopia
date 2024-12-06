@@ -117,13 +117,13 @@
 					<div class="content">
 						<p>サーバー参加人数</p>
 						<div>
-							<p>0人</p>
+							<p>未実装</p>
 						</div>
 					</div>
 					<div class="content">
 						<p>アクティブレート</p>
 						<div>
-							<p>0.0</p>
+							<p>{guild.activeRate ?? 0}</p>
 						</div>
 					</div>
 				</div>
