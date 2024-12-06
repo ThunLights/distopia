@@ -10,6 +10,9 @@ export class MessageClient {
 	}
 
     public async create(message: OmitPartialGroupDMChannel<Message<boolean>>): Promise<void> {
+		if (message.author.bot) {
+			return;
+		}
 		if (!(message.guild && message.guildId)) {
 			return;
 		}
