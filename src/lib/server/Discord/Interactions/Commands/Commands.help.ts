@@ -12,6 +12,6 @@ export class HelpCommands extends CommandsBase {
     }
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-        return { content: "ヘルプコマンドは作り途中だよ。ごめんね。", ephemeral: true } satisfies InteractionReplyOptions;
+        return { content: "https://distopia.top/help", ephemeral: true } satisfies InteractionReplyOptions;
     }
 }
