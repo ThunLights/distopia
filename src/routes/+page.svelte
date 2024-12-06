@@ -22,6 +22,7 @@
 	} satisfies Response;
 
     let bgUrl = $state("");
+	let searchWord = $state("");
     let loginData = $state(data.auth);
 	let servers = $state<Response>(initServersData);
 
@@ -40,6 +41,17 @@
 			return redirectUrl(`https://discord.gg/${invite}`);
 		}
 	}
+
+    async function search() {
+        location.href = `/search?content=${encodeURIComponent(searchWord)}`
+    }
+
+    async function inputSearchCommand(e: KeyboardEvent) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            await search()
+        }
+    }
 </script>
 
 <Meta></Meta>
@@ -51,7 +63,10 @@
 	<div class="contents">
 		<div>
 			<p class="name">あなたにピッタリなDiscordサーバーを見つける</p>
-			<div></div>
+			<div>
+				<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+				<button onclick={search}>検索</button>
+			</div>
 		</div>
 		<div>
 			<p class="name">最近更新されたサーバー</p>
@@ -117,6 +132,12 @@
 {/snippet}
 
 <style>
+	.search-input {
+		width: 60%;
+		font-size: 15px;
+		border-radius: 25px;
+		padding: 4px 8px;
+	}
 	.tags {
 		margin: 7px auto;
 		width: 100%;
