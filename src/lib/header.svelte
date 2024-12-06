@@ -41,6 +41,11 @@
                 <p class="header-other-content">Ranking</p>
             </a>
         </div>
+        <div class="header-other">
+            <a href="/help">
+                <p class="header-other-content">Help</p>
+            </a>
+        </div>
     </div>
     {#if loginBlock}
         <div>
