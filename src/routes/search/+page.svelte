@@ -58,7 +58,7 @@
 	}
 </script>
 
-<Meta title="検索"/>
+<Meta title={`「${searchWord}」の検索結果を表示`}/>
 
 <main>
 	<div class="contents">
