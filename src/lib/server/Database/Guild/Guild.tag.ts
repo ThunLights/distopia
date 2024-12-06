@@ -51,4 +51,19 @@ export class GuildTagTable {
             return new ServerError("ERROR")
         }
     }
+
+	public async findTag(name: string) {
+		try {
+			return await this.table.findMany({
+				where: {
+					tag: {
+						contains: name,
+					}
+				}
+			})
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
 }

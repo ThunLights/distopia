@@ -64,4 +64,19 @@ export class GuildTable {
 			return [];
 		}
 	}
+
+	public async findName(name: string) {
+		try {
+			return await this.table.findMany({
+				where: {
+					name: {
+						contains: name,
+					}
+				}
+			});
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
 }
