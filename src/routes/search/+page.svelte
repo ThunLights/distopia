@@ -35,6 +35,17 @@
 		}
 	})
 
+    async function search() {
+        location.href = `/search?content=${encodeURIComponent(searchWord)}`
+    }
+
+    async function inputSearchCommand(e: KeyboardEvent) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            await search()
+        }
+    }
+
 	function joinBtn(guildId: string, invite: string, name: string) {
 		if (loginData) {
 			const { token } = loginData;
@@ -53,8 +64,8 @@
 	<div class="contents">
 		<div class="context">
 			<div>
-				<input type="text" spellcheck="false" autocomplete="off" bind:value={searchWord}>
-				<button>検索</button>
+				<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+				<button onclick={search}>検索</button>
 			</div>
 			{#if guilds.length}
 				<div class="guilds">
@@ -113,6 +124,12 @@
 {/snippet}
 
 <style>
+	.search-input {
+		width: 60%;
+		font-size: 15px;
+		border-radius: 25px;
+		padding: 4px 8px;
+	}
 	.tags {
 		margin: 7px auto;
 		width: 100%;
@@ -195,10 +212,7 @@
         width: 90%;
         margin: 20px auto;
     }
-	p {
-		color: white;
-	}
-	p, pre {
+	p, pre, a {
 		color: white;
 	}
     button {
