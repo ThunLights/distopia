@@ -9,6 +9,8 @@ export class GuildClientError {
 }
 
 export class GuildClient {
+	private lateLimits: string[] = [];
+
     constructor(private readonly client: Client) {
     }
 
@@ -39,8 +41,12 @@ export class GuildClient {
         if (guild instanceof DatabaseError) {
             return;
         }
-		if (guild) {
+		if (guild && !this.lateLimits.includes(member.id)) {
+			this.lateLimits.push(member.id);
 			await database.guildTables.newMember.update(guild.guildId);
+			setTimeout(() => {
+				this.lateLimits = this.lateLimits.filter(value => value !== member.id);
+			}, 15 * 1000);
 		}
 	}
 
