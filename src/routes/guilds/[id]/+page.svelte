@@ -147,7 +147,9 @@
 		</div>
 		<div class="contents">
 			<div class="context">
-				<p class="name">レビュー <button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}><a href="/guilds/{guildId}/review">レビューを投稿する</a></button></p>
+				<p class="name">レビュー {#if loginData}
+					<button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}><a href="/guilds/{guildId}/review">レビューを投稿する</a></button>
+				{/if}</p>
 				<div>
 					{#if reviews.length}
 						<div class="reviews">
