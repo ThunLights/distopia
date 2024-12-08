@@ -1,4 +1,4 @@
-import { PUBLIC_URL } from "$env/static/public";
+import { PUBLIC_OAUTH_URL } from "$env/static/public";
 
 type SiteAbout = {
     title: string
@@ -143,7 +143,7 @@ export const staffs = [
 	},
 ] satisfies Array<Staff>;
 
-export const LOGIN_URL = PUBLIC_URL;
+export const LOGIN_URL = PUBLIC_OAUTH_URL;
 
 export const CHARACTER_LIMIT = {
 	description: 250,
