@@ -9,11 +9,11 @@ import { ActiveRateClient } from "./Discord.activeRate";
 import { RankingClient } from "./Discord.ranking";
 import { Controller } from "./Controller/index";
 
-import cfg from "$project/important/discord.json";
+import { config } from "$lib/server/config";
 
 export class DiscordBotClient {
-    public readonly token = cfg.bot.token;
-    public readonly clientId = cfg.bot.id;
+    public readonly token = config.bot.token;
+    public readonly clientId = config.bot.id;
     public readonly client = new Client({ intents: INTENTS });
     public readonly guilds = new GuildClient(this.client);
 	public readonly control = new Controller(this.client);

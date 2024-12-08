@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DiscordBotClient } from "./Discord/index.js";
 import { DiscordOauth } from "./Discord/Oauth/index.js";
 
-import cfg from "$project/important/discord.json";
+import { config } from "$lib/server/config";
 
 export const GuildsUserZod = z.object({
     id: z.string(),
@@ -47,7 +47,7 @@ export type GuildsUser = z.infer<typeof GuildsUserZod>
 export type Code2dataResponse = CodeCheckResponse & AccessToken2dataResponse;
 
 export class DiscordController {
-    public readonly config: DiscordConfig = cfg;
+    public readonly config: DiscordConfig = config;
     public readonly bot = new DiscordBotClient();
     public readonly oauth = new DiscordOauth()
 }
