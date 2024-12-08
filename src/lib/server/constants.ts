@@ -1,3 +1,3 @@
-import cfg from "$project/important/discord.json";
+import { config } from "$lib/server/config";
 
-export const LoginUrl = cfg.oauth;
+export const LoginUrl = config.oauth;
