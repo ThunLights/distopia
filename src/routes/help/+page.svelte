@@ -10,6 +10,12 @@
 		<div class="context">
 			<p class="title">目次</p>
 			<div>
+				<p class="sub-title">【期間限定】コマンドのみでサーバー登録</p>
+				<div>
+					<p><a href="/help/register/special">https://distopia.top/help/register/special</a></p>
+				</div>
+			</div>
+			<div>
 				<p class="sub-title">サーバーを登録する</p>
 				<div>
 					<p><a href="/help/register">https://distopia.top/help/register</a></p>
