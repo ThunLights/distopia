@@ -1,6 +1,5 @@
 import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
-import type { UserElement } from "../Database.user";
 import { errorHandling } from "$lib/server/error";
 import { DatabaseError } from "../index";
 
