@@ -14,7 +14,6 @@ export class RegisterCommands extends CommandsBase {
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null | void> {
 		let category = interaction.options.getString("category") ?? "general";
-		console.log(category)
 		if (interaction.guild && interaction.guild.ownerId === interaction.user.id) {
 			if (!(interaction.channel && interaction.channel.type === ChannelType.GuildText)) {
 				return { content: "テキストチャンネル以外に招待リンクを設定することはできません", ephemeral: true } satisfies InteractionReplyOptions;
