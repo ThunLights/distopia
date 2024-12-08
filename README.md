@@ -6,9 +6,9 @@ https://distopia.top/ 用のやつです。
 
 ### 1: Configファイルを作ろう
 
-**important/discord.jsonを作らないと動かないよ**
+**.envを作らないと動かないよ**
 
-discord.jsonの中身に関してはimportantフォルダ内のdiscord.json.exampleを参考にしてね♡
+.env.exampleを元に.envを作成しよう!じゃないと動かないよ!GG!
 
 ### 2: setupコマンドを打とう
 
