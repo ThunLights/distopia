@@ -12,7 +12,7 @@ export abstract class CommandsBase {
 
     constructor(private readonly client: Client) {}
 
-    async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
+    async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
         return new CommandsError("Commands Not Found");
     }
 
@@ -24,6 +24,10 @@ export abstract class CommandsBase {
         if (result instanceof CommandsError) {
             return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
         }
-        return void await interaction.reply(result);
+		if (result || typeof result === "string") {
+			return void await interaction.reply(result)
+		} else {
+			return result;
+		};
     }
 }
