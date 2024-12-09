@@ -3,13 +3,21 @@ import { Client } from "discord.js";
 
 import type { PartialGuildMember, GuildMember, Guild } from "discord.js";
 
+type LateLimit = {
+	user: string[]
+	guild: string[]
+}
+
 export class GuildClientError {
     constructor(public readonly content: string) {
     }
 }
 
 export class GuildClient {
-	private lateLimits: string[] = [];
+	private lateLimits: LateLimit = {
+		user: [],
+		guild: [],
+	};
 
     constructor(private readonly client: Client) {
     }
@@ -41,12 +49,14 @@ export class GuildClient {
         if (guild instanceof DatabaseError) {
             return;
         }
-		if (guild && !this.lateLimits.includes(member.id)) {
-			this.lateLimits.push(member.id);
+		if (guild && !(this.lateLimits.user.includes(member.id) || this.lateLimits.guild.includes(member.guild.id))) {
+			if (!this.lateLimits.user.includes(member.id)) this.lateLimits.user.push(member.id);
+			if (!this.lateLimits.guild.includes(member.guild.id)) this.lateLimits.guild.push(member.guild.id);
 			await database.guildTables.newMember.update(guild.guildId);
 			setTimeout(() => {
-				this.lateLimits = this.lateLimits.filter(value => value !== member.id);
-			}, 15 * 1000);
+				this.lateLimits.user = this.lateLimits.user.filter(value => value !== member.id);
+				this.lateLimits.guild = this.lateLimits.guild.filter(value => value !== member.guild.id);
+			}, 16 * 1000);
 		}
 	}
 
