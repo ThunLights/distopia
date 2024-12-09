@@ -25,6 +25,7 @@ important/discord.json
 db/database.sqlite3
 
 log/**.log
+archive/**.sqlite3
 
 migrations/**
 
