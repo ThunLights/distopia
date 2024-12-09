@@ -9,12 +9,12 @@ export type RateData = {
 };
 
 class ActiveRate {
-    public readonly h1 = 25;
-    public readonly h2 = 2;
-    public readonly h3 = 7;
-    public readonly h4 = 5;
-    public readonly h5 = 1;
-    public readonly h6 = 35;
+    public readonly h1 = 8;
+    public readonly h2 = 6;
+    public readonly h3 = 10;
+    public readonly h4 = 10;
+    public readonly h5 = 6;
+    public readonly h6 = 50;
 
     constructor() {}
 
