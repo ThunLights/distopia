@@ -10,6 +10,7 @@ import { RankingClient } from "./Discord.ranking";
 import { Controller } from "./Controller/index";
 
 import { config } from "$lib/server/config";
+import { generateBackUp } from "$lib/server/archive";
 
 export class DiscordBotClient {
     public readonly token = config.bot.token;
@@ -29,6 +30,7 @@ export class DiscordBotClient {
 			await this.voiceClient.levelUpdate();
 			await this.activeRateClient.update();
 			await this.rankingClient.udpate();
+			await generateBackUp();
 		}, 20 * 60 * 1000);
 	}
 
