@@ -16,12 +16,12 @@
 		});
 	});
 
-	headerStore.subscribe(value => {
+	headerStore.subscribe((value) => {
 		loginBlock = value.loginBlock;
 	});
 </script>
 
-<SvelteToast/>
+<SvelteToast />
 
-<Header userData={auth} loginBlock={loginBlock} />
+<Header userData={auth} {loginBlock} />
 {@render children()}
