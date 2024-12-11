@@ -21,10 +21,6 @@ export class BumpCommands extends CommandsBase {
         if (guild === null || guild instanceof DatabaseError) {
             return { content: "サーバーを本登録していないとこのコマンドは使えません。", ephemeral: true } satisfies InteractionReplyOptions;
         }
-        const result = await database.guildTables.bump.update(guild.guildId);
-        if (!result) {
-            return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
-        }
 		if (this.lateLimit.includes(guild.guildId)) {
 			const embed = new EmbedBuilder()
 				.setColor("Red")
@@ -33,6 +29,10 @@ export class BumpCommands extends CommandsBase {
 				.setDescription(`レートリミットです。時間を置いて再度実行してください`);
 			return { embeds: [ embed ] } satisfies InteractionReplyOptions;
 		}
+        const result = await database.guildTables.bump.update(guild.guildId);
+        if (!result) {
+            return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
+        }
 		this.lateLimit.push(guild.guildId);
 		setTimeout(() => {
 			this.lateLimit = this.lateLimit.filter(value => value !== guild.guildId);
