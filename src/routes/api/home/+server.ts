@@ -23,7 +23,7 @@ export type Response = {
 async function getActiveGuilds() {
 	try {
 		const guilds: Guild[] = [];
-		const guildsBase = await database.guildTables.activeRate.ranking(20);
+		const guildsBase = await database.guildTables.activeRate.ranking(10);
 		for (const guildBase of guildsBase) {
 			const guild = await id2Guild(guildBase.guildId);
 			if (typeof guild === "string") {
