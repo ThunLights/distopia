@@ -23,7 +23,7 @@ export class RankingPanelRate {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { guildId, messageId },
+					data: { messageId },
 				})
 			} else {
 				await this.table.create({
