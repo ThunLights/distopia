@@ -1,5 +1,5 @@
 
-export const ssr = false;
+export const ssr = true;
 
 export const load = (async () => {
     return {};

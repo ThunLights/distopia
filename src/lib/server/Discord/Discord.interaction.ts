@@ -45,6 +45,13 @@ export class InteractionClient {
         {
             name: "admin",
             description: "only admin",
+			options: [
+				{
+					type: 1,
+					name: "ranking",
+					description: "put ranking panel",
+				}
+			],
         },
         {
             name: "web",
