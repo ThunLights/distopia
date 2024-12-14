@@ -11,9 +11,9 @@ export type RateData = {
 class ActiveRate {
     public readonly h1 = 8;
     public readonly h2 = 6;
-    public readonly h3 = 3;
-    public readonly h4 = 5;
-    public readonly h5 = 3;
+    public readonly h3 = 8;
+    public readonly h4 = 8;
+    public readonly h5 = 4;
     public readonly h6 = 50;
 
     constructor() {}
