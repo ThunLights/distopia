@@ -1,9 +1,10 @@
 import { codeBlock } from "$lib/codeblock";
 
+import { RankingRateButton } from "./Buttons.rankingRate";
+import { RankingLevelButton } from "./Buttons.rankingLevel";
+
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
-import { RankingRateButton } from "./Buttons.rankingRate";
-import { RankingLevelButton } from "./Buttons.rankinglevel";
 
 export class Buttons {
 	public readonly buttons: ButtonsBase[]
