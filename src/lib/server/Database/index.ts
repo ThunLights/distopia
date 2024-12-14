@@ -6,6 +6,7 @@ import { Email } from "./Database.email";
 import { Avatar } from "./Database.avatar";
 import { DatabaseGuildTables } from "./Guild/index";
 import { DatabaseArchiveTables } from "./Archive/index";
+import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { Staff } from "./Database.staff";
 
 export class DatabaseError {
@@ -20,6 +21,7 @@ export class DatabaseClient {
     public readonly avatar = new Avatar(this.prisma.avatar);
     public readonly guildTables = new DatabaseGuildTables(this.prisma);
 	public readonly archives = new DatabaseArchiveTables(this.prisma);
+	public readonly rankingPanel = new DatabaseRankingPanelTables(this.prisma);
     public readonly staff = new Staff(this.prisma.staff);
 }
 
