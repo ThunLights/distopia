@@ -6,7 +6,7 @@ import { errorHandling, ServerError } from "$lib/server/error";
 import { generateErrorJson } from "$lib/server/json";
 import { structChecker } from "$lib/struct";
 import { discord } from "$lib/server/discord";
-import { cache } from "$project/src/lib/server/Cache/index";
+import { cache } from "$lib/server/Cache/index";
 
 import type { RequestHandler } from "@sveltejs/kit";
 import type { UserElement } from "$lib/server/Database/Database.user";

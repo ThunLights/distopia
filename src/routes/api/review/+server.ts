@@ -8,7 +8,7 @@ import { database } from "$lib/server/Database";
 import { blank } from "$lib/blank.svelte";
 
 import type { RequestHandler } from "@sveltejs/kit";
-import { CHARACTER_LIMIT } from "$project/src/lib/constants.svelte";
+import { CHARACTER_LIMIT } from "$lib/constants.svelte";
 
 export const _RequestZod = z.object({
 	guildId: z.string(),
