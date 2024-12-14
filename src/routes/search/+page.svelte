@@ -58,7 +58,14 @@
 	}
 </script>
 
-<Meta title={`「${searchWord}」の検索結果を表示`}/>
+<Meta
+	title={`「${searchWord}」の検索結果を表示`}
+	description={[
+		`「${searchWord}」の検索結果です。`,
+		"現在沢山のサーバーが登録されています。",
+		"他ワードも試してみてください。",
+	].join("")}
+/>
 
 <main>
 	<div class="contents">

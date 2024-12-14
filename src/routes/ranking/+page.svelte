@@ -18,7 +18,14 @@
 	}
 </script>
 
-<Meta title="Distopiaサーバーランキング"/>
+<Meta
+	title="Distopiaサーバーランキング"
+	description={[
+		"Distopiaのサーバーランキングです。",
+		"カテゴリはアクティブレートとレベルの二つがあります。",
+		"(20分ごとに更新されます。)",
+	].join("")}
+/>
 
 <main>
 	<div class="contents">
