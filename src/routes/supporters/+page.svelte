@@ -9,12 +9,15 @@
 
     const { data }: { data: PageData } = $props();
 
-    let loginData = $state(data.auth);
     let title = "Supporters";
 </script>
 
 <Meta
     title={title}
+	description={[
+		"サポートサーバーに関する説明です。",
+		"支援団体等が記載されています。",
+	].join("")}
 />
 
 <main>
