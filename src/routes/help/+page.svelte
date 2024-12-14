@@ -3,7 +3,13 @@
 	import Footer from "$lib/footer.svelte";
 </script>
 
-<Meta title="Help / Distopia"/>
+<Meta
+	title="Help / Distopia"
+	description={[
+		"Distopiaへのサーバー登録方法やアクティブレートに関する解説があります。",
+		"このページでも分からないことがある場合は公式Discordサーバーにて聞いてください",
+	].join("")}
+/>
 
 <main>
 	<div class="contents">

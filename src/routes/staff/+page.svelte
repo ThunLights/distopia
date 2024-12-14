@@ -9,11 +9,14 @@
 
     const { data }: { data: PageData } = $props();
     let title = "スタッフ情報";
-    let loginData = $state(data.auth);
 </script>
 
 <Meta
     title={title}
+	description={[
+		"Distopiaのスタッフ一覧です。",
+		"このページに乗っている人以外はスタッフではありません。"
+	].join("")}
 />
 
 <main>

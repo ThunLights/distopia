@@ -9,10 +9,15 @@
 	import type { PageData } from "./$types";
 
     const { data }: { data: PageData } = $props();
-    const loginData = $state(data.auth);
 </script>
 
-<Meta title="Distopiaについて / Distopia.top"/>
+<Meta
+	title="Distopiaについて / Distopia.top"
+	description={[
+		"Distopiaの大まかな解説です。",
+		"細かい技術等の質問は公式Discordサーバーにてお願いします。",
+	].join("")}
+/>
 
 <main>
     <div class="contents">
