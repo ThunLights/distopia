@@ -11,6 +11,7 @@
 
 	import type { Guild } from "$lib/server/guild";
 	import type { Response } from "$routes/api/search/+server.js";
+	import { PUBLIC_URL } from "$env/static/public";
 
 	const { data } = $props();
 	let searchWord = $state(data.searchWord);
@@ -66,6 +67,10 @@
 		"他ワードも試してみてください。",
 	].join("")}
 />
+
+<svelte:head>
+	<link rel="canonical" href="{PUBLIC_URL}/search">
+</svelte:head>
 
 <main>
 	<div class="contents">
