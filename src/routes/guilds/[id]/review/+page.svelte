@@ -5,9 +5,9 @@
 	import { toast } from "@zerodevx/svelte-toast";
 	import { getCategory } from "$lib/category.svelte";
 	import { blank } from "$lib/blank.svelte";
+	import { CHARACTER_LIMIT } from "$lib/constants.svelte";
 
 	import type { PageData } from "./$types";
-	import { CHARACTER_LIMIT } from "$project/src/lib/constants.svelte";
 
 	const { data }: { data: PageData } = $props();
 	const { guildId, content, auth } = data;
