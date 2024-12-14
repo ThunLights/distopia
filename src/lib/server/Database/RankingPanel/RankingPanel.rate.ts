@@ -8,14 +8,17 @@ export class RankingPanelRate {
 
 	public async findMany() {
 		try {
-			return (await this.table.findMany()).map(value => value.messageId);
+			return (await this.table.findMany()).map(value => {return {
+				channelId: value.channelId,
+				messageId: value.messageId,
+			}});
 		} catch (error) {
 			errorHandling(error);
 			return [];
 		}
 	}
 
-	public async update(guildId: string, messageId: string) {
+	public async update(guildId: string, channelId: string, messageId: string) {
 		try {
 			const element = await this.table.findFirst({
 				where: { guildId }
@@ -23,11 +26,11 @@ export class RankingPanelRate {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { messageId },
+					data: { channelId, messageId },
 				})
 			} else {
 				await this.table.create({
-					data: { guildId, messageId }
+					data: { guildId, channelId, messageId }
 				})
 			}
 			return true;

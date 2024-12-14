@@ -30,6 +30,7 @@ export class DiscordBotClient {
 			await this.voiceClient.levelUpdate();
 			await this.activeRateClient.update();
 			await this.rankingClient.udpate();
+			await this.rankingClient.updatePanel();
 			await generateBackUp();
 		}, 20 * 60 * 1000);
 	}
