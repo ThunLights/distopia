@@ -18,7 +18,7 @@ export class RankingLevelButton extends ButtonsBase {
 				return null;
 			}
 			const ranking = await database.guildTables.level.ranking(20);
-			const databaseUpdateResult = await database.rankingPanel.rate.update(interaction.guild.id, interaction.channelId, interaction.message.id);
+			const databaseUpdateResult = await database.rankingPanel.level.update(interaction.guild.id, interaction.channelId, interaction.message.id);
 			if (!databaseUpdateResult) {
 				return { content: "データベースエラー", ephemeral: true } satisfies InteractionReplyOptions;
 			}

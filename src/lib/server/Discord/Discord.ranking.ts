@@ -55,7 +55,7 @@ export class RankingClient {
 			const ranking = await database.guildTables.level.ranking(20);
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
-				.setTitle("サーバーランキング: アクティブレート")
+				.setTitle("サーバーランキング: レベル")
 				.setDescription(`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=level)にアクセスお願いします。`)
 				.setColor("Purple")
 				.setURL(`${PUBLIC_URL}/ranking?type=level`)
@@ -87,7 +87,7 @@ export class RankingClient {
 			const ranking = await database.guildTables.activeRate.ranking(20);
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
-				.setTitle("サーバーランキング: レベル")
+				.setTitle("サーバーランキング: アクティブレート")
 				.setDescription(`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=activeRate)にアクセスお願いします。`)
 				.setColor("Purple")
 				.setURL(`${PUBLIC_URL}/ranking?type=activeRate`)
