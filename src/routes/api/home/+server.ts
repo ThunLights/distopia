@@ -2,12 +2,12 @@ import { database } from "$lib/server/Database";
 import { structChecker } from "$lib/struct";
 import { generateErrorJson } from "$lib/server/json";
 import { id2Guild } from "$lib/server/guild";
+import { errorHandling } from "$lib/server/error";
 import { json } from "@sveltejs/kit";
 import { z } from "zod";
 
 import type { RequestHandler } from "@sveltejs/kit";
 import type { Guild } from "$lib/server/guild";
-import { errorHandling } from "$project/src/lib/server/error";
 
 export const _RequestZod = z.object({
 	take: z.number().min(1).max(50),

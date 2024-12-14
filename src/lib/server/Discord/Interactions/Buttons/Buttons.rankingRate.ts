@@ -1,5 +1,5 @@
 import { PUBLIC_URL } from "$env/static/public";
-import { compressTxt } from "$project/src/lib/compress";
+import { compressTxt } from "$lib/compress";
 import { database } from "$lib/server/Database/index";
 import { errorHandling } from "$lib/server/error";
 import { id2Guild } from "$lib/server/guild";
