@@ -57,14 +57,16 @@
 {#snippet generateGuild(guild: Guild, rank: number, edge: boolean)}
 	<div class="guild">
 		<div>
-			{#if edge}
-				<Icon imgStyle="width: 10vw;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
-			{:else}
-				<img class="icon" src={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} alt="">
-			{/if}
+			<a class="white" href="/guilds/{guild.guildId}">
+				{#if edge}
+					<Icon imgStyle="width: 10vw;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
+				{:else}
+					<img class="icon" src={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} alt="">
+				{/if}
+			</a>
 		</div>
 		<div>
-			<p class="name">{rank+1}: {guild.name}</p>
+			<a class="white" href="/guilds/{guild.guildId}"><p class="name">{rank+1}: {guild.name}</p></a>
 			<div class="informations">
 				<p>Rate {guild.activeRate ?? 0} Lv.{guild.level ? guild.level.level : 0} {guild.level ? guild.level.point : 0}pt</p>
 				<p>{guild.members ?? 0}人(アクティブ: {guild.online})</p>
@@ -77,6 +79,9 @@
 {/snippet}
 
 <style>
+	.white {
+		color: white;
+	}
 	.guild .name {
 		font-size: 20px;
 		font-weight: 700;
