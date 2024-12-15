@@ -94,14 +94,16 @@
 			<div>
 				<div class="guild-info">
 					<div>
-						{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
-							<Icon imgStyle="height: 60px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
-						{:else}
-							<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
-						{/if}
+						<a class="white" href="/guilds/{guild.guildId}">
+							{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
+								<Icon imgStyle="height: 60px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+							{:else}
+								<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+							{/if}
+						</a>
 					</div>
 					<div>
-						<p class="guild-name">{guild.name}</p>
+						<a class="white" href="/guilds/{guild.guildId}"><p class="guild-name">{guild.name}</p></a>
 						<p>ブースト: {guild.boost}</p>
 						<p>カテゴリ: {getCategory(guild.category)}</p>
 					</div>
@@ -121,10 +123,11 @@
 					<pre>{guild.description}</pre>
 				</div>
 			</div>
-			<div>
+			<div class="join-btn">
 				<button onclick={redirectUrl(`/guilds/${guild.guildId}`)}>
 					<a href="/guilds/{guild.guildId}" class="button-a-tag">詳細を閲覧</a>
 				</button>
+				<div></div>
 				<button onclick={joinBtn(guild.guildId, guild.invite, guild.name)}>サーバーに参加</button>
 			</div>
 		</div>
@@ -132,6 +135,14 @@
 {/snippet}
 
 <style>
+	.join-btn {
+		display: grid;
+		grid-template-columns: 49% 2% 49%;
+	}
+	.white {
+		text-decoration: none;
+		color: white;
+	}
 	.search-input {
 		width: 60%;
 		font-size: 15px;
