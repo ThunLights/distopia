@@ -66,7 +66,7 @@
 			</a>
 		</div>
 		<div>
-			<a class="white" href="/guilds/{guild.guildId}"><p class="name">{rank+1}: {guild.name}</p></a>
+            <p><a class="name white" href="/guilds/{guild.guildId}">{rank+1}: {guild.name}</a></p>
 			<div class="informations">
 				<p>Rate {guild.activeRate ?? 0} Lv.{guild.level ? guild.level.level : 0} {guild.level ? guild.level.point : 0}pt</p>
 				<p>{guild.members ?? 0}人(アクティブ: {guild.online})</p>
