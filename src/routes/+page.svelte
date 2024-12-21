@@ -62,9 +62,9 @@
     </div>
 	<div class="contents">
 		<div>
-			<p class="name">あなたにピッタリなDiscordサーバーを見つける</p>
+			<p class="name"><label for="search-input">あなたにピッタリなDiscordサーバーを見つける</label></p>
 			<div>
-				<label><input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}></label>
+				<input id="search-input" class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
 				<button onclick={search}>検索</button>
 			</div>
 		</div>
@@ -261,7 +261,7 @@
 			font-size: 20px;
 		}
 		.guild-description {
-			font-size: 12px;
+			font-size: 10px;
 		}
 	}
 </style>
