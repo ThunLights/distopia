@@ -18,7 +18,7 @@
         color: #9ca3af;
     }
 	a {
-		color: rgb(109, 75, 182);
+		color: rgb(140, 25, 222);
 	}
     .fixed {
         width: 100%;
