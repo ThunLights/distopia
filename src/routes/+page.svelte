@@ -261,7 +261,7 @@
 			font-size: 20px;
 		}
 		.guild-description {
-			font-size: 12px;
+			font-size: 10px;
 		}
 	}
 </style>
