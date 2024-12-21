@@ -4,16 +4,16 @@
     export let fixed = false;
 </script>
 
-<main class="{ fixed ? "fixed" : "" }">
+<footer class="{ fixed ? "fixed" : "" }">
     <p>Contact: <a href="{DISCORD_INVITE_LINK}">Official Discord Server</a></p>
     <p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
-</main>
+</footer>
 
 <style>
-    main {
+	footer {
         background-color: #212227;
     }
-    main p {
+	footer p {
         padding: 3px 5px;
         color: #9ca3af;
     }
