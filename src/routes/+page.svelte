@@ -64,7 +64,7 @@
 		<div>
 			<p class="name">あなたにピッタリなDiscordサーバーを見つける</p>
 			<div>
-				<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+				<label><input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}></label>
 				<button onclick={search}>検索</button>
 			</div>
 		</div>
@@ -96,9 +96,9 @@
 					<div>
 						<a class="white" href="/guilds/{guild.guildId}">
 							{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
-								<Icon imgStyle="height: 60px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+								<Icon imgStyle="height: 60px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp?size=256` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
 							{:else}
-								<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+								<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp?size=256` : "/discord.webp"}" alt="">
 							{/if}
 						</a>
 					</div>
@@ -120,7 +120,7 @@
 						</div>
 					{/if}
 					<p>説明</p>
-					<pre>{guild.description}</pre>
+					<pre class="guild-description">{guild.description}</pre>
 				</div>
 			</div>
 			<div class="join-btn">
@@ -259,6 +259,9 @@
 		}
 		.contents>div .name {
 			font-size: 20px;
+		}
+		.guild-description {
+			font-size: 12px;
 		}
 	}
 </style>
