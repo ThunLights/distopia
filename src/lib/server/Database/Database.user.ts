@@ -28,15 +28,15 @@ export class User {
         try {
             const time = BigInt(Date.now());
             const element = await this.table.findFirst({
-                where: { id, username }
+                where: { id }
             })
             if (element) {
                 await this.table.updateMany({
                     where: {
                         id: element.id,
-                        username: element.username,
                     },
                     data: {
+						username,
                         accessToken,
                         refreshToken,
                         time,
