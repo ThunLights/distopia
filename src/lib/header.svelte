@@ -12,40 +12,56 @@
     export let titleLink = "/";
     export let loginBlock = true;
     export let userData: UserData = null;
+
+	let showBagerContent = false;
+
+	function bagerSwitcher() {
+		showBagerContent = !showBagerContent;
+		if (showBagerContent) {
+		} else {}
+	}
 </script>
 
 <header>
     <div>
-        <div class="header-title">
-            <a href="{titleLink}">
-                <p>{title}</p>
-            </a>
-        </div>
-        <div class="header-other">
-            <a href="/about">
-                <p class="header-other-content">About</p>
-            </a>
-        </div>
-        <div class="header-other">
-            <a href="/supporters">
-                <p class="header-other-content">Supporters</p>
-            </a>
-        </div>
-        <div class="header-other">
-            <a href="/staff">
-                <p class="header-other-content">Staff</p>
-            </a>
-        </div>
-        <div class="header-other">
-            <a href="/ranking">
-                <p class="header-other-content">Ranking</p>
-            </a>
-        </div>
-        <div class="header-other">
-            <a href="/help">
-                <p class="header-other-content">Help</p>
-            </a>
-        </div>
+		<div class="bager">
+			<button onclick={bagerSwitcher} aria-label="bager">
+				<input id="drawer_input" class="drawer_hidden" type="checkbox" style="display: none;">
+				<label for="drawer_input" class="drawer_open"><span></span></label>
+			</button>
+		</div>
+		<nav class="bager-content">
+			<div class="header-title">
+				<a href="{titleLink}">
+					<p>{title}</p>
+				</a>
+			</div>
+			<div class="header-other">
+				<a href="/about">
+					<p class="header-other-content">About</p>
+				</a>
+			</div>
+			<div class="header-other">
+				<a href="/supporters">
+					<p class="header-other-content">Supporters</p>
+				</a>
+			</div>
+			<div class="header-other">
+				<a href="/staff">
+					<p class="header-other-content">Staff</p>
+				</a>
+			</div>
+			<div class="header-other">
+				<a href="/ranking">
+					<p class="header-other-content">Ranking</p>
+				</a>
+			</div>
+			<div class="header-other">
+				<a href="/help">
+					<p class="header-other-content">Help</p>
+				</a>
+			</div>
+		</nav>
     </div>
     {#if loginBlock}
         <div>
@@ -70,6 +86,57 @@
 </header>
 
 <style>
+	#drawer_input:checked ~ .drawer_open span {
+		background: rgba(255, 255, 255, 0);
+	}
+	#drawer_input:checked ~ .drawer_open span::before {
+		bottom: 0;
+		transform: rotate(45deg);
+	}
+	#drawer_input:checked ~ .drawer_open span::after {
+		top: 0;
+		transform: rotate(-45deg);
+	}
+	.drawer_open {
+		display: flex;
+		height: 60px;
+		width: 60px;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		z-index: 100;
+		cursor: pointer;
+	}
+	.drawer_open span,
+	.drawer_open span:before,
+	.drawer_open span:after {
+		content: '';
+		display: block;
+		height: 3px;
+		width: 25px;
+		border-radius: 3px;
+		background: white;
+		transition: 0.5s;
+		position: absolute;
+	}
+	.drawer_open span:before {
+		bottom: 8px;
+	}
+	.drawer_open span:after {
+		top: 8px;
+	}
+	.bager {
+		display: none;
+	}
+
+	button {
+		padding: 0;
+		border: none;
+		outline: none;
+		font: inherit;
+		color: inherit;
+		background: none;
+	}
     header {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -141,10 +208,17 @@
         color: white;
     }
     @media (max-width: 800px) {
+		.bager {
+			display: block;
+		}
 		.header-other-content {
 			font-size: 14px;
 		}
+		.header-other {
+			display: none;
+		}
 		.header-title {
+			display: none;
 			font-size: 24px;
 		}
 	}
