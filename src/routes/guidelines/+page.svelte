@@ -4,33 +4,27 @@
 </script>
 
 <Meta
-	title="Help / Distopia"
+	title="Guidelines / Distopia"
 	description={[
-		"Distopiaへのサーバー登録方法やアクティブレートに関する解説があります。",
-		"このページでも分からないことがある場合は公式Discordサーバーにて聞いてください",
+		"Distopiaのサーバーガイドラインです。",
+		"サービス利用前に一度ご確認ください。",
 	].join("")}
 />
 
 <main>
 	<div class="contents">
 		<div class="context">
-			<p class="title">目次</p>
+			<p class="title">ガイドライン一覧</p>
 			<div>
-				<p class="sub-title">【期間限定】コマンドのみでサーバー登録</p>
+				<p class="sub-title">利用規約</p>
 				<div>
-					<p><a href="/help/register/special">https://distopia.top/help/register/special</a></p>
+					<p><a href="/license">https://distopia.top/license</a></p>
 				</div>
 			</div>
 			<div>
-				<p class="sub-title">サーバーを登録する</p>
+				<p class="sub-title">プライバシーポリシー</p>
 				<div>
-					<p><a href="/help/register">https://distopia.top/help/register</a></p>
-				</div>
-			</div>
-			<div>
-				<p class="sub-title">アクティブレートとは</p>
-				<div>
-					<p><a href="/help/rate">https://distopia.top/help/rate</a></p>
+					<p><a href="/privacy">https://distopia.top/privacy</a></p>
 				</div>
 			</div>
 		</div>

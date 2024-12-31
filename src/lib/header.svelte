@@ -7,28 +7,31 @@
     import type { ResponseContent } from "$routes/api/auth/+server";
 
     type UserData = ResponseContent | null;
+	type Props = {
+		title?: string
+		titleLink?: string
+		loginBlock?: boolean
+		userData?: UserData
+	}
 
-    export let title = "Distopia";
-    export let titleLink = "/";
-    export let loginBlock = true;
-    export let userData: UserData = null;
+	const props: Props = $props();
+	const title = props.title ?? "Distopia";
+	const titleLink = props.titleLink ?? "/";
+	const loginBlock = props.loginBlock ?? true;
+	const userData = props.userData ?? null;
 
-	let showBagerContent = false;
+	let showBagerContent = $state(false);
 
 	function bagerSwitcher() {
 		showBagerContent = !showBagerContent;
-		if (showBagerContent) {
-		} else {}
 	}
 </script>
 
 <header>
     <div>
 		<div class="bager">
-			<button onclick={bagerSwitcher} aria-label="bager">
-				<input id="drawer_input" class="drawer_hidden" type="checkbox" style="display: none;">
-				<label for="drawer_input" class="drawer_open"><span></span></label>
-			</button>
+			<input id="drawer_input" class="drawer_hidden hidden" type="checkbox" onchange={bagerSwitcher}>
+			<label for="drawer_input" class="drawer_open"><span></span></label>
 		</div>
 		<nav class="bager-content">
 			<div class="header-title">
@@ -36,29 +39,39 @@
 					<p>{title}</p>
 				</a>
 			</div>
-			<div class="header-other">
+			<div class="header-other" style="display: {showBagerContent ? "block" : "none"};">
+				<a href="/">
+					<p class="header-other-content">Home</p>
+				</a>
+			</div>
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/about">
 					<p class="header-other-content">About</p>
 				</a>
 			</div>
-			<div class="header-other">
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/supporters">
 					<p class="header-other-content">Supporters</p>
 				</a>
 			</div>
-			<div class="header-other">
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/staff">
 					<p class="header-other-content">Staff</p>
 				</a>
 			</div>
-			<div class="header-other">
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/ranking">
 					<p class="header-other-content">Ranking</p>
 				</a>
 			</div>
-			<div class="header-other">
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/help">
 					<p class="header-other-content">Help</p>
+				</a>
+			</div>
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
+				<a href="/guidelines">
+					<p class="header-other-content">Guidelines</p>
 				</a>
 			</div>
 		</nav>
@@ -129,14 +142,10 @@
 		display: none;
 	}
 
-	button {
-		padding: 0;
-		border: none;
-		outline: none;
-		font: inherit;
-		color: inherit;
-		background: none;
+	.hidden {
+		display: none;
 	}
+
     header {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -149,6 +158,7 @@
     }
     .header-title p,
     .header-other {
+		user-select: none;
         font-family: "Inter";
     }
     .header-other {
@@ -207,71 +217,38 @@
         text-decoration: none;
         color: white;
     }
-    @media (max-width: 800px) {
+    @media (max-width: 840px) {
 		.bager {
 			display: block;
 		}
+		.bager-content {
+			position: fixed;
+			z-index: 20;
+			opacity: 0.85;
+			background: #282828;
+			transition: .5s;
+		}
 		.header-other-content {
-			font-size: 14px;
+			padding: 6px 10px;
+			font-size: 18px;
 		}
 		.header-other {
 			display: none;
 		}
 		.header-title {
 			display: none;
-			font-size: 24px;
 		}
 	}
 	@media (max-width: 650px) {
-		.header-other-content {
-			font-size: 10px;
-		}
-		.header-title {
-			font-size: 20px;
-		}
 		.discord-logined-content,
 		.discord-login-content {
 			font-size: 14px;
 		}
 	}
 	@media (max-width: 540px) {
-		.header-other-content {
-			font-size: 10px;
-		}
-		.header-title {
-			font-size: 16px;
-		}
 		.discord-logined-content,
 		.discord-login-content {
 			font-size: 12px;
-		}
-	}
-	@media (max-width: 500px) {
-		.header-other-content {
-			font-size: 8px;
-		}
-		.header-title {
-			font-size: 12px;
-		}
-		.discord-logined-content,
-		.discord-login-content {
-			font-size: 8px;
-		}
-	}
-	@media (max-width: 480px) {
-		.header-other-content {
-			font-size: 6px;
-		}
-		.header-title {
-			font-size: 10px;
-		}
-	}
-	@media (max-width: 450px) {
-		.header-other-content {
-			font-size: 4px;
-		}
-		.header-title {
-			font-size: 8px;
 		}
 	}
 </style>
