@@ -49,16 +49,7 @@
 			}),
 		});
 		if (response.ok) {
-			toast.push("レビューを投稿しました。数秒後にリダイレクトされます", {
-				theme: {
-				  "--toastColor": "mintcream",
-				  "--toastBackground": !response.ok ? "rgb(168, 13, 13)" : "rgba(72,187,120,0.9)",
-				  "--toastBarBackground": "#2F855A"
-				}
-			});
-			setTimeout(() => {
-				location.href = `/guilds/${guildId}`;
-			}, 2 * 1000);
+			location.href = `/guilds/${guildId}`;
 		} else {
 			toast.push("エラーが発生しました。再ロードしてください", {
 				theme: {
