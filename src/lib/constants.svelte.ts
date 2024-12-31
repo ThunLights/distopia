@@ -78,9 +78,9 @@ export const supporters = [
         invite: "https://discord.gg/De8T2NS74X",
     },
     {
-        name: "Agares",
-        icon: "/supporters/agares.webp",
-        invite: "https://discord.gg/agares",
+        name: "Mikan Soba Club",
+        icon: "/supporters/mikan.gif",
+        invite: "https://discord.gg/HaFhCWS2Kk",
     },
     {
         name: "Cappuccino",
