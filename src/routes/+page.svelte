@@ -21,13 +21,11 @@
 		active: [],
 	} satisfies Response;
 
-    let bgUrl = $state("");
 	let searchWord = $state("");
     let loginData = $state(data.auth);
 	let servers = $state<Response>(initServersData);
 
     onMount(async () => {
-        bgUrl = getMeridiem(navigator.language) === "AM" ? "/am.webp" : "/pm.webp";
 		servers = await home() ?? initServersData;
     })
 
@@ -58,7 +56,11 @@
 
 <main>
     <div class="entrance-img">
-        <img src="{bgUrl}" alt="loading">
+		{#if data.bg === "AM"}
+			<enhanced:img src="/static/am.webp" alt="loading" />
+		{:else}
+			<enhanced:img src="/static/pm.webp" alt="loading" />
+		{/if}
     </div>
 	<div class="contents">
 		<div>
