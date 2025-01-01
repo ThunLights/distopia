@@ -91,7 +91,7 @@
 					{/each}
 				</div>
 			{:else}
-				<p>検索結果はありませんでした。</p>
+				<p>「{searchWord}」の検索結果は0件でした。</p>
 			{/if}
 		</div>
 	</div>

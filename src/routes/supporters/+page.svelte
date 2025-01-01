@@ -5,10 +5,6 @@
     import { supporters } from "$lib/constants.svelte";
     import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
 
-    import type { PageData } from "./$types";
-
-    const { data }: { data: PageData } = $props();
-
     let title = "Supporters";
 </script>
 
