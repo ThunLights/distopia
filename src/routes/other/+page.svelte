@@ -16,19 +16,23 @@
 		<div class="context">
 			<p class="title">Others</p>
 			<div>
-				<p class="sub-title">Guidelines</p>
+				<p class="sub-title">重要人物検索</p>
+				<a href="/people">https://distopia.top/people</a>
+			</div>
+			<div>
+				<p class="sub-title">ガイドライン</p>
 				<a href="/guidelines">https://distopia.top/guidelines</a>
 			</div>
 			<div>
-				<p class="sub-title">Supporters</p>
+				<p class="sub-title">支援団体</p>
 				<a href="/supporters">https://distopia.top/supporters</a>
 			</div>
 			<div>
-				<p class="sub-title">About</p>
+				<p class="sub-title">Distopiaについて</p>
 				<a href="/about">https://distopia.top/about</a>
 			</div>
 			<div>
-				<p class="sub-title">Staff</p>
+				<p class="sub-title">スタッフ一覧</p>
 				<a href="/staff">https://distopia.top/staff</a>
 			</div>
 		</div>
