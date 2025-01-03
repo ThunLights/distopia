@@ -1,6 +1,15 @@
 <script lang="ts">
+	import Meta from "$lib/meta.svelte";
 	import Footer from "$lib/footer.svelte";
 </script>
+
+<Meta
+	title="Other Links / Distopia.top"
+	description={[
+		"Distopiaの色々なリンクをまとめてあります。",
+		"気軽にご覧ください。",
+	].join("")}
+/>
 
 <main>
 	<div class="contents">
