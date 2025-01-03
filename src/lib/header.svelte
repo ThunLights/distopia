@@ -45,21 +45,6 @@
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/about">
-					<p class="header-other-content">About</p>
-				</a>
-			</div>
-			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/supporters">
-					<p class="header-other-content">Supporters</p>
-				</a>
-			</div>
-			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/staff">
-					<p class="header-other-content">Staff</p>
-				</a>
-			</div>
-			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/ranking">
 					<p class="header-other-content">Ranking</p>
 				</a>
@@ -70,8 +55,8 @@
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/guidelines">
-					<p class="header-other-content">Guidelines</p>
+				<a href="/other">
+					<p class="header-other-content">Other</p>
 				</a>
 			</div>
 		</nav>
