@@ -53,6 +53,7 @@ model Friend {
     userId      String @id
     username    String
     description String
+    time        DateTime
 }
 
 model FriendTag {
