@@ -30,7 +30,7 @@ async function getGuilds(user: UserElement) {
 	if (guildsCache) {
 		return guildsCache;
 	}
-	const data = await discord.oauth.guild.guilds.fetch(user);
+	const data = await discord.oauth.guild.guilds.exec(user);
 	if (data) {
 		await cache.discord.guilds.insert(user.id, data);
 	}
