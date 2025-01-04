@@ -6,6 +6,7 @@ import { Email } from "./Database.email";
 import { Avatar } from "./Database.avatar";
 import { DatabaseGuildTables } from "./Guild/index";
 import { DatabaseArchiveTables } from "./Archive/index";
+import { Friend } from "./Friend/index";
 import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { Staff } from "./Database.staff";
 
@@ -20,6 +21,7 @@ export class DatabaseClient {
     public readonly email = new Email(this.prisma.email);
     public readonly avatar = new Avatar(this.prisma.avatar);
     public readonly guildTables = new DatabaseGuildTables(this.prisma);
+	public readonly friend = new Friend(this.prisma);
 	public readonly archives = new DatabaseArchiveTables(this.prisma);
 	public readonly rankingPanel = new DatabaseRankingPanelTables(this.prisma);
     public readonly staff = new Staff(this.prisma.staff);
