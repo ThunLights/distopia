@@ -24,7 +24,7 @@ export class FetchError {
 export class OauthFetch {
     public readonly config = config;
 
-    private async resetAccessToken(refreshToken: string): Promise<ResetAccessToken | FetchError> {
+	public async resetAccessToken(refreshToken: string): Promise<ResetAccessToken | FetchError> {
         try {
             const params = new URLSearchParams();
             params.append("client_id", this.config.bot.id);

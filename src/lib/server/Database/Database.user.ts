@@ -24,6 +24,36 @@ export class User {
         }
     }
 
+	public async delete(userId: string) {
+		try {
+			await this.table.deleteMany({
+				where: {
+					id: userId
+				}
+			})
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
+	public async aboutExpire() {
+		try {
+			const fiveDaysAgo = Date.now() - (5 * 24 * 60 * 60 * 1000);
+			return await this.table.findMany({
+				where: {
+					time: {
+						lte: fiveDaysAgo,
+					}
+				}
+			})
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+
     public async update(id: string, username: string, accessToken: string, refreshToken: string) {
         try {
             const time = BigInt(Date.now());
