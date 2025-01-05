@@ -1,8 +1,10 @@
 import { codeBlock } from "$lib/codeblock";
 
+import { RegisterModals } from "./Modal.register";
+import { FriendModal } from "./Modal.friend";
+
 import type { CacheType, Client, ModalSubmitInteraction } from "discord.js"
 import type { ModalsBase } from "./Modal.base"
-import { RegisterModals } from "./Modal.register";
 
 export class Modals {
     public readonly modals: ModalsBase[]
@@ -10,6 +12,7 @@ export class Modals {
     constructor(private readonly client: Client) {
         this.modals = [
 			new RegisterModals(this.client),
+			new FriendModal(this.client),
         ]
     }
 

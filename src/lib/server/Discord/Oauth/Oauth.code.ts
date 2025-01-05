@@ -1,13 +1,9 @@
 import { config } from "$lib/server/config";
 import { database } from "$lib/server/Database";
 import { errorHandling } from "$lib/server/error";
-import type { OauthFetch } from "./Oauth.fetch";
 
 export class OauthCode {
     private readonly config = config;
-
-    constructor (private readonly originalFetch: OauthFetch) {
-    }
 
     public async getMoreInfo(accessToken: string) {
         try {
