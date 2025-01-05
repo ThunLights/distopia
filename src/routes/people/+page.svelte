@@ -1,5 +1,11 @@
 <script lang="ts"></script>
 
-<main></main>
+<main>
+	<p>完成までしばしお待ちください</p>
+</main>
 
-<style></style>
+<style>
+	p {
+		color: white;
+	}
+</style>
