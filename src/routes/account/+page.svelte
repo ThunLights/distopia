@@ -60,6 +60,7 @@
                 <div>
                     <p class="title">アカウント操作</p>
                     <div>
+						<button class="account-operation-btn" onclick={redirectUrl("/account/friend")}>フレンド募集する</button>
                         <button class="account-operation-btn" onclick={redirectUrl("/account/settings")}>アカウント設定</button>
                         <button class="account-operation-btn" onclick={logout}>ログアウト</button>
                     </div>
@@ -68,7 +69,7 @@
             <div class="contents">
                 <div>
                     <p class="title">ランキング掲載サーバー</p>
-                    <p class="not-found">ランキング上位のサーバーはありません</p>
+                    <p class="not-found">この機能の実装までしばしお待ちください</p>
                 </div>
             </div>
             <div class="contents">
