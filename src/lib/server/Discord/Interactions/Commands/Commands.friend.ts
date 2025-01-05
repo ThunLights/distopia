@@ -9,33 +9,30 @@ export class FriendCommand extends CommandsBase {
     public readonly commandName = "friend";
 
 	public async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-		const element = await database.friend.fetch(interaction.user.id);
-		if (!element) {
-			const modal = new ModalBuilder()
-				.setCustomId("friend")
-				.setTitle("フレンド募集 (ウェブサイトに表示されます。)")
-				.addComponents(
-					new ActionRowBuilder<TextInputBuilder>().addComponents(
-						new TextInputBuilder()
-							.setCustomId("nsfw")
-							.setLabel("R18にしたい場合は下記にokと入力してください")
-							.setStyle(TextInputStyle.Short)
-					),
-					new ActionRowBuilder<TextInputBuilder>().addComponents(
-						new TextInputBuilder()
-							.setCustomId("tags")
-							.setLabel(`検索タグ (最大${TAG_COUNT_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`)
-							.setStyle(TextInputStyle.Paragraph)
-					),
-					new ActionRowBuilder<TextInputBuilder>().addComponents(
-						new TextInputBuilder()
-							.setCustomId("profile")
-							.setLabel("自己紹介")
-							.setStyle(TextInputStyle.Paragraph)
-					),
-				);
-			return await interaction.showModal(modal);
-		}
-		return { content: "既に登録済みです。", ephemeral: true } satisfies InteractionReplyOptions;
+		const modal = new ModalBuilder()
+			.setCustomId("friend")
+			.setTitle("フレンド募集 (ウェブサイトに表示されます。)")
+			.addComponents(
+				new ActionRowBuilder<TextInputBuilder>().addComponents(
+					new TextInputBuilder()
+						.setCustomId("nsfw")
+						.setLabel("R18にしたい場合は下記にokと入力してください")
+						.setValue("no")
+						.setStyle(TextInputStyle.Short)
+				),
+				new ActionRowBuilder<TextInputBuilder>().addComponents(
+					new TextInputBuilder()
+						.setCustomId("tags")
+						.setLabel(`検索タグ (最大${TAG_COUNT_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`)
+						.setStyle(TextInputStyle.Paragraph)
+				),
+				new ActionRowBuilder<TextInputBuilder>().addComponents(
+					new TextInputBuilder()
+						.setCustomId("profile")
+						.setLabel("自己紹介")
+						.setStyle(TextInputStyle.Paragraph)
+				),
+			);
+		return await interaction.showModal(modal);
 	}
 }
