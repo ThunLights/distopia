@@ -6,13 +6,14 @@ import { json } from "@sveltejs/kit";
 import { z } from "zod";
 import { database } from "$lib/server/Database/index";
 import { deDepulication } from "$lib/array";
+import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const _RequestZod = z.object({
-    description: z.string(),
+    description: z.string().max(CHARACTER_LIMIT.description),
     nsfw: z.boolean(),
-	tags: z.string().array(),
+	tags: z.string().max(CHARACTER_LIMIT.tag).array().max(TAG_COUNT_LIMIT),
 });
 
 export type Request = z.infer<typeof _RequestZod>;
