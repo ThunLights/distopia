@@ -26,6 +26,8 @@ export class FriendModal extends ModalsBase {
 		const tags = deDepulication(await this.tagsChecker(interaction.fields.getTextInputValue("tags").split("\n")));
 		const nsfw = interaction.fields.getTextInputValue("nsfw") === "ok";
 		const profile = compressTxt(interaction.fields.getTextInputValue("profile"), CHARACTER_LIMIT.description);
+
+		await database.friend.tag.delete(interaction.user.id);
 		await database.friend.update({
 			userId: interaction.user.id,
 			username: interaction.user.username,
