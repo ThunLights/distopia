@@ -41,37 +41,27 @@
 			</div>
 			<div class="header-other" style="display: {showBagerContent ? "block" : "none"};">
 				<a href="/">
-					<p class="header-other-content">Home</p>
+					<p class="header-other-content">ホーム</p>
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/about">
-					<p class="header-other-content">About</p>
-				</a>
-			</div>
-			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/supporters">
-					<p class="header-other-content">Supporters</p>
-				</a>
-			</div>
-			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/staff">
-					<p class="header-other-content">Staff</p>
+				<a href="/friends">
+					<p class="header-other-content">フレンド募集</p>
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/ranking">
-					<p class="header-other-content">Ranking</p>
+					<p class="header-other-content">ランキング</p>
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
 				<a href="/help">
-					<p class="header-other-content">Help</p>
+					<p class="header-other-content">ヘルプ</p>
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/guidelines">
-					<p class="header-other-content">Guidelines</p>
+				<a href="/other">
+					<p class="header-other-content">その他</p>
 				</a>
 			</div>
 		</nav>
@@ -164,6 +154,9 @@
     .header-other {
         margin-right: 12px;
     }
+	.header-other-content {
+		font-weight: 700;
+	}
     .header-title {
         font-size: 30px;
         padding: 20px;

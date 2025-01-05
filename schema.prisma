@@ -31,6 +31,39 @@ model Avatar {
     content String
 }
 
+//重要人物システム用
+model People {
+    userId      String @id
+    name        String
+    type        String
+    score       Int
+    title       String
+    description String
+}
+
+model PeopleTag {
+    userId  String
+    content String
+
+    @@id([userId, content])
+}
+
+//フレンド募集用
+model Friend {
+    userId      String @id
+    username    String
+    description String
+    nsfw        Boolean
+    time        DateTime
+}
+
+model FriendTag {
+    userId  String
+    content String
+
+    @@id([userId, content])
+}
+
 //登録サーバーの為のテーブル
 model Guild {
     guildId     String @id

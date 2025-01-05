@@ -4,6 +4,6 @@ import { OauthFetch } from "./Oauth.fetch";
 
 export class DiscordOauth {
     public readonly fetch = new OauthFetch();
-    public readonly code = new OauthCode(this.fetch);
-    public readonly guild = new OauthGuild(this.fetch);
+    public readonly code = new OauthCode();
+    public readonly guild = new OauthGuild();
 }

@@ -27,7 +27,7 @@ async function join(body: Request, id: string, data: UserElement) {
 		if (cacheData) {
 			return cacheData.status;
 		}
-		const result = await discord.oauth.guild.join.fetch(body.guildId, id, data);
+		const result = await discord.oauth.guild.join.exec(body.guildId, id, data);
 		if (!result) {
 			return generateErrorJson("DISCORD_API_ERROR");
 		}

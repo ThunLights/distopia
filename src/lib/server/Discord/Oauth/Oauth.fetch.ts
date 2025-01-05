@@ -24,7 +24,7 @@ export class FetchError {
 export class OauthFetch {
     public readonly config = config;
 
-    private async resetAccessToken(refreshToken: string): Promise<ResetAccessToken | FetchError> {
+	public async resetAccessToken(refreshToken: string): Promise<ResetAccessToken | FetchError> {
         try {
             const params = new URLSearchParams();
             params.append("client_id", this.config.bot.id);
@@ -46,68 +46,6 @@ export class OauthFetch {
                 return await this.resetAccessToken(refreshToken);
             }
             return new FetchError("HTTP_RESPONSE_ERROR");
-        } catch (error) {
-            errorHandling(error);
-            return new FetchError("ERROR");
-        }
-    }
-
-	private async fetchCore(url: string, options: RequestInit, user: UserElement): Promise<Response | FetchError> {
-		try {
-            const response = await fetch(url, options);
-            if (response.status === 401) {
-                const newAccessToken = await this.resetAccessToken(user.refreshToken);
-                if (newAccessToken instanceof FetchError) {
-					await database.token.delete(user.id);
-                    return newAccessToken;
-                }
-                const data = await discord.oauth.code.getMoreInfo(newAccessToken.access_token);
-                if (!data) {
-					await database.token.delete(user.id);
-                    return new FetchError("FETCH_USER_DATA_ERROR");
-                }
-                if (!await database.user.update(user.id, data.username, newAccessToken.access_token, newAccessToken.refresh_token)) {
-					await database.token.delete(user.id);
-                    return new FetchError("DATABASE_ERROR");
-                }
-				return await this.fetchCore(url, options, await database.user.data(user.id) ?? user);
-            }
-            if (response.status === 429) {
-                await sleep(1000);
-                return await this.useAccessToken(url, options, user);
-            }
-            return response;
-        } catch (error) {
-            errorHandling(error);
-            return new FetchError("ERROR");
-		}
-	}
-
-	public async useAccessTokenUltra(url: string, options: RequestInit, user: UserElement): Promise<Response | FetchError> {
-		try {
-            const response = await this.fetchCore(url, options, user);
-			if (response instanceof FetchError) {
-				return response;
-			}
-            return response;
-        } catch (error) {
-            errorHandling(error);
-            return new FetchError("ERROR");
-		}
-	}
-
-    public async useAccessToken<T>(url: string, options: RequestInit, user: UserElement): Promise<T | FetchError> {
-        try {
-            const response = await this.fetchCore(url, options, user);
-			if (response instanceof FetchError) {
-				return response;
-			}
-			if (response.ok) {
-				const json: T = await response.json();
-				return json;
-			}
-
-            return new FetchError("ERROR");
         } catch (error) {
             errorHandling(error);
             return new FetchError("ERROR");
