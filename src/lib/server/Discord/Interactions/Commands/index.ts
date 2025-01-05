@@ -7,6 +7,7 @@ import { HelpCommands } from "./Commands.help";
 import { BumpCommands } from "./Commands.bump";
 import { StaffCommands } from "./Commands.staff";
 import { RegisterCommands } from "./Commands.register";
+import { FriendCommand } from "./Commands.friend";
 
 import type { ChatInputCommandInteraction, CacheType } from "discord.js";
 import type { CommandsBase } from "./Commands.base";
@@ -22,6 +23,7 @@ export class Commands {
             new BumpCommands(this.client),
             new StaffCommands(this.client),
 			new RegisterCommands(this.client),
+			new FriendCommand(this.client),
         ]
     }
 
