@@ -12,6 +12,7 @@ import { GuildNewMemberTable } from "./Guild.newMember";
 import { GuildNewMessageTable } from "./Guild.newMessage";
 import { GuildVcMemberSum } from "./Guild.vcMemberSum";
 import { GuildVcMemberUpperTwo } from "./Guild.vcMemberUpperTwo";
+import { BlackList } from "./Guild.blackList";
 
 export class DatabaseGuildTables {
     public readonly guild: GuildTable
@@ -26,6 +27,7 @@ export class DatabaseGuildTables {
 	public readonly newMember: GuildNewMemberTable
 	public readonly vcMemberSum: GuildVcMemberSum
 	public readonly vcMemberUpperTwo: GuildVcMemberUpperTwo
+	public readonly blackList: BlackList
 
     constructor(private readonly prisma: PrismaClient) {
         this.guild = new GuildTable(this.prisma.guild);
@@ -40,5 +42,6 @@ export class DatabaseGuildTables {
 		this.newMember = new GuildNewMemberTable(this.prisma.guildNewMember);
 		this.vcMemberSum = new GuildVcMemberSum(this.prisma.guildVcMemberSum);
 		this.vcMemberUpperTwo = new GuildVcMemberUpperTwo(this.prisma.guildVcMemberUpperTwo);
+		this.blackList = new BlackList(this.prisma.guildBlackList);
     }
 }

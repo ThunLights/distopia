@@ -118,6 +118,10 @@ model GuildLevel {
     point   BigInt
 }
 
+model GuildBlackList {
+    guildId String @id
+}
+
 //アクティブレートの為のテーブル
 model GuildNewMember {
     guildId String
