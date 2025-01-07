@@ -32,7 +32,7 @@ model Avatar {
 }
 
 //重要人物システム用
-model People {
+model DangerousPeople {
     userId      String @id
     name        String
     type        String
@@ -41,7 +41,7 @@ model People {
     description String
 }
 
-model PeopleTag {
+model DangerousPeopleTag {
     userId  String
     content String
 
