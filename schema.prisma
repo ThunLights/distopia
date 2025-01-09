@@ -39,6 +39,7 @@ model DangerousPeople {
     score       Int
     title       String
     description String
+    time        DateTime
 }
 
 model DangerousPeopleTag {
