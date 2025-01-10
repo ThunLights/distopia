@@ -1,4 +1,5 @@
 import { PUBLIC_OAUTH_URL } from "$env/static/public";
+import { z } from "zod";
 
 type SiteAbout = {
     title: string
@@ -156,3 +157,7 @@ export const TAG_COUNT_LIMIT = 5;
 export const INVALID_TAG_CHARACTOR = [
 	"\n"
 ];
+
+export const DangerousPeopleTypes = [ "criminal", "disturber", "madman", "other" ] as const;
+
+export const DangerousPeopleTypeZod = z.enum(DangerousPeopleTypes);

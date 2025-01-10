@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Meta from "$lib/meta.svelte";
+
 	import { PUBLIC_OWNER_ID } from "$env/static/public";
 	import { redirectUrl } from "$lib/redirect.svelte.js";
 	import { onMount } from "svelte";
@@ -11,6 +13,10 @@
 		}
 	})
 </script>
+
+<Meta
+	title="危険人物関係"
+/>
 
 <main>
 	<div class="contents">
