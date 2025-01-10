@@ -19,8 +19,8 @@
 				<p>どのような操作をしますか？</p>
 			</div>
 			<div>
-				<button onclick={redirectUrl("/admin/add")}>追加</button>
-				<button onclick={redirectUrl("/admin/remove")}>削除</button>
+				<button onclick={redirectUrl("/admin/people/add")}>追加</button>
+				<button onclick={redirectUrl("/admin/people/remove")}>削除</button>
 			</div>
 		</div>
 	</div>
