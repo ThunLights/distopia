@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Meta from "$lib/meta.svelte";
+
 	import { PUBLIC_OWNER_ID } from "$env/static/public";
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";
@@ -38,6 +40,10 @@
 	}
 </script>
 
+<Meta
+	title="危険人物を削除"
+/>
+
 <main>
 	<div class="contents">
 		<div class="context">
@@ -70,7 +76,30 @@
 		width: 90%;
 		margin: 20px auto;
 	}
+	.context>div {
+		margin-top: 20px;
+	}
 
+    button {
+        cursor: pointer;
+        border-radius: 25px;
+        color: white;
+        background-color: rgb(49, 49, 49);
+        opacity: 0.8;
+		font-size: 14px;
+        padding: 4px 8px;
+        border: 1px solid rgb(85, 85, 85);
+    }
+    button:active {
+        border: 1px solid rgb(49, 49, 49);
+        background-color: rgb(85, 85, 85);
+    }
+	input {
+		width: 60%;
+		font-size: 15px;
+		border-radius: 25px;
+		padding: 4px 8px;
+	}
 	p {
 		color: white;
 	}

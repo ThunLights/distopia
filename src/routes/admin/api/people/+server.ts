@@ -1,4 +1,3 @@
-import { DangerousPeopleTypeZod } from "$lib/server/Database/DangerousPeople/index";
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { json } from "@sveltejs/kit";
@@ -7,6 +6,7 @@ import { generateErrorJson } from "$lib/server/json";
 import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { structChecker } from "$lib/struct";
 import { database } from "$lib/server/Database/index";
+import { DangerousPeopleTypeZod } from "$lib/constants.svelte";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -19,6 +19,8 @@ export const _BodyZod = z.object({
 	score: z.number(),
 	title: z.string(),
 	description: z.string(),
+
+	tags: z.string().array(),
 });
 
 export type Body = z.infer<typeof _BodyZod>;
@@ -38,12 +40,16 @@ export const POST = (async (e) => {
 		const result = await database.dangerousPeople.update(body.userId, {
 			...body,
 			...{
+				tags: undefined,
 				userId: undefined,
 				time: new Date(),
 			}
 		});
 		if (!result) {
 			return generateErrorJson("DATABASE_ERROR");
+		}
+		for (const tag of body.tags) {
+			await database.dangerousPeople.tag.update(body.userId, tag);
 		}
 
 		return json({

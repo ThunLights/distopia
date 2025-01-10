@@ -4,11 +4,7 @@ import { z } from "zod";
 
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
-
-export const DangerousPeopleTypeZod = z.literal("criminal")
-	.or(z.literal("disturber"))
-	.or(z.literal("madman"))
-	.or(z.literal("other"))
+import type { DangerousPeopleTypeZod } from "$lib/constants.svelte";
 
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
 
@@ -55,8 +51,8 @@ export class DangerousPeople {
 			} else {
 				await this.table.create({
 					data: {
-						...{ userId },
 						...target,
+						...{ userId },
 					}
 				})
 			}
