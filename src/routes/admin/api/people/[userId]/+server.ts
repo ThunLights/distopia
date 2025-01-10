@@ -2,46 +2,25 @@ import { DangerousPeopleTypeZod } from "$lib/server/Database/DangerousPeople/ind
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { json } from "@sveltejs/kit";
-import { z } from "zod";
 import { generateErrorJson } from "$lib/server/json";
 import { PUBLIC_OWNER_ID } from "$env/static/public";
-import { structChecker } from "$lib/struct";
 import { database } from "$lib/server/Database/index";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
-export const _BodyZod = z.object({
-	userId: z.string(),
-	name: z.string(),
-
-	type: DangerousPeopleTypeZod,
-
-	score: z.number(),
-	title: z.string(),
-	description: z.string(),
-});
-
-export type Body = z.infer<typeof _BodyZod>;
-
-export const POST = (async (e) => {
+export const DELETE = (async (e) => {
+	const userId = e.params.userId;
 	const auth = await authorization(e);
-	const body = structChecker(await e.request.json(), _BodyZod);
 
+	if (!userId) {
+		return generateErrorJson("USERID_NOT_FOUND");
+	}
 	if (auth instanceof ServerError) {
 		return generateErrorJson("AUTHORIZATION_ERROR");
 	}
-	if (!body) {
-		return generateErrorJson("BODY_FORMAT_ERROR");
-	}
 
 	if (auth.data.id === PUBLIC_OWNER_ID) {
-		const result = await database.dangerousPeople.update(body.userId, {
-			...body,
-			...{
-				userId: undefined,
-				time: new Date(),
-			}
-		});
+		const result = await database.dangerousPeople.delete(userId);
 		if (!result) {
 			return generateErrorJson("DATABASE_ERROR");
 		}

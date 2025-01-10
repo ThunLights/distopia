@@ -1,8 +1,29 @@
 import { errorHandling } from "$lib/server/error";
 import { DangerousPeopleTag } from "./DangerousPeople.tag";
+import { z } from "zod";
 
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
+
+export const DangerousPeopleTypeZod = z.literal("criminal")
+	.or(z.literal("disturber"))
+	.or(z.literal("madman"))
+	.or(z.literal("other"))
+
+export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
+
+export type UpdateElement = {
+    type: string
+    name: string
+    score: number
+    title: string
+    description: string
+    time: Date
+}
+
+export type Element = {
+    userId: string
+} & Required<UpdateElement>
 
 export class DangerousPeople {
 	public readonly tag: DangerousPeopleTag;
@@ -20,6 +41,39 @@ export class DangerousPeople {
 		} catch (error) {
 			errorHandling(error);
 			return null;
+		}
+	}
+
+	public async update(userId: string, target: UpdateElement) {
+		try {
+			const element = await this.table.findFirst({ where: { userId } });
+			if (element) {
+				await this.table.updateMany({
+					where: { userId },
+					data: target,
+				})
+			} else {
+				await this.table.create({
+					data: {
+						...{ userId },
+						...target,
+					}
+				})
+			}
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
+	public async delete(userId: string) {
+		try {
+			await this.table.deleteMany({ where: { userId } })
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
 		}
 	}
 
