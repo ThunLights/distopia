@@ -14,6 +14,15 @@ export class DangerousPeople {
 		this.tag = new DangerousPeopleTag(prisma.dangerousPeopleTag);
 	}
 
+	public async fetch(userId: string) {
+		try {
+			return await this.table.findFirst({ where: { userId } });
+		} catch (error) {
+			errorHandling(error);
+			return null;
+		}
+	}
+
 	public async countAll() {
 		try {
 			return (await this.table.findMany()).length;

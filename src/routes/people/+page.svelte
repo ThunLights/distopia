@@ -20,10 +20,10 @@
 				<div></div>
 			</div>
 			<div>
-				<p>現在{count}個のユーザーが登録済み</p>
+				<p class="sub-title">現在{count}人のユーザーが登録済み</p>
 			</div>
 			<div>
-				<p>最近登録されたユーザー</p>
+				<p class="title">最近登録されたユーザー</p>
 				{#each peoples as people}
 					<div class="people">
 						<div class="profile">
@@ -34,12 +34,6 @@
 							<p>識別タイプ: {people.type}</p>
 							<p>危険度: {people.score}</p>
 							<p>登録日時: {date2Txt(people.time)}</p>
-						</div>
-						<div>
-							<p class="sub-title">主な要素</p>
-							<p>{people.title}</p>
-							<p class="sub-title">詳細</p>
-							<pre>{people.description}</pre>
 						</div>
 					</div>
 				{/each}
@@ -61,6 +55,19 @@
 		border-radius: 10px;
 		width: 90%;
 		margin: 20px auto;
+	}
+	.title {
+		font-size: 24px;
+	}
+	.sub-title {
+		font-size: 18px;
+	}
+	.title, .sub-title {
+		margin-top: 16px;
+		font-weight: 700;
+	}
+	.context>div {
+		margin: 10px 0;
 	}
 
 	main {
