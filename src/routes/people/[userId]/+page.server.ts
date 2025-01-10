@@ -9,5 +9,6 @@ export const load = (async (e) => {
 	return {
 		userId,
 		user,
+		tags: (await database.dangerousPeople.tag.findUserTags(userId)).map(value => value.content),
 	}
 }) satisfies PageServerLoad;
