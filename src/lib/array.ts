@@ -11,6 +11,21 @@ export function deDepulicationObject<T extends Guild>(arr: T[]): T[] {
 	return result;
 }
 
+export function deDepulicationStructs<T extends object>(arr: T[]): T[] {
+	const result: T[] = [];
+	const stringElements: string[] = [];
+
+	for (const element of arr) {
+		const strElement = JSON.stringify(element);
+		if (!stringElements.includes(strElement)) {
+			result.push(element);
+			stringElements.push(strElement);
+		}
+	}
+
+	return result;
+}
+
 export function sumArrayContents(arr: number[]) {
 	if (!arr.length) {
 		return 0;

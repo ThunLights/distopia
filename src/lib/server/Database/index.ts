@@ -8,6 +8,7 @@ import { DatabaseGuildTables } from "./Guild/index";
 import { DatabaseArchiveTables } from "./Archive/index";
 import { Friend } from "./Friend/index";
 import { DatabaseRankingPanelTables } from "./RankingPanel/index";
+import { DangerousPeople } from "./DangerousPeople/index";
 import { Staff } from "./Database.staff";
 
 export class DatabaseError {
@@ -24,6 +25,7 @@ export class DatabaseClient {
 	public readonly friend = new Friend(this.prisma);
 	public readonly archives = new DatabaseArchiveTables(this.prisma);
 	public readonly rankingPanel = new DatabaseRankingPanelTables(this.prisma);
+	public readonly dangerousPeople = new DangerousPeople(this.prisma);
     public readonly staff = new Staff(this.prisma.staff);
 }
 

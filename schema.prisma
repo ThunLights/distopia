@@ -32,16 +32,17 @@ model Avatar {
 }
 
 //重要人物システム用
-model People {
+model DangerousPeople {
     userId      String @id
     name        String
     type        String
     score       Int
     title       String
     description String
+    time        DateTime
 }
 
-model PeopleTag {
+model DangerousPeopleTag {
     userId  String
     content String
 
@@ -118,6 +119,10 @@ model GuildLevel {
     point   BigInt
 }
 
+model GuildBlackList {
+    guildId String @id
+}
+
 //アクティブレートの為のテーブル
 model GuildNewMember {
     guildId String
@@ -184,6 +189,17 @@ model RankingPanelLevel {
     guildId   String @id
     channelId String
     messageId String
+}
+
+//サーバーごとの設定用
+model DangerousPeopleNoticeChannel {
+    guildId   String @id
+    channelId String
+}
+
+model DangerousPeopleBanBasis {
+    guildId String @id
+    score   Int
 }
 
 //スタッフ

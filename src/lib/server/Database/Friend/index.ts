@@ -54,7 +54,7 @@ export class Friend {
 		try {
 			return await this.table.findMany({
 				orderBy: {
-					time: "asc"
+					time: "desc"
 				},
 				take: 50,
 				skip: skip ?? 0,

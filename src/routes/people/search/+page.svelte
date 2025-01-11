@@ -1,13 +1,14 @@
 <script lang="ts">
 	import Meta from "$lib/meta.svelte";
 	import Footer from "$lib/footer.svelte";
+
+	import { date2Txt } from "$lib/date";
 	import { redirectUrl } from "$lib/redirect.svelte";
-	import { date2Txt } from "$lib/date.js";
 
 	const { data } = $props();
-	const { peoples, count } = data;
+	const { elements } = data;
 
-	let searchWord = $state("");
+	let searchWord = $state(data.searchWord);
 
     async function search() {
         location.href = `/people/search?content=${encodeURIComponent(searchWord)}`
@@ -21,95 +22,70 @@
     }
 </script>
 
-<Meta
-	title="危険人物検索システム"
-	description={[
-		"危険人物を検索することが出来ます。"
-	].join("")}
-/>
+<Meta/>
 
 <main>
 	<div class="contents">
 		<div class="context">
-			<div>
-				<p><label for="search">危険人物を検索する</label></p>
+			<div class="info">
 				<div>
-					<input id="search" class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+					<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
 					<button onclick={search}>検索</button>
 				</div>
-				<div>
-					<p><small>検索したい人物のIDや通称などを入れてください</small></p>
+				<div class="count">
+					<p>{elements.length}件のサーバーがヒット</p>
 				</div>
 			</div>
 		</div>
 	</div>
-	<div class="contents">
-		<div class="context">
-			<p class="context-title">ステータス</p>
-			<p>{count}人が登録済み</p>
-		</div>
-	</div>
-	<div>
-		<p class="title">最近登録されたユーザー</p>
-		<div class="peoples">
-			{#each peoples as people}
-				<div class="people">
-					<div class="context">
-						<div class="profile">
-							<p>通称: {people.name}</p>
-							<p>ID: {people.userId}</p>
-						</div>
-						<div class="info">
-							<p>理由: {people.title}</p>
-							<p>識別タイプ: {people.type}</p>
-							<p>危険度: {people.score}</p>
-							<p>タグ: {people.tags.join(", ")}</p>
-							<p>登録日時: {date2Txt(people.time)}</p>
-						</div>
-						<div>
-							<button onclick={redirectUrl(`/people/${people.userId}`)}>詳細を閲覧</button>
-						</div>
+	<div class="peoples">
+		{#each elements as people}
+			<div class="contents people">
+				<div class="context">
+					<div class="profile">
+						<p>通称: {people.name}</p>
+						<p>ID: {people.userId}</p>
+					</div>
+					<div class="info">
+						<p>理由: {people.title}</p>
+						<p>識別タイプ: {people.type}</p>
+						<p>危険度: {people.score}</p>
+						<p>タグ: {people.tags ? people.tags.join(", ") : "タグなし"}</p>
+						<p>登録日時: {date2Txt(people.time)}</p>
+					</div>
+					<div>
+						<button onclick={redirectUrl(`/people/${people.userId}`)}>詳細を閲覧</button>
 					</div>
 				</div>
-			{/each}
-		</div>
+			</div>
+		{/each}
 	</div>
 </main>
-<Footer/>
+<Footer></Footer>
 
 <style>
 	.context {
 		overflow: hidden;
 		margin: 10px 20px;
 	}
-	.contents {
-		overflow: hidden;
-		display: block;
-		background-color: rgb(37, 36, 41);
-		border-radius: 10px;
-		width: 90%;
-		margin: 20px auto;
+    .contents {
+        overflow: hidden;
+        display: block;
+        background-color: rgb(37, 36, 41);
+        border-radius: 10px;
+        width: 90%;
+        margin: 20px auto;
+    }
+	.context>div {
+		margin: 10px 0;
+	}
+	.profile p {
+		font-weight: 600;
 	}
 	.peoples {
 		display: grid;
 		grid-template-columns: 32% 32% 32%;
 		grid-template-rows: auto auto auto auto auto auto auto auto auto auto auto;
-	}
-	.title {
-		font-size: 24px;
-	}
-	.context-title {
-		font-weight: 600;
-		font-size: 20px;
-	}
-	.title {
-		width: 90%;
-		margin: 20px auto;
-		margin-top: 16px;
-		font-weight: 700;
-	}
-	.context>div {
-		margin: 10px 0;
 	}
 	.profile p {
 		font-weight: 600;
