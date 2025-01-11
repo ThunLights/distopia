@@ -26,7 +26,7 @@ export const DELETE = (async (e) => {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 	const guild = await database.guildTables.guild.id2Data(body.guildId);
-	const ownerId = await discord.bot.control.guild.owner(body.guildId);
+	const ownerId = await discord.bot.control.guild.fetchOwner(body.guildId);
 	if (guild === null || guild instanceof DatabaseError) {
 		return generateErrorJson("SERVER_NOT_FOUND");
 	}
