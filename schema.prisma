@@ -191,6 +191,17 @@ model RankingPanelLevel {
     messageId String
 }
 
+//サーバーごとの設定用
+model DangerousPeopleNoticeChannel {
+    guildId   String @id
+    channelId String
+}
+
+model DangerousPeopleBanBasis {
+    guildId String @id
+    score   Int
+}
+
 //スタッフ
 model Staff {
     id String @id
