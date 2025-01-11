@@ -45,13 +45,18 @@
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/friends">
-					<p class="header-other-content">フレンド募集</p>
+				<a href="/ranking">
+					<p class="header-other-content">ランキング</p>
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
-				<a href="/ranking">
-					<p class="header-other-content">ランキング</p>
+				<a href="/people">
+					<p class="header-other-content">危険人物一覧</p>
+				</a>
+			</div>
+			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">
+				<a href="/friends">
+					<p class="header-other-content">フレンド募集</p>
 				</a>
 			</div>
 			<div class="header-other" style="{showBagerContent ? "display: block;" : ""}">

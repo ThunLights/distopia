@@ -65,6 +65,7 @@ export class DiscordBotClient {
     public async login(): Promise<void> {
         await this.client.login(this.token)
     }
+
     public async logout(): Promise<void> {
         await this.client.destroy();
     }
