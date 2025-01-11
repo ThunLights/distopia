@@ -59,9 +59,18 @@ export class DangerousPeople {
 		}
 	}
 
-	public async search(options: SearchOptions) {
+	public async search(content: string) {
 		try {
-			return await this.table.findMany({ where: options })
+			const whereContent = { contains: content };
+			return await this.table.findMany({
+				where: {
+					OR: [
+						{ name: whereContent },
+						{ title: whereContent },
+						{ description: whereContent },
+					],
+				}
+			});
 		} catch (error) {
 			errorHandling(error);
 			return []

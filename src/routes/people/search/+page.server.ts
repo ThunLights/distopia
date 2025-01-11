@@ -21,16 +21,8 @@ export const load = (async (e) => {
 	let elements: Elements = [];
 
 	for (const word of words) {
-		const search = {
-			contains: word
-		};
-
 		elements = elements.concat(await database.dangerousPeople.fetch(word, { partial: true }) ?? []);
-		elements = elements.concat(await database.dangerousPeople.search({
-			name: search,
-			title: search,
-			description: search,
-		}));
+		elements = elements.concat(await database.dangerousPeople.search(word));
 
 		for (const userId of await database.dangerousPeople.tag.search(word)) {
 			const user = await database.dangerousPeople.fetch(userId);
