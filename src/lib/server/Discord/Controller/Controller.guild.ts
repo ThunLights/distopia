@@ -1,6 +1,6 @@
 import { errorHandling } from "$lib/server/error";
 
-import type { Client, PresenceStatus } from "discord.js";
+import { PermissionsBitField, type Client, type PresenceStatus } from "discord.js";
 
 export class Guild {
 	constructor(private readonly client: Client) {}
@@ -47,5 +47,29 @@ export class Guild {
             errorHandling(error);
             return false;
         }
+	}
+
+	public async adminUsers(guildId: string) {
+		try {
+			const guild = this.client.guilds.cache.get(guildId);
+			if (guild) {
+				const members = Array.from(guild.members.cache.values());
+				return members.filter(member => !member.user.bot && member.permissions.has(PermissionsBitField.Flags.Administrator));
+			}
+			return [];
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+
+	public async isAdmin(guildId: string, userId: string) {
+		try {
+			const admins = await this.adminUsers(guildId);
+			return admins.map(value => value.user.id).includes(userId)
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
 	}
 }
