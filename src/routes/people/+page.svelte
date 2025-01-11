@@ -35,7 +35,7 @@
 				<p><label for="search">危険人物を検索する</label></p>
 				<div>
 					<input id="search" class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
-					<button>検索</button>
+					<button onclick={search}>検索</button>
 				</div>
 				<div>
 					<p><small>検索したい人物のIDや通称などを入れてください</small></p>

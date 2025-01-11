@@ -21,6 +21,22 @@ export type Element = {
     userId: string
 } & Required<UpdateElement>
 
+export type FetchOptions = {
+	partial?: boolean
+}
+
+export type SearchOptions = {
+	name?: {
+		contains: string
+	},
+	title?: {
+		contains: string
+	},
+	description?: {
+		contains: string
+	},
+}
+
 export class DangerousPeople {
 	public readonly tag: DangerousPeopleTag;
 
@@ -31,12 +47,24 @@ export class DangerousPeople {
 		this.tag = new DangerousPeopleTag(prisma.dangerousPeopleTag);
 	}
 
-	public async fetch(userId: string) {
+	public async fetch(userId: string, options?: FetchOptions) {
 		try {
+			if (options && options.partial) {
+				return await this.table.findFirst({ where: { userId: { contains: userId } } });
+			}
 			return await this.table.findFirst({ where: { userId } });
 		} catch (error) {
 			errorHandling(error);
 			return null;
+		}
+	}
+
+	public async search(options: SearchOptions) {
+		try {
+			return await this.table.findMany({ where: options })
+		} catch (error) {
+			errorHandling(error);
+			return []
 		}
 	}
 

@@ -1,3 +1,4 @@
+import { deDepulication } from "$lib/array";
 import { errorHandling } from "$lib/server/error";
 
 import type { Prisma } from "@prisma/client";
@@ -5,6 +6,21 @@ import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class DangerousPeopleTag {
 	constructor(private readonly table: Prisma.DangerousPeopleTagDelegate<DefaultArgs>) {}
+
+	public async search(content: string) {
+		try {
+			return deDepulication(await this.table.findMany({
+				where: {
+					content: {
+						contains: content
+					}
+				}
+			})).map(value => value.userId);
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
 
 	public async delete(userId: string, content?: string) {
 		try {
