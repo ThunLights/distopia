@@ -80,7 +80,7 @@
 				<Tags tags={tags} tagsUpdate={(newTags) => { tags = newTags }}></Tags>
 			</div>
 			<div>
-				<p class="title"><small class="indispensable">*</small>サーバーの説明 <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.description ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.description})</strong></p>
+				<p class="title"><small class="indispensable">*</small>自己紹介 <strong style={`color: ${descriptionLength > CHARACTER_LIMIT.description ? "red" : "green" };`}>({descriptionLength} / {CHARACTER_LIMIT.description})</strong></p>
 				<textarea bind:value={description}></textarea>
 			</div>
 			<div>
