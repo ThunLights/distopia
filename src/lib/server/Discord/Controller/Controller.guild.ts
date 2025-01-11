@@ -32,7 +32,7 @@ export class Guild {
 		return Array.from(guild.scheduledEvents.cache.values());
 	}
 
-	public async isOwner(guildId: string) {
+	public async fetchOwner(guildId: string) {
 		const guild = this.client.guilds.cache.get(guildId);
 		if (!guild) {
 			return null;

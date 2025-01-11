@@ -50,7 +50,7 @@ export const POST = (async (e) => {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 	const guildTmp = await database.guildTables.tmp.data(body.guildId);
-	const ownerId = await discord.bot.control.guild.isOwner(body.guildId);
+	const ownerId = await discord.bot.control.guild.fetchOwner(body.guildId);
 	if (!guildTmp) {
 		return generateErrorJson("TMP_NOT_FOUND");
 	}
