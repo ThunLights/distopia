@@ -134,7 +134,7 @@
 		</div>
 		<div class="contents">
 			<div class="context">
-				<p class="name">評価: {guild.review}</p>
+				<p class="name">評価: {guild.review.toFixed(2)}</p>
 				<div>
 					{#each Array(5) as _, i}
 						<div class="star">
