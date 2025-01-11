@@ -1,4 +1,3 @@
-import { DangerousPeopleTypeZod } from "$lib/server/Database/DangerousPeople/index";
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { json } from "@sveltejs/kit";
