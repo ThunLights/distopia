@@ -54,8 +54,8 @@ export const POST = (async (e) => {
 	if (!guildTmp) {
 		return generateErrorJson("TMP_NOT_FOUND");
 	}
-	if (ownerId !== auth.data.id) {
-		return generateErrorJson("THIS_GUILD_IS_NOT_YOURS");
+	if (!(ownerId === auth.data.id || await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))) {
+		return generateErrorJson("PERMISSION_DENIED");
 	}
 	const checkedBody = await invalidElementCheck(body);
 	if (checkedBody) {
@@ -90,7 +90,12 @@ export const PATCH = (async (e) => {
 	if (!body) {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
+	const ownerId = await discord.bot.control.guild.fetchOwner(body.guildId);
 	const checkedBody = await invalidElementCheck(body);
+
+	if (!(ownerId === auth.data.id || await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))) {
+		return generateErrorJson("PERMISSION_DENIED");
+	}
 	if (checkedBody) {
 		return checkedBody;
 	}
