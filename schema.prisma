@@ -192,6 +192,11 @@ model RankingPanelLevel {
 }
 
 //サーバーごとの設定用
+model BumpNotice {
+    guildId String @id
+    content Boolean
+}
+
 model DangerousPeopleNoticeChannel {
     guildId   String @id
     channelId String
