@@ -79,6 +79,10 @@ export class InteractionClient {
 			description: "フレンド募集用のコマンドです。",
 		},
 		{
+			name: "settings",
+			description: "設定コマンドです。",
+		},
+		{
 			name: "register",
 			description: "【期間限定】コマンドのみでDistopiaに本登録できます。(オーナーのみ)",
 			options: [
