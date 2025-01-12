@@ -3,16 +3,13 @@
 	import Footer from "$lib/footer.svelte";
 	import Meta from "$lib/meta.svelte";
 
-	import { onMount } from "svelte";
-
 	const { data } = $props();
 	const { userId, user, tags } = data;
-
-	onMount(async () => {})
+	const title = user ? `「${user.name}」は危険人物です。` : `「${userId}」は登録されていません`;
 </script>
 
 <Meta
-	title="「{userId}」の検索結果を表示"
+	title={title}
 	description={[
 		`「${userId}」の検索結果を表示します。`,
 		"他にも色々なユーザーが登録されていますで是非一度検索してみてください",
