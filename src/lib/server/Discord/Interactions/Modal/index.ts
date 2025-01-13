@@ -2,6 +2,7 @@ import { codeBlock } from "$lib/codeblock";
 
 import { RegisterModals } from "./Modal.register";
 import { FriendModal } from "./Modal.friend";
+import { AutoBanModal } from "./Modal.autoBan";
 
 import type { CacheType, Client, ModalSubmitInteraction } from "discord.js"
 import type { ModalsBase } from "./Modal.base"
@@ -13,6 +14,7 @@ export class Modals {
         this.modals = [
 			new RegisterModals(this.client),
 			new FriendModal(this.client),
+			new AutoBanModal(this.client),
         ]
     }
 
