@@ -1,4 +1,4 @@
-import { EmbedBuilder, PermissionsBitField } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionsBitField } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database } from "$lib/server/Database/index";
 
@@ -41,7 +41,24 @@ export class SettingsCommand extends CommandsBase {
 					{ name: "危険人物予報チャンネル", value: noticeChannelValue, inline: false },
 				);
 
-			return { embeds: [ embed ] } satisfies InteractionReplyOptions;
+			const bumpNoticeButton = new ButtonBuilder()
+				.setCustomId("bumpNotice")
+				.setLabel("Bump通知")
+				.setStyle(ButtonStyle.Success);
+			const autoBanButton = new ButtonBuilder()
+				.setCustomId("autoBan")
+				.setLabel("AutoBan設定")
+				.setStyle(ButtonStyle.Success);
+			const noticeChannelButton = new ButtonBuilder()
+				.setCustomId("noticeChannel")
+				.setLabel("危険人物通知チャンネル")
+				.setStyle(ButtonStyle.Success);
+
+			return {
+				embeds: [ embed ],
+				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton) ],
+				ephemeral: true
+			} satisfies InteractionReplyOptions;
 		}
 
 		return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
