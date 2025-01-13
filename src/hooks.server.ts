@@ -5,6 +5,8 @@ import { FetchError } from "$lib/server/Discord/Oauth/Oauth.fetch";
 
 import type { HandleServerError } from "@sveltejs/kit"
 
+process.on("uncaughtExceptionMonitor", errorHandling);
+
 async function start() {
 	await discord.bot.setEvents();
 	await discord.bot.login();
