@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder } from "discord.js";
+import { ChannelType, Client, EmbedBuilder } from "discord.js";
 
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database, DatabaseError } from "$lib/server/Database";
@@ -34,8 +34,20 @@ export class BumpCommands extends CommandsBase {
             return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
         }
 		this.lateLimit.push(guild.guildId);
-		setTimeout(() => {
-			this.lateLimit = this.lateLimit.filter(value => value !== guild.guildId);
+		setTimeout(async () => {
+			try {
+				const settings = await database.guildTables.settings.bump.fetch(guild.guildId);
+				const embed = new EmbedBuilder()
+					.setColor("Gold")
+					.setTitle("Bumpが実行できますよ!!")
+					.setURL(`https://distopia.top/`)
+					.setDescription("只今、前回のBumpから2時間がたちました。");
+
+				this.lateLimit = this.lateLimit.filter(value => value !== guild.guildId);
+				if (settings && settings.content && interaction.channel && interaction.channel.type === ChannelType.GuildText) {
+					await interaction.channel.send({ embeds: [ embed ] });
+				}
+			} catch {}
 		}, 2 * 60 * 60 * 1000)
         const embed = new EmbedBuilder()
             .setColor("Gold")

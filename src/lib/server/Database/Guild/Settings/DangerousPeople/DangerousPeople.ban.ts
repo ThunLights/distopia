@@ -15,9 +15,10 @@ export class Ban {
 		}
 	}
 
-	public async update(guildId: string, score: number) {
+	public async update(guildId: string, baseScore: number) {
 		try {
 			const element = await this.table.findFirst({ where: { guildId }});
+			const score = Math.floor(baseScore);
 
 			if (element) {
 				await this.table.updateMany({
