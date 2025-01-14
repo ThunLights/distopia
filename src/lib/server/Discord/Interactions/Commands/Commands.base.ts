@@ -10,7 +10,7 @@ export class CommandsError {
 export abstract class CommandsBase {
     public readonly commandName: string | null = null;
 
-    constructor(private readonly client: Client) {}
+    constructor(protected readonly client: Client) {}
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
         return new CommandsError("Commands Not Found");
