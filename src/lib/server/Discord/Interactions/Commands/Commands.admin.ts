@@ -33,6 +33,13 @@ export class AdminCommands extends CommandsBase {
 	
 				return { embeds: [ embed ], components: [ component ] } satisfies InteractionReplyOptions;
 			}
+			if (commandName === "status") {
+				const embed = new EmbedBuilder()
+					.setColor("Gold")
+					.setTitle("ステータス")
+					.setDescription(`ping: ${this.client.ws.ping}`);
+				return { embeds: [ embed ], ephemeral: true } satisfies InteractionReplyOptions;
+			}
 		}
         return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
     }

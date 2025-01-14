@@ -49,7 +49,12 @@ export class InteractionClient {
 				{
 					type: 1,
 					name: "ranking",
-					description: "put ranking panel",
+					description: "ランキングパネルを置く",
+				},
+				{
+					type: 1,
+					name: "status",
+					description: "ステータスパネルを閲覧",
 				}
 			],
         },
