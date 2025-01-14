@@ -1,4 +1,4 @@
-import { ActivityType, Client, REST } from "discord.js";
+import { ActivityType, Client, PermissionsBitField, REST } from "discord.js";
 
 import { INTENTS } from "./Discord.intents";
 import { InteractionClient } from "./Discord.interaction";
@@ -11,6 +11,8 @@ import { Controller } from "./Controller/index";
 
 import { config } from "$lib/server/config";
 import { generateBackUp } from "$lib/server/archive";
+import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID } from "$env/static/public";
+import { errorHandling } from "$lib/server/error";
 
 export class DiscordBotClient {
     public readonly token = config.bot.token;
@@ -25,8 +27,11 @@ export class DiscordBotClient {
 	private readonly activeRateClient = new ActiveRateClient(this.client);
 	private readonly rankingClient = new RankingClient(this.client);
 
+	private nowActivityStatus = true;
+
     constructor() {
 		setInterval(async () => {
+			await this.updateHomeServerRoles();
 			await this.voiceClient.levelUpdate();
 			await this.activeRateClient.update();
 			await this.rankingClient.udpate();
@@ -35,15 +40,82 @@ export class DiscordBotClient {
 		}, 20 * 60 * 1000);
 	}
 
+	private changeActivityInterval() {
+		setInterval(() => {
+			if (this.client.user) {
+				if (this.nowActivityStatus) {
+					this.client.user.setActivity({
+						name: `${this.client.guilds.cache.size}サーバーで稼働中`,
+						type: ActivityType.Playing,
+					});
+				} else {
+					this.client.user.setActivity({
+						name: "Supported by distopia.top",
+						type: ActivityType.Playing,
+					});
+				}
+			}
+			this.nowActivityStatus = !this.nowActivityStatus;
+		}, 10 * 1000);
+	}
+
+	private async updateHomeServerRoles() {
+		try {
+			const owners: string[] = [];
+			const admins: string[] = [];
+
+			const homeServer = await this.client.guilds.fetch(PUBLIC_HOME_SERVER_ID);
+			const guilds = this.client.guilds.cache.values().toArray();
+			const existingOwnerUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
+			const existingAdminUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
+
+			for (const guild of guilds) {
+				owners.push(guild.ownerId);
+				const adminMembers = guild.members.cache
+					.filter(member => member.permissions.has(PermissionsBitField.Flags.Administrator))
+					.values().toArray();
+				for (const adminMember of adminMembers) {
+					admins.push(adminMember.user.id);
+				}
+			}
+			for (const owner of owners) {
+				const user = homeServer.members.cache.get(owner);
+				if (user) {
+					await user.roles.add(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID);
+				}
+			}
+			for (const admin of admins) {
+				const user = homeServer.members.cache.get(admin);
+				if (user) {
+					await user.roles.add(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID);
+				}
+			}
+
+			for (const member of existingOwnerUsers) {
+				if (!owners.includes(member.user.id)) {
+					await member.roles.remove(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID);
+				}
+			}
+			for (const member of existingAdminUsers) {
+				if (!admins.includes(member.user.id)) {
+					await member.roles.remove(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID);
+				}
+			}
+		} catch (error) {
+			errorHandling(error);
+		}
+	}
+
     public async setEvents() {
         this.client.on("ready", async (client) => {
             client.user.setActivity({
                 name: "Supported by distopia.top",
                 type: ActivityType.Playing,
-            })
+            });
             await this.rest.put(`/applications/${this.clientId}/commands`, {
                 body: InteractionClient.commands,
-            })
+            });
+			this.changeActivityInterval();
         });
         this.client.on("interactionCreate", async (interaction) => {
             return await this.interactionClient.create(interaction);
