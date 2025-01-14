@@ -192,6 +192,11 @@ model RankingPanelLevel {
 }
 
 //サーバーごとの設定用
+model ActingOwner {
+    guildId String @id
+    userId  String
+}
+
 model BumpNotice {
     guildId String @id
     content Boolean
