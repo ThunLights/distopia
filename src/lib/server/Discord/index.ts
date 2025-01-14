@@ -11,9 +11,10 @@ import { Controller } from "./Controller/index";
 
 import { config } from "$lib/server/config";
 import { generateBackUp } from "$lib/server/archive";
-import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID } from "$env/static/public";
+import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID } from "$env/static/public";
 import { errorHandling } from "$lib/server/error";
 import { deDepulication } from "$lib/array";
+import { database } from "$lib/server/Database/index";
 
 export class DiscordBotClient {
     public readonly token = config.bot.token;
@@ -33,6 +34,7 @@ export class DiscordBotClient {
     constructor() {
 		setInterval(async () => {
 			await this.updateHomeServerRoles();
+			await this.updateHomeServerSpecialRole();
 			await this.voiceClient.levelUpdate();
 			await this.activeRateClient.update();
 			await this.rankingClient.udpate();
@@ -58,6 +60,35 @@ export class DiscordBotClient {
 			}
 			this.nowActivityStatus = !this.nowActivityStatus;
 		}, 10 * 1000);
+	}
+
+	private async updateHomeServerSpecialRole() {
+		try {
+			const targets: string[] = [];
+			const homeServer = await this.client.guilds.fetch(PUBLIC_HOME_SERVER_ID);
+			const serverIds = await database.guildTables.activeRate.ranking(10);
+			const existingUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
+
+			for (const serverId of serverIds) {
+				const guild = this.client.guilds.cache.get(serverId.guildId);
+				if (guild) {
+					targets.push(guild.ownerId);
+				}
+			}
+			for (const target of targets) {
+				const user = homeServer.members.cache.get(target);
+				if (user) {
+					await user.roles.add(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID);
+				}
+			}
+			for (const existingUser of existingUsers) {
+				if (!targets.includes(existingUser.user.id)) {
+					await existingUser.roles.remove(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID);
+				}
+			}
+		} catch (error) {
+			errorHandling(error);
+		}
 	}
 
 	private async updateHomeServerRoles() {
