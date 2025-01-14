@@ -13,6 +13,7 @@ import { config } from "$lib/server/config";
 import { generateBackUp } from "$lib/server/archive";
 import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID } from "$env/static/public";
 import { errorHandling } from "$lib/server/error";
+import { deDepulication } from "$lib/array";
 
 export class DiscordBotClient {
     public readonly token = config.bot.token;
@@ -78,13 +79,13 @@ export class DiscordBotClient {
 					admins.push(adminMember.user.id);
 				}
 			}
-			for (const owner of owners) {
+			for (const owner of deDepulication(owners)) {
 				const user = homeServer.members.cache.get(owner);
 				if (user) {
 					await user.roles.add(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID);
 				}
 			}
-			for (const admin of admins) {
+			for (const admin of deDepulication(admins)) {
 				const user = homeServer.members.cache.get(admin);
 				if (user) {
 					await user.roles.add(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID);
