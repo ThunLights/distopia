@@ -6,7 +6,7 @@ import { json } from "@sveltejs/kit";
 import { z } from "zod";
 import { database } from "$lib/server/Database/index";
 import { deDepulication } from "$lib/array";
-import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte";
+import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
 
 import type { RequestHandler } from "@sveltejs/kit";
 

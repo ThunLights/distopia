@@ -5,7 +5,7 @@
 	import { PUBLIC_OWNER_ID } from "$env/static/public";
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";
-	import { DangerousPeopleTypes } from "$lib/constants.svelte";
+	import { DangerousPeopleTypes } from "$lib/constants";
 
 	const { data } = $props();
 

@@ -4,7 +4,7 @@ import { _TagsZod } from "$lib/server/Database/Friend/Friend.tag";
 import { structChecker } from "$lib/struct";
 import { z } from "zod";
 import { compressTxt } from "$lib/compress";
-import { CHARACTER_LIMIT } from "$lib/constants.svelte";
+import { CHARACTER_LIMIT } from "$lib/constants";
 import { deDepulication } from "$lib/array";
 
 import type { ModalSubmitInteraction, CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";

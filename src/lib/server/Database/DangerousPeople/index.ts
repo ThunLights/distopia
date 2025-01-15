@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
-import type { DangerousPeopleTypeZod } from "$lib/constants.svelte";
+import type { DangerousPeopleTypeZod } from "$lib/constants";
 
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
 

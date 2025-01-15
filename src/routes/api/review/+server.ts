@@ -6,7 +6,7 @@ import { ServerError } from "$lib/server/error";
 import { generateErrorJson } from "$lib/server/json";
 import { database } from "$lib/server/Database";
 import { blank } from "$lib/blank.svelte";
-import { CHARACTER_LIMIT } from "$lib/constants.svelte";
+import { CHARACTER_LIMIT } from "$lib/constants";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
