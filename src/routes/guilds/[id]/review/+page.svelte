@@ -4,7 +4,7 @@
 
 	import { toast } from "@zerodevx/svelte-toast";
 	import { getCategory } from "$lib/category.svelte";
-	import { blank } from "$lib/blank.svelte";
+	import { blank } from "$lib/blank";
 	import { CHARACTER_LIMIT } from "$lib/constants";
 
 	import type { PageData } from "./$types";

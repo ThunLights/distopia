@@ -1,6 +1,6 @@
 import { deDepulicationStructs } from "$lib/array";
 import { database } from "$lib/server/Database/index";
-import { blank } from "$lib/blank.svelte";
+import { blank } from "$lib/blank";
 
 import type { PageServerLoad } from "./$types";
 import type { Element } from "$lib/server/Database/DangerousPeople/index";

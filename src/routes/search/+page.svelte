@@ -7,7 +7,7 @@
 	import { guildJoin } from "$lib/join.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { generateEdge } from "$lib/edge.js";
-	import { blank } from "$lib/blank.svelte";
+	import { blank } from "$lib/blank";
 
 	import type { Guild } from "$lib/server/guild";
 	import type { Response } from "$routes/api/search/+server.js";
