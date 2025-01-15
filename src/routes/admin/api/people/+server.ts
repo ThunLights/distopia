@@ -16,10 +16,10 @@ export const _BodyZod = z.object({
 
 	type: DangerousPeopleTypeZod,
 
-	score: z.number(),
 	title: z.string(),
 	description: z.string(),
 
+	score: z.string().array(),
 	tags: z.string().array(),
 });
 
@@ -40,6 +40,7 @@ export const POST = (async (e) => {
 		const result = await database.dangerousPeople.update(body.userId, {
 			...body,
 			...{
+				score: undefined,
 				tags: undefined,
 				userId: undefined,
 				time: new Date(),
@@ -47,6 +48,9 @@ export const POST = (async (e) => {
 		});
 		if (!result) {
 			return generateErrorJson("DATABASE_ERROR");
+		}
+		for (const score of body.score) {
+			await database.dangerousPeople.score.update(body.userId, score);
 		}
 		for (const tag of body.tags) {
 			await database.dangerousPeople.tag.update(body.userId, tag);

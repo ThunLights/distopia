@@ -6,16 +6,18 @@
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";
 	import { DangerousPeopleTypes } from "$lib/constants";
+	import { DangerousPeople } from "$lib/dangerousPeople";
 
 	const { data } = $props();
 
 	let targetId = $state("");
 	let name = $state("");
-	let score = $state(0);
+	let score = $state<string[]>([]);
 	let tags = $state<string[]>([]);
 	let title = $state("");
 	let description = $state("");
 	let targetType = $state<typeof DangerousPeopleTypes[number]>("criminal");
+	let scoreSum = $state(0);
 
 	onMount(async () => {
 		if (!(data.auth && data.auth.id === PUBLIC_OWNER_ID)) {
@@ -49,7 +51,7 @@
 			Toast.success(`${targetId}を追加しました。`)
 			targetId = "";
 			name = "";
-			score = 0;
+			score = [];
 			title = "";
 			description = "";
 			tags = [];
@@ -83,8 +85,29 @@
 				<input type="text" bind:value={name}>
 			</div>
 			<div>
-				<p>スコア</p>
-				<input type="number" bind:value={score}>
+				<p>スコア (現在の合計: {scoreSum})</p>
+				<table>
+					<thead></thead>
+					<tbody>
+						{#each DangerousPeople.elementsList() as element}
+							<tr class="score-element">
+								<th>
+									<input type="checkbox" onchange={e => {
+										if (e.currentTarget.checked) {
+											score.push(element.id);
+											scoreSum += element.score;
+										} else {
+											score = score.filter(value => value !== element.id);
+											scoreSum -= element.score;
+										}
+									}} />
+								</th>
+								<td><p>{element.label}</p></td>
+								<td><p>{element.score}</p></td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
 			</div>
 			<div>
 				<p>危険タイプ</p>
@@ -162,7 +185,7 @@
         border: 1px solid rgb(49, 49, 49);
         background-color: rgb(85, 85, 85);
     }
-	input {
+	input[type="text"] {
 		width: 60%;
 		font-size: 15px;
 		border-radius: 25px;
