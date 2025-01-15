@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
+    import { DISCORD_INVITE_LINK } from "$lib/invite";
 
     export let fixed = false;
 </script>
