@@ -2,7 +2,7 @@ import { json } from "@sveltejs/kit";
 import { z } from "zod";
 import { structChecker } from "$lib/struct";
 import { generateErrorJson } from "$lib/server/json";
-import { blank } from "$lib/blank.svelte";
+import { blank } from "$lib/blank";
 import { deDepulicationObject } from "$lib/array";
 import { errorHandling } from "$lib/server/error";
 import { database } from "$lib/server/Database";

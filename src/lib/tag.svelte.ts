@@ -1,4 +1,4 @@
-import { blank } from "./blank.svelte";
+import { blank } from "./blank";
 import { CHARACTER_LIMIT, INVALID_TAG_CHARACTOR, TAG_COUNT_LIMIT } from "./constants";
 
 export function invalidCharactorChecker(content: string): boolean {
