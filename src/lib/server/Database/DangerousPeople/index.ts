@@ -1,18 +1,17 @@
 import { errorHandling } from "$lib/server/error";
 import { DangerousPeopleTag } from "./DangerousPeople.tag";
 import { z } from "zod";
+import { DangerousPeopleScore } from "./DangerousPeople.score";
 
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 import type { DangerousPeopleTypeZod } from "$lib/constants";
-import { DangerousPeopleScore } from "./DangerousPeople.score";
 
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
 
 export type UpdateElement = {
     type: string
     name: string
-    score: number
     title: string
     description: string
     time: Date
