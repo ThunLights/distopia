@@ -3,7 +3,7 @@
     import Footer from "$lib/footer.svelte";
 
     import { staffs } from "$lib/constants"
-    import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
+    import { DISCORD_INVITE_LINK } from "$lib/invite";
 
     let title = "スタッフ情報";
 </script>
