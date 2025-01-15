@@ -36,7 +36,6 @@ model DangerousPeople {
     userId      String @id
     name        String
     type        String
-    score       Int
     title       String
     description String
     time        DateTime
