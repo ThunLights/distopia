@@ -35,11 +35,29 @@
 						{/each}
 					</div>
 				</div>
+				<div>
+					<p class="sub-title">危険指数: {DangerousPeople.strArrToScore(score)}</p>
+					<table>
+						<thead>
+							<tr>
+								<th><p>加点</p></th>
+								<th><p>該当項目</p></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each score as element}
+								<tr>
+									<th><p>{DangerousPeople.strToScore(element)}</p></th>
+									<td><p>{DangerousPeople.propertyToContent(element)}</p></td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
 				<div class="info">
 					<p>理由: {user.title}</p>
 					<p>識別タイプ: {user.type}</p>
 					<p>登録日時: {date2Txt(user.time)}</p>
-					<p>危険度: {DangerousPeople.strArrToScore(score)}</p>
 				</div>
 				<div>
 					<p class="sub-title">説明</p>
