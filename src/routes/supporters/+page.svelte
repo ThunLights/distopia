@@ -2,7 +2,7 @@
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import { supporters } from "$lib/constants.svelte";
+    import { supporters } from "$lib/constants";
     import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
 
     let title = "Supporters";

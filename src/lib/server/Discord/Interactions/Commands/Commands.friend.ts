@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database } from "$lib/server/Database/index";
-import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte";
+import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
 
 import type { ChatInputCommandInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 

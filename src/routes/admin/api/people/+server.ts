@@ -6,7 +6,7 @@ import { generateErrorJson } from "$lib/server/json";
 import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { structChecker } from "$lib/struct";
 import { database } from "$lib/server/Database/index";
-import { DangerousPeopleTypeZod } from "$lib/constants.svelte";
+import { DangerousPeopleTypeZod } from "$lib/constants";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
