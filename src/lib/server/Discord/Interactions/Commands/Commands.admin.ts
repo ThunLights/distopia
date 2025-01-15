@@ -1,6 +1,9 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Client, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { PUBLIC_OWNER_ID } from "$env/static/public";
+import { codeBlock } from "$lib/codeblock";
+import { DangerousPeople } from "$lib/dangerousPeople";
+import { database } from "$lib/server/Database/index";
 
 import type { CacheType, InteractionReplyOptions, MessagePayload, ChatInputCommandInteraction } from "discord.js";
 
@@ -39,6 +42,30 @@ export class AdminCommands extends CommandsBase {
 					.setTitle("ステータス")
 					.setDescription(`ping: ${this.client.ws.ping}`);
 				return { embeds: [ embed ], ephemeral: true } satisfies InteractionReplyOptions;
+			}
+			if (commandName === "score") {
+				if (!(interaction.channel && interaction.channel.type === ChannelType.GuildText)) {
+					return { content: "テキストチャンネルのみで実行可能です。", ephemeral: true } satisfies InteractionReplyOptions;
+				}
+				if (!interaction.guild) {
+					return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+				}
+
+				let description = "";
+				for (const element of DangerousPeople.elementsList()) {
+					description += `${element.score}: ${element.label}\n`;
+				}
+
+				const embed = new EmbedBuilder()
+					.setColor("Gold")
+					.setTitle("危険人物スコア票")
+					.setDescription(codeBlock(description));
+				const message = await interaction.channel.send({ embeds: [ embed ] });
+				const result = await database.panel.dangerousPeopleScore.update(interaction.guild.id, interaction.channelId, message.id);
+				if (!result) {
+					return { content: "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+				}
+				return { content: message.url, ephemeral: true } satisfies InteractionReplyOptions;
 			}
 		}
         return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;

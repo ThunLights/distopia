@@ -15,6 +15,7 @@ import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SPECIA
 import { errorHandling } from "$lib/server/error";
 import { deDepulication } from "$lib/array";
 import { database } from "$lib/server/Database/index";
+import { DangerousPeopleClient } from "./Discord.dangerousPeople";
 
 export class DiscordBotClient {
     public readonly token = config.bot.token;
@@ -28,6 +29,7 @@ export class DiscordBotClient {
 	private readonly voiceClient = new VoiceClient(this.client);
 	private readonly activeRateClient = new ActiveRateClient(this.client);
 	private readonly rankingClient = new RankingClient(this.client);
+	private readonly dangerousPeople = new DangerousPeopleClient(this.client);
 
 	private nowActivityStatus = true;
 
@@ -39,6 +41,7 @@ export class DiscordBotClient {
 			await this.activeRateClient.update();
 			await this.rankingClient.udpate();
 			await this.rankingClient.updatePanel();
+			await this.dangerousPeople.updatePanel();
 			await generateBackUp();
 		}, 20 * 60 * 1000);
 	}
