@@ -5,11 +5,11 @@
 
 	import { onMount } from "svelte";
 	import { token2data } from "$lib/auth.svelte";
-	import { getCategory } from "$lib/category.svelte";
+	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { guildJoin } from "$lib/join.svelte";
-	import { generateEdge } from "$lib/edge.svelte.js";
+	import { generateEdge } from "$lib/edge.js";
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";

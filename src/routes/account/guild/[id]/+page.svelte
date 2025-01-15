@@ -4,7 +4,7 @@
 
     import { onMount } from "svelte";
 	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
-	import { CATEGORIES } from "$lib/category.svelte";
+	import { CATEGORIES } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 
     import type { PageData } from "./$types";

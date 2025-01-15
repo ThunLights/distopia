@@ -1,5 +1,5 @@
 import { database } from "$lib/server/Database/index";
-import { getCategory } from "$lib/category.svelte";
+import { getCategory } from "$lib/category";
 import { ModalsBase, ModalsError } from "./Modal.base";
 import { PUBLIC_URL } from "$env/static/public";
 

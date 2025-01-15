@@ -1,17 +1,17 @@
 import { errorHandling } from "$lib/server/error";
 import { DangerousPeopleTag } from "./DangerousPeople.tag";
 import { z } from "zod";
+import { DangerousPeopleScore } from "./DangerousPeople.score";
 
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
-import type { DangerousPeopleTypeZod } from "$lib/constants.svelte";
+import type { DangerousPeopleTypeZod } from "$lib/constants";
 
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
 
 export type UpdateElement = {
     type: string
     name: string
-    score: number
     title: string
     description: string
     time: Date
@@ -39,12 +39,14 @@ export type SearchOptions = {
 
 export class DangerousPeople {
 	public readonly tag: DangerousPeopleTag;
+	public readonly score: DangerousPeopleScore;
 
 	private readonly table: Prisma.DangerousPeopleDelegate<DefaultArgs>
 
 	constructor(prisma: PrismaClient) {
 		this.table = prisma.dangerousPeople;
 		this.tag = new DangerousPeopleTag(prisma.dangerousPeopleTag);
+		this.score = new DangerousPeopleScore(prisma.dangerousPeopleScore);
 	}
 
 	public async fetch(userId: string, options?: FetchOptions) {

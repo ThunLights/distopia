@@ -4,7 +4,7 @@ import { structChecker } from "$lib/struct";
 import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { database, DatabaseError } from "$lib/server/Database";
-import { foundCategory } from "$lib/category.svelte";
+import { foundCategory } from "$lib/category";
 import { descriptionFormatCheck } from "$lib/description.svelte";
 import { tagCountCheck, tagFormatCheck } from "$lib/tag.svelte";
 import { generateErrorJson } from "$lib/server/json";

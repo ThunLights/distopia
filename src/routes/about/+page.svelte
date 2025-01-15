@@ -1,7 +1,7 @@
 <script lang="ts">
     import "$routes/aTag.css";
 
-    import { siteAbout } from "$lib/constants.svelte";
+    import { siteAbout } from "$lib/constants";
 
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";

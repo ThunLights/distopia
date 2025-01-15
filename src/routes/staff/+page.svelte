@@ -2,8 +2,8 @@
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";
 
-    import { staffs } from "$lib/constants.svelte"
-    import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
+    import { staffs } from "$lib/constants"
+    import { DISCORD_INVITE_LINK } from "$lib/invite";
 
     let title = "スタッフ情報";
 </script>

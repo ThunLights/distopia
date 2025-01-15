@@ -1,11 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { getMeridiem } from "$lib/time.svelte";
 	import { home } from "$lib/api.svelte";
-	import { getCategory } from "$lib/category.svelte";
+	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { guildJoin } from "$lib/join.svelte";
-	import { generateEdge } from "$lib/edge.svelte";
+	import { generateEdge } from "$lib/edge";
 
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";

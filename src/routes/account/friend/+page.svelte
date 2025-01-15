@@ -4,7 +4,7 @@
 	import Footer from "$lib/footer.svelte";
 
 	import { onMount } from "svelte";
-	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte.js";
+	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
 	import { toast } from "@zerodevx/svelte-toast";
 
     const { data } = $props();
