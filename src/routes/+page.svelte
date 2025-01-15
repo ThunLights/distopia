@@ -5,7 +5,7 @@
 	import { getCategory } from "$lib/category.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { guildJoin } from "$lib/join.svelte";
-	import { generateEdge } from "$lib/edge.svelte";
+	import { generateEdge } from "$lib/edge";
 
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";

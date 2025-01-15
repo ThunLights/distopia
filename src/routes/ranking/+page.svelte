@@ -2,7 +2,7 @@
 	import Meta from "$lib/meta.svelte";
 	import Icon from "$lib/icon.svelte";
 
-	import { generateEdge } from "$lib/edge.svelte.js";
+	import { generateEdge } from "$lib/edge.js";
 
 	import type { Guild } from "$lib/server/guild";
 
