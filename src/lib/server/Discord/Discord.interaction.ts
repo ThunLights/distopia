@@ -1,6 +1,6 @@
 import type { CacheType, Client, Interaction } from "discord.js";
 import { InteractionResponse } from "./Interactions/index";
-import { CATEGORIES } from "../../category.svelte";
+import { CATEGORIES } from "../../category";
 
 type Choice = {
 	name: string
@@ -55,6 +55,11 @@ export class InteractionClient {
 					type: 1,
 					name: "status",
 					description: "ステータスパネルを閲覧",
+				},
+				{
+					type: 1,
+					name: "score",
+					description: "危険人物スコア表を設置",
 				}
 			],
         },

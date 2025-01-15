@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { LOGIN_URL } from "$lib/constants.svelte";
+    import { LOGIN_URL } from "$lib/constants";
 
     import "@fontsource/inter/900.css";
     import "@fontsource/open-sans/800-italic.css";

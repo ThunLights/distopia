@@ -2,7 +2,7 @@
 	import Meta from "$lib/meta.svelte";
 	import Footer from "$lib/footer.svelte";
 
-	import { DISCORD_INVITE_LINK } from "$lib/invite.svelte";
+	import { DISCORD_INVITE_LINK } from "$lib/invite";
 </script>
 
 <Meta

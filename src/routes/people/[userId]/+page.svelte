@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { DangerousPeople } from "$lib/dangerousPeople.js";
 	import { date2Txt } from "$lib/date.js";
 	import Footer from "$lib/footer.svelte";
 	import Meta from "$lib/meta.svelte";
 
 	const { data } = $props();
-	const { userId, user, tags } = data;
+	const { userId, user, tags, score } = data;
 	const title = user ? `「${user.name}」は危険人物です。` : `「${userId}」は登録されていません`;
 </script>
 
@@ -34,10 +35,28 @@
 						{/each}
 					</div>
 				</div>
+				<div>
+					<p class="sub-title">危険指数: {DangerousPeople.strArrToScore(score)}</p>
+					<table>
+						<thead>
+							<tr>
+								<th><p>加点</p></th>
+								<th><p>該当項目</p></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each score as element}
+								<tr>
+									<th><p>{DangerousPeople.strToScore(element)}</p></th>
+									<td><p>{DangerousPeople.propertyToContent(element)}</p></td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
 				<div class="info">
 					<p>理由: {user.title}</p>
 					<p>識別タイプ: {user.type}</p>
-					<p>危険度: {user.score}</p>
 					<p>登録日時: {date2Txt(user.time)}</p>
 				</div>
 				<div>

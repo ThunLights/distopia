@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Tags from "$lib/tags.svelte";
 
-	import { CATEGORIES } from "./category.svelte";
-	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants.svelte";
+	import { CATEGORIES } from "./category";
+	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants";
 	import { descriptionFormatCheck } from "./description.svelte";
 
 	export type Guild = {

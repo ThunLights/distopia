@@ -1,6 +1,6 @@
 import { errorHandling } from "$lib/server/error";
 import { z } from "zod";
-import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants.svelte";
+import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
 
 import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";

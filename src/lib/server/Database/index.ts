@@ -10,6 +10,7 @@ import { Friend } from "./Friend/index";
 import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
 import { Staff } from "./Database.staff";
+import { Panel } from "./Panel/index";
 
 export class DatabaseError {
     constructor(public readonly content: string) {}
@@ -26,6 +27,7 @@ export class DatabaseClient {
 	public readonly archives = new DatabaseArchiveTables(this.prisma);
 	public readonly rankingPanel = new DatabaseRankingPanelTables(this.prisma);
 	public readonly dangerousPeople = new DangerousPeople(this.prisma);
+	public readonly panel = new Panel(this.prisma);
     public readonly staff = new Staff(this.prisma.staff);
 }
 

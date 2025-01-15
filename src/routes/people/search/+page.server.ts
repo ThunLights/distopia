@@ -1,11 +1,12 @@
 import { deDepulicationStructs } from "$lib/array";
 import { database } from "$lib/server/Database/index";
-import { blank } from "$lib/blank.svelte";
+import { blank } from "$lib/blank";
 
 import type { PageServerLoad } from "./$types";
 import type { Element } from "$lib/server/Database/DangerousPeople/index";
+import { DangerousPeople } from "$lib/dangerousPeople";
 
-export type Elements = Array<Element & { tags?: string[] }>;
+export type Elements = Array<Element & { tags?: string[], score?: number }>;
 
 export const load = (async (e) => {
 	const searchWord = e.url.searchParams.get("content") ?? "";
@@ -34,7 +35,10 @@ export const load = (async (e) => {
 
 	elements = deDepulicationStructs(elements);
 	for (const element of elements) {
+		const score = DangerousPeople.strArrToScore(await database.dangerousPeople.score.fetch(element.userId));
 		const tags = await database.dangerousPeople.tag.findUserTags(element.userId);
+
+		element.score = score;
 		element.tags = tags.map(value => value.content);
 	}
 

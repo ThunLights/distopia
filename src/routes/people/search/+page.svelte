@@ -49,7 +49,7 @@
 					<div class="info">
 						<p>理由: {people.title}</p>
 						<p>識別タイプ: {people.type}</p>
-						<p>危険度: {people.score}</p>
+						<p>危険度: {people.score ?? 0}</p>
 						<p>タグ: {people.tags ? people.tags.join(", ") : "タグなし"}</p>
 						<p>登録日時: {date2Txt(people.time)}</p>
 					</div>
