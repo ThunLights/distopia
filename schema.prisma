@@ -184,7 +184,7 @@ model ArchiveActiveRateMax {
     content BigInt
 }
 
-//ランキングパネル用
+//色々なパネル用
 model RankingPanelRate {
     guildId   String @id
     channelId String
@@ -192,6 +192,12 @@ model RankingPanelRate {
 }
 
 model RankingPanelLevel {
+    guildId   String @id
+    channelId String
+    messageId String
+}
+
+model DangerousPeopleScorePanel {
     guildId   String @id
     channelId String
     messageId String
