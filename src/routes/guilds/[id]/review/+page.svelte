@@ -3,7 +3,7 @@
 	import Footer from "$lib/footer.svelte";
 
 	import { toast } from "@zerodevx/svelte-toast";
-	import { getCategory } from "$lib/category.svelte";
+	import { getCategory } from "$lib/category";
 	import { blank } from "$lib/blank";
 	import { CHARACTER_LIMIT } from "$lib/constants";
 

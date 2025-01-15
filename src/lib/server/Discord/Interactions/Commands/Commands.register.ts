@@ -1,4 +1,4 @@
-import { getCategory } from "$lib/category.svelte";
+import { getCategory } from "$lib/category";
 import { database, DatabaseError } from "$lib/server/Database/index";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { ActionRowBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
