@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { getMeridiem } from "$lib/time.svelte";
 	import { home } from "$lib/api.svelte";
 	import { getCategory } from "$lib/category.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
