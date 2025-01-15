@@ -9,7 +9,7 @@
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { guildJoin } from "$lib/join.svelte";
-	import { generateEdge } from "$lib/edge.svelte.js";
+	import { generateEdge } from "$lib/edge.js";
 
     import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
