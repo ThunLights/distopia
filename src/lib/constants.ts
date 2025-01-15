@@ -22,19 +22,6 @@ type Staff = {
     }[]
 }
 
-export const dagerousElement = {
-	disturber: 10,
-	situationBreaker: 15,
-	sexualHarassment: 20,
-	madman: 30,
-	internetStalker: 40,
-	criminal: 50,
-	disturberNukeBot: 50,
-	disturberSelfBot: 60,
-	disturberStaff: 65,
-	criminalStaff: 80,
-} as const satisfies Record<string, number>
-
 export const siteAbout = [
     {
         title: "本サイトについて",
