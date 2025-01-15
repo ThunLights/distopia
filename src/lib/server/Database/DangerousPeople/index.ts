@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 import type { DangerousPeopleTypeZod } from "$lib/constants";
+import { DangerousPeopleScore } from "./DangerousPeople.score";
 
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
 
@@ -39,12 +40,14 @@ export type SearchOptions = {
 
 export class DangerousPeople {
 	public readonly tag: DangerousPeopleTag;
+	public readonly score: DangerousPeopleScore;
 
 	private readonly table: Prisma.DangerousPeopleDelegate<DefaultArgs>
 
 	constructor(prisma: PrismaClient) {
 		this.table = prisma.dangerousPeople;
 		this.tag = new DangerousPeopleTag(prisma.dangerousPeopleTag);
+		this.score = new DangerousPeopleScore(prisma.dangerousPeopleScore);
 	}
 
 	public async fetch(userId: string, options?: FetchOptions) {

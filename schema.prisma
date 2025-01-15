@@ -42,6 +42,13 @@ model DangerousPeople {
     time        DateTime
 }
 
+model DangerousPeopleScore {
+    userId  String
+    content String
+
+    @@id([userId, content])
+}
+
 model DangerousPeopleTag {
     userId  String
     content String
