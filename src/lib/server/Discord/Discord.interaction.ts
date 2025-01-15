@@ -55,6 +55,11 @@ export class InteractionClient {
 					type: 1,
 					name: "status",
 					description: "ステータスパネルを閲覧",
+				},
+				{
+					type: 1,
+					name: "score",
+					description: "危険人物スコア表を設置",
 				}
 			],
         },
