@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
 	import { home } from "$lib/api.svelte";
-	import { getCategory } from "$lib/category.svelte";
+	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { guildJoin } from "$lib/join.svelte";
 	import { generateEdge } from "$lib/edge";

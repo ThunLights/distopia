@@ -5,7 +5,7 @@
 
 	import { onMount } from "svelte";
 	import { token2data } from "$lib/auth.svelte";
-	import { getCategory } from "$lib/category.svelte";
+	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { toast } from "@zerodevx/svelte-toast";
 	import { guildJoin } from "$lib/join.svelte";

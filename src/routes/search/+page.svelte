@@ -3,7 +3,7 @@
 	import Icon from "$lib/icon.svelte";
 
 	import { onMount } from "svelte";
-	import { getCategory } from "$lib/category.svelte";
+	import { getCategory } from "$lib/category";
 	import { guildJoin } from "$lib/join.svelte";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { generateEdge } from "$lib/edge.js";
