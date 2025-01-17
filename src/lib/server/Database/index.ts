@@ -11,6 +11,7 @@ import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
 import { Staff } from "./Database.staff";
 import { Panel } from "./Panel/index";
+import { Sales } from "./Database.sales";
 
 export class DatabaseError {
     constructor(public readonly content: string) {}
@@ -29,6 +30,7 @@ export class DatabaseClient {
 	public readonly dangerousPeople = new DangerousPeople(this.prisma);
 	public readonly panel = new Panel(this.prisma);
     public readonly staff = new Staff(this.prisma.staff);
+	public readonly sales = new Sales(this.prisma.sales);
 }
 
 export const database = new DatabaseClient();
