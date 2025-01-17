@@ -18,6 +18,7 @@ export class SettingsCommand extends CommandsBase {
 			const bumpNotice = await database.guildTables.settings.bump.fetch(interaction.guild.id);
 			const autoBan = await database.guildTables.settings.dangerousPeople.ban.fetch(interaction.guild.id);
 			const noticeChannel = await database.guildTables.settings.dangerousPeople.notice.fetch(interaction.guild.id);
+			const actingOwner = await database.guildTables.settings.owner.fetch(interaction.guild.id);
 
 			const bumptNoticeValue = bumpNotice
 				? bumpNotice.content
@@ -30,6 +31,9 @@ export class SettingsCommand extends CommandsBase {
 			const noticeChannelValue = noticeChannel
 				? `出力チャンネル: <#${noticeChannel.channelId}>`
 				: "未設定";
+			const actingOwnerValue = actingOwner
+				? `<@${actingOwner.userId}>`
+				: "未設定";
 
 			const embed = new EmbedBuilder()
 				.setColor("Navy")
@@ -39,6 +43,7 @@ export class SettingsCommand extends CommandsBase {
 					{ name: "Bump通知", value: bumptNoticeValue, inline: false },
 					{ name: "危険人物自動BAN", value: autoBanValue, inline: false },
 					{ name: "危険人物予報チャンネル", value: noticeChannelValue, inline: false },
+					{ name: "オーナー代理", value: actingOwnerValue, inline: false },
 				);
 
 			const bumpNoticeButton = new ButtonBuilder()
@@ -53,10 +58,14 @@ export class SettingsCommand extends CommandsBase {
 				.setCustomId("noticeChannel")
 				.setLabel("危険人物通知チャンネル")
 				.setStyle(ButtonStyle.Success);
+			const actingOwnerButton = new ButtonBuilder()
+				.setCustomId("actingOwner")
+				.setLabel("代理オーナー設定")
+				.setStyle(ButtonStyle.Danger);
 
 			return {
 				embeds: [ embed ],
-				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton) ],
+				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton, actingOwnerButton) ],
 				ephemeral: true
 			} satisfies InteractionReplyOptions;
 		}

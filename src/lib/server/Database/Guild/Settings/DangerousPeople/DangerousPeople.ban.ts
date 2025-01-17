@@ -37,4 +37,14 @@ export class Ban {
 			return false;
 		}
 	}
+
+	public async remove(guildId: string) {
+		try {
+			await this.table.deleteMany({ where: { guildId } });
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
 }
