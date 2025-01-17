@@ -224,6 +224,13 @@ model DangerousPeopleBanBasis {
     score   Int
 }
 
+//営業先
+model Sales {
+    guildId String @id
+    userId  String
+    time    DateTime
+}
+
 //スタッフ
 model Staff {
     id String @id
