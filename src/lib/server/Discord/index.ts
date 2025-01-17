@@ -75,7 +75,8 @@ export class DiscordBotClient {
 			for (const serverId of serverIds) {
 				const guild = this.client.guilds.cache.get(serverId.guildId);
 				if (guild) {
-					targets.push(guild.ownerId);
+					const owner = await database.guildTables.settings.owner.fetch(serverId.guildId);
+					targets.push(owner ? owner.userId : guild.ownerId);
 				}
 			}
 			for (const target of targets) {
@@ -105,7 +106,8 @@ export class DiscordBotClient {
 			const existingAdminUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
 
 			for (const guild of guilds) {
-				owners.push(guild.ownerId);
+				const owner = await database.guildTables.settings.owner.fetch(guild.id);
+				owners.push(owner ? owner.userId : guild.ownerId);
 				const adminMembers = guild.members.cache
 					.filter(member => member.permissions.has(PermissionsBitField.Flags.Administrator))
 					.values().toArray();
