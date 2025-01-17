@@ -7,9 +7,11 @@ import { AutoBanButton } from "./Buttons.autoBan";
 import { NoticeChannelButton } from "./Buttons.noticeChannel";
 import { BumpNoticeOnButton } from "./Buttons.bumpNoticeOn";
 import { BumpNoticeOffButton } from "./Buttons.bumpNoticeOff";
+import { ActingOwnerButton } from "./Buttons.actingOwner";
 
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
+import { ActingOwnerCancelButton } from "./Buttons.actingOwnerCancel";
 
 export class Buttons {
 	public readonly buttons: ButtonsBase[]
@@ -23,6 +25,8 @@ export class Buttons {
 			new NoticeChannelButton(this.client),
 			new BumpNoticeOnButton(this.client),
 			new BumpNoticeOffButton(this.client),
+			new ActingOwnerButton(this.client),
+			new ActingOwnerCancelButton(this.client),
 		];
 	}
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void> {

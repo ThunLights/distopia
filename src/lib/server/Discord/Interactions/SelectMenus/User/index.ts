@@ -1,4 +1,5 @@
 import { codeBlock } from "$lib/codeblock";
+import { Owner } from "./User.actingOwner";
 
 import type { CacheType, Client, UserSelectMenuInteraction } from "discord.js";
 import type { UsersBase } from "./User.base";
@@ -6,8 +7,9 @@ import type { UsersBase } from "./User.base";
 export class UserSelectMenu {
 	public readonly commands: UsersBase[];
 
-	constructor(private readonly client: Client) {
+	constructor(client: Client) {
 		this.commands = [
+			new Owner(client),
 		];
 	}
 
