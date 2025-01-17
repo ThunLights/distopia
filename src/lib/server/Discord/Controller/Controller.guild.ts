@@ -1,3 +1,4 @@
+import { PUBLIC_HOME_SERVER_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
 import { errorHandling } from "$lib/server/error";
 
 import { PermissionsBitField, type Client, type PresenceStatus } from "discord.js";
@@ -47,6 +48,21 @@ export class Guild {
             errorHandling(error);
             return false;
         }
+	}
+
+	public async isStaff(userId: string) {
+		try {
+			const guild = this.client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
+			if (guild) {
+				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
+				return users.toArray().map(user => user.id).includes(userId);
+			}
+
+			return false;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
 	}
 
 	public async adminUsers(guildId: string) {
