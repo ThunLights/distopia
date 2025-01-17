@@ -27,6 +27,9 @@ export class InteractionResponse {
 		if (interaction.isChannelSelectMenu()) {
 			return await this.selectMenu.channel.reply(interaction);
 		}
+		if (interaction.isUserSelectMenu()) {
+			return await this.selectMenu.user.reply(interaction);
+		}
 		if (interaction.isButton()) {
 			return await this.buttons.reply(interaction);
 		}
