@@ -1,11 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionsBitField } from "discord.js";
+import { ActionRowBuilder, ModalBuilder, PermissionsBitField, TextInputBuilder, TextInputStyle } from "discord.js";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 import { errorHandling } from "$lib/server/error";
 
 import type { ButtonInteraction, CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";
 
-export class AutoBanButton extends ButtonsBase {
-	public readonly customId = "autoBan";
+export class AutoBanSetButton extends ButtonsBase {
+	public readonly customId = "autoBanSet";
 
 	public async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		try {
@@ -17,19 +17,22 @@ export class AutoBanButton extends ButtonsBase {
 			)) {
 				return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
 			}
-			const embed = new EmbedBuilder()
-				.setColor("DarkAqua")
-				.setTitle("自動BANを設定する")
-				.setDescription("以下のボタンで操作をしてください");
-			const setButton = new ButtonBuilder()
-				.setCustomId("autoBanSet")
-				.setLabel("自動BANを設定する")
-				.setStyle(ButtonStyle.Success);
-			const cancelButton = new ButtonBuilder()
-				.setCustomId("autoBanCancel")
-				.setLabel("無効化")
-				.setStyle(ButtonStyle.Danger);
-			return { embeds: [ embed ], components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(setButton, cancelButton) ], ephemeral: true } satisfies InteractionReplyOptions;
+			const contentInput = new ActionRowBuilder<TextInputBuilder>()
+				.addComponents(
+					new TextInputBuilder()
+						.setLabel("以下のスコア以上のユーザーをBANします。")
+						.setCustomId("content")
+						.setValue("50")
+						.setStyle(TextInputStyle.Short)
+						.setMaxLength(5)
+				)
+
+			const modal = new ModalBuilder()
+				.setCustomId("autoBan")
+				.setTitle("Auto Ban設定")
+				.setComponents(contentInput);
+
+			return await interaction.showModal(modal);
 		} catch (error) {
 			errorHandling(error);
 			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;

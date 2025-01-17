@@ -49,7 +49,8 @@ export const POST = (async (e) => {
     }
     const response: Response = [];
 	for (const guild of guilds) {
-		if (guild.owner || await discord.bot.control.guild.isAdmin(guild.id, user.data.id)) {
+		const actingOwner = await database.guildTables.settings.owner.fetch(guild.id);
+		if (guild.owner || (actingOwner && actingOwner.userId === user.data.id) || await discord.bot.control.guild.isAdmin(guild.id, user.data.id)) {
 			const official = await database.guildTables.guild.id2Data(guild.id);
 			response.push({...guild, ...{
 				guild: official instanceof DatabaseError ? null : official,

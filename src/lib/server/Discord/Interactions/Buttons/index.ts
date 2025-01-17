@@ -7,6 +7,10 @@ import { AutoBanButton } from "./Buttons.autoBan";
 import { NoticeChannelButton } from "./Buttons.noticeChannel";
 import { BumpNoticeOnButton } from "./Buttons.bumpNoticeOn";
 import { BumpNoticeOffButton } from "./Buttons.bumpNoticeOff";
+import { ActingOwnerButton } from "./Buttons.actingOwner";
+import { ActingOwnerCancelButton } from "./Buttons.actingOwnerCancel";
+import { AutoBanSetButton } from "./Buttons.autoBanSet";
+import { AutoBanCancelButton } from "./Buttons.autoBanCancel";
 
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
@@ -20,9 +24,13 @@ export class Buttons {
 			new RankingLevelButton(this.client),
 			new BumpNoticeButton(this.client),
 			new AutoBanButton(this.client),
+			new AutoBanSetButton(this.client),
+			new AutoBanCancelButton(this.client),
 			new NoticeChannelButton(this.client),
 			new BumpNoticeOnButton(this.client),
 			new BumpNoticeOffButton(this.client),
+			new ActingOwnerButton(this.client),
+			new ActingOwnerCancelButton(this.client),
 		];
 	}
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void> {

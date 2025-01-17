@@ -1,4 +1,5 @@
 import { PUBLIC_HOME_SERVER_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
+import { database } from "$lib/server/Database/index";
 import { errorHandling } from "$lib/server/error";
 
 import { PermissionsBitField, type Client, type PresenceStatus } from "discord.js";
@@ -34,6 +35,10 @@ export class Guild {
 	}
 
 	public async fetchOwner(guildId: string) {
+		const actingOwner = await database.guildTables.settings.owner.fetch(guildId);
+		if (actingOwner) {
+			return actingOwner.userId;
+		}
 		const guild = this.client.guilds.cache.get(guildId);
 		if (!guild) {
 			return null;
