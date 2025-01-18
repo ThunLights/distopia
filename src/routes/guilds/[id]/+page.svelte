@@ -22,7 +22,7 @@
 		avatar: string | null;
 	}
 
-    const { data }: { data: PageData } = $props();
+    const { data } = $props();
 	const { guildId, content } = data;
 	const guild = $state<Response | null>(content);
 	const reviews = $derived(guild ? guild.reviews : []);
@@ -73,7 +73,12 @@
 						{/if}
 					</div>
 					<div>
-						<p class="guild-name">{guild.name}</p>
+						<p class="guild-name">
+							{guild.name}
+							{#if guild.nsfw}
+								<small class="nsfw">NSFW!!</small>
+							{/if}
+						</p>
 						<p>ブースト: {guild.boost}</p>
 						<p>カテゴリ: {getCategory(guild.category)}</p>
 					</div>
@@ -201,6 +206,9 @@
 <Footer/>
 
 <style>
+	.nsfw {
+		color: red;
+	}
 	.guild-icon {
 		height: 128px;
 	}

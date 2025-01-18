@@ -7,7 +7,7 @@ export async function home() {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			take: 40
+			take: 30
 		})
 	})
 	if (response.ok) {
