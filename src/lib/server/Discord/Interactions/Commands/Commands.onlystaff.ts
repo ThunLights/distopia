@@ -32,7 +32,7 @@ export class OnlyStaffCommand extends CommandsBase {
 			const subCommandGroup = interaction.options.getSubcommandGroup(true);
 			if (subCommandGroup === "sales") {
 				const commandName = interaction.options.getSubcommand();
-				const guildId = interaction.options.getString("guildId") ?? "";
+				const guildId = interaction.options.getString("guild") ?? "";
 				const isRegisteredServer = await database.guildTables.guild.id2Data(guildId);
 				const isRegistered = await database.sales.fetch(guildId);
 
