@@ -5,10 +5,6 @@
 
     import Meta from "$lib/meta.svelte";
     import Footer from "$lib/footer.svelte";
-
-	import type { PageData } from "./$types";
-
-    const { data }: { data: PageData } = $props();
 </script>
 
 <Meta
