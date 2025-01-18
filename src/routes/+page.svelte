@@ -23,6 +23,7 @@
 	let searchWord = $state("");
     let loginData = $state(data.auth);
 	let servers = $state<Response>(initServersData);
+	let showNsfw = $state(true);
 
     onMount(async () => {
 		servers = await home() ?? initServersData;
@@ -71,6 +72,11 @@
 		</div>
 		<div>
 			<p class="name">最近更新されたサーバー</p>
+			<div>
+				<label for="show-nsfw">
+					<p>NSFWサーバーを表示 <input type="checkbox" id="show-nsfw" bind:checked={showNsfw}></p>
+				</label>
+			</div>
 			<div class="guilds">
 				{#each servers.content as guild}
 					{@render generateGuildElement(guild)}
@@ -90,7 +96,7 @@
 <Footer></Footer>
 
 {#snippet generateGuildElement(guild: Guild)}
-	<div class="guild">
+	<div class="guild {guild.nsfw && !showNsfw ? "hidden" : ""}">
 		<div class="guild-context">
 			<div>
 				<div class="guild-info">
@@ -104,7 +110,12 @@
 						</a>
 					</div>
 					<div>
-						<a class="white" href="/guilds/{guild.guildId}"><p class="guild-name">{guild.name}</p></a>
+						<a class="white" href="/guilds/{guild.guildId}"><p class="guild-name">
+							{guild.name}
+							{#if guild.nsfw}
+								<small class="nsfw">NSFW!!</small>
+							{/if}
+						</p></a>
 						<p>ブースト: {guild.boost}</p>
 						<p>カテゴリ: {getCategory(guild.category)}</p>
 					</div>
@@ -136,6 +147,12 @@
 {/snippet}
 
 <style>
+	.nsfw {
+		color: red;
+	}
+	.hidden {
+		display: none;
+	}
 	.join-btn {
 		display: grid;
 		grid-template-columns: 49% 2% 49%;
