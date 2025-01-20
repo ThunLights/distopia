@@ -27,12 +27,13 @@ export class BumpCommands extends CommandsBase {
 				.setTitle("Distopia: Discordサーバー掲示板")
 				.setURL(`https://distopia.top/`)
 				.setDescription(`レートリミットです。時間を置いて再度実行してください`);
-			return { embeds: [ embed ] } satisfies InteractionReplyOptions;
+			return { embeds: [ embed ], ephemeral: true } satisfies InteractionReplyOptions;
 		}
         const result = await database.guildTables.bump.update(guild.guildId);
         if (!result) {
             return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
         }
+		await database.guildTables.bumpCounter.update(interaction.guild.id);
 		this.lateLimit.push(guild.guildId);
 		setTimeout(async () => {
 			try {
@@ -48,12 +49,13 @@ export class BumpCommands extends CommandsBase {
 					await interaction.channel.send({ embeds: [ embed ] });
 				}
 			} catch {}
-		}, 2 * 60 * 60 * 1000)
+		}, 2 * 60 * 60 * 1000);
+		const counter = await database.guildTables.bumpCounter.fetch(interaction.guild.id);
         const embed = new EmbedBuilder()
             .setColor("Gold")
             .setTitle("Distopia: Discordサーバー掲示板")
             .setURL(`https://distopia.top/`)
-            .setDescription(`表示順を上げました。[こちら](https://distopia.top/)で確認できます。`);
+            .setDescription(`合計Bump: ${counter ? counter.count : 0}回\n表示順を上げました。[こちら](https://distopia.top/)で確認できます。`);
         return { embeds: [ embed ] } satisfies InteractionReplyOptions;
     }
 }
