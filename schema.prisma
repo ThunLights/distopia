@@ -129,6 +129,11 @@ model GuildBlackList {
     guildId String @id
 }
 
+model BumpCounter {
+    guildId String @id
+    count   Int
+}
+
 //アクティブレートの為のテーブル
 model GuildNewMember {
     guildId String
