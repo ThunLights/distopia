@@ -14,6 +14,7 @@ import { GuildVcMemberSum } from "./Guild.vcMemberSum";
 import { GuildVcMemberUpperTwo } from "./Guild.vcMemberUpperTwo";
 import { BlackList } from "./Guild.blackList";
 import { DatabaseGuildSettingsTables } from "./Settings/index";
+import { BumpCounter } from "./Guild.bumpCounter";
 
 export class DatabaseGuildTables {
     public readonly guild: GuildTable
@@ -29,6 +30,7 @@ export class DatabaseGuildTables {
 	public readonly vcMemberSum: GuildVcMemberSum
 	public readonly vcMemberUpperTwo: GuildVcMemberUpperTwo
 	public readonly blackList: BlackList
+	public readonly bumpCounter: BumpCounter
 	public readonly settings: DatabaseGuildSettingsTables
 
     constructor(private readonly prisma: PrismaClient) {
@@ -45,6 +47,7 @@ export class DatabaseGuildTables {
 		this.vcMemberSum = new GuildVcMemberSum(this.prisma.guildVcMemberSum);
 		this.vcMemberUpperTwo = new GuildVcMemberUpperTwo(this.prisma.guildVcMemberUpperTwo);
 		this.blackList = new BlackList(this.prisma.guildBlackList);
+		this.bumpCounter = new BumpCounter(this.prisma.bumpCounter);
 		this.settings = new DatabaseGuildSettingsTables(this.prisma);
     }
 }
