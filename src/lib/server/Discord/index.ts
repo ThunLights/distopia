@@ -10,7 +10,6 @@ import { RankingClient } from "./Discord.ranking";
 import { Controller } from "./Controller/index";
 
 import { config } from "$lib/server/config";
-import { generateBackUp } from "$lib/server/archive";
 import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID } from "$env/static/public";
 import { errorHandling } from "$lib/server/error";
 import { deDepulication } from "$lib/array";
@@ -32,19 +31,6 @@ export class DiscordBotClient {
 	private readonly dangerousPeople = new DangerousPeopleClient(this.client);
 
 	private nowActivityStatus = true;
-
-    constructor() {
-		setInterval(async () => {
-			await this.updateHomeServerRoles();
-			await this.updateHomeServerSpecialRole();
-			await this.voiceClient.levelUpdate();
-			await this.activeRateClient.update();
-			await this.rankingClient.udpate();
-			await this.rankingClient.updatePanel();
-			await this.dangerousPeople.updatePanel();
-			await generateBackUp();
-		}, 20 * 60 * 1000);
-	}
 
 	private changeActivityInterval() {
 		setInterval(() => {
@@ -141,6 +127,16 @@ export class DiscordBotClient {
 		} catch (error) {
 			errorHandling(error);
 		}
+	}
+
+	public async update() {
+		await this.updateHomeServerRoles();
+		await this.updateHomeServerSpecialRole();
+		await this.voiceClient.levelUpdate();
+		await this.activeRateClient.update();
+		await this.rankingClient.udpate();
+		await this.rankingClient.updatePanel();
+		await this.dangerousPeople.updatePanel();
 	}
 
     public async setEvents() {
