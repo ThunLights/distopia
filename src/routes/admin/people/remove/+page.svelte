@@ -4,13 +4,20 @@
 	import { PUBLIC_OWNER_ID } from "$env/static/public";
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";
+	import { discord } from "$lib/server/discord";
 
 	const { data } = $props();
 
 	let targetId = $state("");
 
 	onMount(async () => {
-		if (!(data.auth && data.auth.id === PUBLIC_OWNER_ID)) {
+		if (!(
+			data.auth
+			&& (
+				data.auth.id === PUBLIC_OWNER_ID
+				|| await discord.bot.control.guild.isHonoraryMember(data.auth.id)
+			)
+		)) {
 			return location.href = "/";
 		}
 	});
