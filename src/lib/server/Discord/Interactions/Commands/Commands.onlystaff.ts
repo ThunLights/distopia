@@ -1,34 +1,19 @@
-import { PUBLIC_HOME_SERVER_ID, PUBLIC_OWNER_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
+import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { database, DatabaseError } from "$lib/server/Database/index";
-import { errorHandling } from "$lib/server/error";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { EmbedBuilder } from "discord.js";
+import { Guild } from "../../Controller/Controller.guild";
 
 import type { ChatInputCommandInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
 export class OnlyStaffCommand extends CommandsBase {
 	public readonly commandName = "onlystaff";
 
-	private async isStaff(userId: string) {
-		try {
-			const guild = this.client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
-			if (guild) {
-				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
-				return users.toArray().map(user => user.id).includes(userId);
-			}
-
-			return false;
-		} catch (error) {
-			errorHandling(error);
-			return false;
-		}
-	}
-
 	public async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
 		if (!interaction.guild) {
 			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
 		}
-		if (await this.isStaff(interaction.user.id)) {
+		if (await Guild.isStaff(interaction.user.id, this.client)) {
 			const subCommandGroup = interaction.options.getSubcommandGroup(true);
 			if (subCommandGroup === "sales") {
 				const commandName = interaction.options.getSubcommand();
