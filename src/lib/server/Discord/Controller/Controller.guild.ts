@@ -7,6 +7,21 @@ import { PermissionsBitField, type Client, type PresenceStatus } from "discord.j
 export class Guild {
 	constructor(private readonly client: Client) {}
 
+	public static async isStaff(userId: string, client: Client) {
+		try {
+			const guild = client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
+			if (guild) {
+				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
+				return users.toArray().map(user => user.id).includes(userId);
+			}
+
+			return false;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
 	public async memberCount(guildId: string, status?: PresenceStatus) {
 		const guild = this.client.guilds.cache.get(guildId);
 		if (!guild) {
@@ -56,18 +71,7 @@ export class Guild {
 	}
 
 	public async isStaff(userId: string) {
-		try {
-			const guild = this.client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
-			if (guild) {
-				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
-				return users.toArray().map(user => user.id).includes(userId);
-			}
-
-			return false;
-		} catch (error) {
-			errorHandling(error);
-			return false;
-		}
+		return await Guild.isStaff(userId, this.client);
 	}
 
 	public async adminUsers(guildId: string) {
