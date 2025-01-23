@@ -1,4 +1,4 @@
-import { PUBLIC_HOME_SERVER_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
+import { PUBLIC_HOME_SERVER_ID, PUBLIC_HONORARY_MEMBER_ROLE_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
 import { database } from "$lib/server/Database/index";
 import { errorHandling } from "$lib/server/error";
 
@@ -6,6 +6,21 @@ import { PermissionsBitField, type Client, type PresenceStatus } from "discord.j
 
 export class Guild {
 	constructor(private readonly client: Client) {}
+
+	public static async isStaff(userId: string, client: Client) {
+		try {
+			const guild = client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
+			if (guild) {
+				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
+				return users.toArray().map(user => user.id).includes(userId);
+			}
+
+			return false;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
 
 	public async memberCount(guildId: string, status?: PresenceStatus) {
 		const guild = this.client.guilds.cache.get(guildId);
@@ -56,10 +71,14 @@ export class Guild {
 	}
 
 	public async isStaff(userId: string) {
+		return await Guild.isStaff(userId, this.client);
+	}
+
+	public async isHonoraryMember(userId: string) {
 		try {
 			const guild = this.client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
 			if (guild) {
-				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
+				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_HONORARY_MEMBER_ROLE_ID));
 				return users.toArray().map(user => user.id).includes(userId);
 			}
 

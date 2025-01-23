@@ -4,6 +4,7 @@ import { json } from "@sveltejs/kit";
 import { generateErrorJson } from "$lib/server/json";
 import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { database } from "$lib/server/Database/index";
+import { discord } from "$lib/server/discord";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -18,7 +19,7 @@ export const DELETE = (async (e) => {
 		return generateErrorJson("AUTHORIZATION_ERROR");
 	}
 
-	if (auth.data.id === PUBLIC_OWNER_ID) {
+	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
 		const result = await database.dangerousPeople.delete(userId);
 		if (!result) {
 			return generateErrorJson("DATABASE_ERROR");

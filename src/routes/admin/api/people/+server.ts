@@ -7,6 +7,7 @@ import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { structChecker } from "$lib/struct";
 import { database } from "$lib/server/Database/index";
 import { DangerousPeopleTypeZod } from "$lib/constants";
+import { discord } from "$lib/server/discord";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
@@ -36,7 +37,7 @@ export const POST = (async (e) => {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 
-	if (auth.data.id === PUBLIC_OWNER_ID) {
+	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
 		const result = await database.dangerousPeople.update(body.userId, {
 			...body,
 			...{

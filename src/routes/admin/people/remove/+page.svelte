@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Meta from "$lib/meta.svelte";
 
-	import { PUBLIC_OWNER_ID } from "$env/static/public";
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";
 
@@ -10,7 +9,7 @@
 	let targetId = $state("");
 
 	onMount(async () => {
-		if (!(data.auth && data.auth.id === PUBLIC_OWNER_ID)) {
+		if (!data.canUse) {
 			return location.href = "/";
 		}
 	});
