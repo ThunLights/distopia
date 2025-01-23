@@ -235,8 +235,3 @@ model Sales {
     userId  String
     time    DateTime
 }
-
-//スタッフ
-model Staff {
-    id String @id
-}

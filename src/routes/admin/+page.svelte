@@ -1,14 +1,13 @@
 <script lang="ts">
 	import Meta from "$lib/meta.svelte";
 
-	import { PUBLIC_OWNER_ID } from "$env/static/public";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { onMount } from "svelte";
 
 	const { data } = $props();
 
 	onMount(async () => {
-		if (!(data.auth && data.auth.id === PUBLIC_OWNER_ID)) {
+		if (!data.canUse) {
 			return location.href = "/";
 		}
 	})

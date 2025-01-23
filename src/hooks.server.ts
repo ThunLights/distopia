@@ -2,8 +2,9 @@ import { errorHandling } from "$lib/server/error";
 import { discord } from "$lib/server/discord";
 import { database } from "$lib/server/Database/index";
 import { FetchError } from "$lib/server/Discord/Oauth/Oauth.fetch";
+import { generateBackUp } from "$lib/server/archive";
 
-import type { HandleServerError } from "@sveltejs/kit"
+import type { HandleServerError } from "@sveltejs/kit";
 
 process.on("uncaughtExceptionMonitor", errorHandling);
 
@@ -23,6 +24,10 @@ async function start() {
 			}
 		}
 	}, 5 * 60 * 1000);
+	setInterval(async () => {
+		await discord.bot.update();
+		await generateBackUp();
+	}, 20 * 60 * 1000);
 }
 
 export const handleError = (async (input) => {
