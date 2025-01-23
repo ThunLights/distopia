@@ -7,6 +7,7 @@
 	import { onMount } from "svelte";
 	import { DangerousPeopleTypes } from "$lib/constants";
 	import { DangerousPeople } from "$lib/dangerousPeople";
+	import { discord } from "$lib/server/discord";
 
 	const { data } = $props();
 
@@ -20,7 +21,13 @@
 	let scoreSum = $state(0);
 
 	onMount(async () => {
-		if (!(data.auth && data.auth.id === PUBLIC_OWNER_ID)) {
+		if (!(
+			data.auth
+			&& (
+				data.auth.id === PUBLIC_OWNER_ID
+				|| await discord.bot.control.guild.isHonoraryMember(data.auth.id)
+			)
+		)) {
 			return location.href = "/";
 		}
 	});
