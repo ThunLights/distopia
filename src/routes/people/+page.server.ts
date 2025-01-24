@@ -10,9 +10,12 @@ export const load = (async (e) => {
 
 	const elementsScore: Record<string, number> = {};
 	const elementsTag: Record<string, string[]> = {};
+	const elementsSubAccounts: Record<string, string[]> = {};
+
 	for (const element of peoples) {
 		elementsScore[element.userId] = DangerousPeople.strArrToScore(await database.dangerousPeople.score.fetch(element.userId));
 		elementsTag[element.userId] = (await database.dangerousPeople.tag.findUserTags(element.userId)).map(value => value.content);
+		elementsSubAccounts[element.userId] = (await database.dangerousPeople.subAccount.fetch(element.userId)).map(value => value.userId);
 	}
 
 	return {
@@ -22,6 +25,7 @@ export const load = (async (e) => {
 			...{
 				score: elementsScore[value.userId] ?? 0,
 				tags: elementsTag[value.userId] ?? [],
+				subAccounts: elementsSubAccounts[value.userId] ?? [],
 			}
 		}})
 	}

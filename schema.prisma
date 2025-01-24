@@ -41,6 +41,11 @@ model DangerousPeople {
     time        DateTime
 }
 
+model DangerousPeopleSubAccount {
+    userId String @id
+    mainId String
+}
+
 model DangerousPeopleScore {
     userId  String
     content String
@@ -132,6 +137,11 @@ model GuildBlackList {
 model BumpCounter {
     guildId String @id
     count   Int
+}
+
+model UserBumpCounter {
+    userId String @id
+    count  Int
 }
 
 //アクティブレートの為のテーブル

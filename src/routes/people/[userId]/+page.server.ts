@@ -9,6 +9,7 @@ export const load = (async (e) => {
 	return {
 		userId,
 		user,
+		subAccounts: (await database.dangerousPeople.subAccount.fetch(userId)).map(value => value.userId),
 		score: await database.dangerousPeople.score.fetch(userId),
 		tags: (await database.dangerousPeople.tag.findUserTags(userId)).map(value => value.content),
 	}

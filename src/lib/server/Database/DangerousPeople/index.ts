@@ -2,6 +2,7 @@ import { errorHandling } from "$lib/server/error";
 import { DangerousPeopleTag } from "./DangerousPeople.tag";
 import { z } from "zod";
 import { DangerousPeopleScore } from "./DangerousPeople.score";
+import { SubAccount } from "./DangerousPeople.subAccount";
 
 import type { Prisma, PrismaClient } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
@@ -40,6 +41,7 @@ export type SearchOptions = {
 export class DangerousPeople {
 	public readonly tag: DangerousPeopleTag;
 	public readonly score: DangerousPeopleScore;
+	public readonly subAccount: SubAccount;
 
 	private readonly table: Prisma.DangerousPeopleDelegate<DefaultArgs>
 
@@ -47,6 +49,7 @@ export class DangerousPeople {
 		this.table = prisma.dangerousPeople;
 		this.tag = new DangerousPeopleTag(prisma.dangerousPeopleTag);
 		this.score = new DangerousPeopleScore(prisma.dangerousPeopleScore);
+		this.subAccount = new SubAccount(prisma.dangerousPeopleSubAccount);
 	}
 
 	public async fetch(userId: string, options?: FetchOptions) {
