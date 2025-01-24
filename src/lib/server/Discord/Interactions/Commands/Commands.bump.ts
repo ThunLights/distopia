@@ -34,6 +34,7 @@ export class BumpCommands extends CommandsBase {
             return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
         }
 		await database.guildTables.bumpCounter.update(interaction.guild.id);
+		await database.userBump.update(interaction.user.id);
 		this.lateLimit.push(guild.guildId);
 		setTimeout(async () => {
 			try {
@@ -51,11 +52,15 @@ export class BumpCommands extends CommandsBase {
 			} catch {}
 		}, 2 * 60 * 60 * 1000);
 		const counter = await database.guildTables.bumpCounter.fetch(interaction.guild.id);
+		const userCounter = await database.userBump.fetch(interaction.user.id);
         const embed = new EmbedBuilder()
             .setColor("Gold")
             .setTitle("Distopia: Discordサーバー掲示板")
             .setURL(`https://distopia.top/`)
-            .setDescription(`合計Bump: ${counter ? counter.count : 0}回\n表示順を上げました。[こちら](https://distopia.top/)で確認できます。`);
+            .setDescription(`合計Bump: ${counter ? counter.count : 0}回\n表示順を上げました。[こちら](https://distopia.top/)で確認できます。`)
+			.setFields(
+				{ name: `${interaction.user.displayName} 's Bump Score`, value: `合計: ${userCounter ? userCounter.count : 0}回`, inline: false },
+			);
         return { embeds: [ embed ] } satisfies InteractionReplyOptions;
     }
 }

@@ -22,6 +22,7 @@ export const _BodyZod = z.object({
 
 	score: z.string().array(),
 	tags: z.string().array(),
+	subAccounts: z.string().array(),
 });
 
 export type Body = z.infer<typeof _BodyZod>;
@@ -38,9 +39,13 @@ export const POST = (async (e) => {
 	}
 
 	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
+		await database.dangerousPeople.score.delete(body.userId);
+		await database.dangerousPeople.tag.delete(body.userId);
+		await database.dangerousPeople.subAccount.delete(body.userId);
 		const result = await database.dangerousPeople.update(body.userId, {
 			...body,
 			...{
+				subAccounts: undefined,
 				score: undefined,
 				tags: undefined,
 				userId: undefined,
@@ -55,6 +60,9 @@ export const POST = (async (e) => {
 		}
 		for (const tag of body.tags) {
 			await database.dangerousPeople.tag.update(body.userId, tag);
+		}
+		for (const subAccount of body.subAccounts) {
+			await database.dangerousPeople.subAccount.update(subAccount, body.userId);
 		}
 
 		return json({

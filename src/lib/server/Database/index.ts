@@ -9,9 +9,9 @@ import { DatabaseArchiveTables } from "./Archive/index";
 import { Friend } from "./Friend/index";
 import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
-import { Staff } from "./Database.staff";
 import { Panel } from "./Panel/index";
 import { Sales } from "./Database.sales";
+import { UserBumpCounter } from "./Database.userBumpCounter";
 
 export class DatabaseError {
     constructor(public readonly content: string) {}
@@ -29,8 +29,8 @@ export class DatabaseClient {
 	public readonly rankingPanel = new DatabaseRankingPanelTables(this.prisma);
 	public readonly dangerousPeople = new DangerousPeople(this.prisma);
 	public readonly panel = new Panel(this.prisma);
-    public readonly staff = new Staff(this.prisma.staff);
 	public readonly sales = new Sales(this.prisma.sales);
+	public readonly userBump = new UserBumpCounter(this.prisma.userBumpCounter);
 }
 
 export const database = new DatabaseClient();
