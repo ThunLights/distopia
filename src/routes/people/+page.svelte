@@ -57,7 +57,7 @@
 					<div class="context">
 						<div class="profile">
 							<p>通称: {people.name}</p>
-							<p>ID: {people.userId}</p>
+							<p>ID: {people.userId} {people.subAccounts.length ? `(サブ垢: ${people.subAccounts.join(", ")})` : ""}</p>
 						</div>
 						<div class="info">
 							<p>理由: {people.title}</p>
