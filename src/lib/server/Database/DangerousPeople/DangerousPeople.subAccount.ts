@@ -32,7 +32,7 @@ export class SubAccount {
 		}
 	}
 
-	public async delete(mainId: string, userId: string) {
+	public async delete(mainId: string, userId?: string) {
 		try {
 			return await this.table.deleteMany({ where: { mainId, userId } });
 		} catch (error) {
