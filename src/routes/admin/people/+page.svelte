@@ -25,6 +25,7 @@
 			</div>
 			<div>
 				<button onclick={redirectUrl("/admin/people/add")}>追加</button>
+				<button onclick={redirectUrl("/admin/people/update")}>更新</button>
 				<button onclick={redirectUrl("/admin/people/remove")}>削除</button>
 			</div>
 		</div>
