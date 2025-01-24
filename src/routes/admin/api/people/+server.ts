@@ -38,6 +38,8 @@ export const POST = (async (e) => {
 	}
 
 	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
+		await database.dangerousPeople.score.delete(body.userId);
+		await database.dangerousPeople.tag.delete(body.userId);
 		const result = await database.dangerousPeople.update(body.userId, {
 			...body,
 			...{
