@@ -6,9 +6,9 @@ import type { DefaultArgs } from "@prisma/client/runtime/library";
 export class SubAccount {
 	constructor(private readonly table: Prisma.DangerousPeopleSubAccountDelegate<DefaultArgs>) {}
 
-	public async fetch(userId: string) {
+	public async fetch(mainId: string) {
 		try {
-			return await this.table.findMany({ where: { userId } });
+			return await this.table.findMany({ where: { mainId } });
 		} catch (error)  {
 			errorHandling(error);
 			return [];
@@ -32,9 +32,9 @@ export class SubAccount {
 		}
 	}
 
-	public async delete(userId: string, mainId?: string) {
+	public async delete(mainId: string, userId: string) {
 		try {
-			return await this.table.deleteMany({ where: { userId, mainId } });
+			return await this.table.deleteMany({ where: { mainId, userId } });
 		} catch (error) {
 			errorHandling(error);
 			return null;
