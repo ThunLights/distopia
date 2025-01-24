@@ -5,7 +5,7 @@
 	import Meta from "$lib/meta.svelte";
 
 	const { data } = $props();
-	const { userId, user, tags, score } = data;
+	const { userId, user, tags, score, subAccounts } = data;
 	const title = user ? `「${user.name}」は危険人物です。` : `「${userId}」は登録されていません`;
 </script>
 
@@ -55,6 +55,9 @@
 					</table>
 				</div>
 				<div class="info">
+					{#if subAccounts.length}
+						<p>サブ垢: {subAccounts.join(", ")}</p>
+					{/if}
 					<p>理由: {user.title}</p>
 					<p>識別タイプ: {user.type}</p>
 					<p>登録日時: {date2Txt(user.time)}</p>

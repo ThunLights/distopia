@@ -20,6 +20,7 @@ export type ResponseJson = {
 		description: string
 		time: Date
 	}
+	subAccounts: string[]
 	score: string[]
 	tags: string[]
 }
@@ -40,6 +41,7 @@ export const POST = (async (e) => {
 	return json({
 		userId,
 		user,
+		subAccounts: (await database.dangerousPeople.subAccount.fetch(userId)).map(value => value.userId),
 		score: await database.dangerousPeople.score.fetch(userId),
 		tags: (await database.dangerousPeople.tag.findUserTags(userId)).map(value => value.content),
 	} satisfies ResponseJson, { status: 200 });
