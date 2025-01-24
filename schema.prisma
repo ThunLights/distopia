@@ -41,6 +41,11 @@ model DangerousPeople {
     time        DateTime
 }
 
+model DangerousPeopleSubAccount {
+    userId String @id
+    mainId String
+}
+
 model DangerousPeopleScore {
     userId  String
     content String
