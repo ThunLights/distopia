@@ -48,7 +48,7 @@
 			Toast.error("認証情報エラー")
 			return;
 		}
-		const { targetId, targetType, tags, name, score, title, description } = content;
+		const { targetId, targetType, tags, name, score, title, description, subAccounts } = content;
 		const response = await fetch("/admin/api/people", {
 			method: "POST",
 			headers: {
@@ -64,6 +64,7 @@
 				title,
 				description,
 				tags,
+				subAccounts,
 			})
 		});
 		if (response.ok) {
@@ -103,6 +104,7 @@
 						title: userData.user.title,
 						description: userData.user.description,
 						targetType: userType,
+						subAccounts: userData.subAccounts,
 					} : {}}
 				/>
 			{:else}

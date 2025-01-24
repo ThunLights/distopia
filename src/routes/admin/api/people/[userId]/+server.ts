@@ -22,6 +22,7 @@ export const DELETE = (async (e) => {
 	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
 		await database.dangerousPeople.score.delete(userId);
 		await database.dangerousPeople.tag.delete(userId);
+		await database.dangerousPeople.subAccount.delete(userId);
 		const result = await database.dangerousPeople.delete(userId);
 		if (!result) {
 			return generateErrorJson("DATABASE_ERROR");

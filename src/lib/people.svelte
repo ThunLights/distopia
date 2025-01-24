@@ -13,6 +13,7 @@
 		title: string
 		description: string
 		targetType: typeof DangerousPeopleTypes[number]
+		subAccounts: string[]
 	}
 
 	export type Props = {
@@ -35,9 +36,10 @@
 	let description = $state(init.description ?? "");
 	let targetType = $state<typeof DangerousPeopleTypes[number]>(init.targetType ?? "criminal");
 	let scoreSum = $state(DangerousPeople.strArrToScore(init.score ?? []));
+	let subAccounts = $state<string[]>(init.subAccounts ?? []);
 
 	function clicked() {
-		send({ targetId, name, score, tags, title, description, targetType });
+		send({ targetId, name, score, tags, title, description, targetType, subAccounts });
 	}
 </script>
 
@@ -93,6 +95,13 @@
 	<Tags
 		tags={tags}
 		tagsUpdate={(newTags) => { tags = newTags }}
+	/>
+</div>
+<div>
+	<p>サブ垢</p>
+	<Tags
+		tags={subAccounts}
+		tagsUpdate={(newTags) => { subAccounts = newTags }}
 	/>
 </div>
 <div>
