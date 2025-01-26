@@ -18,6 +18,9 @@
         <div id="adsense-bug-checker"></div>
         %sveltekit.body%
         <script>
+            if (localStorage.getItem("adsense")) {
+                return;
+            }
             const element = document.getElementById("adsense-bug-checker");
             if (element) {
                 sessionStorage.setItem("adsense", "true");
