@@ -18,14 +18,13 @@
         <div id="adsense-bug-checker"></div>
         %sveltekit.body%
         <script>
-            setInterval(() => {
-                const element = document.getElementById("adsense-bug-checker");
-                if (element) {
-                    localStorage.setItem("adsense", "true");
-                } else {
-                    localStorage.removeItem("adsense");
-                }
-            }, 1000);
+            const element = document.getElementById("adsense-bug-checker");
+            if (element) {
+                sessionStorage.setItem("adsense", "true");
+                location.reload();
+            } else {
+                sessionStorage.removeItem("adsense");
+            }
         </script>
 	</body>
 </html>
