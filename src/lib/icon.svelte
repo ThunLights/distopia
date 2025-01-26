@@ -2,92 +2,45 @@
     import { onMount } from "svelte";
 
     type Props = {
-        imgStyle: string
+		height: number | string
+		width: number | string
 		iconPath: string
 		edgePath: string
+        imgStyle?: string
     }
 
-	const { imgStyle, iconPath, edgePath }: Props = $props();
+	const { imgStyle, iconPath, edgePath, height, width }: Props = $props();
 
     const size = 512;
-    const iconCanvasSize = 350;
 
-    let canvas: HTMLCanvasElement;
-    let iconCanvas: HTMLCanvasElement;
+    let imgPath = $state("/ranking/discord.webp");
 
-    let imgPath = $state("/discord.webp");
-
-    function drawEdge(fPath: string) {
-        const ctx = $state(canvas.getContext("2d"));
-        if (ctx) {
-            const image = new Image();
-            image.onload = () => {
-                ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, size, size);
-                imgPath = canvas.toDataURL("image/webp");
-            }
-            image.src = fPath
-        }
-    }
-
-    function drawIcon(fPath: string, edge: string) {
-        const iconSize = size - 250;
-        const ctx = $state(canvas.getContext("2d"));
-        if (ctx) {
-            const image = new Image();
-            image.src = fPath;
-            image.onload = () => {
-                ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 125, 125, iconSize, iconSize);
-                drawEdge(edge);
-            }
-        }
-    }
-
-    function generateIcon(fPath: string, rankingPath: string) {
-        const ctx = $state(iconCanvas.getContext("2d"));
-        if (ctx) {
-            const image = new Image();
-            image.src = fPath;
-            image.onload = () => {
-                ctx.beginPath();
-                ctx.arc(175, 175, (iconCanvasSize / 2) - 4, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.clip();
-                ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, iconCanvasSize, iconCanvasSize);
-                ctx.restore();
-                drawIcon(iconCanvas.toDataURL("image/webp"), rankingPath);
-            }
-        }
-    }
-
-    async function fetchData(url: string) {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        return arrayBufferToDataUrl(arrayBuffer);
-    }
-
-    function arrayBufferToDataUrl(buffer: ArrayBuffer) {
-        let binary = "";
-        const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        const base = window.btoa(binary);
-        return `data:image/jpeg;base64,${base}`;
-    }
-
-    onMount(async () => {
-        const iconData = await fetchData(iconPath);
-        generateIcon(iconData, edgePath);
-    });
+	onMount(async () => {
+		const reponse = await fetch(iconPath);
+		if (reponse.status === 200) {
+			imgPath = iconPath;
+		}
+	});
 </script>
 
-<img src={imgPath} alt="" style={imgStyle}>
-<canvas width={size} height={size} bind:this={canvas} class="hidden"></canvas>
-<canvas width={iconCanvasSize} height={iconCanvasSize} bind:this={iconCanvas} class="hidden"></canvas>
+<svg width={width} height={height} viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2; {imgStyle ?? ""};">
+    <use xlink:href="#_Image1" x="0" y="0" width={size} height={size}/>
+    <g transform="matrix(1,0,0,1,5.19543,0.659201)">
+        <circle cx="250.805" cy="255.341" r="128.468" style="fill:rgb(235,235,235);"/>
+        <clipPath id="_clip2">
+            <circle cx="250.805" cy="255.341" r="128.468"/>
+        </clipPath>
+        <g clip-path="url(#_clip2)">
+            <g transform="matrix(0.629565,0,0,0.629565,98.8075,91.7886)">
+                <use xlink:href="#_Image3" x="-14" y="0" width={size} height={size}/>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <image id="_Image1" width={size} height={size} xlink:href={edgePath} />
+        <image id="_Image3" width={size} height={size} xlink:href={imgPath} />
+    </defs>
+</svg>
 
 <style>
-    .hidden {
-        display: none;
-    }
 </style>
