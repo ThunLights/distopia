@@ -103,7 +103,7 @@
 					<div>
 						<a class="white" href="/guilds/{guild.guildId}" aria-label="{guild.name}">
 							{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
-								<Icon imgStyle="height: 60px;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp?size=256` : "/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+								<Icon width={60} height={60} imgStyle="" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp?size=256` : "/ranking/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
 							{:else}
 								<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp?size=256` : "/discord.webp"}" alt="">
 							{/if}
