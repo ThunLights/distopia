@@ -59,7 +59,7 @@
 		<div>
 			<a class="white" href="/guilds/{guild.guildId}">
 				{#if edge}
-					<Icon imgStyle="width: 10vw;" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
+					<Icon width="10vw" height="10vw" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/ranking/discord.webp"} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
 				{:else}
 					<img class="icon" src={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} alt="">
 				{/if}
