@@ -4,7 +4,7 @@ import { database } from "$lib/server/Database/index";
 import { FetchError } from "$lib/server/Discord/Oauth/Oauth.fetch";
 import { generateBackUp } from "$lib/server/archive";
 
-import type { HandleServerError } from "@sveltejs/kit";
+import type { Handle, HandleServerError } from "@sveltejs/kit";
 
 process.on("uncaughtExceptionMonitor", errorHandling);
 
@@ -29,6 +29,12 @@ async function start() {
 		await generateBackUp();
 	}, 20 * 60 * 1000);
 }
+
+export const handle = (async ({event, resolve}) => {
+	const response = await resolve(event);
+	response.headers.set("cache-control", "no-cache, no-store, must-revalidate");
+	return response;
+}) satisfies Handle;
 
 export const handleError = (async (input) => {
     if (input.status === 404) {
