@@ -43,7 +43,7 @@ export class BumpCommands extends CommandsBase {
 					.setColor("Gold")
 					.setTitle("Bumpが実行できますよ!!")
 					.setURL(`https://distopia.top/`)
-					.setDescription("只今、前回のBumpから2時間がたちました。");
+					.setDescription(`只今、前回のBumpから2時間がたちました。\n再度 </bump:${interaction.commandId}> を実行可能です。`);
 
 				this.lateLimit = this.lateLimit.filter(value => value !== guild.guildId);
 				if (settings && settings.content && interaction.channel && interaction.channel.type === ChannelType.GuildText) {
