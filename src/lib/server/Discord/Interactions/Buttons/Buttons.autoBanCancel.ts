@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ModalBuilder, PermissionsBitField, TextInputBuilder, TextInputStyle } from "discord.js";
+import { MessageFlags, PermissionsBitField } from "discord.js";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 import { errorHandling } from "$lib/server/error";
 
@@ -17,13 +17,13 @@ export class AutoBanCancelButton extends ButtonsBase {
 				&& interaction.member.permissions instanceof PermissionsBitField
 				&& interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
 			)) {
-				return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const result = await database.guildTables.settings.dangerousPeople.ban.remove(interaction.guild.id);
-			return { content: result ? "AutoBANが無効になりました。" : "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: result ? "AutoBANが無効になりました。" : "DATABASE_ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		} catch (error) {
 			errorHandling(error);
-			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 import { getCategory } from "$lib/category";
 import { database, DatabaseError } from "$lib/server/Database/index";
 import { CommandsBase, CommandsError } from "./Commands.base";
-import { ActionRowBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, ChannelType, MessageFlags, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 
 import type { CacheType, ChatInputCommandInteraction, Client, InteractionReplyOptions, MessagePayload } from "discord.js";
 
@@ -16,14 +16,14 @@ export class RegisterCommands extends CommandsBase {
 		let category = interaction.options.getString("category") ?? "general";
 		if (interaction.guild && interaction.guild.ownerId === interaction.user.id) {
 			if (!(interaction.channel && interaction.channel.type === ChannelType.GuildText)) {
-				return { content: "テキストチャンネル以外に招待リンクを設定することはできません", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "テキストチャンネル以外に招待リンクを設定することはできません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const guild = await database.guildTables.guild.id2Data(interaction.guild.id);
 			if (guild instanceof DatabaseError) {
-				return { content: "登録チェック時にデータベースエラーが発生しました。", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "登録チェック時にデータベースエラーが発生しました。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			if (guild) {
-				return { content: "正式登録が済んでいます。", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "正式登録が済んでいます。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			category = getCategory(category) ? category : "general";
 			const invite = await interaction.channel.createInvite({
@@ -56,10 +56,10 @@ export class RegisterCommands extends CommandsBase {
 						.setStyle(TextInputStyle.Paragraph))
 				);
 			if (!result) {
-				return { content: "データベースへの書き込みがうまく行きませんでした", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "データベースへの書き込みがうまく行きませんでした", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
-			return await interaction.showModal(modal);
+			return void await interaction.showModal(modal);
 		}
-		return { content: "オーナー以外は登録できません", ephemeral: true } satisfies InteractionReplyOptions;
+		return { content: "オーナー以外は登録できません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 	}
 }

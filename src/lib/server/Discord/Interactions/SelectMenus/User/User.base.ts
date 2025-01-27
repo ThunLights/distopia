@@ -1,4 +1,5 @@
 import { codeBlock } from "$lib/codeblock";
+import { MessageFlags } from "discord.js";
 
 import type { CacheType, Client, InteractionReplyOptions, MessagePayload, UserSelectMenuInteraction } from "discord.js";
 
@@ -18,10 +19,10 @@ export abstract class UsersBase {
 	async reply(interaction: UserSelectMenuInteraction<CacheType>): Promise<void | UsersError> {
 		const result = await this.commands(interaction);
 		if (result === null) {
-			return void await interaction.reply({ content: codeBlock(`Error: Commands Not Found`), ephemeral: true });
+			return void await interaction.reply({ content: codeBlock(`Error: Commands Not Found`), flags: [ MessageFlags.Ephemeral ] });
 		}
 		if (result instanceof UsersError) {
-			return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+			return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
 		}
 		if (result || typeof result === "string") {
 			return void await interaction.reply(result)
