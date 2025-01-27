@@ -229,6 +229,11 @@ model BumpNotice {
     content Boolean
 }
 
+model BumpNoticeRole {
+    guildId String @id
+    roleId  String
+}
+
 model DangerousPeopleNoticeChannel {
     guildId   String @id
     channelId String
