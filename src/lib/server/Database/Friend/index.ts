@@ -1,8 +1,6 @@
 import { errorHandling } from "$lib/server/error";
+import { DatabaseClient } from "../index";
 import { FriendTag } from "./Friend.tag";
-
-import type { Prisma, PrismaClient } from "@prisma/client";
-import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export type Element = {
     userId: string
@@ -13,14 +11,9 @@ export type Element = {
 }
 
 export class Friend {
-	public readonly tag: FriendTag;
+	public readonly tag = new FriendTag(DatabaseClient._prisma.friendTag);
 
-	private readonly table: Prisma.FriendDelegate<DefaultArgs>
-
-	constructor(prisma: PrismaClient) {
-		this.table = prisma.friend;
-		this.tag = new FriendTag(prisma.friendTag);
-	}
+	private readonly table = DatabaseClient._prisma.friend;
 
 	public async update(data: Element) {
 		try {

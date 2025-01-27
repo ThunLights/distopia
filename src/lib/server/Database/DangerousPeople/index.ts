@@ -3,9 +3,8 @@ import { DangerousPeopleTag } from "./DangerousPeople.tag";
 import { z } from "zod";
 import { DangerousPeopleScore } from "./DangerousPeople.score";
 import { SubAccount } from "./DangerousPeople.subAccount";
+import { DatabaseClient } from "$lib/server/Database/index";
 
-import type { Prisma, PrismaClient } from "@prisma/client";
-import type { DefaultArgs } from "@prisma/client/runtime/library";
 import type { DangerousPeopleTypeZod } from "$lib/constants";
 
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
@@ -39,18 +38,11 @@ export type SearchOptions = {
 }
 
 export class DangerousPeople {
-	public readonly tag: DangerousPeopleTag;
-	public readonly score: DangerousPeopleScore;
-	public readonly subAccount: SubAccount;
+	public readonly tag = new DangerousPeopleTag(DatabaseClient._prisma.dangerousPeopleTag);
+	public readonly score = new DangerousPeopleScore(DatabaseClient._prisma.dangerousPeopleScore);
+	public readonly subAccount = new SubAccount(DatabaseClient._prisma.dangerousPeopleSubAccount);
 
-	private readonly table: Prisma.DangerousPeopleDelegate<DefaultArgs>
-
-	constructor(prisma: PrismaClient) {
-		this.table = prisma.dangerousPeople;
-		this.tag = new DangerousPeopleTag(prisma.dangerousPeopleTag);
-		this.score = new DangerousPeopleScore(prisma.dangerousPeopleScore);
-		this.subAccount = new SubAccount(prisma.dangerousPeopleSubAccount);
-	}
+	private readonly table = DatabaseClient._prisma.dangerousPeople;
 
 	public async fetch(userId: string, options?: FetchOptions) {
 		try {
