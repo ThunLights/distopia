@@ -25,7 +25,6 @@ export class BumpCommands extends CommandsBase {
 			const termDate = this.lateLimit[guild.guildId];
 			const nowDate = new Date();
 			const between = (2 * 60 * 60 * 1000) - (nowDate.getTime() - termDate.getTime());
-			console.log(between);
 			const embed = new EmbedBuilder()
 				.setColor("Red")
 				.setTitle("Distopia: Discordサーバー掲示板")
@@ -43,6 +42,7 @@ export class BumpCommands extends CommandsBase {
 		setTimeout(async () => {
 			try {
 				const settings = await database.guildTables.settings.bump.fetch(guild.guildId);
+				const mention = await database.guildTables.settings.bumpNoticeRole.fetch(guild.guildId);
 				const embed = new EmbedBuilder()
 					.setColor("Gold")
 					.setTitle("Bumpが実行できますよ!!")
@@ -50,7 +50,7 @@ export class BumpCommands extends CommandsBase {
 					.setDescription(`只今、前回のBumpから2時間がたちました。\n再度 </bump:${interaction.commandId}> を実行可能です。`);
 				delete this.lateLimit[guild.guildId];
 				if (settings && settings.content && interaction.channel && interaction.channel.type === ChannelType.GuildText) {
-					await interaction.channel.send({ embeds: [ embed ] });
+					await interaction.channel.send({ content: mention ? `<@&${mention.roleId}>` : undefined, embeds: [ embed ] });
 				}
 			} catch {}
 		}, 2 * 60 * 60 * 1000);

@@ -24,6 +24,9 @@ export class InteractionResponse {
         if (interaction.isContextMenuCommand()) {
             return;
         }
+		if (interaction.isRoleSelectMenu()) {
+			return await this.selectMenu.role.reply(interaction);
+		}
 		if (interaction.isChannelSelectMenu()) {
 			return await this.selectMenu.channel.reply(interaction);
 		}
