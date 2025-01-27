@@ -2,6 +2,7 @@ import { database } from "$lib/server/Database/index";
 import { getCategory } from "$lib/category";
 import { ModalsBase, ModalsError } from "./Modal.base";
 import { PUBLIC_URL } from "$env/static/public";
+import { MessageFlags } from "discord.js";
 
 import type { ModalSubmitInteraction, CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";
 
@@ -14,10 +15,10 @@ export class RegisterModals extends ModalsBase {
 			const description = interaction.fields.getTextInputValue("description");
 			const guildTmp = await database.guildTables.tmp.data(interaction.guild.id);
 			if (!guildTmp) {
-				return { content: "仮登録されていません", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "仮登録されていません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			if (!description) {
-				return { content: "説明が取得できませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "説明が取得できませんでした。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const result = await database.guildTables.guild.update({
 				...guildTmp,
@@ -27,12 +28,12 @@ export class RegisterModals extends ModalsBase {
 				}
 			});
 			if (!result) {
-				return { content: "データベースエラー", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "データベースエラー", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			await database.guildTables.bump.update(guildTmp.guildId);
 			await database.guildTables.bump.update(guildTmp.guildId);
 			await database.guildTables.tmp.delete(guildTmp.guildId);
-			return { content: `${PUBLIC_URL}/guilds/${interaction.guild.id}`, ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: `${PUBLIC_URL}/guilds/${interaction.guild.id}`, flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
 		return null;
 	}

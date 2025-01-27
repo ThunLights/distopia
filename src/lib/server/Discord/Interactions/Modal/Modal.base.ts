@@ -1,4 +1,5 @@
 import { codeBlock } from "$lib/codeblock";
+import { MessageFlags } from "discord.js";
 
 import type { CacheType, Client, InteractionReplyOptions, MessagePayload, ModalSubmitInteraction } from "discord.js";
 
@@ -18,10 +19,10 @@ export abstract class ModalsBase {
     async reply(interaction: ModalSubmitInteraction<CacheType>): Promise<void | ModalsError> {
         const result = await this.commands(interaction);
         if (result === null) {
-            return void await interaction.reply({ content: codeBlock(`Error: Commands Not Found`), ephemeral: true });
+            return void await interaction.reply({ content: codeBlock(`Error: Commands Not Found`), flags: [ MessageFlags.Ephemeral ] });
         }
         if (result instanceof ModalsError) {
-            return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+            return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
         }
         return void await interaction.reply(result);
     }

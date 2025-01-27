@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionsBitField } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags, PermissionsBitField } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database } from "$lib/server/Database/index";
 
@@ -66,10 +66,10 @@ export class SettingsCommand extends CommandsBase {
 			return {
 				embeds: [ embed ],
 				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton, actingOwnerButton) ],
-				ephemeral: true
+				flags: [ MessageFlags.Ephemeral ]
 			} satisfies InteractionReplyOptions;
 		}
 
-		return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
+		return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 	}
 }

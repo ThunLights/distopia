@@ -11,6 +11,7 @@ import { ActingOwnerButton } from "./Buttons.actingOwner";
 import { ActingOwnerCancelButton } from "./Buttons.actingOwnerCancel";
 import { AutoBanSetButton } from "./Buttons.autoBanSet";
 import { AutoBanCancelButton } from "./Buttons.autoBanCancel";
+import { MessageFlags } from "discord.js";
 
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
@@ -38,13 +39,13 @@ export class Buttons {
 			if (button.customId === interaction.customId) {
 				const result = await button.reply(interaction);
 				if (result) {
-					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
 				} else {
 					return result;
 				}
 			}
 		}
 
-		return void await interaction.reply({ content: "Command Not Found", ephemeral: true });
+		return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
 	}
 }

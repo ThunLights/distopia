@@ -1,7 +1,7 @@
 import { UsersBase, UsersError } from "./User.base";
 import { errorHandling } from "$lib/server/error";
 import { database } from "$lib/server/Database/index";
-import { PermissionsBitField } from "discord.js";
+import { MessageFlags, PermissionsBitField } from "discord.js";
 
 import type { UserSelectMenuInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
@@ -17,17 +17,17 @@ export class Owner extends UsersBase {
 				&& interaction.member.permissions instanceof PermissionsBitField
 				&& interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
 			)) {
-				return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const user = interaction.values[0];
 			if (!user) {
-				return { content: "1人以上選択してください", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "1人以上選択してください", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const result = await database.guildTables.settings.owner.update(interaction.guild.id, user);
-			return { content: result ? `<@${user}> をオーナー代理に設定しました。` : "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: result ? `<@${user}> をオーナー代理に設定しました。` : "DATABASE_ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		} catch (error) {
 			errorHandling(error);
-			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
 	}
 }

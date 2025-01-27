@@ -1,4 +1,4 @@
-import { ChannelType, Client, EmbedBuilder, PermissionsBitField } from "discord.js";
+import { ChannelType, Client, EmbedBuilder, MessageFlags, PermissionsBitField } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database, DatabaseError } from "$lib/server/Database";
 
@@ -21,14 +21,14 @@ export class WebCommands extends CommandsBase {
         if (commandName === "register") {
 			if (interaction.member && interaction.member.permissions instanceof PermissionsBitField && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
 				if (!(interaction.channel && interaction.channel.type === ChannelType.GuildText)) {
-					return { content: "テキストチャンネル以外に招待リンクを設定することはできません", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "テキストチャンネル以外に招待リンクを設定することはできません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				const guild = await database.guildTables.guild.id2Data(interaction.guildId);
 				if (guild instanceof DatabaseError) {
-					return { content: "登録チェック時にデータベースエラーが発生しました。", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "登録チェック時にデータベースエラーが発生しました。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				if (guild) {
-					return { content: "正式登録が済んでいます。", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "正式登録が済んでいます。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				const invite = await interaction.channel.createInvite({
 					maxAge: 0,
@@ -42,7 +42,7 @@ export class WebCommands extends CommandsBase {
 					banner: interaction.guild.banner ?? undefined,
 				});
 				if (!result) {
-					return { content: "データベースへの書き込みがうまく行きませんでした", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "データベースへの書き込みがうまく行きませんでした", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				const embed = new EmbedBuilder()
 					.setColor("Gold")
@@ -64,16 +64,16 @@ export class WebCommands extends CommandsBase {
 			if (interaction.member && interaction.member.permissions instanceof PermissionsBitField && interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
 				const guild = await database.guildTables.guild.id2Data(interaction.guildId);
 				if (guild instanceof DatabaseError) {
-					return { content: "データベースエラー", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "データベースエラー", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				if (!guild) {
-					return { content: `サーバーが本登録されていません。\n詳しくは\`/help\`のコマンドを使用してく確認してください`, ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: `サーバーが本登録されていません。\n詳しくは\`/help\`のコマンドを使用してく確認してください`, flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				if (this.changeInviteRateLimit.includes(interaction.guildId)) {
-					return { content: "頻繁にサーバー招待URLを変えることはできません", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "頻繁にサーバー招待URLを変えることはできません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				if (!(interaction.channel && interaction.channel.isTextBased() && interaction.channel.type === ChannelType.GuildText)) {
-					return { content: "テキストチャンネルでのみ招待リンクを設定することが出来ます。", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "テキストチャンネルでのみ招待リンクを設定することが出来ます。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				const invite = await interaction.channel.createInvite({
 					maxAge: 0,
@@ -81,7 +81,7 @@ export class WebCommands extends CommandsBase {
 				});
 				const result = await database.guildTables.guild.update({...guild, ...{ invite: invite.code }});
 				if (!result) {
-					return { content: "データベースの更新が出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "データベースの更新が出来ませんでした。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				this.changeInviteRateLimit.push(interaction.guildId);
 				setTimeout(() => {
@@ -106,7 +106,7 @@ export class WebCommands extends CommandsBase {
         if (commandName === "page") {
             const guild = await database.guildTables.guild.id2Data(interaction.guildId);
             if (guild instanceof DatabaseError || guild === null) {
-                return { content: "サーバーが見つかりませんでした。正式登録が済んでいるか確認してみてください。", ephemeral: true } satisfies InteractionReplyOptions;
+                return { content: "サーバーが見つかりませんでした。正式登録が済んでいるか確認してみてください。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
             }
             if (guild) {
                 return { content: `https://distopia.top/guilds/${guild.guildId}` } satisfies InteractionReplyOptions;
