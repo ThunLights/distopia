@@ -12,7 +12,7 @@ async function start() {
 	await discord.bot.setEvents();
 	await discord.bot.login();
 
-	setTimeout(async () => {
+	setInterval(async () => {
 		const users = await database.user.aboutExpire();
 		for (const user of users) {
 			const newData = await discord.oauth.fetch.resetAccessToken(user.refreshToken);
