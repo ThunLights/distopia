@@ -18,6 +18,7 @@ export class SettingsCommand extends CommandsBase {
 			const bumpNotice = await database.guildTables.settings.bump.fetch(interaction.guild.id);
 			const autoBan = await database.guildTables.settings.dangerousPeople.ban.fetch(interaction.guild.id);
 			const noticeChannel = await database.guildTables.settings.dangerousPeople.notice.fetch(interaction.guild.id);
+			const bumpRole = await database.guildTables.settings.bumpNoticeRole.fetch(interaction.guild.id);
 			const actingOwner = await database.guildTables.settings.owner.fetch(interaction.guild.id);
 
 			const bumptNoticeValue = bumpNotice
@@ -31,6 +32,9 @@ export class SettingsCommand extends CommandsBase {
 			const noticeChannelValue = noticeChannel
 				? `出力チャンネル: <#${noticeChannel.channelId}>`
 				: "未設定";
+			const bumpRoleValue = bumpRole
+				? `<@&${bumpRole.roleId}>`
+				: "未設定";
 			const actingOwnerValue = actingOwner
 				? `<@${actingOwner.userId}>`
 				: "未設定";
@@ -43,6 +47,7 @@ export class SettingsCommand extends CommandsBase {
 					{ name: "Bump通知", value: bumptNoticeValue, inline: false },
 					{ name: "危険人物自動BAN", value: autoBanValue, inline: false },
 					{ name: "危険人物予報チャンネル", value: noticeChannelValue, inline: false },
+					{ name: "Bump通知用ロール", value: bumpRoleValue, inline: false },
 					{ name: "オーナー代理", value: actingOwnerValue, inline: false },
 				);
 
@@ -58,6 +63,10 @@ export class SettingsCommand extends CommandsBase {
 				.setCustomId("noticeChannel")
 				.setLabel("危険人物通知チャンネル")
 				.setStyle(ButtonStyle.Success);
+			const bumpRoleButton = new ButtonBuilder()
+				.setCustomId("bumpRole")
+				.setLabel("Bump通知ロール")
+				.setStyle(ButtonStyle.Primary);
 			const actingOwnerButton = new ButtonBuilder()
 				.setCustomId("actingOwner")
 				.setLabel("代理オーナー設定")
@@ -65,7 +74,7 @@ export class SettingsCommand extends CommandsBase {
 
 			return {
 				embeds: [ embed ],
-				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton, actingOwnerButton) ],
+				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton, bumpRoleButton, actingOwnerButton) ],
 				flags: [ MessageFlags.Ephemeral ]
 			} satisfies InteractionReplyOptions;
 		}
