@@ -18,19 +18,22 @@ export class DatabaseError {
 }
 
 export class DatabaseClient {
-    public readonly prisma = new PrismaClient();
+	public static readonly _prisma = new PrismaClient();
+
+    public readonly prisma = DatabaseClient._prisma;
     public readonly token = new Token(this.prisma.token);
     public readonly user = new User(this.prisma.user);
     public readonly email = new Email(this.prisma.email);
     public readonly avatar = new Avatar(this.prisma.avatar);
-    public readonly guildTables = new DatabaseGuildTables(this.prisma);
-	public readonly friend = new Friend(this.prisma);
-	public readonly archives = new DatabaseArchiveTables(this.prisma);
-	public readonly rankingPanel = new DatabaseRankingPanelTables(this.prisma);
-	public readonly dangerousPeople = new DangerousPeople(this.prisma);
-	public readonly panel = new Panel(this.prisma);
 	public readonly sales = new Sales(this.prisma.sales);
 	public readonly userBump = new UserBumpCounter(this.prisma.userBumpCounter);
+
+    public readonly guildTables = new DatabaseGuildTables();
+	public readonly friend = new Friend();
+	public readonly archives = new DatabaseArchiveTables();
+	public readonly rankingPanel = new DatabaseRankingPanelTables();
+	public readonly dangerousPeople = new DangerousPeople();
+	public readonly panel = new Panel();
 }
 
 export const database = new DatabaseClient();

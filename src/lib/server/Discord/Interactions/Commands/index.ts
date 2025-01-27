@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { Client, MessageFlags } from "discord.js";
 import { codeBlock } from "$lib/codeblock";
 
 import { WebCommands } from "./Commands.web";
@@ -36,13 +36,13 @@ export class Commands {
             if (command.commandName === interaction.commandName) {
                 const result = await command.reply(interaction);
                 if (result) {
-                    return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+                    return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
                 } else {
                     return result;
                 }
             }
         }
 
-        return void await interaction.reply({ content: "Command Not Found", ephemeral: true });
+        return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
     }
 }

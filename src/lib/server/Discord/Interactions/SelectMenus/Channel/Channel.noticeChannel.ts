@@ -1,7 +1,9 @@
-import type { ChannelSelectMenuInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
+import { MessageFlags } from "discord.js";
 import { ChannelsBase, ChannelsError } from "./Channel.base";
 import { errorHandling } from "$lib/server/error";
 import { database } from "$lib/server/Database";
+
+import type { ChannelSelectMenuInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
 export class NoticeChannel extends ChannelsBase {
 	public readonly customId = "noticeChannel";
@@ -10,19 +12,19 @@ export class NoticeChannel extends ChannelsBase {
 		try {
 			const channel = interaction.values[0];
 			if (!interaction.guild) {
-				return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			if (!channel) {
-				return { content: "チャンネルを1つ選択してください", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "チャンネルを1つ選択してください", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const result = await database.guildTables.settings.dangerousPeople.notice.update(interaction.guild.id, channel);
 			if (!result) {
-				return { content: "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "DATABASE_ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
-			return { content: `<#${channel}> に設定しました。`, ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: `<#${channel}> に設定しました。`, flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		} catch (error) {
 			errorHandling(error);
-			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { Client, MessageFlags } from "discord.js";
 
 import { CommandsBase, CommandsError } from "./Commands.base";
 
@@ -12,6 +12,6 @@ export class HelpCommands extends CommandsBase {
     }
 
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-        return { content: "https://distopia.top/help", ephemeral: true } satisfies InteractionReplyOptions;
+        return { content: "https://distopia.top/help", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
     }
 }

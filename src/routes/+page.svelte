@@ -125,9 +125,11 @@
 						<p>タグ</p>
 						<div class="tags">
 							{#each guild.tags as tag}
-								<div class="tag">
-									<p class="content">{tag}</p>
-								</div>
+								<a class="tag" href="/search?content={tag}">
+									<div class="content">
+										<p>{tag}</p>
+									</div>
+								</a>
 							{/each}
 						</div>
 					{/if}

@@ -1,5 +1,6 @@
 import { codeBlock } from "$lib/codeblock";
 import { NoticeChannel } from "./Channel.noticeChannel";
+import { MessageFlags } from "discord.js";
 
 import type { CacheType, ChannelSelectMenuInteraction, Client } from "discord.js";
 import type { ChannelsBase } from "./Channel.base";
@@ -18,13 +19,13 @@ export class ChannelSelectMenu {
 			if (command.customId === interaction.customId) {
 				const result = await command.reply(interaction);
 				if (result) {
-					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
 				} else {
 					return result;
 				}
 			}
 		}
 
-		return void await interaction.reply({ content: "Command Not Found", ephemeral: true });
+		return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
 	}
 }

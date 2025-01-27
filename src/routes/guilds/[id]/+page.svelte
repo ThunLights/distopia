@@ -87,7 +87,7 @@
 					<p class="name">タグ一覧</p>
 					<div class="tags">
 						{#each guild.tags as tag}
-							<a class="tag" href="/search?tag={tag}">
+							<a class="tag" href="/search?content={tag}">
 								<div class="content">
 									<p>{tag}</p>
 								</div>

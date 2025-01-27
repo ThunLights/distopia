@@ -1,7 +1,7 @@
 import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { database, DatabaseError } from "$lib/server/Database/index";
 import { CommandsBase, CommandsError } from "./Commands.base";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { Guild } from "../../Controller/Controller.guild";
 
 import type { ChatInputCommandInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
@@ -11,7 +11,7 @@ export class OnlyStaffCommand extends CommandsBase {
 
 	public async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
 		if (!interaction.guild) {
-			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
 		if (await Guild.isStaff(interaction.user.id, this.client)) {
 			const subCommandGroup = interaction.options.getSubcommandGroup(true);
@@ -38,7 +38,7 @@ export class OnlyStaffCommand extends CommandsBase {
 					}
 					const result = await database.sales.update(guildId, interaction.user.id);
 					if (!result) {
-						return { content: "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+						return { content: "DATABASE_ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 					}
 					const embed = new EmbedBuilder()
 						.setColor("Green")
@@ -53,7 +53,7 @@ export class OnlyStaffCommand extends CommandsBase {
 						.setTitle("削除しました。")
 						.setDescription(`${guildId} を削除しました`);
 					if (!result) {
-						return { content: "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+						return { content: "DATABASE_ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 					}
 					return { embeds: [ embed ] } satisfies InteractionReplyOptions;
 				}
@@ -71,6 +71,6 @@ export class OnlyStaffCommand extends CommandsBase {
 				}
 			}
 		}
-		return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
+		return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 	}
 }

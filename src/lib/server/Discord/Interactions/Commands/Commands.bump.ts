@@ -1,4 +1,4 @@
-import { ChannelType, Client, EmbedBuilder } from "discord.js";
+import { ChannelType, Client, EmbedBuilder, MessageFlags } from "discord.js";
 
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { database, DatabaseError } from "$lib/server/Database";
@@ -7,7 +7,7 @@ import type { CacheType, InteractionReplyOptions, ChatInputCommandInteraction, M
 
 export class BumpCommands extends CommandsBase {
     public readonly commandName = "bump";
-	public lateLimit: string[] = [];
+	public readonly lateLimit: Record<string, Date> = {};
 
     constructor(client: Client) {
         super(client);
@@ -19,35 +19,38 @@ export class BumpCommands extends CommandsBase {
         }
         const guild = await database.guildTables.guild.id2Data(interaction.guildId);
         if (guild === null || guild instanceof DatabaseError) {
-            return { content: "サーバーを本登録していないとこのコマンドは使えません。", ephemeral: true } satisfies InteractionReplyOptions;
+            return { content: "サーバーを本登録していないとこのコマンドは使えません。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
         }
-		if (this.lateLimit.includes(guild.guildId)) {
+		if (Object.keys(this.lateLimit).includes(guild.guildId)) {
+			const termDate = this.lateLimit[guild.guildId];
+			const nowDate = new Date();
+			const between = (2 * 60 * 60 * 1000) - (nowDate.getTime() - termDate.getTime());
 			const embed = new EmbedBuilder()
 				.setColor("Red")
 				.setTitle("Distopia: Discordサーバー掲示板")
 				.setURL(`https://distopia.top/`)
-				.setDescription(`レートリミットです。時間を置いて再度実行してください`);
-			return { embeds: [ embed ], ephemeral: true } satisfies InteractionReplyOptions;
+				.setDescription(`レートリミットです。${Math.ceil(between / (60 * 1000))}分経ってから再度実行してください`);
+			return { embeds: [ embed ], flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
         const result = await database.guildTables.bump.update(guild.guildId);
         if (!result) {
-            return { content: "データベースのエラーによりBUMPが出来ませんでした。", ephemeral: true } satisfies InteractionReplyOptions;
+            return { content: "データベースのエラーによりBUMPが出来ませんでした。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
         }
 		await database.guildTables.bumpCounter.update(interaction.guild.id);
 		await database.userBump.update(interaction.user.id);
-		this.lateLimit.push(guild.guildId);
+		this.lateLimit[guild.guildId] = new Date();
 		setTimeout(async () => {
 			try {
 				const settings = await database.guildTables.settings.bump.fetch(guild.guildId);
+				const mention = await database.guildTables.settings.bumpNoticeRole.fetch(guild.guildId);
 				const embed = new EmbedBuilder()
 					.setColor("Gold")
 					.setTitle("Bumpが実行できますよ!!")
 					.setURL(`https://distopia.top/`)
 					.setDescription(`只今、前回のBumpから2時間がたちました。\n再度 </bump:${interaction.commandId}> を実行可能です。`);
-
-				this.lateLimit = this.lateLimit.filter(value => value !== guild.guildId);
+				delete this.lateLimit[guild.guildId];
 				if (settings && settings.content && interaction.channel && interaction.channel.type === ChannelType.GuildText) {
-					await interaction.channel.send({ embeds: [ embed ] });
+					await interaction.channel.send({ content: mention ? `<@&${mention.roleId}>` : undefined, embeds: [ embed ] });
 				}
 			} catch {}
 		}, 2 * 60 * 60 * 1000);

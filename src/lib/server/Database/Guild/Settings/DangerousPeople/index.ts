@@ -1,14 +1,8 @@
+import { DatabaseClient } from "$lib/server/Database/index";
 import { Ban } from "./DangerousPeople.ban";
 import { Notice } from "./DangerousPeople.notice";
 
-import type { PrismaClient } from "@prisma/client";
-
 export class DangerousPeople {
-	public readonly ban: Ban;
-	public readonly notice: Notice;
-
-	constructor(prisma: PrismaClient) {
-		this.ban = new Ban(prisma.dangerousPeopleBanBasis);
-		this.notice = new Notice(prisma.dangerousPeopleNoticeChannel);
-	}
+	public readonly ban = new Ban(DatabaseClient._prisma.dangerousPeopleBanBasis);
+	public readonly notice = new Notice(DatabaseClient._prisma.dangerousPeopleNoticeChannel);
 }

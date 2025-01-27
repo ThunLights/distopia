@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, Client, EmbedBuilder, MessageFlags } from "discord.js";
 import { CommandsBase, CommandsError } from "./Commands.base";
 import { PUBLIC_OWNER_ID } from "$env/static/public";
 import { codeBlock } from "$lib/codeblock";
@@ -41,14 +41,14 @@ export class AdminCommands extends CommandsBase {
 					.setColor("Gold")
 					.setTitle("ステータス")
 					.setDescription(`ping: ${this.client.ws.ping}`);
-				return { embeds: [ embed ], ephemeral: true } satisfies InteractionReplyOptions;
+				return { embeds: [ embed ], flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			if (commandName === "score") {
 				if (!(interaction.channel && interaction.channel.type === ChannelType.GuildText)) {
-					return { content: "テキストチャンネルのみで実行可能です。", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "テキストチャンネルのみで実行可能です。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 				if (!interaction.guild) {
-					return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
 
 				let description = "";
@@ -63,11 +63,11 @@ export class AdminCommands extends CommandsBase {
 				const message = await interaction.channel.send({ embeds: [ embed ] });
 				const result = await database.panel.dangerousPeopleScore.update(interaction.guild.id, interaction.channelId, message.id);
 				if (!result) {
-					return { content: "DATABASE_ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+					return { content: "DATABASE_ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 				}
-				return { content: message.url, ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: message.url, flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 		}
-        return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
+        return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
     }
 }
