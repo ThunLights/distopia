@@ -1,15 +1,8 @@
-
+import { DatabaseClient } from "$lib/server/Database/index";
 import { ActiveRateMaxTable } from "./ActiveRate.max";
 import { ActiveRateRankingTable } from "./ActiveRate.ranking";
 
-import type { PrismaClient } from "@prisma/client";
-
 export class ArchiveActiveRateTables {
-	public readonly max: ActiveRateMaxTable
-	public readonly ranking: ActiveRateRankingTable
-
-    constructor(private readonly prisma: PrismaClient) {
-		this.max = new ActiveRateMaxTable(this.prisma.archiveActiveRateMax);
-		this.ranking = new ActiveRateRankingTable(this.prisma.archiveActiveRateRanking);
-	}
+	public readonly max = new ActiveRateMaxTable(DatabaseClient._prisma.archiveActiveRateMax);
+	public readonly ranking = new ActiveRateRankingTable(DatabaseClient._prisma.archiveActiveRateRanking);
 }

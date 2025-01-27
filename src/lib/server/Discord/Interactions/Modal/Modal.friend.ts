@@ -3,6 +3,7 @@ import { database } from "$lib/server/Database/index";
 import { _TagsZod } from "$lib/server/Database/Friend/Friend.tag";
 import { structChecker } from "$lib/struct";
 import { z } from "zod";
+import { MessageFlags } from "discord.js";
 import { compressTxt } from "$lib/compress";
 import { CHARACTER_LIMIT } from "$lib/constants";
 import { deDepulication } from "$lib/array";
@@ -38,6 +39,6 @@ export class FriendModal extends ModalsBase {
 		for (const tag of tags) {
 			await database.friend.tag.update(interaction.user.id, tag);
 		}
-		return { content: "投稿しました!", ephemeral: true };
+		return { content: "投稿しました!", flags: [ MessageFlags.Ephemeral ] };
 	}
 }

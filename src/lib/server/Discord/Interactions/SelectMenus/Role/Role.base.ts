@@ -1,27 +1,27 @@
 import { codeBlock } from "$lib/codeblock";
 import { MessageFlags } from "discord.js";
 
-import type { CacheType, Client, InteractionReplyOptions, MessagePayload, UserSelectMenuInteraction } from "discord.js";
+import type { CacheType, Client, InteractionReplyOptions, MessagePayload, RoleSelectMenuInteraction } from "discord.js";
 
-export class UsersError {
+export class RolesError {
 	constructor(public readonly content: string) {}
 }
 
-export abstract class UsersBase {
+export abstract class RolesBase {
 	public readonly customId: string = "";
 
 	constructor(private readonly client: Client) {}
 
-	async commands(interaction: UserSelectMenuInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | UsersError | null> {
-		return new UsersError("Commands Not Found");
+	async commands(interaction: RoleSelectMenuInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | RolesError | null> {
+		return new RolesError("Commands Not Found");
 	}
 
-	async reply(interaction: UserSelectMenuInteraction<CacheType>): Promise<void | UsersError> {
+	async reply(interaction: RoleSelectMenuInteraction<CacheType>): Promise<void | RolesError> {
 		const result = await this.commands(interaction);
 		if (result === null) {
 			return void await interaction.reply({ content: codeBlock(`Error: Commands Not Found`), flags: [ MessageFlags.Ephemeral ] });
 		}
-		if (result instanceof UsersError) {
+		if (result instanceof RolesError) {
 			return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
 		}
 		if (result || typeof result === "string") {

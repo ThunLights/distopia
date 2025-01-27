@@ -5,7 +5,7 @@ import { errorHandling } from "$lib/server/error";
 import { id2Guild } from "$lib/server/guild";
 import { formatDate } from "$lib/server/date";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 
 import type { ButtonInteraction, CacheType, InteractionReplyOptions, MessagePayload } from "discord.js";
 
@@ -20,7 +20,7 @@ export class RankingLevelButton extends ButtonsBase {
 			const ranking = await database.guildTables.level.ranking(20);
 			const databaseUpdateResult = await database.rankingPanel.level.update(interaction.guild.id, interaction.channelId, interaction.message.id);
 			if (!databaseUpdateResult) {
-				return { content: "データベースエラー", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "データベースエラー", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
@@ -37,7 +37,7 @@ export class RankingLevelButton extends ButtonsBase {
 				}
 			}
 			await interaction.message.edit({ embeds: [ embed ], components: [] });
-			return { content: "更新しました。", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: "更新しました。", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		} catch (error) {
 			errorHandling(error);
 			return null;

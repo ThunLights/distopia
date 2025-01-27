@@ -1,20 +1,21 @@
 import { codeBlock } from "$lib/codeblock";
-import { Owner } from "./User.actingOwner";
 import { MessageFlags } from "discord.js";
 
-import type { CacheType, Client, UserSelectMenuInteraction } from "discord.js";
-import type { UsersBase } from "./User.base";
+import { BumpRole } from "./Role.bumpRole";
 
-export class UserSelectMenu {
-	public readonly commands: UsersBase[];
+import type { CacheType, Client, RoleSelectMenuInteraction } from "discord.js";
+import type { RolesBase } from "./Role.base";
+
+export class RoleSelectMenu {
+	public readonly commands: RolesBase[];
 
 	constructor(client: Client) {
 		this.commands = [
-			new Owner(client),
+			new BumpRole(client),
 		];
 	}
 
-	public async reply(interaction: UserSelectMenuInteraction<CacheType>): Promise<void> {
+	public async reply(interaction: RoleSelectMenuInteraction<CacheType>): Promise<void> {
 		for (const command of this.commands) {
 			if (command.customId === interaction.customId) {
 				const result = await command.reply(interaction);

@@ -33,6 +33,6 @@ export class FriendCommand extends CommandsBase {
 						.setStyle(TextInputStyle.Paragraph)
 				),
 			);
-		return await interaction.showModal(modal);
+		return void await interaction.showModal(modal);
 	}
 }

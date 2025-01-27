@@ -1,4 +1,5 @@
 import { codeBlock } from "$lib/codeblock";
+import { MessageFlags } from "discord.js";
 
 import { RegisterModals } from "./Modal.register";
 import { FriendModal } from "./Modal.friend";
@@ -23,13 +24,13 @@ export class Modals {
             if (command.customId === interaction.customId) {
                 const result = await command.reply(interaction);
                 if (result) {
-                    return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+                    return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
                 } else {
                     return result;
                 }
             }
         }
 
-        return void await interaction.reply({ content: "Command Not Found", ephemeral: true });
+        return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
     }
 }

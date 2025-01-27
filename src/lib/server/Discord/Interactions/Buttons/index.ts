@@ -11,6 +11,9 @@ import { ActingOwnerButton } from "./Buttons.actingOwner";
 import { ActingOwnerCancelButton } from "./Buttons.actingOwnerCancel";
 import { AutoBanSetButton } from "./Buttons.autoBanSet";
 import { AutoBanCancelButton } from "./Buttons.autoBanCancel";
+import { MessageFlags } from "discord.js";
+import { BumpRoleButton } from "./Buttons.bumpRole";
+import { BumpRoleCancelButton } from "./Buttons.bumpRoleCancel";
 
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
@@ -31,6 +34,8 @@ export class Buttons {
 			new BumpNoticeOffButton(this.client),
 			new ActingOwnerButton(this.client),
 			new ActingOwnerCancelButton(this.client),
+			new BumpRoleButton(this.client),
+			new BumpRoleCancelButton(this.client),
 		];
 	}
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void> {
@@ -38,13 +43,13 @@ export class Buttons {
 			if (button.customId === interaction.customId) {
 				const result = await button.reply(interaction);
 				if (result) {
-					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), ephemeral: true });
+					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
 				} else {
 					return result;
 				}
 			}
 		}
 
-		return void await interaction.reply({ content: "Command Not Found", ephemeral: true });
+		return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
 	}
 }

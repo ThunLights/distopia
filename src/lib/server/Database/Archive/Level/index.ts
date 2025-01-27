@@ -1,11 +1,6 @@
+import { DatabaseClient } from "$lib/server/Database/index";
 import { LevelRankingTable } from "./Level.ranking";
 
-import type { PrismaClient } from "@prisma/client";
-
 export class ArchiveLevelTables {
-	public readonly ranking: LevelRankingTable
-
-    constructor(private readonly prisma: PrismaClient) {
-		this.ranking = new LevelRankingTable(this.prisma.archiveLevelRanking);
-	}
+	public readonly ranking = new LevelRankingTable(DatabaseClient._prisma.archiveLevelRanking);
 }

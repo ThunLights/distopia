@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionsBitField, UserSelectMenuBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags, PermissionsBitField, UserSelectMenuBuilder } from "discord.js";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 import { errorHandling } from "$lib/server/error";
 
@@ -15,7 +15,7 @@ export class ActingOwnerButton extends ButtonsBase {
 				&& interaction.member.permissions instanceof PermissionsBitField
 				&& interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
 			)) {
-				return { content: "権限がありません", ephemeral: true } satisfies InteractionReplyOptions;
+				return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 			}
 			const embed = new EmbedBuilder()
 				.setColor("Blurple")
@@ -35,11 +35,11 @@ export class ActingOwnerButton extends ButtonsBase {
 					new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(userSelector),
 					new ActionRowBuilder<ButtonBuilder>().addComponents(comeBackButton),
 				],
-				ephemeral: true,
+				flags: [ MessageFlags.Ephemeral ],
 			};
 		} catch (error) {
 			errorHandling(error);
-			return { content: "ERROR", ephemeral: true } satisfies InteractionReplyOptions;
+			return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
 	}
 }
