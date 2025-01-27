@@ -1,5 +1,3 @@
-import { PrismaClient } from "@prisma/client";
-
 import { GuildTable } from "./Guild";
 import { GuildTagTable } from "./Guild.tag";
 import { GuildReviewTable } from "./Guild.review";
@@ -15,39 +13,22 @@ import { GuildVcMemberUpperTwo } from "./Guild.vcMemberUpperTwo";
 import { BlackList } from "./Guild.blackList";
 import { DatabaseGuildSettingsTables } from "./Settings/index";
 import { BumpCounter } from "./Guild.bumpCounter";
+import { DatabaseClient } from "../index";
 
 export class DatabaseGuildTables {
-    public readonly guild: GuildTable
-    public readonly tag: GuildTagTable
-    public readonly review: GuildReviewTable
-    public readonly level: GuildLevelTable
-    public readonly bump: GuildBumpTable
-    public readonly tmp: GuildInviteTempTable
-	public readonly nsfw: GuildNSFWTable
-	public readonly activeRate: GuildActiveRateTable
-	public readonly newMessage: GuildNewMessageTable
-	public readonly newMember: GuildNewMemberTable
-	public readonly vcMemberSum: GuildVcMemberSum
-	public readonly vcMemberUpperTwo: GuildVcMemberUpperTwo
-	public readonly blackList: BlackList
-	public readonly bumpCounter: BumpCounter
-	public readonly settings: DatabaseGuildSettingsTables
-
-    constructor(private readonly prisma: PrismaClient) {
-        this.guild = new GuildTable(this.prisma.guild);
-        this.tag = new GuildTagTable(this.prisma.guildTag);
-        this.review = new GuildReviewTable(this.prisma.guildReview);
-        this.level = new GuildLevelTable(this.prisma.guildLevel);
-        this.bump = new GuildBumpTable(this.prisma.guildBump);
-        this.tmp = new GuildInviteTempTable(this.prisma.guildTmp);
-		this.nsfw = new GuildNSFWTable(this.prisma.guildNSFW);
-		this.activeRate = new GuildActiveRateTable(this.prisma.guildActiveRate);
-		this.newMessage = new GuildNewMessageTable(this.prisma.guildNewMessage);
-		this.newMember = new GuildNewMemberTable(this.prisma.guildNewMember);
-		this.vcMemberSum = new GuildVcMemberSum(this.prisma.guildVcMemberSum);
-		this.vcMemberUpperTwo = new GuildVcMemberUpperTwo(this.prisma.guildVcMemberUpperTwo);
-		this.blackList = new BlackList(this.prisma.guildBlackList);
-		this.bumpCounter = new BumpCounter(this.prisma.bumpCounter);
-		this.settings = new DatabaseGuildSettingsTables(this.prisma);
-    }
+	public readonly guild = new GuildTable(DatabaseClient._prisma.guild);
+	public readonly tag = new GuildTagTable(DatabaseClient._prisma.guildTag);
+	public readonly review = new GuildReviewTable(DatabaseClient._prisma.guildReview);
+	public readonly level = new GuildLevelTable(DatabaseClient._prisma.guildLevel);
+	public readonly bump = new GuildBumpTable(DatabaseClient._prisma.guildBump);
+	public readonly tmp = new GuildInviteTempTable(DatabaseClient._prisma.guildTmp);
+	public readonly nsfw = new GuildNSFWTable(DatabaseClient._prisma.guildNSFW);
+	public readonly activeRate = new GuildActiveRateTable(DatabaseClient._prisma.guildActiveRate);
+	public readonly newMessage = new GuildNewMessageTable(DatabaseClient._prisma.guildNewMessage);
+	public readonly newMember = new GuildNewMemberTable(DatabaseClient._prisma.guildNewMember);
+	public readonly vcMemberSum = new GuildVcMemberSum(DatabaseClient._prisma.guildVcMemberSum);
+	public readonly vcMemberUpperTwo = new GuildVcMemberUpperTwo(DatabaseClient._prisma.guildVcMemberUpperTwo);
+	public readonly blackList = new BlackList(DatabaseClient._prisma.guildBlackList);
+	public readonly bumpCounter = new BumpCounter(DatabaseClient._prisma.bumpCounter);
+	public readonly settings = new DatabaseGuildSettingsTables();
 }
