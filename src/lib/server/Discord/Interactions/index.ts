@@ -1,9 +1,10 @@
-import { Client } from "discord.js";
+import { Client, EmbedBuilder } from "discord.js";
 
 import { Commands } from "./Commands/index";
 import { Modals } from "./Modal/index";
 import { Buttons } from "./Buttons/index";
 import { SelectMenu } from "./SelectMenus/index";
+import { database } from "$lib/server/Database/index";
 
 import type { CacheType, Interaction } from "discord.js";
 
@@ -21,6 +22,20 @@ export class InteractionResponse {
     }
 
     async reply(interaction: Interaction<CacheType>): Promise<void> {
+		const user = await database.blacklist.fetch(interaction.user.id);
+		if (user) {
+			if (interaction.isRepliable()) {
+				const embed = new EmbedBuilder()
+					.setColor("Red")
+					.setTitle("あなたはブラックリストに登録されています。")
+					.setDescription("登録解除をしたい場合は[こちら](https://discord.gg/QWUxsxWyYv)にて申請お願いします。")
+					.setFields(
+						{ name: "理由", value: user.description.length ? user.description : "設定されていません", inline: false }
+					);
+				return void await interaction.reply({ embeds: [ embed ] });
+			}
+			return;
+		}
         if (interaction.isContextMenuCommand()) {
             return;
         }
