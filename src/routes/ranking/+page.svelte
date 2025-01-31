@@ -2,8 +2,9 @@
 	import Meta from "$lib/meta.svelte";
 	import Icon from "$lib/icon.svelte";
 
-	import { generateEdge } from "$lib/edge.js";
+	import { generateEdge } from "$lib/edge";
 
+	import type { User } from "$routes/ranking/+page.server";
 	import type { Guild } from "$lib/server/guild";
 
 	type OnChangeEvent = Event & {
@@ -11,7 +12,7 @@
 	};
 
 	const { data } = $props();
-	const { searchType, level, activeRate } = data;
+	const { searchType, level, activeRate, users } = data;
 
 	function moveOtherType(e: OnChangeEvent) {
 		location.href = `/ranking?type=${e.currentTarget.value}`;
@@ -36,6 +37,7 @@
 					<select value={searchType} onchange={moveOtherType}>
 						<option value="level">レベル</option>
 						<option value="activeRate">アクティブレート</option>
+						<option value="userBump">ユーザーBumpランキング</option>
 					</select>
 				</div>
 			</div>
@@ -44,9 +46,13 @@
 					{#each activeRate as guild, i}
 						{@render generateGuild(guild, i, true)}
 					{/each}
-				{:else}
+				{:else if searchType === "level"}
 					{#each level as guild, i}
 						{@render generateGuild(guild, i, false)}
+					{/each}
+				{:else}
+					{#each users as user, i}
+						{@render generateUser(user, i)}
 					{/each}
 				{/if}
 			</div>
@@ -74,6 +80,21 @@
 		</div>
 		<div>
 			<a href="/guilds/{guild.guildId}"><p class="move-page">詳細→</p></a>
+		</div>
+	</div>
+{/snippet}
+
+{#snippet generateUser(content: User, rank: number)}
+	<div class="guild">
+		<div>
+			<img class="icon" src={content.avatarUrl} alt="">
+		</div>
+		<div>
+			<p class="name white">{rank+1}: {content.displayName}</p>
+			<div class="informations">
+				<p>合計: {content.count}回</p>
+				<p>ユーザーネーム: {content.username} (ID: {content.userId})</p>
+			</div>
 		</div>
 	</div>
 {/snippet}

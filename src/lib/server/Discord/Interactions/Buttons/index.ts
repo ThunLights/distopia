@@ -14,6 +14,7 @@ import { AutoBanCancelButton } from "./Buttons.autoBanCancel";
 import { MessageFlags } from "discord.js";
 import { BumpRoleButton } from "./Buttons.bumpRole";
 import { BumpRoleCancelButton } from "./Buttons.bumpRoleCancel";
+import { RankingUserBumpButton } from "./Buttons.rankingUserBump";
 
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
@@ -25,6 +26,7 @@ export class Buttons {
 		this.buttons = [
 			new RankingRateButton(this.client),
 			new RankingLevelButton(this.client),
+			new RankingUserBumpButton(this.client),
 			new BumpNoticeButton(this.client),
 			new AutoBanButton(this.client),
 			new AutoBanSetButton(this.client),

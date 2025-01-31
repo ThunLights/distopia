@@ -1,8 +1,9 @@
 import { PUBLIC_HOME_SERVER_ID, PUBLIC_HONORARY_MEMBER_ROLE_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
 import { database } from "$lib/server/Database/index";
 import { errorHandling } from "$lib/server/error";
+import { PermissionsBitField } from "discord.js";
 
-import { PermissionsBitField, type Client, type PresenceStatus } from "discord.js";
+import type { Client, PresenceStatus } from "discord.js";
 
 export class Guild {
 	constructor(private readonly client: Client) {}

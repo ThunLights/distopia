@@ -5,6 +5,20 @@ import { errorHandling } from "../error";
 export class UserBumpCounter {
 	constructor(private readonly table: Prisma.UserBumpCounterDelegate<DefaultArgs>) {}
 
+	public async ranking(take?: number) {
+		try {
+			return await this.table.findMany({
+				orderBy: {
+					count: "desc",
+				},
+				take,
+			});
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+
 	public async update(userId: string) {
 		try {
 			const element = await this.table.findFirst({ where: { userId } });
