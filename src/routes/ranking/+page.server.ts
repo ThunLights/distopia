@@ -1,12 +1,22 @@
 import { database } from "$lib/server/Database/index";
+import { discord } from "$lib/server/discord";
 import { id2Guild } from "$lib/server/guild";
 
 import type { Guild } from "$lib/server/guild";
 import type { PageServerLoad } from "./$types";
 
+export type User = {
+	userId: string
+	avatarUrl: string | null
+	username: string
+	displayName: string
+	count: number
+}
+
 const searchTypes = [
 	"activeRate",
 	"level",
+	"userBump"
 ] as const;
 
 export type SearchTypes = typeof searchTypes[number];
@@ -26,6 +36,7 @@ export const load = (async (e) => {
 	const levelBase = await database.guildTables.level.ranking(50);
 	const activeRateBase = await database.guildTables.activeRate.ranking(50);
 
+	const users: User[] = [];
 	const level: Guild[] = []
 	const activeRate: Guild[] = [];
 
@@ -39,10 +50,23 @@ export const load = (async (e) => {
 		if (typeof data === "string") continue;
 		activeRate.push(data);
 	}
+	for (const { userId, count } of await database.userBump.ranking(50)) {
+		const user = await discord.bot.control.user.fetch(userId);
+		if (user) {
+			users.push({
+				userId: user.id,
+				avatarUrl: user.avatarURL(),
+				username: user.username,
+				displayName: user.displayName,
+				count,
+			});
+		}
+	}
 
 	return {
 		searchType,
 		level,
 		activeRate,
+		users,
 	}
 }) satisfies PageServerLoad;
