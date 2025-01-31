@@ -5,9 +5,18 @@ import type { Client } from "discord.js";
 export class User {
 	constructor(private readonly client: Client) {}
 
-	public async fetchUser(userId: string) {
+	public static async fetch(client: Client, userId: string) {
 		try {
-			return this.client.users.cache.get(userId) ?? null;
+			return client.users.cache.get(userId) ?? null;
+		} catch (error) {
+			errorHandling(error);
+			return null;
+		}
+	}
+
+	public async fetch(userId: string) {
+		try {
+			return await User.fetch(this.client, userId);
 		} catch (error) {
 			errorHandling(error);
 			return null;

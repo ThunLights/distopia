@@ -31,8 +31,12 @@ export class AdminCommands extends CommandsBase {
 					.setCustomId("RankingPanelRate")
 					.setLabel("アクティブレート")
 					.setStyle(ButtonStyle.Primary);
+				const userBumpButton = new ButtonBuilder()
+					.setCustomId("RankingPanelUserBump")
+					.setLabel("ユーザーBump")
+					.setStyle(ButtonStyle.Primary);
 				const component = new ActionRowBuilder<ButtonBuilder>()
-					.addComponents(levelButton, rateButton);
+					.addComponents(levelButton, rateButton, userBumpButton);
 	
 				return { embeds: [ embed ], components: [ component ] } satisfies InteractionReplyOptions;
 			}
