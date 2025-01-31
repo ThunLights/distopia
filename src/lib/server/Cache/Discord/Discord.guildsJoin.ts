@@ -5,6 +5,6 @@ export type CacheContent = {
 }
 
 export class CacheGuildsJoin extends CacheClientBase<CacheContent> {
-    public caches: Record<string, CacheContent> = {};
-    public deleteRate = 1 * 60 * 1000;
+    public readonly caches: Record<string, CacheContent> = {};
+    public readonly deleteRate = 1 * 60 * 1000;
 }

@@ -1,17 +1,11 @@
 import { database } from "$lib/server/Database/index";
 import { discord } from "$lib/server/discord";
 import { id2Guild } from "$lib/server/guild";
+import { cache } from "$lib/server/Cache/index";
 
+import type { User } from "$lib/server/Cache/Discord/Discord.users";
 import type { Guild } from "$lib/server/guild";
 import type { PageServerLoad } from "./$types";
-
-export type User = {
-	userId: string
-	avatarUrl: string | null
-	username: string
-	displayName: string
-	count: number
-}
 
 const searchTypes = [
 	"activeRate",
@@ -36,7 +30,7 @@ export const load = (async (e) => {
 	const levelBase = await database.guildTables.level.ranking(50);
 	const activeRateBase = await database.guildTables.activeRate.ranking(50);
 
-	const users: User[] = [];
+	const users: (User & { count: number })[] = [];
 	const level: Guild[] = []
 	const activeRate: Guild[] = [];
 
@@ -51,6 +45,11 @@ export const load = (async (e) => {
 		activeRate.push(data);
 	}
 	for (const { userId, count } of await database.userBump.ranking(50)) {
+		const cacheData = await cache.discord.users.checkCache(userId);
+		if (cacheData) {
+			users.push({ ...cacheData, ...{ count }});
+			continue;
+		}
 		const user = await discord.bot.control.user.fetch(userId);
 		if (user) {
 			users.push({
