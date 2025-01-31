@@ -212,6 +212,12 @@ model RankingPanelLevel {
     messageId String
 }
 
+model RankingPanelUserBump {
+    guildId   String @id
+    channelId String
+    messageId String
+}
+
 model DangerousPeopleScorePanel {
     guildId   String @id
     channelId String

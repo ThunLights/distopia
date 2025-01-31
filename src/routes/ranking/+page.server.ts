@@ -51,7 +51,7 @@ export const load = (async (e) => {
 		activeRate.push(data);
 	}
 	for (const { userId, count } of await database.userBump.ranking(50)) {
-		const user = await discord.bot.control.user.fetchUser(userId);
+		const user = await discord.bot.control.user.fetch(userId);
 		if (user) {
 			users.push({
 				userId: user.id,

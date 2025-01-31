@@ -7,6 +7,7 @@ import { compressTxt } from "$lib/compress";
 
 import { ChannelType, EmbedBuilder } from "discord.js";
 import { parseRanking } from "../ranking";
+import { User } from "./Controller/Controller.user";
 
 import type { Client } from "discord.js";
 
@@ -76,6 +77,7 @@ export class RankingClient {
 					await message.edit({ embeds: [ embed ], components: [] });
 				}
 			}
+			return true;
 		} catch (error) {
 			errorHandling(error);
 			return false;
@@ -107,6 +109,39 @@ export class RankingClient {
 					await message.edit({ embeds: [ embed ], components: [] });
 				}
 			}
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
+
+	private async updateUserBumpPanel() {
+		try  {
+			const ranking = await database.userBump.ranking(20);
+			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
+			const embed = new EmbedBuilder()
+				.setTitle("サーバーランキング: アクティブレート")
+				.setDescription(`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=userBump)にアクセスお願いします。`)
+				.setColor("Purple")
+				.setURL(`${PUBLIC_URL}/ranking?type=userBump`)
+				.setFooter({ text: `最終更新: ${date}` });
+			for (let i = 0; i < ranking.length; i++) {
+				const { userId, count } = ranking[i];
+				const user = await User.fetch(this.client, userId);
+				if (user) {
+					embed.addFields({ name: `${i+1}: ${user.displayName}`, value: `合計: ${count}回\nユーザーネーム: ${user.username} (ID: ${user.id})` });
+				}
+			}
+			const panels = await database.rankingPanel.userBump.findMany();
+			for (const panel of panels) {
+				const channel = await this.client.channels.fetch(panel.channelId);
+				if (channel && channel.type === ChannelType.GuildText) {
+					const message = await channel.messages.fetch(panel.messageId);
+					await message.edit({ embeds: [ embed ], components: [] });
+				}
+			}
+			return true;
 		} catch (error) {
 			errorHandling(error);
 			return false;
@@ -121,5 +156,6 @@ export class RankingClient {
 	public async updatePanel() {
 		await this.updateLevelPanel();
 		await this.updateRatePanel();
+		await this.updateUserBumpPanel();
 	}
 }
