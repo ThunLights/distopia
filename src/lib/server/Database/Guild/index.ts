@@ -14,6 +14,7 @@ import { BlackList } from "./Guild.blackList";
 import { DatabaseGuildSettingsTables } from "./Settings/index";
 import { BumpCounter } from "./Guild.bumpCounter";
 import { DatabaseClient } from "../index";
+import { Removed } from "./Guild.remove";
 
 export class DatabaseGuildTables {
 	public readonly guild = new GuildTable(DatabaseClient._prisma.guild);
@@ -30,5 +31,6 @@ export class DatabaseGuildTables {
 	public readonly vcMemberUpperTwo = new GuildVcMemberUpperTwo(DatabaseClient._prisma.guildVcMemberUpperTwo);
 	public readonly blackList = new BlackList(DatabaseClient._prisma.guildBlackList);
 	public readonly bumpCounter = new BumpCounter(DatabaseClient._prisma.bumpCounter);
+	public readonly removed = new Removed(DatabaseClient._prisma.guildRemoved);
 	public readonly settings = new DatabaseGuildSettingsTables();
 }
