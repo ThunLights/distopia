@@ -140,6 +140,11 @@ model GuildBlackList {
     guildId String @id
 }
 
+model GuildRemoved {
+    guildId String   @id
+    date    DateTime
+}
+
 model BumpCounter {
     guildId String @id
     count   Int

@@ -48,4 +48,15 @@ export class GuildVcMemberUpperTwo {
 			return [];
 		}
 	}
+
+	public async remove(guildId: string) {
+		try {
+			return await this.table.deleteMany({
+				where: { guildId }
+			});
+		} catch (error) {
+			errorHandling(error);
+			return null;
+		}
+	}
 }
