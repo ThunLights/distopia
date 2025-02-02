@@ -15,19 +15,6 @@
         </script>
 	</head>
 	<body data-sveltekit-preload-data="hover">
-        <div id="adsense-bug-checker"></div>
         %sveltekit.body%
-        <script>
-            if (localStorage.getItem("adsense")) {
-                return;
-            }
-            const element = document.getElementById("adsense-bug-checker");
-            if (element) {
-                sessionStorage.setItem("adsense", "true");
-                location.reload();
-            } else {
-                sessionStorage.removeItem("adsense");
-            }
-        </script>
 	</body>
 </html>

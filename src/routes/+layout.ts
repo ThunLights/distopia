@@ -1,9 +1,11 @@
 import { browser } from "$app/environment";
 import { token2data } from "$lib/auth.svelte";
 
-export const load = (async () => {
+export const load = (async (e) => {
     return {
-        auth: browser ? await token2data() : null,
-		adsense: browser ? Boolean(sessionStorage.getItem("adsense")) : false,
+		...e.data,
+		...{
+			auth: browser ? await token2data() : null,
+		}
     }
 });
