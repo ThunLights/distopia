@@ -13,6 +13,7 @@ import { Panel } from "./Panel/index";
 import { Sales } from "./Database.sales";
 import { UserBumpCounter } from "./Database.userBumpCounter";
 import { DatabaseBlackList } from "./Database.blacklist";
+import { EventBoost } from "./EventBoost/index";
 
 export class DatabaseError {
     constructor(public readonly content: string) {}
@@ -30,6 +31,7 @@ export class DatabaseClient {
 	public readonly userBump = new UserBumpCounter(this.prisma.userBumpCounter);
 	public readonly blacklist = new DatabaseBlackList(this.prisma.blackList);
 
+	public readonly eventBoost = new EventBoost();
     public readonly guildTables = new DatabaseGuildTables();
 	public readonly friend = new Friend();
 	public readonly archives = new DatabaseArchiveTables();

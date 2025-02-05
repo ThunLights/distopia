@@ -5,7 +5,7 @@
 	"scripts": {
 		"start": "bun run index.ts",
 		"dev": "vite dev --port 3095",
-		"build": "vite build",
+		"build": "npx prisma migrate dev --name \"update\" && vite build",
 		"setup": "npx prisma migrate dev --name \"init\" && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
