@@ -267,3 +267,9 @@ model Sales {
     userId  String
     time    DateTime
 }
+
+//イベントブースト関係
+model EventBoostLateLimit {
+    guildId String   @id
+    date    DateTime
+}
