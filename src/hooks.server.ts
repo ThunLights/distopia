@@ -8,9 +8,8 @@ import type { Handle, HandleServerError } from "@sveltejs/kit";
 
 process.on("uncaughtExceptionMonitor", errorHandling);
 
-async function updateExpireAccount() {
-	const users = await database.user.aboutExpire();
-	for (const user of users) {
+async function updateExpireDatas() {
+	for (const user of await database.user.aboutExpire()) {
 		const newData = await discord.oauth.fetch.resetAccessToken(user.refreshToken);
 		if (newData instanceof FetchError) {
 			await database.user.delete(user.id);
@@ -18,6 +17,10 @@ async function updateExpireAccount() {
 		} else {
 			await database.user.update(user.id, user.username, newData.access_token, newData.refresh_token);
 		}
+	}
+
+	for (const { guildId } of await database.eventBoost.latelimit.fetchExpirationElements()) {
+		await database.eventBoost.latelimit.remove(guildId);
 	}
 }
 
@@ -64,7 +67,7 @@ async function start() {
 	await discord.bot.login();
 
 	setInterval(async () => {
-		await updateExpireAccount();
+		await updateExpireDatas();
 		await updateGuildRemove();
 	}, 5 * 60 * 1000);
 	setInterval(async () => {

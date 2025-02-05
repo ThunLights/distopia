@@ -15,6 +15,22 @@ export class LateLimit {
 		}
 	}
 
+	public async fetchExpirationElements() {
+		try {
+			const limit = new Date(Date.now() - (14 * 24 * 60 * 60 * 1000));
+			return await this.table.findMany({
+				where: {
+					date: {
+						lte: limit
+					}
+				}
+			});
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+
 	public async update(guildId: string) {
 		try {
 			const date = new Date();
