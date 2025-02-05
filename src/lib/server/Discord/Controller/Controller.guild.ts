@@ -23,6 +23,21 @@ export class Guild {
 		}
 	}
 
+	public static async fetchEvents(guildId: string, client: Client) {
+		try {
+			const guild = client.guilds.cache.get(guildId);
+
+			if (guild) {
+				return guild.scheduledEvents.cache.values().toArray();
+			}
+
+			return null;
+		} catch (error) {
+			errorHandling(error);
+			return null;
+		}
+	}
+
 	public async memberCount(guildId: string, status?: PresenceStatus) {
 		const guild = this.client.guilds.cache.get(guildId);
 		if (!guild) {
@@ -112,5 +127,9 @@ export class Guild {
 			errorHandling(error);
 			return false;
 		}
+	}
+
+	public async fetchEvents(guildId: string) {
+		return await Guild.fetchEvents(guildId, this.client);
 	}
 }
