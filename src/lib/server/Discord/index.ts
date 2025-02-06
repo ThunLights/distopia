@@ -87,11 +87,13 @@ export class DiscordBotClient {
 			const admins: string[] = [];
 
 			const homeServer = await this.client.guilds.fetch(PUBLIC_HOME_SERVER_ID);
-			const guilds = this.client.guilds.cache.values().toArray();
+			const guilds = (await database.guildTables.activeRate.ranking(50))
+				.map(({ guildId }) => this.client.guilds.cache.get(guildId))
+				.filter(guild => !(typeof guild === "undefined"));
 			const existingOwnerUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
 			const existingAdminUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
 
-			for (const guild of guilds) {
+			for await (const guild of guilds) {
 				const owner = await database.guildTables.settings.owner.fetch(guild.id);
 				owners.push(owner ? owner.userId : guild.ownerId);
 				const adminMembers = guild.members.cache
