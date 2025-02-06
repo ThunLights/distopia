@@ -12,13 +12,9 @@ import type { RequestHandler } from "@sveltejs/kit";
 export type ResponseJson = {
 	post: {
 		content: {
-			guildId: string
 			eventId: string
 			name: string
 			description: string
-			guild: {
-				name: string
-			}
 		}[]
 	}
 }
@@ -53,5 +49,5 @@ export const POST = (async (e) => {
 			name: event.name,
 			description: event.description ?? "",
 		}}),
-	}, { status: 200 });
+	} satisfies ResponseJson["post"], { status: 200 });
 }) satisfies RequestHandler;
