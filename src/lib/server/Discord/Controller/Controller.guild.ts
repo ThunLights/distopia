@@ -31,6 +31,21 @@ export class Guild {
 				return guild.scheduledEvents.cache.values().toArray();
 			}
 
+			return [];
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+
+	public static async fetchEvent(guildId: string, eventId: string, client: Client) {
+		try {
+			const guild = client.guilds.cache.get(guildId);
+
+			if (guild) {
+				return guild.scheduledEvents.cache.get(eventId);
+			}
+
 			return null;
 		} catch (error) {
 			errorHandling(error);
@@ -131,5 +146,9 @@ export class Guild {
 
 	public async fetchEvents(guildId: string) {
 		return await Guild.fetchEvents(guildId, this.client);
+	}
+
+	public async fetchEvent(guildId: string, eventId: string) {
+		return await Guild.fetchEvent(guildId, eventId, this.client);
 	}
 }
