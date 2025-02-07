@@ -17,6 +17,22 @@ export class AdminCommands extends CommandsBase {
     async commands(interaction: ChatInputCommandInteraction<CacheType>): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
 		if (interaction.user.id === PUBLIC_OWNER_ID) {
 			const commandName = interaction.options.getSubcommand();
+			if (commandName === "ticket") {
+				const embed = new EmbedBuilder()
+					.setTitle("危険人物解除申請")
+					.setColor("Navy")
+					.setDescription("以下のボタンを押すことで申請できます。");
+				const ticketCreateButton = new ButtonBuilder()
+					.setCustomId("ticketCreate")
+					.setStyle(ButtonStyle.Success)
+					.setLabel("申請");
+				return {
+					embeds: [ embed ],
+					components: [
+						new ActionRowBuilder<ButtonBuilder>().addComponents(ticketCreateButton),
+					]
+				} satisfies InteractionReplyOptions;
+			}
 			if (commandName === "ranking") {
 				const embed = new EmbedBuilder()
 					.setTitle("ランキングパネルを設置します。")
