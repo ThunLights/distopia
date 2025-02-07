@@ -278,3 +278,9 @@ model EventBoostLateLimit {
     guildId String   @id
     date    DateTime
 }
+
+//チケット関係
+model Ticket {
+    userId    String @id
+    channelId String @unique
+}
