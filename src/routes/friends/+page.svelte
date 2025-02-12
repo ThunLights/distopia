@@ -99,7 +99,7 @@
 		grid-template-rows: auto auto auto auto auto auto auto auto auto auto auto;
 	}
 	.friend {
-		margin: 0 3px;
+		margin: 3px;
 		border-radius: 20px;
 		background-color: rgb(40, 40, 40);
 	}
