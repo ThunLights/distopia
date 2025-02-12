@@ -9,7 +9,7 @@ export class ButtonsError {
 
 export abstract class ButtonsBase {
 	public readonly customId: string = "";
-	constructor(private readonly client: Client) {}
+	constructor(protected readonly client: Client) {}
 
 	async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		return new ButtonsError("Commands Not Found");

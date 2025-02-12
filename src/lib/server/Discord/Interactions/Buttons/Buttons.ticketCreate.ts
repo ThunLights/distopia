@@ -1,9 +1,9 @@
-import { ActionRowBuilder, EmbedBuilder, MessageFlags } from "discord.js";
+import { ActionRowBuilder, EmbedBuilder, MessageFlags, ButtonBuilder, ButtonStyle } from "discord.js";
 import { PUBLIC_HONORARY_MEMBER_ROLE_ID, PUBLIC_TICKET_CATEGORY_ID } from "$env/static/public";
 import { database } from "$lib/server/Database/index";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 
-import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions, TextChannel, ButtonBuilder } from "discord.js";
+import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions, TextChannel } from "discord.js";
 
 export class TicketCreateButton extends ButtonsBase {
 	public readonly customId = "ticketCreate";
@@ -19,7 +19,16 @@ export class TicketCreateButton extends ButtonsBase {
 			embeds: [ embed ],
 			components: [
 				new ActionRowBuilder<ButtonBuilder>()
-					.setComponents(),
+					.setComponents(
+						new ButtonBuilder()
+							.setCustomId("ticketVote")
+							.setLabel("削除投票")
+							.setStyle(ButtonStyle.Primary),
+						new ButtonBuilder()
+							.setCustomId("ticketClose")
+							.setLabel("閉じる")
+							.setStyle(ButtonStyle.Danger)
+					),
 			],
 		});
 	}
@@ -28,7 +37,11 @@ export class TicketCreateButton extends ButtonsBase {
 		if (!interaction.guild) {
 			return { content: "ERR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
+		const isRegisterd = await database.dangerousPeople.fetch(interaction.user.id);
 		const created = await database.ticket.fetch(interaction.user.id);
+		if (!isRegisterd) {
+			return { content: `あなたは危険人物に登録されていません`, flags: [ MessageFlags.Ephemeral ]} satisfies InteractionReplyOptions;
+		}
 		if (created) {
 			return { content: `<#${created.channelId}>`, flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}

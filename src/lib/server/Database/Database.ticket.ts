@@ -43,4 +43,13 @@ export class Ticket {
 			return null;
 		}
 	}
+
+	public async fetchChannelId(channelId: string) {
+		try {
+			return await this.table.findFirst({ where: { channelId } });
+		} catch (error) {
+			errorHandling(error);
+			return null;
+		}
+	}
 }
