@@ -6,7 +6,6 @@ import { AdminCommands } from "./Commands.admin";
 import { HelpCommands } from "./Commands.help";
 import { BumpCommands } from "./Commands.bump";
 import { StaffCommands } from "./Commands.staff";
-import { RegisterCommands } from "./Commands.register";
 import { FriendCommand } from "./Commands.friend";
 import { SettingsCommand } from "./Commands.settings";
 import { OnlyStaffCommand } from "./Commands.onlystaff";
@@ -24,7 +23,6 @@ export class Commands {
             new HelpCommands(this.client),
             new BumpCommands(this.client),
             new StaffCommands(this.client),
-			new RegisterCommands(this.client),
 			new FriendCommand(this.client),
 			new SettingsCommand(this.client),
 			new OnlyStaffCommand(this.client),

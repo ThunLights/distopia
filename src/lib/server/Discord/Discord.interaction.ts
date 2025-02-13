@@ -149,22 +149,6 @@ export class InteractionClient {
 			name: "settings",
 			description: "設定コマンドです。",
 		},
-		{
-			name: "register",
-			description: "【期間限定】コマンドのみでDistopiaに本登録できます。(オーナーのみ)",
-			options: [
-				{
-					type: 3,
-					name: "category",
-					required: true,
-					description: "サーバーカテゴリを選択",
-					choices: CATEGORIES.map(value => {return {
-						name: value.name,
-						value: value.id,
-					}}),
-				}
-			],
-		},
         {
             name: "bump",
             description: "サーバーの表示順を上げる",
