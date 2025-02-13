@@ -30,24 +30,14 @@ export class DiscordBotClient {
 	private readonly rankingClient = new RankingClient(this.client);
 	private readonly dangerousPeople = new DangerousPeopleClient(this.client);
 
-	private nowActivityStatus = true;
-
 	private changeActivityInterval() {
 		setInterval(() => {
 			if (this.client.user) {
-				if (this.nowActivityStatus) {
-					this.client.user.setActivity({
-						name: `${this.client.guilds.cache.size}サーバーで稼働中`,
-						type: ActivityType.Playing,
-					});
-				} else {
-					this.client.user.setActivity({
-						name: "Supported by distopia.top",
-						type: ActivityType.Playing,
-					});
-				}
+				this.client.user.setActivity({
+					name: `${this.client.guilds.cache.size}server | ${this.client.users.cache.size}users | distopia.top`,
+					type: ActivityType.Playing,
+				});
 			}
-			this.nowActivityStatus = !this.nowActivityStatus;
 		}, 10 * 1000);
 	}
 
@@ -143,10 +133,10 @@ export class DiscordBotClient {
 
     public async setEvents() {
         this.client.on("ready", async (client) => {
-            client.user.setActivity({
-                name: "Supported by distopia.top",
-                type: ActivityType.Playing,
-            });
+			client.user.setActivity({
+				name: `${this.client.guilds.cache.size}server | ${this.client.users.cache.size}users | distopia.top`,
+				type: ActivityType.Playing,
+			});
             await this.rest.put(`/applications/${this.clientId}/commands`, {
                 body: InteractionClient.commands,
             });
