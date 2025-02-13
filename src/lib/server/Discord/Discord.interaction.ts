@@ -60,6 +60,11 @@ export class InteractionClient {
 					type: 1,
 					name: "score",
 					description: "危険人物スコア表を設置",
+				},
+				{
+					type: 1,
+					name: "ticket",
+					description: "危険人物解除申請用のチケット作成",
 				}
 			],
         },
