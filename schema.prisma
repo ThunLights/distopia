@@ -286,7 +286,8 @@ model Ticket {
 }
 
 model TicketVotePanel {
-    messageId String @id
+    targetUserId String @unique
+    messageId    String @id
 }
 
 model TicketVote {

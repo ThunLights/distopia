@@ -3,13 +3,14 @@ import { PUBLIC_TICKET_VOTE_CHANNEL_ID } from "$env/static/public";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 import { errorHandling } from "$lib/server/error";
 import { codeBlock } from "$lib/codeblock";
+import { database } from "$lib/server/Database/index";
 
 import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
 export class TicketVoteButton extends ButtonsBase {
 	public readonly customId = "ticketVote";
 
-	private async putVotePanel(interaction: ButtonInteraction<CacheType>) {
+	private async putVotePanel(interaction: ButtonInteraction<CacheType>, targetUserId: string) {
 		try {
 			const channel = this.client.channels.cache.get(PUBLIC_TICKET_VOTE_CHANNEL_ID);
 			if (channel && channel.isSendable()) {
@@ -34,10 +35,15 @@ export class TicketVoteButton extends ButtonsBase {
 									.setCustomId("ticketVoteDisagree")
 									.setLabel("反対")
 									.setStyle(ButtonStyle.Danger),
+								new ButtonBuilder()
+									.setCustomId("ticketVoteEnd")
+									.setLabel("投票終了")
+									.setStyle(ButtonStyle.Secondary),
 							),
 					],
 				});
 				await message.reply("@everyone");
+				await database.ticket.votePanel.update(message.id, targetUserId);
 			}
 		} catch (error) {
 			errorHandling(error);
@@ -51,8 +57,12 @@ export class TicketVoteButton extends ButtonsBase {
 		if (!(interaction.memberPermissions && interaction.memberPermissions.has(PermissionsBitField.Flags.Administrator))) {
 			return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 		}
+		const data = await database.ticket.fetchChannelId(interaction.channelId);
+		if (!data) {
+			return { content: "ERR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
+		}
 
-		await this.putVotePanel(interaction);
+		await this.putVotePanel(interaction, data.userId);
 
 		const embed = new EmbedBuilder()
 			.setTitle("投票を開始しました。")
