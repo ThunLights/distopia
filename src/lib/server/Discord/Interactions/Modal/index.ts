@@ -1,7 +1,6 @@
 import { codeBlock } from "$lib/codeblock";
 import { MessageFlags } from "discord.js";
 
-import { RegisterModals } from "./Modal.register";
 import { FriendModal } from "./Modal.friend";
 import { AutoBanModal } from "./Modal.autoBan";
 
@@ -13,7 +12,6 @@ export class Modals {
 
     constructor(private readonly client: Client) {
         this.modals = [
-			new RegisterModals(this.client),
 			new FriendModal(this.client),
 			new AutoBanModal(this.client),
         ]
