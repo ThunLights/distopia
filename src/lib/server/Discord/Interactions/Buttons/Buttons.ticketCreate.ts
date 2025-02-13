@@ -62,6 +62,7 @@ export class TicketCreateButton extends ButtonsBase {
 		});
 
 		await this.sendWelcomeMessage(interaction, channel);
+		await database.ticket.update(interaction.user.id, channel.id);
 
 		return { content: `<#${channel.id}>`, flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
 	}
