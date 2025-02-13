@@ -1,10 +1,14 @@
 import { errorHandling } from "$lib/server/error";
+import { DatabaseClient } from "../index";
 
-import type { Prisma } from "@prisma/client";
-import type { DefaultArgs } from "@prisma/client/runtime/library";
+import { TicketVote } from "./Ticket.vote";
+import { TicketVotePanel } from "./Ticket.votePanel";
 
 export class Ticket {
-	constructor(private readonly table: Prisma.TicketDelegate<DefaultArgs>) {}
+	private readonly table = DatabaseClient._prisma.ticket;
+
+	public readonly vote = new TicketVote(DatabaseClient._prisma.ticketVote);
+	public readonly votePanel = new TicketVotePanel(DatabaseClient._prisma.ticketVotePanel);
 
 	public async update(userId: string, channelId: string) {
 		try {
