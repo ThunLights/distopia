@@ -284,3 +284,15 @@ model Ticket {
     userId    String @id
     channelId String @unique
 }
+
+model TicketVotePanel {
+    messageId String @id
+}
+
+model TicketVote {
+    targetUserId String
+    userId       String
+    agree        Boolean
+
+    @@id([targetUserId, userId])
+}

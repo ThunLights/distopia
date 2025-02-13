@@ -14,7 +14,7 @@ import { Sales } from "./Database.sales";
 import { UserBumpCounter } from "./Database.userBumpCounter";
 import { DatabaseBlackList } from "./Database.blacklist";
 import { EventBoost } from "./EventBoost/index";
-import { Ticket } from "./Database.ticket";
+import { Ticket } from "./Ticket/index";
 
 export class DatabaseError {
     constructor(public readonly content: string) {}
@@ -31,7 +31,6 @@ export class DatabaseClient {
 	public readonly sales = new Sales(this.prisma.sales);
 	public readonly userBump = new UserBumpCounter(this.prisma.userBumpCounter);
 	public readonly blacklist = new DatabaseBlackList(this.prisma.blackList);
-	public readonly ticket = new Ticket(this.prisma.ticket);
 
 	public readonly eventBoost = new EventBoost();
     public readonly guildTables = new DatabaseGuildTables();
@@ -40,6 +39,7 @@ export class DatabaseClient {
 	public readonly rankingPanel = new DatabaseRankingPanelTables();
 	public readonly dangerousPeople = new DangerousPeople();
 	public readonly panel = new Panel();
+	public readonly ticket = new Ticket();
 }
 
 export const database = new DatabaseClient();
