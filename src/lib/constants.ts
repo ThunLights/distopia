@@ -131,17 +131,6 @@ export const staffs = [
             },
         ],
     },
-	{
-		name: "yuzu",
-		icon: "/staff/yuzu.webp",
-		description: "レベルシステムやアクティブレートなどの数学的アルゴリズムの調整",
-		links: [
-			{
-				icon: "/service/github.webp",
-				url: "https://github.com/yuzu-machan",
-			}
-		],
-	},
     {
         name: "えと元帥",
         icon: "/staff/etogensui.webp",

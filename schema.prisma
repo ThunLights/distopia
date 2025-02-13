@@ -267,3 +267,33 @@ model Sales {
     userId  String
     time    DateTime
 }
+
+//イベントブースト関係
+model EventBoost {
+    guildId String @id
+    eventId String
+}
+
+model EventBoostLateLimit {
+    guildId String   @id
+    date    DateTime
+}
+
+//チケット関係
+model Ticket {
+    userId    String @id
+    channelId String @unique
+}
+
+model TicketVotePanel {
+    targetUserId String @unique
+    messageId    String @id
+}
+
+model TicketVote {
+    targetUserId String
+    userId       String
+    agree        Boolean
+
+    @@id([targetUserId, userId])
+}

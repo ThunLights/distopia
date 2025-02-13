@@ -8,15 +8,25 @@ import type { Handle, HandleServerError } from "@sveltejs/kit";
 
 process.on("uncaughtExceptionMonitor", errorHandling);
 
-async function updateExpireAccount() {
-	const users = await database.user.aboutExpire();
-	for (const user of users) {
+async function updateExpireDatas() {
+	for (const user of await database.user.aboutExpire()) {
 		const newData = await discord.oauth.fetch.resetAccessToken(user.refreshToken);
 		if (newData instanceof FetchError) {
 			await database.user.delete(user.id);
 			await database.token.delete(user.id);
 		} else {
 			await database.user.update(user.id, user.username, newData.access_token, newData.refresh_token);
+		}
+	}
+
+	for (const { guildId } of await database.eventBoost.latelimit.fetchExpirationElements()) {
+		await database.eventBoost.latelimit.remove(guildId);
+	}
+
+	for (const { guildId, eventId } of await database.eventBoost.findMany()) {
+		const data = await discord.bot.control.guild.fetchEvent(guildId, eventId);
+		if (!data) {
+			await database.eventBoost.remove(guildId);
 		}
 	}
 }
@@ -56,6 +66,9 @@ async function updateGuildRemove() {
 		await database.archives.level.ranking.remove(guildId);
 		await database.archives.activeRate.max.remove(guildId);
 		await database.archives.activeRate.ranking.remove(guildId);
+
+		await database.eventBoost.remove(guildId);
+		await database.eventBoost.latelimit.remove(guildId);
 	}
 }
 
@@ -64,7 +77,7 @@ async function start() {
 	await discord.bot.login();
 
 	setInterval(async () => {
-		await updateExpireAccount();
+		await updateExpireDatas();
 		await updateGuildRemove();
 	}, 5 * 60 * 1000);
 	setInterval(async () => {
