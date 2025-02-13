@@ -1,4 +1,4 @@
-import { ActionRowBuilder, EmbedBuilder, MessageFlags, ButtonBuilder, ButtonStyle } from "discord.js";
+import { ActionRowBuilder, EmbedBuilder, MessageFlags, ButtonBuilder, ButtonStyle, PermissionFlagsBits } from "discord.js";
 import { PUBLIC_HONORARY_MEMBER_ROLE_ID, PUBLIC_TICKET_CATEGORY_ID } from "$env/static/public";
 import { database } from "$lib/server/Database/index";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
@@ -49,6 +49,16 @@ export class TicketCreateButton extends ButtonsBase {
 		const channel = await interaction.guild.channels.create({
 			name: `削除申請-${interaction.user.username}`,
 			parent: PUBLIC_TICKET_CATEGORY_ID,
+			permissionOverwrites: [
+				{
+					id: interaction.user.id,
+					allow: [ PermissionFlagsBits.ViewChannel ],
+				},
+				{
+					id: interaction.guild.id,
+					deny: [ PermissionFlagsBits.ViewChannel ],
+				}
+			]
 		});
 
 		await this.sendWelcomeMessage(interaction, channel);
