@@ -42,12 +42,13 @@ export class BumpCommands extends CommandsBase {
 		setTimeout(async () => {
 			try {
 				const settings = await database.guildTables.settings.bump.fetch(guild.guildId);
+				const bumpMessage = await database.guildTables.settings.bumpNoticeContent.fetch(guild.guildId);
 				const mention = await database.guildTables.settings.bumpNoticeRole.fetch(guild.guildId);
 				const embed = new EmbedBuilder()
 					.setColor("Gold")
 					.setTitle("Bumpが実行できますよ!!")
 					.setURL(`https://distopia.top/`)
-					.setDescription(`只今、前回のBumpから2時間がたちました。\n再度 </bump:${interaction.commandId}> を実行可能です。`);
+					.setDescription(bumpMessage ? bumpMessage.content : `只今、前回のBumpから2時間がたちました。\n再度 </bump:${interaction.commandId}> を実行可能です。`);
 				delete this.lateLimit[guild.guildId];
 				if (settings && settings.content && interaction.channel && interaction.channel.type === ChannelType.GuildText) {
 					await interaction.channel.send({ content: mention ? `<@&${mention.roleId}>` : undefined, embeds: [ embed ] });

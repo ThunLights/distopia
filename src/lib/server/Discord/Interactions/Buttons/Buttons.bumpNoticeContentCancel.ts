@@ -6,7 +6,7 @@ import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOpti
 import { database } from "$lib/server/Database";
 
 export class BumpNoticeContentCancelButton extends ButtonsBase {
-	public readonly customId = "bumpNoiceContentCancel";
+	public readonly customId = "bumpNoticeContentCancel";
 
 	public async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		try {

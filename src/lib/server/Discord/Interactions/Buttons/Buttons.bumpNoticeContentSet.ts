@@ -5,7 +5,7 @@ import { errorHandling } from "$lib/server/error";
 import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
 export class BumpNoticeContentSetButton extends ButtonsBase {
-	public readonly customId = "bumpNoiceContentSet";
+	public readonly customId = "bumpNoticeContentSet";
 
 	public async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		try {

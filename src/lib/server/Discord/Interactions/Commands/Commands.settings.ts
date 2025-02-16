@@ -77,9 +77,9 @@ export class SettingsCommand extends CommandsBase {
 				.setLabel("代理オーナー設定")
 				.setStyle(ButtonStyle.Danger);
 			const bumpNoticeContentButton = new ButtonBuilder()
-				.setCustomId("bumpNoiceContent")
+				.setCustomId("bumpNoticeContent")
 				.setLabel("Bump時のメッセージを変更")
-				.setStyle(ButtonStyle.Success);
+				.setStyle(ButtonStyle.Primary);
 
 			return {
 				embeds: [ embed ],

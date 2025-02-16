@@ -5,7 +5,7 @@ import { errorHandling } from "$lib/server/error";
 import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
 export class BumpNoticeContentButton extends ButtonsBase {
-	public readonly customId = "bumpNoiceContent";
+	public readonly customId = "bumpNoticeContent";
 
 	public async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		try {
@@ -35,6 +35,7 @@ export class BumpNoticeContentButton extends ButtonsBase {
 			return {
 				embeds: [ embed ],
 				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(settingsButton, cancelButton) ],
+				flags: [ MessageFlags.Ephemeral ],
 			} satisfies InteractionReplyOptions;
 		} catch (error) {
 			errorHandling(error);
