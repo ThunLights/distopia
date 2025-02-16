@@ -21,6 +21,9 @@ import { TicketVoteButton } from "./Buttons.ticketVote";
 import { TicketVoteAgreeButton } from "./Buttons.ticketVoteAgree";
 import { TicketVoteDisagreeButton } from "./Buttons.ticketVoteDisagree";
 import { TicketVoteEndButton } from "./Buttons.ticketVoteEnd";
+import { BumpNoticeContentButton } from "./Buttons.bumpNoticeContent";
+import { BumpNoticeContentSetButton } from "./Buttons.bumpNoticeContentSet";
+import { BumpNoticeContentCancelButton } from "./Buttons.bumpNoticeContentCancel";
 
 import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
@@ -50,6 +53,9 @@ export class Buttons {
 			new TicketVoteDisagreeButton(this.client),
 			new TicketCloseButton(this.client),
 			new TicketVoteEndButton(this.client),
+			new BumpNoticeContentButton(this.client),
+			new BumpNoticeContentSetButton(this.client),
+			new BumpNoticeContentCancelButton(this.client),
 		];
 	}
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void> {

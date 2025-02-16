@@ -20,6 +20,7 @@ export class SettingsCommand extends CommandsBase {
 			const noticeChannel = await database.guildTables.settings.dangerousPeople.notice.fetch(interaction.guild.id);
 			const bumpRole = await database.guildTables.settings.bumpNoticeRole.fetch(interaction.guild.id);
 			const actingOwner = await database.guildTables.settings.owner.fetch(interaction.guild.id);
+			const bumpNoticeContent = await database.guildTables.settings.bumpNoticeContent.fetch(interaction.guild.id);
 
 			const bumptNoticeValue = bumpNotice
 				? bumpNotice.content
@@ -38,6 +39,9 @@ export class SettingsCommand extends CommandsBase {
 			const actingOwnerValue = actingOwner
 				? `<@${actingOwner.userId}>`
 				: "未設定";
+			const bumpNoticeContentValue = bumpNoticeContent
+				? bumpNoticeContent.content
+				: "未設定";
 
 			const embed = new EmbedBuilder()
 				.setColor("Navy")
@@ -48,6 +52,7 @@ export class SettingsCommand extends CommandsBase {
 					{ name: "危険人物自動BAN", value: autoBanValue, inline: false },
 					{ name: "危険人物予報チャンネル", value: noticeChannelValue, inline: false },
 					{ name: "Bump通知用ロール", value: bumpRoleValue, inline: false },
+					{ name: "Bump通知内容", value: bumpNoticeContentValue, inline: false },
 					{ name: "オーナー代理", value: actingOwnerValue, inline: false },
 				);
 
@@ -71,10 +76,17 @@ export class SettingsCommand extends CommandsBase {
 				.setCustomId("actingOwner")
 				.setLabel("代理オーナー設定")
 				.setStyle(ButtonStyle.Danger);
+			const bumpNoticeContentButton = new ButtonBuilder()
+				.setCustomId("bumpNoticeContent")
+				.setLabel("Bump時のメッセージを変更")
+				.setStyle(ButtonStyle.Primary);
 
 			return {
 				embeds: [ embed ],
-				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, autoBanButton, noticeChannelButton, bumpRoleButton, actingOwnerButton) ],
+				components: [
+					new ActionRowBuilder<ButtonBuilder>().addComponents(autoBanButton, noticeChannelButton, actingOwnerButton),
+					new ActionRowBuilder<ButtonBuilder>().addComponents(bumpNoticeButton, bumpRoleButton, bumpNoticeContentButton),
+				],
 				flags: [ MessageFlags.Ephemeral ]
 			} satisfies InteractionReplyOptions;
 		}

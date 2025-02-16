@@ -251,6 +251,11 @@ model BumpNoticeRole {
     roleId  String
 }
 
+model BumpNoticeContent {
+    guildId String @id
+    content String
+}
+
 model DangerousPeopleNoticeChannel {
     guildId   String @id
     channelId String

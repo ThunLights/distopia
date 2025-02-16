@@ -3,6 +3,7 @@ import { MessageFlags } from "discord.js";
 
 import { FriendModal } from "./Modal.friend";
 import { AutoBanModal } from "./Modal.autoBan";
+import { BumpNoticeContent } from "./Modal.bumpNoticeContent";
 
 import type { CacheType, Client, ModalSubmitInteraction } from "discord.js"
 import type { ModalsBase } from "./Modal.base"
@@ -14,6 +15,7 @@ export class Modals {
         this.modals = [
 			new FriendModal(this.client),
 			new AutoBanModal(this.client),
+			new BumpNoticeContent(this.client),
         ]
     }
 
