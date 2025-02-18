@@ -1,3 +1,4 @@
+import { DangerousPeople } from "$lib/dangerousPeople";
 import { database, DatabaseError } from "../Database/index";
 import { ChannelType, Client, EmbedBuilder } from "discord.js";
 
@@ -52,7 +53,8 @@ export class GuildClient {
 			if (dangerousPeople) {
 				const notice = await database.guildTables.settings.dangerousPeople.notice.fetch(member.guild.id);
 				const ban = await database.guildTables.settings.dangerousPeople.ban.fetch(member.guild.id);
-				const isBanUser = ban && ban.score <= dangerousPeople.score;
+				const score = DangerousPeople.strArrToScore(await database.dangerousPeople.score.fetch(member.id));
+				const isBanUser = ban && ban.score <= score;
 				const registeredChannels = notice ? this.client.channels.cache.get(notice.channelId) : null;
 				const channel = registeredChannels && registeredChannels.type === ChannelType.GuildText ? registeredChannels : member.guild.systemChannel;
 				const embed = new EmbedBuilder()
@@ -61,7 +63,7 @@ export class GuildClient {
 					.setDescription(`「${member.user.username}(ID: ${member.user.id})」は危険人物に登録されています。`)
 					.addFields(
 						{ name: "詳細情報", value: `通称: ${dangerousPeople.name}, 理由: ${dangerousPeople.title}`, inline: false },
-						{ name: "危険度スコア", value: `${dangerousPeople.score}(${isBanUser ? "BAN対象" : "BAN対象外"})`, inline: false },
+						{ name: "危険度スコア", value: `${score}(${isBanUser ? "BAN対象" : "BAN対象外"})`, inline: false },
 						{ name: "詳しい説明", value: dangerousPeople.description, inline: false },
 					);
 
