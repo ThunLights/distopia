@@ -102,6 +102,7 @@
 	<Tags
 		tags={subAccounts}
 		tagsUpdate={(newTags) => { subAccounts = newTags }}
+		limit={100}
 	/>
 </div>
 <div>
