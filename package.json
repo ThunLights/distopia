@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"start": "bun run build/index.js",
+		"start": "node build/index.js",
 		"dev": "vite dev",
 		"build": "npx prisma migrate dev --name \"update\" && vite build",
 		"setup": "npx prisma migrate dev --name \"init\" && vite build",
