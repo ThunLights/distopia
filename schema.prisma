@@ -266,13 +266,6 @@ model DangerousPeopleBanBasis {
     score   Int
 }
 
-//営業先
-model Sales {
-    guildId String @id
-    userId  String
-    time    DateTime
-}
-
 //イベントブースト関係
 model EventBoost {
     guildId String @id
