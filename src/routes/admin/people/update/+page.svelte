@@ -6,9 +6,18 @@
 	import { DangerousPeopleTypes } from "$lib/constants";
 	import { onMount } from "svelte";
 
-	import type { Content } from "$lib/people.svelte";
 	import type { ResponseJson } from "$routes/api/people/+server";
 
+	type Content = {
+		targetId: string
+		name: string
+		score: string[]
+		tags: string[]
+		title: string
+		description: string
+		targetType: typeof DangerousPeopleTypes[number]
+		subAccounts: string[]
+	}
 	type DangerousPeopleType = typeof DangerousPeopleTypes[number];
 
 	const { data } = $props();

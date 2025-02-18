@@ -5,7 +5,7 @@
 
 	import { DangerousPeopleTypes } from "./constants";
 
-	export type Content = {
+	type Content = {
 		targetId: string
 		name: string
 		score: string[]
@@ -16,7 +16,7 @@
 		subAccounts: string[]
 	}
 
-	export type Props = {
+	type Props = {
 		send: (content: Content) => void
 		page: {
 			title: string
@@ -102,6 +102,7 @@
 	<Tags
 		tags={subAccounts}
 		tagsUpdate={(newTags) => { subAccounts = newTags }}
+		limit={100}
 	/>
 </div>
 <div>

@@ -5,7 +5,18 @@
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";
 
-	import type { Content } from "$lib/people.svelte";
+	import type { DangerousPeopleTypes } from "$lib/constants";
+
+	type Content = {
+		targetId: string
+		name: string
+		score: string[]
+		tags: string[]
+		title: string
+		description: string
+		targetType: typeof DangerousPeopleTypes[number]
+		subAccounts: string[]
+	}
 
 	const { data } = $props();
 
