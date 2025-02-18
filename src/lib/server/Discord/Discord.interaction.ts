@@ -68,58 +68,6 @@ export class InteractionClient {
 				}
 			],
         },
-		{
-			name: "onlystaff",
-			description: "only staff",
-			options: [
-				{
-					type: 2,
-					name: "sales",
-					description: "営業確認コマンド",
-					options: [
-						{
-							type: 1,
-							name: "check",
-							description: "check",
-							options: [
-								{
-									type: 3,
-									name: "guild",
-									description: "サーバーIDを入力してください",
-									required: true,
-								}
-							],
-						},
-						{
-							type: 1,
-							name: "add",
-							description: "add",
-							options: [
-								{
-									type: 3,
-									name: "guild",
-									description: "サーバーIDを入力してください",
-									required: true,
-								}
-							],
-						},
-						{
-							type: 1,
-							name: "remove",
-							description: "remove",
-							options: [
-								{
-									type: 3,
-									name: "guild",
-									description: "サーバーIDを入力してください",
-									required: true,
-								}
-							],
-						},
-					]
-				},
-			],
-		},
         {
             name: "web",
             description: "web",

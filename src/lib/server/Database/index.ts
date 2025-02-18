@@ -10,7 +10,6 @@ import { Friend } from "./Friend/index";
 import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
 import { Panel } from "./Panel/index";
-import { Sales } from "./Database.sales";
 import { UserBumpCounter } from "./Database.userBumpCounter";
 import { DatabaseBlackList } from "./Database.blacklist";
 import { EventBoost } from "./EventBoost/index";
@@ -28,7 +27,6 @@ export class DatabaseClient {
     public readonly user = new User(this.prisma.user);
     public readonly email = new Email(this.prisma.email);
     public readonly avatar = new Avatar(this.prisma.avatar);
-	public readonly sales = new Sales(this.prisma.sales);
 	public readonly userBump = new UserBumpCounter(this.prisma.userBumpCounter);
 	public readonly blacklist = new DatabaseBlackList(this.prisma.blackList);
 
