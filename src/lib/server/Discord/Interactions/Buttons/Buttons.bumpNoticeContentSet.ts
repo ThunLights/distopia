@@ -1,6 +1,7 @@
-import { PermissionsBitField, MessageFlags, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } from "discord.js";
+import { PermissionsBitField, MessageFlags, ActionRowBuilder, TextInputBuilder, TextInputStyle, ModalBuilder } from "discord.js";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 import { errorHandling } from "$lib/server/error";
+import { CHARACTER_LIMIT } from "$lib/constants";
 
 import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
 
@@ -23,7 +24,7 @@ export class BumpNoticeContentSetButton extends ButtonsBase {
 						.setLabel("メッセージ内容")
 						.setCustomId("content")
 						.setStyle(TextInputStyle.Paragraph)
-						.setMaxLength(100)
+						.setMaxLength(CHARACTER_LIMIT.description)
 				)
 
 			const modal = new ModalBuilder()
