@@ -8,13 +8,14 @@
 	type Props = {
 		tags: string[]
 		tagsUpdate: (params: string[]) => void
+		limit?: number
 	}
 
-	let { tags, tagsUpdate }: Props = $props();
+	let { tags, tagsUpdate, limit }: Props = $props();
 
 	function controller(e: KeyUpEvent) {
 		if (e.key === "Enter") {
-			if (!tags.includes(e.currentTarget.value) && TAG_COUNT_LIMIT > tags.length && tagFormatCheck(e.currentTarget.value)) {
+			if (!tags.includes(e.currentTarget.value) && (limit ?? TAG_COUNT_LIMIT) > tags.length && tagFormatCheck(e.currentTarget.value)) {
 				tags.push(e.currentTarget.value);
 				e.currentTarget.value = "";
 				tagsUpdate(tags);
