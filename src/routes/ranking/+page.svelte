@@ -4,7 +4,6 @@
 
 	import { generateEdge } from "$lib/edge";
 
-	import type { User } from "$routes/ranking/+page.server";
 	import type { Guild } from "$lib/server/guild";
 
 	type OnChangeEvent = Event & {
@@ -84,7 +83,7 @@
 	</div>
 {/snippet}
 
-{#snippet generateUser(content: User, rank: number)}
+{#snippet generateUser(content: (typeof users)[number], rank: number)}
 	<div class="guild">
 		<div>
 			<img class="icon" src={content.avatarUrl} alt="">

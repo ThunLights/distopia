@@ -5,7 +5,7 @@
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants";
 	import { descriptionFormatCheck } from "./description.svelte";
 
-	export type Guild = {
+	type Guild = {
 		guildId: string
 		name: string
 		invite: string
@@ -18,7 +18,7 @@
 		nsfw: boolean
 	}
 
-	export type Props = {
+	type Props = {
 		guild: Guild
 		token: string
 		method: string
