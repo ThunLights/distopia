@@ -24,6 +24,7 @@
     let loginData = $state(data.auth);
 	let servers = $state<Response>(initServersData);
 	let showNsfw = $state(true);
+	let showNormal = $state(true);
 
     onMount(async () => {
 		servers = await home() ?? initServersData;
@@ -73,8 +74,11 @@
 		<div>
 			<p class="name">最近更新されたサーバー</p>
 			<div>
+				<label for="show-normal">
+					<p><input type="checkbox" id="show-normal" bind:checked={showNormal}> 通常サーバーを表示</p>
+				</label>
 				<label for="show-nsfw">
-					<p>NSFWサーバーを表示 <input type="checkbox" id="show-nsfw" bind:checked={showNsfw}></p>
+					<p><input type="checkbox" id="show-nsfw" bind:checked={showNsfw}> NSFWサーバーを表示</p>
 				</label>
 			</div>
 			<div class="guilds">
@@ -96,7 +100,7 @@
 <Footer></Footer>
 
 {#snippet generateGuildElement(guild: Guild)}
-	<div class="guild {guild.nsfw && !showNsfw ? "hidden" : ""}">
+	<div class="guild {((guild.nsfw && !showNsfw) || (!guild.nsfw && !showNormal)) ? "hidden" : ""}">
 		<div class="guild-context">
 			<div>
 				<div class="guild-info">
