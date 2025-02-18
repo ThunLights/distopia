@@ -12,8 +12,8 @@ export class Guild {
 		try {
 			const guild = client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
 			if (guild) {
-				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
-				return users.toArray().map(user => user.id).includes(userId);
+				const users = guild.members.cache.filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
+				return users.map(user => user.id).includes(userId);
 			}
 
 			return false;
@@ -28,7 +28,7 @@ export class Guild {
 			const guild = client.guilds.cache.get(guildId);
 
 			if (guild) {
-				return guild.scheduledEvents.cache.values().toArray();
+				return Array.from(guild.scheduledEvents.cache.values());
 			}
 
 			return [];
@@ -109,8 +109,8 @@ export class Guild {
 		try {
 			const guild = this.client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
 			if (guild) {
-				const users = guild.members.cache.values().filter(member => member.roles.cache.has(PUBLIC_HONORARY_MEMBER_ROLE_ID));
-				return users.toArray().map(user => user.id).includes(userId);
+				const users = guild.members.cache.filter(member => member.roles.cache.has(PUBLIC_HONORARY_MEMBER_ROLE_ID));
+				return users.map(user => user.id).includes(userId);
 			}
 
 			return false;
