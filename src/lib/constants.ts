@@ -147,7 +147,7 @@ export const staffs = [
 export const LOGIN_URL = PUBLIC_OAUTH_URL;
 
 export const CHARACTER_LIMIT = {
-	description: 250,
+	description: 400,
 	tag: 25,
 	review: 100,
 };
