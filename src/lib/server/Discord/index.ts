@@ -46,7 +46,7 @@ export class DiscordBotClient {
 			const targets: string[] = [];
 			const homeServer = await this.client.guilds.fetch(PUBLIC_HOME_SERVER_ID);
 			const serverIds = await database.guildTables.activeRate.ranking(10);
-			const existingUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
+			const existingUsers = Array.from(homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID)).values());
 
 			for (const serverId of serverIds) {
 				const guild = this.client.guilds.cache.get(serverId.guildId);
@@ -80,8 +80,8 @@ export class DiscordBotClient {
 			const guilds = (await database.guildTables.activeRate.ranking(50))
 				.map(({ guildId }) => this.client.guilds.cache.get(guildId))
 				.filter(guild => !(typeof guild === "undefined"));
-			const existingOwnerUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
-			const existingAdminUsers = homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID)).values().toArray();
+			const existingOwnerUsers = Array.from(homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID)).values());
+			const existingAdminUsers = Array.from(homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID)).values());
 
 			for await (const guild of guilds) {
 				const owner = await database.guildTables.settings.owner.fetch(guild.id);
