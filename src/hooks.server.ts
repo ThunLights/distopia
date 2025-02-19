@@ -33,7 +33,7 @@ async function updateExpireDatas() {
 
 async function updateGuildRemove() {
 	for (const { guildId } of await database.guildTables.guild.datas()) {
-		const guildIds = discord.bot.client.guilds.cache.values().map(guild => guild.id).toArray();
+		const guildIds = Array.from(discord.bot.client.guilds.cache.values()).map(guild => guild.id);
 		if (!guildIds.includes(guildId)) {
 			await database.guildTables.removed.add(guildId);
 		}
