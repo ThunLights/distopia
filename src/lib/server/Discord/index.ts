@@ -86,9 +86,9 @@ export class DiscordBotClient {
 			for await (const guild of guilds) {
 				const owner = await database.guildTables.settings.owner.fetch(guild.id);
 				owners.push(owner ? owner.userId : guild.ownerId);
-				const adminMembers = guild.members.cache
+				const adminMembers = Array.from(guild.members.cache
 					.filter(member => member.permissions.has(PermissionsBitField.Flags.Administrator))
-					.values().toArray();
+					.values());
 				for (const adminMember of adminMembers) {
 					admins.push(adminMember.user.id);
 				}
