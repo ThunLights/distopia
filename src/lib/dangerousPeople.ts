@@ -9,10 +9,13 @@ export type Elements = Array<Element>;
 
 export class DangerousPeople {
 	public static readonly table = {
+		inappropriate: 5,
 		disturber: 10,
 		situationBreaker: 15,
 		sexualHarassment: 20,
+		spoofing: 25,
 		madman: 30,
+		personalInformation: 35,
 		internetStalker: 40,
 		criminal: 50,
 		disturberNukeBot: 50,
@@ -22,10 +25,13 @@ export class DangerousPeople {
 	} as Record<string, number>;
 
 	public static readonly displayContent = {
+		inappropriate: "不適切行為",
 		disturber: "荒らし",
 		situationBreaker: "空気が読めない",
 		sexualHarassment: "セクハラ",
+		spoofing: "なりすまし",
 		madman: "話が通じない",
+		personalInformation: "個人情報晒し",
 		internetStalker: "ネトスト",
 		criminal: "犯罪者",
 		disturberNukeBot: "荒らし(NukeBot)",
