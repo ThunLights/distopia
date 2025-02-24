@@ -1,0 +1,48 @@
+name: Build Check
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    env:
+      PUBLIC_URL: "http://localhost:3095"
+      PUBLIC_OAUTH_URL: "https://discord.com/oauth2/authorize?client_id=1314831666849775616&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3095%2Fauth&scope=identify+guilds+email+guilds.join"
+      PUBLIC_OWNER_ID: "1261634733037719593"
+
+      PUBLIC_HOME_SERVER_ID: "1314831487702663188"
+      PUBLIC_STAFF_ROLE_ID: "1329730992474427402"
+      PUBLIC_HONORARY_MEMBER_ROLE_ID: "1331939881579970632"
+      PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "1328702557022978109"
+      PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "1328605999749136446"
+      PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "1328606042602340394"
+
+      PUBLIC_TICKET_VOTE_CHANNEL_ID: "1337251889955344436"
+      PUBLIC_TICKET_CATEGORY_ID: "1337228645319708743"
+      PUBLIC_TICKET_ARCHIVE_CATEGORY_ID: "1337228665125212171"
+
+      PORT: 3095
+      BOT_ID: "1314831666849775616"
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      BOT_SECRET: ${{ secrets.BOT_SECRET }}
+      BOT_REDIRECT_URL: "http://localhost:3095/auth"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: CI
+        run: npm run ci
