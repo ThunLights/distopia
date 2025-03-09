@@ -27,45 +27,8 @@ function parseSearchType(content: string) {
 export const load = (async (e) => {
 	const searchTypeBase = e.url.searchParams.get("type");
 	const searchType: SearchTypes = searchTypeBase ? parseSearchType(searchTypeBase) ?? "activeRate" : "activeRate";
-	const levelBase = await database.guildTables.level.ranking(50);
-	const activeRateBase = await database.guildTables.activeRate.ranking(50);
-
-	const users: (User & { count: number })[] = [];
-	const level: Guild[] = []
-	const activeRate: Guild[] = [];
-
-	for (const element of levelBase) {
-		const data = await id2Guild(element.guildId);
-		if (typeof data === "string") continue;
-		level.push(data);
-	}
-	for (const element of activeRateBase) {
-		const data = await id2Guild(element.guildId);
-		if (typeof data === "string") continue;
-		activeRate.push(data);
-	}
-	for (const { userId, count } of await database.userBump.ranking(50)) {
-		const cacheData = await cache.discord.users.checkCache(userId);
-		if (cacheData) {
-			users.push({ ...cacheData, ...{ count }});
-			continue;
-		}
-		const user = await discord.bot.control.user.fetch(userId);
-		if (user) {
-			users.push({
-				userId: user.id,
-				avatarUrl: user.avatarURL(),
-				username: user.username,
-				displayName: user.displayName,
-				count,
-			});
-		}
-	}
 
 	return {
 		searchType,
-		level,
-		activeRate,
-		users,
 	}
 }) satisfies PageServerLoad;

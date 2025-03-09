@@ -3,15 +3,32 @@
 	import Icon from "$lib/icon.svelte";
 
 	import { generateEdge } from "$lib/edge";
+	import { onMount } from "svelte";
 
 	import type { Guild } from "$lib/server/guild";
+	import type { ResponseJson } from "$routes/api/guilds/ranking/+server";
 
 	type OnChangeEvent = Event & {
 		currentTarget: EventTarget & HTMLSelectElement;
 	};
 
 	const { data } = $props();
-	const { searchType, level, activeRate, users } = data;
+	const { searchType } = data;
+
+	let contents = $state<ResponseJson["post"]>({
+		level: [],
+		activeRate: [],
+		users: [],
+	});
+
+	onMount(async () => {
+		const response = await fetch("/api/guilds/ranking", {
+			method: "POST",
+		});
+		if (response.status === 200) {
+			contents = await response.json();
+		}
+	});
 
 	function moveOtherType(e: OnChangeEvent) {
 		location.href = `/ranking?type=${e.currentTarget.value}`;
@@ -42,15 +59,15 @@
 			</div>
 			<div class="ranking">
 				{#if searchType === "activeRate"}
-					{#each activeRate as guild, i}
+					{#each contents.activeRate as guild, i}
 						{@render generateGuild(guild, i, true)}
 					{/each}
 				{:else if searchType === "level"}
-					{#each level as guild, i}
+					{#each contents.level as guild, i}
 						{@render generateGuild(guild, i, false)}
 					{/each}
 				{:else}
-					{#each users as user, i}
+					{#each contents.users as user, i}
 						{@render generateUser(user, i)}
 					{/each}
 				{/if}
@@ -83,7 +100,7 @@
 	</div>
 {/snippet}
 
-{#snippet generateUser(content: (typeof users)[number], rank: number)}
+{#snippet generateUser(content: (typeof contents.users)[number], rank: number)}
 	<div class="guild">
 		<div>
 			<img class="icon" src={content.avatarUrl} alt="">
