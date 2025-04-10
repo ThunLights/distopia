@@ -8,9 +8,12 @@
 		"build": "vite build",
 		"setup": "npx prisma migrate dev --name \"init\" && npm run build",
 		"ci": "npx prisma migrate dev --name \"update\" && npm run build",
+		"prepare": "svelte-kit sync || echo ''",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint ."
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^2.0.0",
@@ -21,6 +24,8 @@
 		"vite": "^6.0.11"
 	},
 	"dependencies": {
+		"@eslint/compat": "^1.2.8",
+		"@eslint/js": "^9.24.0",
 		"@fontsource/inter": "^5.1.0",
 		"@fontsource/open-sans": "^5.1.0",
 		"@prisma/client": "^6.0.0",
@@ -31,8 +36,16 @@
 		"@types/node": "^22.10.1",
 		"@zerodevx/svelte-toast": "^0.9.6",
 		"discord.js": "^14.18.0",
+		"eslint": "^9.24.0",
+		"eslint-config-prettier": "^10.1.1",
+		"eslint-plugin-svelte": "^3.5.1",
+		"globals": "^16.0.0",
 		"javascript-obfuscator": "^4.1.1",
+		"prettier": "^3.5.3",
+		"prettier-plugin-svelte": "^3.3.3",
+		"prettier-plugin-tailwindcss": "^0.6.11",
 		"rollup-obfuscator": "^4.1.1",
+		"typescript-eslint": "^8.29.1",
 		"ua-parser-js": "^2.0.0",
 		"uuid": "^11.0.5",
 		"zod": "^3.23.8"
