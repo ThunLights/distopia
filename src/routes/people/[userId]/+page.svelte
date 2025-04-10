@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DangerousPeople } from "$lib/dangerousPeople.js";
 	import { date2Txt } from "$lib/date.js";
-	import Footer from "$lib/footer.svelte";
+	import Footer from "$lib/components/footer.svelte";
 	import Meta from "$lib/meta.svelte";
 
 	const { data } = $props();

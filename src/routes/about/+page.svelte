@@ -4,7 +4,7 @@
 	import { siteAbout } from "$lib/constants";
 
 	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
+	import Footer from "$lib/components/footer.svelte";
 </script>
 
 <Meta
