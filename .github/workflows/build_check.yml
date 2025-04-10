@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  update:
+  ci:
     runs-on: ubuntu-latest
 
     env:
