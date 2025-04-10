@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Tags from "$lib/tags.svelte";
+	import Tags from "$lib/components/tags.svelte";
 	import Meta from "$lib/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
 
