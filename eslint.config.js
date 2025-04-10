@@ -30,11 +30,5 @@ export default ts.config(
 				parser: ts.parser
 			}
 		}
-	},
-	{
-		files: ["src/lib/client/gpu.ts", "src/lib/components/hcaptcha.svelte"],
-		rules: {
-			"@typescript-eslint/no-explicit-any": ["off"]
-		}
 	}
 );
