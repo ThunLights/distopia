@@ -89,7 +89,7 @@
 					<p class="title">登録済みサーバー</p>
 					{#if publicGuildsCount}
 						<div class="guilds">
-							{#each guilds.filter((value) => value.guild) as guild}
+							{#each guilds.filter((value) => value.guild) as guild (guild)}
 								{@render generatePublicGuild(guild)}
 							{/each}
 						</div>
@@ -105,7 +105,7 @@
 					</p>
 					{#if guildsCount}
 						<div class="guilds">
-							{#each guilds.filter((value) => !value.guild) as guild}
+							{#each guilds.filter((value) => !value.guild) as guild (guild)}
 								{@render generateGuild(guild, guild.joinBot, guild.tmp)}
 							{/each}
 						</div>

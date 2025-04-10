@@ -148,13 +148,13 @@
 <Footer />
 
 {#snippet generateTagsElement(tags: string[])}
-	{#each tags as tag}
+	{#each tags as tag (tag)}
 		<p class="tag">{tag}</p>
 	{/each}
 {/snippet}
 
 {#snippet description(content: string)}
-	{#each content.split("\n") as line}
+	{#each content.split("\n") as line (line)}
 		<p>{line}</p>
 	{/each}
 {/snippet}

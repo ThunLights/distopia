@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { dayExchanger } from "$lib/server/day";
+import { DayExchanger } from "$lib/server/day";
 
 const logFilesDir = path.join(process.cwd(), "log");
 
@@ -30,8 +30,8 @@ function errorHandling<T>(error: T) {
 
 function errorLog(content: string) {
 	const base = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
-	let date = new Date(base);
-	let now = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${dayExchanger.exchangeAbbreviation(date)}) ${date.getHours()}時${date.getMinutes()}分${date.getSeconds()}.${date.getMilliseconds()}秒`;
+	const date = new Date(base);
+	const now = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${DayExchanger.exchangeAbbreviation(date)}) ${date.getHours()}時${date.getMinutes()}分${date.getSeconds()}.${date.getMilliseconds()}秒`;
 
 	fs.appendFileSync(
 		path.join(

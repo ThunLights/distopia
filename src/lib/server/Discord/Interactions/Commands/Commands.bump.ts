@@ -83,7 +83,9 @@ export class BumpCommands extends CommandsBase {
 							embeds: [embed]
 						});
 					}
-				} catch {}
+				} catch {
+					//
+				}
 			},
 			2 * 60 * 60 * 1000
 		);

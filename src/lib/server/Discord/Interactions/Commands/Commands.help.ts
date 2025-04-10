@@ -2,12 +2,7 @@ import { Client, MessageFlags } from "discord.js";
 
 import { CommandsBase, CommandsError } from "./Commands.base";
 
-import type {
-	CacheType,
-	InteractionReplyOptions,
-	MessagePayload,
-	ChatInputCommandInteraction
-} from "discord.js";
+import type { InteractionReplyOptions, MessagePayload } from "discord.js";
 
 export class HelpCommands extends CommandsBase {
 	public readonly commandName = "help";
@@ -16,9 +11,9 @@ export class HelpCommands extends CommandsBase {
 		super(client);
 	}
 
-	async commands(
-		interaction: ChatInputCommandInteraction<CacheType>
-	): Promise<string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
+	async commands(): Promise<
+		string | MessagePayload | InteractionReplyOptions | CommandsError | null
+	> {
 		return {
 			content: "https://distopia.top/help",
 			flags: [MessageFlags.Ephemeral]

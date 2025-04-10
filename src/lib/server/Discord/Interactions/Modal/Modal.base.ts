@@ -23,7 +23,7 @@ export abstract class ModalsBase {
 	): Promise<
 		(InteractionReplyOptions & { fetchReply: true }) | string | MessagePayload | ModalsError | null
 	> {
-		return new ModalsError("Commands Not Found");
+		return new ModalsError(`Commands Not Found: ${interaction.customId}`);
 	}
 
 	async reply(interaction: ModalSubmitInteraction<CacheType>): Promise<void | ModalsError> {

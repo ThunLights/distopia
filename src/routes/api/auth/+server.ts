@@ -18,7 +18,7 @@ export const _ResponseZod = z.object({
 });
 
 export type ResponseContent = z.infer<typeof _ResponseContentZod>;
-export type Response = z.infer<typeof _ResponseZod>;
+export type ResponseJson = z.infer<typeof _ResponseZod>;
 
 export const POST = (async (e) => {
 	const user = await authorization(e);
@@ -32,6 +32,6 @@ export const POST = (async (e) => {
 	}
 	const response = {
 		content: user.content
-	} satisfies Response;
+	} satisfies ResponseJson;
 	return json(response, { status: 200 });
 }) satisfies RequestHandler;

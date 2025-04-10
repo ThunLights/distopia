@@ -1,4 +1,4 @@
-import type { Response } from "$routes/api/home/+server";
+import type { ResponseJson } from "$routes/api/home/+server";
 
 export async function home() {
 	const response = await fetch("/api/home", {
@@ -11,7 +11,7 @@ export async function home() {
 		})
 	});
 	if (response.ok) {
-		const json: Response = await response.json();
+		const json: ResponseJson = await response.json();
 		return json;
 	}
 	return null;

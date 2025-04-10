@@ -2,7 +2,6 @@ import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { json } from "@sveltejs/kit";
 import { generateErrorJson } from "$lib/server/json";
-import { database } from "$lib/server/Database/index";
 import { discord } from "$lib/server/discord";
 import { structChecker } from "$lib/struct";
 import { z } from "zod";

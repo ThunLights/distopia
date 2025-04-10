@@ -19,7 +19,7 @@ export async function getAccountGuilds(token: string) {
 			return data;
 		}
 		return new GuildsApiError(`API_STATUS_${response.status}`);
-	} catch (error) {
+	} catch {
 		return new GuildsApiError("ERR");
 	}
 }
@@ -56,7 +56,7 @@ export async function getPublicGuild(token: string, guildId: string) {
 			return data;
 		}
 		return new GuildsApiError(`API_STATUS_${response.status}`);
-	} catch (error) {
+	} catch {
 		return new GuildsApiError("");
 	}
 }

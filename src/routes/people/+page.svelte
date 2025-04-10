@@ -55,7 +55,7 @@
 	<div>
 		<p class="title">最近登録されたユーザー</p>
 		<div class="peoples">
-			{#each peoples as people}
+			{#each peoples as people (people)}
 				<div class="people">
 					<div class="context">
 						<div class="profile">

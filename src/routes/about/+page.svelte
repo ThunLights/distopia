@@ -17,11 +17,11 @@
 
 <main>
 	<div class="contents">
-		{#each siteAbout as about}
+		{#each siteAbout as about (about)}
 			<div class="section">
 				<p class="title">{about.title}</p>
 				<div class="section-contents">
-					{#each about.description as description}
+					{#each about.description as description (description)}
 						<p>{@html description}</p>
 					{/each}
 				</div>

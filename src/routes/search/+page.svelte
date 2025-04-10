@@ -93,7 +93,7 @@
 			</div>
 			{#if guilds.length}
 				<div class="guilds">
-					{#each guilds as guild}
+					{#each guilds as guild (guild)}
 						{@render generateGuildElement(guild)}
 					{/each}
 				</div>
@@ -139,7 +139,7 @@
 					{#if guild.tags.length}
 						<p>タグ</p>
 						<div class="tags">
-							{#each guild.tags as tag}
+							{#each guild.tags as tag (tag)}
 								<div class="tag">
 									<p class="content">{tag}</p>
 								</div>

@@ -101,7 +101,7 @@
 						}}
 						bind:value={category}
 					>
-						{#each CATEGORIES as category}
+						{#each CATEGORIES as category (category)}
 							<option value={category.id}>{category.name}</option>
 						{/each}
 					</select>

@@ -21,7 +21,7 @@ export abstract class RolesBase {
 	async commands(
 		interaction: RoleSelectMenuInteraction<CacheType>
 	): Promise<void | string | MessagePayload | InteractionReplyOptions | RolesError | null> {
-		return new RolesError("Commands Not Found");
+		return new RolesError(`Commands Not Found: ${interaction.customId}`);
 	}
 
 	async reply(interaction: RoleSelectMenuInteraction<CacheType>): Promise<void | RolesError> {

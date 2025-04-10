@@ -1,6 +1,6 @@
-import type { CacheType, Client, Interaction } from "discord.js";
 import { InteractionResponse } from "./Interactions/index";
-import { CATEGORIES } from "../../category";
+
+import type { CacheType, Client, Interaction } from "discord.js";
 
 type Choice = {
 	name: string;

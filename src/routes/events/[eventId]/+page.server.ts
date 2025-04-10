@@ -1,5 +1,3 @@
-import { id2Guild } from "$lib/server/guild";
-
 import type { PageServerLoad } from "./$types";
 
 export const load = (async (e) => {

@@ -29,7 +29,7 @@
 
 <main>
 	{#if guild}
-		<Guild token={data.auth ? data.auth.token : ""} method={"PATCH"} {guild} />
+		<Guild token={data.auth ? data.auth.token : ""} method="PATCH" {guild} />
 	{/if}
 </main>
 <Footer />

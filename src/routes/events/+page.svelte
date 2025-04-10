@@ -18,7 +18,7 @@
 
 	<div class="events">
 		{#if events.length}
-			{#each events as event}
+			{#each events as event (event)}
 				<div class="event"></div>
 			{/each}
 		{:else}

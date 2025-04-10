@@ -39,7 +39,7 @@
 <div>
 	<input type="text" maxlength={CHARACTER_LIMIT.tag} onkeyup={controller} />
 	<div class="tags">
-		{#each tags as tag}
+		{#each tags as tag (tag)}
 			<div class="tag">
 				<div class="content">
 					<p>{tag}</p>
