@@ -23,12 +23,18 @@ export default ts.config(
 		}
 	},
 	{
-		files: ["**/*.svelte"],
+		files: ["**/*.{ts,svelte}"],
 
 		languageOptions: {
 			parserOptions: {
 				parser: ts.parser
 			}
+		}
+	},
+	{
+		files: ["src/routes/about/+page.svelte"],
+		rules: {
+			"svelte/no-at-html-tags": ["off"]
 		}
 	}
 );
