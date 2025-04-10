@@ -31,7 +31,7 @@ export class EventBoost {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { eventId },
+					data: { eventId }
 				});
 			} else {
 				await this.table.create({ data: { guildId, eventId } });

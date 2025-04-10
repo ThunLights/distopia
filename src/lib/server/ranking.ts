@@ -1,9 +1,9 @@
 import { errorHandling } from "./error";
 
 export type RankingElement = {
-	guildId: string
-	content: bigint
-}
+	guildId: string;
+	content: bigint;
+};
 
 export type RankingElements = Array<RankingElement>;
 

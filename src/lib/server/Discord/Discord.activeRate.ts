@@ -11,22 +11,32 @@ export class ActiveRateClient {
 
 	private async updateGuild(guildId: string) {
 		try {
-			const newMember = sumArrayContents((await database.guildTables.newMember.thirtyDays(guildId)).map(value => value.count));
-			const newMessage = sumArrayContents((await database.guildTables.newMessage.thirtyDays(guildId)).map(value => value.count));
+			const newMember = sumArrayContents(
+				(await database.guildTables.newMember.thirtyDays(guildId)).map((value) => value.count)
+			);
+			const newMessage = sumArrayContents(
+				(await database.guildTables.newMessage.thirtyDays(guildId)).map((value) => value.count)
+			);
 			const vcMemberSum = (await database.guildTables.vcMemberSum.thirtyDays(guildId)).length;
-			const vcMemberUpperTwo = sumArrayContents((await database.guildTables.vcMemberUpperTwo.thirtyDays(guildId)).map(value => value.count));
+			const vcMemberUpperTwo = sumArrayContents(
+				(await database.guildTables.vcMemberUpperTwo.thirtyDays(guildId)).map(
+					(value) => value.count
+				)
+			);
 			const activeMember = await discord.bot.control.guild.memberCount(guildId, "online");
 			const allMember = await discord.bot.control.guild.memberCount(guildId);
 			if (activeMember && allMember) {
-				const rate = BigInt(await activeRate.calc({
-					newMember,
-					newMessage,
-					vcMemberSum,
-					vcMemberUpperTwo,
-					activeMember,
-					allMember,
-				}));
-                await database.archives.activeRate.max.update(guildId, rate);
+				const rate = BigInt(
+					await activeRate.calc({
+						newMember,
+						newMessage,
+						vcMemberSum,
+						vcMemberUpperTwo,
+						activeMember,
+						allMember
+					})
+				);
+				await database.archives.activeRate.max.update(guildId, rate);
 				return await database.guildTables.activeRate.update(guildId, rate);
 			}
 			return false;

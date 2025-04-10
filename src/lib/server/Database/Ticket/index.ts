@@ -16,7 +16,7 @@ export class Ticket {
 			if (element) {
 				await this.table.updateMany({
 					where: { userId },
-					data: { channelId },
+					data: { channelId }
 				});
 			} else {
 				await this.table.create({ data: { userId, channelId } });
@@ -31,7 +31,7 @@ export class Ticket {
 	public async remove(userId: string) {
 		try {
 			return await this.table.deleteMany({
-				where: { userId },
+				where: { userId }
 			});
 		} catch (error) {
 			errorHandling(error);

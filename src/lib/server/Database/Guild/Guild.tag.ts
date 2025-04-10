@@ -5,7 +5,7 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class GuildTagTable {
-    constructor(private readonly table: Prisma.GuildTagDelegate<DefaultArgs>) {}
+	constructor(private readonly table: Prisma.GuildTagDelegate<DefaultArgs>) {}
 
 	public async delete(guildId: string) {
 		try {
@@ -17,50 +17,50 @@ export class GuildTagTable {
 		}
 	}
 
-    async data(guildId: string): Promise<string[]> {
-        try {
-            return (await this.table.findMany({ where: { guildId } })).map(value => value.tag);
-        } catch (error) {
-            errorHandling(error);
-            return []
-        }
-    }
+	async data(guildId: string): Promise<string[]> {
+		try {
+			return (await this.table.findMany({ where: { guildId } })).map((value) => value.tag);
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
 
-    async update(guildId: string, guildTags: string[]) {
-        try {
-            const tags = deDepulication(guildTags);
-            await this.table.deleteMany({
-                where: {
-                    guildId,
-                }
-            })
-            for (const tag of tags) {
-                await this.table.create({
-                    data: {
-                        guildId,
-                        tag,
-                    }
-                })
-            }
-            return {
-                guildId,
-                tags,
-            }
-        } catch (error) {
-            errorHandling(error);
-            return new ServerError("ERROR")
-        }
-    }
+	async update(guildId: string, guildTags: string[]) {
+		try {
+			const tags = deDepulication(guildTags);
+			await this.table.deleteMany({
+				where: {
+					guildId
+				}
+			});
+			for (const tag of tags) {
+				await this.table.create({
+					data: {
+						guildId,
+						tag
+					}
+				});
+			}
+			return {
+				guildId,
+				tags
+			};
+		} catch (error) {
+			errorHandling(error);
+			return new ServerError("ERROR");
+		}
+	}
 
 	public async findTag(name: string) {
 		try {
 			return await this.table.findMany({
 				where: {
 					tag: {
-						contains: name,
+						contains: name
 					}
 				}
-			})
+			});
 		} catch (error) {
 			errorHandling(error);
 			return [];

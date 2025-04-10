@@ -9,24 +9,19 @@
 
 	let searchWord = $state("");
 
-    async function search() {
-        location.href = `/people/search?content=${encodeURIComponent(searchWord)}`
-    }
+	async function search() {
+		location.href = `/people/search?content=${encodeURIComponent(searchWord)}`;
+	}
 
-    async function inputSearchCommand(e: KeyboardEvent) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            await search()
-        }
-    }
+	async function inputSearchCommand(e: KeyboardEvent) {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			await search();
+		}
+	}
 </script>
 
-<Meta
-	title="危険人物検索システム"
-	description={[
-		"危険人物を検索することが出来ます。"
-	].join("")}
-/>
+<Meta title="危険人物検索システム" description={["危険人物を検索することが出来ます。"].join("")} />
 
 <main>
 	<div class="contents">
@@ -34,7 +29,15 @@
 			<div>
 				<p><label for="search">危険人物を検索する</label></p>
 				<div>
-					<input id="search" class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+					<input
+						id="search"
+						class="search-input"
+						type="text"
+						spellcheck="false"
+						autocomplete="off"
+						onkeyup={inputSearchCommand}
+						bind:value={searchWord}
+					/>
 					<button onclick={search}>検索</button>
 				</div>
 				<div>
@@ -57,7 +60,10 @@
 					<div class="context">
 						<div class="profile">
 							<p>通称: {people.name}</p>
-							<p>ID: {people.userId} {people.subAccounts.length ? `(サブ垢: ${people.subAccounts.join(", ")})` : ""}</p>
+							<p>
+								ID: {people.userId}
+								{people.subAccounts.length ? `(サブ垢: ${people.subAccounts.join(", ")})` : ""}
+							</p>
 						</div>
 						<div class="info">
 							<p>理由: {people.title}</p>
@@ -75,7 +81,7 @@
 		</div>
 	</div>
 </main>
-<Footer/>
+<Footer />
 
 <style>
 	.context {
@@ -108,7 +114,7 @@
 		margin-top: 16px;
 		font-weight: 700;
 	}
-	.context>div {
+	.context > div {
 		margin: 10px 0;
 	}
 	.profile p {
@@ -120,7 +126,7 @@
 		background-color: rgb(37, 36, 41);
 		border-radius: 10px;
 	}
-	.people>div button {
+	.people > div button {
 		width: 100%;
 	}
 	.search-input {
@@ -136,20 +142,20 @@
 	p {
 		color: white;
 	}
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 
 	@media (max-width: 1100px) {
 		.peoples {

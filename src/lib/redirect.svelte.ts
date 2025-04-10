@@ -1,6 +1,5 @@
-
 export function redirectUrl(url: string) {
-    return (() => {
-        location.href = url;
-    })
+	return () => {
+		location.href = url;
+	};
 }

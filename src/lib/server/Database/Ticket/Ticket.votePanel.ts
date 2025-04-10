@@ -21,7 +21,7 @@ export class TicketVotePanel {
 			if (element) {
 				await this.table.updateMany({
 					where: { messageId },
-					data: { targetUserId },
+					data: { targetUserId }
 				});
 			} else {
 				await this.table.create({ data: { messageId, targetUserId } });

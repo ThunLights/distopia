@@ -3,9 +3,7 @@
 	import Main from "$lib/components/main.svelte";
 </script>
 
-<Meta
-	title="イベント一覧"
-/>
+<Meta title="イベント一覧" />
 
 <Main>
 	<p>Comming soon</p>

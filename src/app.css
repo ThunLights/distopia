@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-    --body-background-color: #313338;
+	--body-background-color: #313338;
 }
 
 * {
-    margin: 0;
+	margin: 0;
 }
 
 body {
-    background-color: var(--body-background-color);
+	background-color: var(--body-background-color);
 }
 
 pre {

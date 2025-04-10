@@ -1,11 +1,11 @@
 import { CacheClientBase } from "../Cache.base";
 
 export type User = {
-	userId: string
-	avatarUrl: string | null
-	username: string
-	displayName: string
-}
+	userId: string;
+	avatarUrl: string | null;
+	username: string;
+	displayName: string;
+};
 
 export class CacheUsers extends CacheClientBase<User> {
 	public readonly caches: Record<string, User> = {};

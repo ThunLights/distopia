@@ -11,23 +11,23 @@ export class GuildNewMemberTable {
 		try {
 			const now = new Date(formatDate(new Date()));
 			const element = await this.table.findFirst({
-				where: { guildId, date: now },
+				where: { guildId, date: now }
 			});
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId, date: now },
 					data: {
-						count: element.count + 1,
+						count: element.count + 1
 					}
-				})
+				});
 			} else {
 				await this.table.create({
 					data: {
 						guildId,
 						count: 1,
-						date: now,
+						date: now
 					}
-				})
+				});
 			}
 			return true;
 		} catch (error) {
@@ -54,13 +54,13 @@ export class GuildNewMemberTable {
 				where: {
 					guildId,
 					date: {
-						gte: thirtyDaysAgo,
+						gte: thirtyDaysAgo
 					}
 				}
-			})
+			});
 		} catch (error) {
 			errorHandling(error);
-			return []
+			return [];
 		}
 	}
 }

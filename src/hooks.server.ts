@@ -15,7 +15,12 @@ async function updateExpireDatas() {
 			await database.user.delete(user.id);
 			await database.token.delete(user.id);
 		} else {
-			await database.user.update(user.id, user.username, newData.access_token, newData.refresh_token);
+			await database.user.update(
+				user.id,
+				user.username,
+				newData.access_token,
+				newData.refresh_token
+			);
 		}
 	}
 
@@ -33,7 +38,7 @@ async function updateExpireDatas() {
 
 async function updateGuildRemove() {
 	for (const { guildId } of await database.guildTables.guild.datas()) {
-		const guildIds = Array.from(discord.bot.client.guilds.cache.values()).map(guild => guild.id);
+		const guildIds = Array.from(discord.bot.client.guilds.cache.values()).map((guild) => guild.id);
 		if (!guildIds.includes(guildId)) {
 			await database.guildTables.removed.add(guildId);
 		}
@@ -76,17 +81,23 @@ async function start() {
 	await discord.bot.setEvents();
 	await discord.bot.login();
 
-	setInterval(async () => {
-		await updateExpireDatas();
-		await updateGuildRemove();
-	}, 5 * 60 * 1000);
-	setInterval(async () => {
-		await discord.bot.update();
-		await generateBackUp();
-	}, 20 * 60 * 1000);
+	setInterval(
+		async () => {
+			await updateExpireDatas();
+			await updateGuildRemove();
+		},
+		5 * 60 * 1000
+	);
+	setInterval(
+		async () => {
+			await discord.bot.update();
+			await generateBackUp();
+		},
+		20 * 60 * 1000
+	);
 }
 
-export const handle = (async ({event, resolve}) => {
+export const handle = (async ({ event, resolve }) => {
 	const response = await resolve(event);
 	response.headers.set("Cache-Control", "no-store");
 	response.headers.set("Pragma", "no-cache");
@@ -94,12 +105,12 @@ export const handle = (async ({event, resolve}) => {
 }) satisfies Handle;
 
 export const handleError = (async (input) => {
-    if (input.status === 404) {
-        return;
-    };
+	if (input.status === 404) {
+		return;
+	}
 	if (input.status === 405) {
 		return;
-	};
+	}
 	errorHandling(input);
 }) satisfies HandleServerError;
 

@@ -13,32 +13,38 @@ import type { ChatInputCommandInteraction, CacheType } from "discord.js";
 import type { CommandsBase } from "./Commands.base";
 
 export class Commands {
-    public readonly commands: CommandsBase[]
+	public readonly commands: CommandsBase[];
 
-    constructor(private readonly client: Client) {
-        this.commands = [
-            new WebCommands(this.client),
-            new AdminCommands(this.client),
-            new HelpCommands(this.client),
-            new BumpCommands(this.client),
-            new StaffCommands(this.client),
+	constructor(private readonly client: Client) {
+		this.commands = [
+			new WebCommands(this.client),
+			new AdminCommands(this.client),
+			new HelpCommands(this.client),
+			new BumpCommands(this.client),
+			new StaffCommands(this.client),
 			new FriendCommand(this.client),
-			new SettingsCommand(this.client),
-        ]
-    }
+			new SettingsCommand(this.client)
+		];
+	}
 
-    async reply(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-        for (const command of this.commands) {
-            if (command.commandName === interaction.commandName) {
-                const result = await command.reply(interaction);
-                if (result) {
-                    return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
-                } else {
-                    return result;
-                }
-            }
-        }
+	async reply(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+		for (const command of this.commands) {
+			if (command.commandName === interaction.commandName) {
+				const result = await command.reply(interaction);
+				if (result) {
+					return void (await interaction.reply({
+						content: codeBlock(`Error: ${result.content}`),
+						flags: [MessageFlags.Ephemeral]
+					}));
+				} else {
+					return result;
+				}
+			}
+		}
 
-        return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
-    }
+		return void (await interaction.reply({
+			content: "Command Not Found",
+			flags: [MessageFlags.Ephemeral]
+		}));
+	}
 }

@@ -21,7 +21,7 @@ export class DatabaseBlackList {
 			if (element) {
 				await this.table.updateMany({
 					where: { userId },
-					data: { description },
+					data: { description }
 				});
 			} else {
 				await this.table.create({ data: { userId, description } });

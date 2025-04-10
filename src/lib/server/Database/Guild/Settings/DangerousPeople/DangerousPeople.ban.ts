@@ -17,18 +17,18 @@ export class Ban {
 
 	public async update(guildId: string, baseScore: number) {
 		try {
-			const element = await this.table.findFirst({ where: { guildId }});
+			const element = await this.table.findFirst({ where: { guildId } });
 			const score = Math.floor(baseScore);
 
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { score },
-				})
+					data: { score }
+				});
 			} else {
 				await this.table.create({
 					data: { guildId, score }
-				})
+				});
 			}
 
 			return true;

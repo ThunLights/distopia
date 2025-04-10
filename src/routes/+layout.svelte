@@ -12,7 +12,7 @@
 
 	onMount(() => {
 		headerStore.set({
-			loginBlock: true,
+			loginBlock: true
 		});
 	});
 
@@ -23,7 +23,11 @@
 
 <svelte:head>
 	{#if !isMobile}
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9010324670720699" crossorigin="anonymous"></script>
+		<script
+			async
+			src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9010324670720699"
+			crossorigin="anonymous"
+		></script>
 	{/if}
 </svelte:head>
 

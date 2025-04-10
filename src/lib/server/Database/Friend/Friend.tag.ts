@@ -16,7 +16,7 @@ export class FriendTag {
 		try {
 			await this.table.deleteMany({
 				where: { userId, content }
-			})
+			});
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -43,7 +43,7 @@ export class FriendTag {
 		try {
 			return await this.table.findMany({
 				where: { userId }
-			})
+			});
 		} catch (error) {
 			errorHandling(error);
 			return [];

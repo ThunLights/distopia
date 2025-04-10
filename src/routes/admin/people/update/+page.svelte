@@ -9,26 +9,30 @@
 	import type { ResponseJson } from "$routes/api/people/+server";
 
 	type Content = {
-		targetId: string
-		name: string
-		score: string[]
-		tags: string[]
-		title: string
-		description: string
-		targetType: typeof DangerousPeopleTypes[number]
-		subAccounts: string[]
-	}
-	type DangerousPeopleType = typeof DangerousPeopleTypes[number];
+		targetId: string;
+		name: string;
+		score: string[];
+		tags: string[];
+		title: string;
+		description: string;
+		targetType: (typeof DangerousPeopleTypes)[number];
+		subAccounts: string[];
+	};
+	type DangerousPeopleType = (typeof DangerousPeopleTypes)[number];
 
 	const { data } = $props();
 
 	let userData = $state<ResponseJson | null>(null);
 	let targetId = $state("");
-	let userType = $derived<DangerousPeopleType>(userData && DangerousPeopleTypes.includes(userData.user.type as DangerousPeopleType) ? userData.user.type as DangerousPeopleType : "criminal");
+	let userType = $derived<DangerousPeopleType>(
+		userData && DangerousPeopleTypes.includes(userData.user.type as DangerousPeopleType)
+			? (userData.user.type as DangerousPeopleType)
+			: "criminal"
+	);
 
 	onMount(async () => {
 		if (!data.canUse) {
-			return location.href = "/";
+			return (location.href = "/");
 		}
 	});
 
@@ -36,11 +40,11 @@
 		const response = await fetch("/api/people", {
 			method: "POST",
 			headers: {
-				"Content-Type": "application/json",
+				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
 				userId: targetId
-			}),
+			})
 		});
 
 		if (response.status === 200) {
@@ -54,7 +58,7 @@
 
 	async function send(content: Content) {
 		if (!data.auth) {
-			Toast.error("認証情報エラー")
+			Toast.error("認証情報エラー");
 			return;
 		}
 		const { targetId, targetType, tags, name, score, title, description, subAccounts } = content;
@@ -62,7 +66,7 @@
 			method: "POST",
 			headers: {
 				Authorization: data.auth.token,
-				"Content-Type": "application/json",
+				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
 				userId: targetId,
@@ -73,7 +77,7 @@
 				title,
 				description,
 				tags,
-				subAccounts,
+				subAccounts
 			})
 		});
 		if (response.ok) {
@@ -82,46 +86,46 @@
 		} else {
 			try {
 				const json = await response.json();
-				Toast.error(`レスポンス「${json.content}」`)
+				Toast.error(`レスポンス「${json.content}」`);
 			} catch {
-				Toast.error("エラー")
+				Toast.error("エラー");
 			}
 		}
 	}
 </script>
 
-<Meta
-	title="危険人物を編集"
-/>
+<Meta title="危険人物を編集" />
 
 <main>
 	<div class="contents">
 		<div class="context">
 			{#if userData}
 				<People
-					send={send}
+					{send}
 					canEditId={true}
 					page={{
 						title: "危険人物を編集",
-						button: "編集",
+						button: "編集"
 					}}
-					init={userData ? {
-						targetId: userData.userId,
-						name: userData.user.name,
-						score: userData.score,
-						tags: userData.tags,
-						title: userData.user.title,
-						description: userData.user.description,
-						targetType: userType,
-						subAccounts: userData.subAccounts,
-					} : {}}
+					init={userData
+						? {
+								targetId: userData.userId,
+								name: userData.user.name,
+								score: userData.score,
+								tags: userData.tags,
+								title: userData.user.title,
+								description: userData.user.description,
+								targetType: userType,
+								subAccounts: userData.subAccounts
+							}
+						: {}}
 				/>
 			{:else}
 				<div>
 					<p>どのIDのユーザーを更新？</p>
 				</div>
 				<div>
-					<input type="text" bind:value={targetId}>
+					<input type="text" bind:value={targetId} />
 				</div>
 				<div>
 					<button onclick={getUser}>取得</button>
@@ -147,24 +151,24 @@
 		width: 90%;
 		margin: 20px auto;
 	}
-	.context>div {
+	.context > div {
 		margin-top: 20px;
 	}
 
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 	input {
 		width: 60%;
 		font-size: 15px;

@@ -18,12 +18,12 @@
 	let contents = $state<ResponseJson["post"]>({
 		level: [],
 		activeRate: [],
-		users: [],
+		users: []
 	});
 
 	onMount(async () => {
 		const response = await fetch("/api/guilds/ranking", {
-			method: "POST",
+			method: "POST"
 		});
 		if (response.status === 200) {
 			contents = await response.json();
@@ -40,7 +40,7 @@
 	description={[
 		"Distopiaのサーバーランキングです。",
 		"カテゴリはアクティブレートとレベルの二つがあります。",
-		"(20分ごとに更新されます。)",
+		"(20分ごとに更新されます。)"
 	].join("")}
 />
 
@@ -81,16 +81,32 @@
 		<div>
 			<a class="white" href="/guilds/{guild.guildId}">
 				{#if edge}
-					<Icon width="10vw" height="10vw" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/ranking/discord.webp"} edgePath={`/ranking/${generateEdge(rank)}.webp`}/>
+					<Icon
+						width="10vw"
+						height="10vw"
+						iconPath={guild.icon
+							? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+							: "/ranking/discord.webp"}
+						edgePath={`/ranking/${generateEdge(rank)}.webp`}
+					/>
 				{:else}
-					<img class="icon" src={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"} alt="">
+					<img
+						class="icon"
+						src={guild.icon
+							? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+							: "/discord.webp"}
+						alt=""
+					/>
 				{/if}
 			</a>
 		</div>
 		<div>
-            <p><a class="name white" href="/guilds/{guild.guildId}">{rank+1}: {guild.name}</a></p>
+			<p><a class="name white" href="/guilds/{guild.guildId}">{rank + 1}: {guild.name}</a></p>
 			<div class="informations">
-				<p>Rate {guild.activeRate ?? 0} Lv.{guild.level ? guild.level.level : 0} {guild.level ? guild.level.point : 0}pt</p>
+				<p>
+					Rate {guild.activeRate ?? 0} Lv.{guild.level ? guild.level.level : 0}
+					{guild.level ? guild.level.point : 0}pt
+				</p>
 				<p>{guild.members ?? 0}人(アクティブ: {guild.online})</p>
 			</div>
 		</div>
@@ -103,10 +119,10 @@
 {#snippet generateUser(content: (typeof contents.users)[number], rank: number)}
 	<div class="guild">
 		<div>
-			<img class="icon" src={content.avatarUrl} alt="">
+			<img class="icon" src={content.avatarUrl} alt="" />
 		</div>
 		<div>
-			<p class="name white">{rank+1}: {content.displayName}</p>
+			<p class="name white">{rank + 1}: {content.displayName}</p>
 			<div class="informations">
 				<p>合計: {content.count}回</p>
 				<p>ユーザーネーム: {content.username} (ID: {content.userId})</p>
@@ -159,15 +175,16 @@
 		overflow: hidden;
 		margin: 10px 20px;
 	}
-    .contents {
-        overflow: hidden;
-        display: block;
-        background-color: rgb(37, 36, 41);
-        border-radius: 10px;
-        width: 90%;
-        margin: 20px auto;
-    }
-	a, p {
+	.contents {
+		overflow: hidden;
+		display: block;
+		background-color: rgb(37, 36, 41);
+		border-radius: 10px;
+		width: 90%;
+		margin: 20px auto;
+	}
+	a,
+	p {
 		font-size: 15px;
 		text-decoration: none;
 		color: white;

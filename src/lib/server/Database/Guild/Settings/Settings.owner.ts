@@ -31,8 +31,8 @@ export class Owner {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { userId },
-				})
+					data: { userId }
+				});
 			} else {
 				await this.table.create({ data: { guildId, userId } });
 			}

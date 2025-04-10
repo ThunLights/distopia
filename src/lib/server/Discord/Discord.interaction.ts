@@ -3,128 +3,128 @@ import { InteractionResponse } from "./Interactions/index";
 import { CATEGORIES } from "../../category";
 
 type Choice = {
-	name: string
-	value: string
-}
+	name: string;
+	value: string;
+};
 
-type Choices = Array<Choice>
+type Choices = Array<Choice>;
 
 export type InteractionCommand = {
-    name: string
-    description: string
-    options?: {
-        type: number
-        name: string
-        description: string
-        required?: boolean
-        channel_types?: number[]
-		choices?: Choices
-        options?: {
-            type: number
-            name: string
-            description: string
-            required?: boolean
-            channel_types?: number[]
-			choices?: Choices
-            options?: {
-                type: number
-                name: string
-                description: string
-                required?: boolean
-                channel_types?: number[]
-				choices?: Choices
-            }[]
-        }[]
-    }[]
+	name: string;
+	description: string;
+	options?: {
+		type: number;
+		name: string;
+		description: string;
+		required?: boolean;
+		channel_types?: number[];
+		choices?: Choices;
+		options?: {
+			type: number;
+			name: string;
+			description: string;
+			required?: boolean;
+			channel_types?: number[];
+			choices?: Choices;
+			options?: {
+				type: number;
+				name: string;
+				description: string;
+				required?: boolean;
+				channel_types?: number[];
+				choices?: Choices;
+			}[];
+		}[];
+	}[];
 };
 
 export type InteractionCommands = Array<InteractionCommand>;
 
 export class InteractionClient {
-    public static commands: InteractionCommands = [
-        {
-            name: "admin",
-            description: "only admin",
+	public static commands: InteractionCommands = [
+		{
+			name: "admin",
+			description: "only admin",
 			options: [
 				{
 					type: 1,
 					name: "ranking",
-					description: "ランキングパネルを置く",
+					description: "ランキングパネルを置く"
 				},
 				{
 					type: 1,
 					name: "status",
-					description: "ステータスパネルを閲覧",
+					description: "ステータスパネルを閲覧"
 				},
 				{
 					type: 1,
 					name: "score",
-					description: "危険人物スコア表を設置",
+					description: "危険人物スコア表を設置"
 				},
 				{
 					type: 1,
 					name: "ticket",
-					description: "危険人物解除申請用のチケット作成",
+					description: "危険人物解除申請用のチケット作成"
 				}
-			],
-        },
-        {
-            name: "web",
-            description: "web",
-            options: [
-                {
-                    type: 1,
-                    name: "register",
-                    description: "サーバーの仮登録をする。",
-                },
-                {
-                    type: 1,
-                    name: "invite",
-                    description: "招待リンクをこのチャンネルに変える。",
-                },
-                {
-                    type: 1,
-                    name: "page",
-                    description: "このサーバーのページを表示",
-                }
-            ],
-        },
+			]
+		},
+		{
+			name: "web",
+			description: "web",
+			options: [
+				{
+					type: 1,
+					name: "register",
+					description: "サーバーの仮登録をする。"
+				},
+				{
+					type: 1,
+					name: "invite",
+					description: "招待リンクをこのチャンネルに変える。"
+				},
+				{
+					type: 1,
+					name: "page",
+					description: "このサーバーのページを表示"
+				}
+			]
+		},
 		{
 			name: "friend",
-			description: "フレンド募集用のコマンドです。",
+			description: "フレンド募集用のコマンドです。"
 		},
 		{
 			name: "settings",
-			description: "設定コマンドです。",
+			description: "設定コマンドです。"
 		},
-        {
-            name: "bump",
-            description: "サーバーの表示順を上げる",
-        },
-        {
-            name: "help",
-            description: "ヘルプを表示",
-        },
-        {
-            name: "staff",
-            description: "スタッフかどうかチェックできるよ",
-            options: [
-                {
-                    type: 6,
-                    name: "user",
-                    description: "ユーザーを指定することも出来ます。",
-                    required: false,
-                }
-            ],
-        },
-    ];
-    public readonly interactionRespnse: InteractionResponse;
+		{
+			name: "bump",
+			description: "サーバーの表示順を上げる"
+		},
+		{
+			name: "help",
+			description: "ヘルプを表示"
+		},
+		{
+			name: "staff",
+			description: "スタッフかどうかチェックできるよ",
+			options: [
+				{
+					type: 6,
+					name: "user",
+					description: "ユーザーを指定することも出来ます。",
+					required: false
+				}
+			]
+		}
+	];
+	public readonly interactionRespnse: InteractionResponse;
 
-    constructor(private readonly client: Client) {
-        this.interactionRespnse = new InteractionResponse(this.client);
-    }
+	constructor(private readonly client: Client) {
+		this.interactionRespnse = new InteractionResponse(this.client);
+	}
 
-    public async create(interaction: Interaction<CacheType>): Promise<void> {
-        return void await this.interactionRespnse.reply(interaction);
-    }
+	public async create(interaction: Interaction<CacheType>): Promise<void> {
+		return void (await this.interactionRespnse.reply(interaction));
+	}
 }

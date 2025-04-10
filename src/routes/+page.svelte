@@ -1,73 +1,83 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+	import { onMount } from "svelte";
 	import { home } from "$lib/api.svelte";
 	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { guildJoin } from "$lib/join.svelte";
 	import { generateEdge } from "$lib/edge";
 
-    import Meta from "$lib/meta.svelte";
-    import Footer from "$lib/footer.svelte";
+	import Meta from "$lib/meta.svelte";
+	import Footer from "$lib/footer.svelte";
 	import Icon from "$lib/icon.svelte";
 
-    import type { PageData } from "./$types";
+	import type { PageData } from "./$types";
 	import type { Guild } from "$lib/server/guild";
 	import type { Response } from "$routes/api/home/+server";
 
 	const { data }: { data: PageData } = $props();
 	const initServersData = {
 		content: [],
-		active: [],
+		active: []
 	} satisfies Response;
 
 	let searchWord = $state("");
-    let loginData = $state(data.auth);
+	let loginData = $state(data.auth);
 	let servers = $state<Response>(initServersData);
 	let showNsfw = $state(true);
 	let showNormal = $state(true);
 
-    onMount(async () => {
-		servers = await home() ?? initServersData;
-    })
+	onMount(async () => {
+		servers = (await home()) ?? initServersData;
+	});
 
 	function joinBtn(guildId: string, invite: string, name: string) {
 		if (loginData) {
 			const { token } = loginData;
 			return async () => {
 				await guildJoin(token, guildId, name);
-			}
+			};
 		} else {
 			return redirectUrl(`https://discord.gg/${invite}`);
 		}
 	}
 
-    async function search() {
-        location.href = `/search?content=${encodeURIComponent(searchWord)}`
-    }
+	async function search() {
+		location.href = `/search?content=${encodeURIComponent(searchWord)}`;
+	}
 
-    async function inputSearchCommand(e: KeyboardEvent) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            await search()
-        }
-    }
+	async function inputSearchCommand(e: KeyboardEvent) {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			await search();
+		}
+	}
 </script>
 
 <Meta></Meta>
 
 <main>
-    <div class="entrance-img">
+	<div class="entrance-img">
 		{#if data.bg === "AM"}
 			<enhanced:img src="/static/am.webp" alt="loading" />
 		{:else}
 			<enhanced:img src="/static/pm.webp" alt="loading" />
 		{/if}
-    </div>
+	</div>
 	<div class="contents">
 		<div>
-			<p class="name"><label for="search-input">あなたにピッタリなDiscordサーバーを見つける</label></p>
+			<p class="name">
+				<label for="search-input">あなたにピッタリなDiscordサーバーを見つける</label>
+			</p>
 			<div>
-				<input id="search-input" class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+				<input
+					id="search-input"
+					class="search-input"
+					type="text"
+					spellcheck="false"
+					autocomplete="off"
+					onkeyup={inputSearchCommand}
+					bind:value={searchWord}
+				/>
 				<button onclick={search}>検索</button>
 			</div>
 		</div>
@@ -75,10 +85,12 @@
 			<p class="name">最近更新されたサーバー</p>
 			<div>
 				<label for="show-normal">
-					<p><input type="checkbox" id="show-normal" bind:checked={showNormal}> 通常サーバーを表示</p>
+					<p>
+						<input type="checkbox" id="show-normal" bind:checked={showNormal} /> 通常サーバーを表示
+					</p>
 				</label>
 				<label for="show-nsfw">
-					<p><input type="checkbox" id="show-nsfw" bind:checked={showNsfw}> NSFWサーバーを表示</p>
+					<p><input type="checkbox" id="show-nsfw" bind:checked={showNsfw} /> NSFWサーバーを表示</p>
 				</label>
 			</div>
 			<div class="guilds">
@@ -100,26 +112,42 @@
 <Footer></Footer>
 
 {#snippet generateGuildElement(guild: Guild)}
-	<div class="guild {((guild.nsfw && !showNsfw) || (!guild.nsfw && !showNormal)) ? "hidden" : ""}">
+	<div class="guild {(guild.nsfw && !showNsfw) || (!guild.nsfw && !showNormal) ? 'hidden' : ''}">
 		<div class="guild-context">
 			<div>
 				<div class="guild-info">
 					<div>
-						<a class="white" href="/guilds/{guild.guildId}" aria-label="{guild.name}">
+						<a class="white" href="/guilds/{guild.guildId}" aria-label={guild.name}>
 							{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
-								<Icon width={60} height={60} imgStyle="" iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/ranking/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+								<Icon
+									width={60}
+									height={60}
+									imgStyle=""
+									iconPath={guild.icon
+										? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+										: "/ranking/discord.webp"}
+									edgePath="/ranking/{generateEdge(guild.ranking.activeRate - 1)}.webp"
+								/>
 							{:else}
-								<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+								<img
+									class="icon"
+									src={guild.icon
+										? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+										: "/discord.webp"}
+									alt=""
+								/>
 							{/if}
 						</a>
 					</div>
 					<div>
-						<a class="white" href="/guilds/{guild.guildId}"><p class="guild-name">
-							{guild.name}
-							{#if guild.nsfw}
-								<small class="nsfw">NSFW!!</small>
-							{/if}
-						</p></a>
+						<a class="white" href="/guilds/{guild.guildId}"
+							><p class="guild-name">
+								{guild.name}
+								{#if guild.nsfw}
+									<small class="nsfw">NSFW!!</small>
+								{/if}
+							</p></a
+						>
 						<p>ブースト: {guild.boost}</p>
 						<p>カテゴリ: {getCategory(guild.category)}</p>
 					</div>
@@ -219,7 +247,7 @@
 		grid-template-columns: 32% 32% 32%;
 		grid-template-rows: auto auto auto auto auto auto auto auto auto auto auto;
 	}
-	.guild-context>div {
+	.guild-context > div {
 		margin-bottom: 8px;
 	}
 	.guild-context {
@@ -230,7 +258,7 @@
 		height: 95%;
 		margin: 14px;
 	}
-	.contents>div .name {
+	.contents > div .name {
 		margin-top: 14px;
 		font-size: 30px;
 		font-weight: 700;
@@ -244,36 +272,37 @@
 		color: white;
 		text-decoration: none;
 	}
-    main {
-        width: 100%;
-        overflow: hidden;
-    }
-    .entrance-img img {
-        width: 100%;
-        height: auto;
-    }
-	p, pre {
+	main {
+		width: 100%;
+		overflow: hidden;
+	}
+	.entrance-img img {
+		width: 100%;
+		height: auto;
+	}
+	p,
+	pre {
 		color: white;
 	}
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 	@media (max-width: 1100px) {
 		.guilds {
 			grid-template-columns: 48% 48%;
 		}
-		.contents>div .name {
+		.contents > div .name {
 			font-size: 24px;
 		}
 	}
@@ -281,7 +310,7 @@
 		.guilds {
 			grid-template-columns: 98%;
 		}
-		.contents>div .name {
+		.contents > div .name {
 			font-size: 20px;
 		}
 		.guild-description {

@@ -11,21 +11,18 @@
 			await navigator.clipboard.writeText(username);
 			toast.push("コピーしました。", {
 				theme: {
-				  "--toastColor": "mintcream",
-				  "--toastBackground": "rgba(72,187,120,0.9)",
-				  "--toastBarBackground": "#2F855A"
+					"--toastColor": "mintcream",
+					"--toastBackground": "rgba(72,187,120,0.9)",
+					"--toastBarBackground": "#2F855A"
 				}
 			});
-		}
+		};
 	}
 </script>
 
 <Meta
 	title="フレンド募集 / Distopia.top"
-	description={[
-		"Distopiaを通してフレンド募集できます。",
-		"気軽にお使いください。",
-	].join("")}
+	description={["Distopiaを通してフレンド募集できます。", "気軽にお使いください。"].join("")}
 />
 
 <main>
@@ -37,10 +34,19 @@
 					<div class="friend-content">
 						<div class="profile">
 							<div>
-								<img class="icon" src={friend.avatar ? `https://cdn.discordapp.com/avatars/${friend.userId}/${friend.avatar}` : "/discord.webp"} alt="">
+								<img
+									class="icon"
+									src={friend.avatar
+										? `https://cdn.discordapp.com/avatars/${friend.userId}/${friend.avatar}`
+										: "/discord.webp"}
+									alt=""
+								/>
 							</div>
 							<div>
-								<p class="username">{friend.username} <button onclick={copy(friend.username)}><img src="/copy.webp" alt=""></button></p>
+								<p class="username">
+									{friend.username}
+									<button onclick={copy(friend.username)}><img src="/copy.webp" alt="" /></button>
+								</p>
 								<p>ID: {friend.userId}</p>
 							</div>
 						</div>
@@ -66,7 +72,7 @@
 		</div>
 	</div>
 </main>
-<Footer/>
+<Footer />
 
 <style>
 	.tags {
@@ -111,10 +117,10 @@
 		height: 70px;
 		border-radius: 50%;
 	}
-	.friend-content .profile>div {
+	.friend-content .profile > div {
 		display: inline-block;
 	}
-	.friend-content>div {
+	.friend-content > div {
 		margin: 10px 0;
 	}
 	.contents {
@@ -132,7 +138,8 @@
 		min-height: 90vh;
 		overflow: hidden;
 	}
-	p, pre {
+	p,
+	pre {
 		color: white;
 	}
 	button {

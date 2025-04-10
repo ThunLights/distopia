@@ -15,27 +15,23 @@
 
 	onMount(async () => {
 		if (!data.auth) {
-			return location.href = "/account";
+			return (location.href = "/account");
 		}
 		const response = await getPublicGuild(data.auth.token, guildId);
 		if (response instanceof GuildsApiError) {
-			return location.href = "/account";
+			return (location.href = "/account");
 		}
 		guild = response;
-	})
+	});
 </script>
 
-<Meta/>
+<Meta />
 
 <main>
 	{#if guild}
-		<Guild
-			token={data.auth ? data.auth.token : ""}
-			method={"PATCH"}
-			guild={guild}
-		/>
+		<Guild token={data.auth ? data.auth.token : ""} method={"PATCH"} {guild} />
 	{/if}
 </main>
-<Footer/>
+<Footer />
 
 <style></style>

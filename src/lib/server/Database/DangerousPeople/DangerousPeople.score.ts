@@ -9,7 +9,7 @@ export class DangerousPeopleScore {
 	public async fetch(userId: string) {
 		try {
 			const elements = await this.table.findMany({ where: { userId } });
-			return elements.map(value => value.content);
+			return elements.map((value) => value.content);
 		} catch (error) {
 			errorHandling(error);
 			return [];

@@ -4,8 +4,7 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class ActiveRateRankingTable {
-	constructor(private readonly table: Prisma.ArchiveActiveRateRankingDelegate<DefaultArgs>) {
-	}
+	constructor(private readonly table: Prisma.ArchiveActiveRateRankingDelegate<DefaultArgs>) {}
 
 	public async data(guildId: string) {
 		try {

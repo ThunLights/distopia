@@ -24,7 +24,7 @@ export class DangerousPeopleClient {
 			const channel = await this.client.channels.fetch(panel.channelId);
 			if (channel && channel.type === ChannelType.GuildText) {
 				const message = await channel.messages.fetch(panel.messageId);
-				await message.edit({ embeds: [ embed ], components: [] });
+				await message.edit({ embeds: [embed], components: [] });
 			}
 		}
 	}

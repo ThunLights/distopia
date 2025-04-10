@@ -11,9 +11,9 @@ import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const _RequestZod = z.object({
-    description: z.string().max(CHARACTER_LIMIT.description),
-    nsfw: z.boolean(),
-	tags: z.string().max(CHARACTER_LIMIT.tag).array().max(TAG_COUNT_LIMIT),
+	description: z.string().max(CHARACTER_LIMIT.description),
+	nsfw: z.boolean(),
+	tags: z.string().max(CHARACTER_LIMIT.tag).array().max(TAG_COUNT_LIMIT)
 });
 
 export type Request = z.infer<typeof _RequestZod>;
@@ -33,10 +33,10 @@ export const POST = (async (e) => {
 		username: auth.content.username,
 		description: body.description,
 		time: new Date(),
-		nsfw: body.nsfw,
+		nsfw: body.nsfw
 	});
 	for (const tag of deDepulication(body.tags)) {
 		await database.friend.tag.update(auth.content.id, tag);
 	}
-	return json({}, { status: 200 })
+	return json({}, { status: 200 });
 }) satisfies RequestHandler;
