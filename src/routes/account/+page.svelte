@@ -6,7 +6,7 @@
 	import { redirectUrl } from "$lib/redirect.svelte";
 
 	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
+	import Footer from "$lib/components/footer.svelte";
 
 	import type { Response } from "$routes/api/auth/owner/+server";
 	import type { PageData } from "./$types";

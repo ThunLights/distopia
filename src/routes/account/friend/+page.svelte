@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Tags from "$lib/tags.svelte";
 	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
+	import Footer from "$lib/components/footer.svelte";
 
 	import { onMount } from "svelte";
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";

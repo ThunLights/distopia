@@ -7,7 +7,7 @@
 	import { generateEdge } from "$lib/edge";
 
 	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
+	import Footer from "$lib/components/footer.svelte";
 	import Icon from "$lib/icon.svelte";
 
 	import type { PageData } from "./$types";
