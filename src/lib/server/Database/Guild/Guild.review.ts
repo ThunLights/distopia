@@ -4,19 +4,18 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export type Review = {
-	guildId: string
-	userId: string
-	star: number
-	content?: string | null
-}
+	guildId: string;
+	userId: string;
+	star: number;
+	content?: string | null;
+};
 
 class DeleteReview {
-    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
-	}
+	constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {}
 
 	public async target(guildId: string, userId: string) {
 		try {
-			await this.table.deleteMany({ where: { guildId, userId }});
+			await this.table.deleteMany({ where: { guildId, userId } });
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -36,7 +35,7 @@ class DeleteReview {
 
 	public async users(userId: string) {
 		try {
-			await this.table.deleteMany({ where: { userId }});
+			await this.table.deleteMany({ where: { userId } });
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -46,8 +45,7 @@ class DeleteReview {
 }
 
 class GetData {
-    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
-	}
+	constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {}
 
 	public async guilds(guildId: string) {
 		try {
@@ -63,7 +61,7 @@ export class GuildReviewTable {
 	public readonly delete: DeleteReview;
 	public readonly data: GetData;
 
-    constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
+	constructor(private readonly table: Prisma.GuildReviewDelegate<DefaultArgs>) {
 		this.delete = new DeleteReview(table);
 		this.data = new GetData(table);
 	}
@@ -76,7 +74,7 @@ export class GuildReviewTable {
 			};
 			const element = await this.table.findFirst({ where });
 			if (element) {
-				await this.table.updateMany({ where, data})
+				await this.table.updateMany({ where, data });
 			} else {
 				await this.table.create({ data });
 			}

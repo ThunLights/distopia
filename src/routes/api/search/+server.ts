@@ -12,13 +12,13 @@ import type { RequestHandler } from "@sveltejs/kit";
 import type { Guild } from "$lib/server/guild";
 
 export const _RequestZod = z.object({
-	content: z.string(),
-})
+	content: z.string()
+});
 
 export type Request = z.infer<typeof _RequestZod>;
 
 export type Response = {
-	guilds: Guild[]
+	guilds: Guild[];
 };
 
 async function searchName(names: string[]) {
@@ -34,7 +34,7 @@ async function searchName(names: string[]) {
 		return guilds;
 	} catch (error) {
 		errorHandling(error);
-		return []
+		return [];
 	}
 }
 
@@ -51,7 +51,7 @@ async function searchTag(names: string[]) {
 		return guilds;
 	} catch (error) {
 		errorHandling(error);
-		return []
+		return [];
 	}
 }
 
@@ -67,7 +67,10 @@ export const POST = (async (e) => {
 	const nameElement = await searchName(words);
 	const tagElement = await searchTag(words);
 	const guilds = deDepulicationObject(nameElement.concat(tagElement));
-	return json({
-		guilds,
-	} satisfies Response, { status: 200 });
+	return json(
+		{
+			guilds
+		} satisfies Response,
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

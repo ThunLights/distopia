@@ -8,10 +8,12 @@ export class RankingUserBump {
 
 	public async findMany() {
 		try {
-			return (await this.table.findMany()).map(value => {return {
-				channelId: value.channelId,
-				messageId: value.messageId,
-			}});
+			return (await this.table.findMany()).map((value) => {
+				return {
+					channelId: value.channelId,
+					messageId: value.messageId
+				};
+			});
 		} catch (error) {
 			errorHandling(error);
 			return [];
@@ -26,12 +28,12 @@ export class RankingUserBump {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { channelId, messageId },
-				})
+					data: { channelId, messageId }
+				});
 			} else {
 				await this.table.create({
 					data: { guildId, channelId, messageId }
-				})
+				});
 			}
 			return true;
 		} catch (error) {

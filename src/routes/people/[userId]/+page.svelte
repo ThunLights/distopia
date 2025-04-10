@@ -10,10 +10,10 @@
 </script>
 
 <Meta
-	title={title}
+	{title}
 	description={[
 		`「${userId}」の検索結果を表示します。`,
-		"他にも色々なユーザーが登録されていますで是非一度検索してみてください",
+		"他にも色々なユーザーが登録されていますで是非一度検索してみてください"
 	].join("")}
 />
 
@@ -28,7 +28,7 @@
 				<div>
 					<p class="sub-title">タグ</p>
 					<div class="tags">
-						{#each tags as tag}
+						{#each tags as tag (tag)}
 							<div class="tag">
 								<p class="content">{tag}</p>
 							</div>
@@ -45,7 +45,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each score as element}
+							{#each score as element (element)}
 								<tr>
 									<th><p>{DangerousPeople.strToScore(element)}</p></th>
 									<td><p>{DangerousPeople.propertyToContent(element)}</p></td>
@@ -99,7 +99,7 @@
 	.center {
 		text-align: center;
 	}
-	.context>div {
+	.context > div {
 		margin-top: 18px;
 	}
 	.tags {

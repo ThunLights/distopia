@@ -9,7 +9,7 @@ import { ServerError } from "$lib/server/error";
 
 import type { RequestHandler } from "@sveltejs/kit";
 
-export const _RequestZod = z.object({})
+export const _RequestZod = z.object({});
 
 export type Request = z.infer<typeof _RequestZod>;
 
@@ -26,7 +26,10 @@ export const DELETE = (async (e) => {
 	if (!result) {
 		return generateErrorJson("DATABASE_ERROR");
 	}
-	return json({
-		content: "SUCCESS"
-	}, { status: 200 });
+	return json(
+		{
+			content: "SUCCESS"
+		},
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

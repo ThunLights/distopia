@@ -1,9 +1,8 @@
-
 export type Element = {
-	id: string
-	score: number
-	label: string
-}
+	id: string;
+	score: number;
+	label: string;
+};
 
 export type Elements = Array<Element>;
 
@@ -21,7 +20,7 @@ export class DangerousPeople {
 		disturberNukeBot: 50,
 		disturberSelfBot: 60,
 		disturberStaff: 65,
-		criminalStaff: 80,
+		criminalStaff: 80
 	} as Record<string, number>;
 
 	public static readonly displayContent = {
@@ -37,7 +36,7 @@ export class DangerousPeople {
 		disturberNukeBot: "荒らし(NukeBot)",
 		disturberSelfBot: "荒らし(SelfBot)",
 		disturberStaff: "荒らし(幹部)",
-		criminalStaff: "犯罪者(幹部)",
+		criminalStaff: "犯罪者(幹部)"
 	} as Record<string, string>;
 
 	public static propertyToContent(content: string) {
@@ -45,10 +44,13 @@ export class DangerousPeople {
 	}
 
 	public static elementsList(): Elements {
-		return Object.entries(DangerousPeople.table)
-			.map(([id, score]) => {return {
-				id, score, label: DangerousPeople.propertyToContent(id),
-			}});
+		return Object.entries(DangerousPeople.table).map(([id, score]) => {
+			return {
+				id,
+				score,
+				label: DangerousPeople.propertyToContent(id)
+			};
+		});
 	}
 
 	public static strToScore(content: string) {

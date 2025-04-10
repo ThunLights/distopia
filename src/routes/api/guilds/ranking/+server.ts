@@ -15,15 +15,15 @@ export type ResponseJson = {
 		users: (User & {
 			count: number;
 		})[];
-	}
-}
+	};
+};
 
 export const POST = (async () => {
 	const levelBase = await database.guildTables.level.ranking(50);
 	const activeRateBase = await database.guildTables.activeRate.ranking(50);
 
 	const users: (User & { count: number })[] = [];
-	const level: Guild[] = []
+	const level: Guild[] = [];
 	const activeRate: Guild[] = [];
 
 	for (const element of levelBase) {
@@ -39,7 +39,7 @@ export const POST = (async () => {
 	for (const { userId, count } of await database.userBump.ranking(50)) {
 		const cacheData = await cache.discord.users.checkCache(userId);
 		if (cacheData) {
-			users.push({ ...cacheData, ...{ count }});
+			users.push({ ...cacheData, ...{ count } });
 			continue;
 		}
 		const user = await discord.bot.control.user.fetch(userId);
@@ -49,13 +49,16 @@ export const POST = (async () => {
 				avatarUrl: user.avatarURL(),
 				username: user.username,
 				displayName: user.displayName,
-				count,
+				count
 			});
 		}
 	}
-	return json({
-		level,
-		activeRate,
-		users,
-	} satisfies ResponseJson["post"], { status: 200 });
+	return json(
+		{
+			level,
+			activeRate,
+			users
+		} satisfies ResponseJson["post"],
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

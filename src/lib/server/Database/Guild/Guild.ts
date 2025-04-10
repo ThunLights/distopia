@@ -4,21 +4,21 @@ import { errorHandling } from "$lib/server/error";
 import { DatabaseError } from "../index";
 
 export type Guild = {
-    name: string
-    icon: string | null
-    banner: string | null
-    guildId: string
-    invite: string
-    category: string
-    description: string
-}
+	name: string;
+	icon: string | null;
+	banner: string | null;
+	guildId: string;
+	invite: string;
+	category: string;
+	description: string;
+};
 
 export class GuildTable {
-    constructor(private readonly table: Prisma.GuildDelegate<DefaultArgs>) {}
+	constructor(private readonly table: Prisma.GuildDelegate<DefaultArgs>) {}
 
 	public async delete(guildId: string) {
 		try {
-			await this.table.deleteMany({ where: { guildId }});
+			await this.table.deleteMany({ where: { guildId } });
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -26,34 +26,34 @@ export class GuildTable {
 		}
 	}
 
-    public async update(guild: Guild) {
-        try {
-			const element = await this.table.findFirst({ where: { guildId: guild.guildId }});
+	public async update(guild: Guild) {
+		try {
+			const element = await this.table.findFirst({ where: { guildId: guild.guildId } });
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId: guild.guildId },
-					data: guild,
+					data: guild
 				});
 			} else {
 				await this.table.create({
-					data: guild,
-				})
+					data: guild
+				});
 			}
-            return true;
-        } catch (error) {
-            errorHandling(error);
-            return false;
-        }
-    }
+			return true;
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
+	}
 
-    public async id2Data(id: string) {
-        try {
-            return await this.table.findFirst({ where: { guildId: id } });
-        } catch (error) {
-            errorHandling(error);
-            return new DatabaseError("ERROR")
-        }
-    }
+	public async id2Data(id: string) {
+		try {
+			return await this.table.findFirst({ where: { guildId: id } });
+		} catch (error) {
+			errorHandling(error);
+			return new DatabaseError("ERROR");
+		}
+	}
 
 	public async datas() {
 		try {
@@ -69,7 +69,7 @@ export class GuildTable {
 			return await this.table.findMany({
 				where: {
 					name: {
-						contains: name,
+						contains: name
 					}
 				}
 			});

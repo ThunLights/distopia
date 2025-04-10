@@ -8,10 +8,10 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			"$routes/*": "src/routes",
+			"$routes/*": "src/routes"
 		}
 	},
-	runes: true,
+	runes: true
 };
 
 export default config;

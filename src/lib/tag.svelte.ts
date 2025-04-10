@@ -12,7 +12,9 @@ export function invalidCharactorChecker(content: string): boolean {
 }
 
 export function tagFormatCheck(content: string) {
-	return content.length <= CHARACTER_LIMIT.tag && !blank(content) && !invalidCharactorChecker(content)
+	return (
+		content.length <= CHARACTER_LIMIT.tag && !blank(content) && !invalidCharactorChecker(content)
+	);
 }
 
 export function tagCountCheck<T>(content: T[]) {

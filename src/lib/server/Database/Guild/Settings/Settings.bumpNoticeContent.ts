@@ -21,7 +21,7 @@ export class BumpNoticeContent {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { content },
+					data: { content }
 				});
 			} else {
 				await this.table.create({ data: { guildId, content } });

@@ -10,21 +10,26 @@ import { RankingClient } from "./Discord.ranking";
 import { Controller } from "./Controller/index";
 
 import { config } from "$lib/server/config";
-import { PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID, PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID } from "$env/static/public";
+import {
+	PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
+	PUBLIC_HOME_SERVER_ID,
+	PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
+	PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID
+} from "$env/static/public";
 import { errorHandling } from "$lib/server/error";
 import { deDepulication } from "$lib/array";
 import { database } from "$lib/server/Database/index";
 import { DangerousPeopleClient } from "./Discord.dangerousPeople";
 
 export class DiscordBotClient {
-    public readonly token = config.bot.token;
-    public readonly clientId = config.bot.id;
-    public readonly client = new Client({ intents: INTENTS });
-    public readonly guilds = new GuildClient(this.client);
+	public readonly token = config.bot.token;
+	public readonly clientId = config.bot.id;
+	public readonly client = new Client({ intents: INTENTS });
+	public readonly guilds = new GuildClient(this.client);
 	public readonly control = new Controller(this.client);
-    private readonly rest = new REST({ version: "10" }).setToken(this.token);
-    private readonly interactionClient = new InteractionClient(this.client);
-    private readonly messageClient = new MessageClient(this.client);
+	private readonly rest = new REST({ version: "10" }).setToken(this.token);
+	private readonly interactionClient = new InteractionClient(this.client);
+	private readonly messageClient = new MessageClient(this.client);
 	private readonly voiceClient = new VoiceClient(this.client);
 	private readonly activeRateClient = new ActiveRateClient(this.client);
 	private readonly rankingClient = new RankingClient(this.client);
@@ -35,7 +40,7 @@ export class DiscordBotClient {
 			if (this.client.user) {
 				this.client.user.setActivity({
 					name: `${this.client.guilds.cache.size}server | ${this.client.users.cache.size}users | distopia.top`,
-					type: ActivityType.Playing,
+					type: ActivityType.Playing
 				});
 			}
 		}, 10 * 1000);
@@ -46,7 +51,11 @@ export class DiscordBotClient {
 			const targets: string[] = [];
 			const homeServer = await this.client.guilds.fetch(PUBLIC_HOME_SERVER_ID);
 			const serverIds = await database.guildTables.activeRate.ranking(10);
-			const existingUsers = Array.from(homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID)).values());
+			const existingUsers = Array.from(
+				homeServer.members.cache
+					.filter((member) => member.roles.cache.has(PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID))
+					.values()
+			);
 
 			for (const serverId of serverIds) {
 				const guild = this.client.guilds.cache.get(serverId.guildId);
@@ -79,16 +88,26 @@ export class DiscordBotClient {
 			const homeServer = await this.client.guilds.fetch(PUBLIC_HOME_SERVER_ID);
 			const guilds = (await database.guildTables.activeRate.ranking(50))
 				.map(({ guildId }) => this.client.guilds.cache.get(guildId))
-				.filter(guild => !(typeof guild === "undefined"));
-			const existingOwnerUsers = Array.from(homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID)).values());
-			const existingAdminUsers = Array.from(homeServer.members.cache.filter(member => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID)).values());
+				.filter((guild) => !(typeof guild === "undefined"));
+			const existingOwnerUsers = Array.from(
+				homeServer.members.cache
+					.filter((member) => member.roles.cache.has(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID))
+					.values()
+			);
+			const existingAdminUsers = Array.from(
+				homeServer.members.cache
+					.filter((member) => member.roles.cache.has(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID))
+					.values()
+			);
 
 			for await (const guild of guilds) {
 				const owner = await database.guildTables.settings.owner.fetch(guild.id);
 				owners.push(owner ? owner.userId : guild.ownerId);
-				const adminMembers = Array.from(guild.members.cache
-					.filter(member => member.permissions.has(PermissionsBitField.Flags.Administrator))
-					.values());
+				const adminMembers = Array.from(
+					guild.members.cache
+						.filter((member) => member.permissions.has(PermissionsBitField.Flags.Administrator))
+						.values()
+				);
 				for (const adminMember of adminMembers) {
 					admins.push(adminMember.user.id);
 				}
@@ -131,39 +150,36 @@ export class DiscordBotClient {
 		await this.dangerousPeople.updatePanel();
 	}
 
-    public async setEvents() {
-        this.client.on("ready", async (client) => {
+	public async setEvents() {
+		this.client.on("ready", async (client) => {
 			client.user.setActivity({
 				name: `${this.client.guilds.cache.size}server | ${this.client.users.cache.size}users | distopia.top`,
-				type: ActivityType.Playing,
+				type: ActivityType.Playing
 			});
-            await this.rest.put(`/applications/${this.clientId}/commands`, {
-                body: InteractionClient.commands,
-            });
+			await this.rest.put(`/applications/${this.clientId}/commands`, {
+				body: InteractionClient.commands
+			});
 			this.changeActivityInterval();
-        });
-        this.client.on("interactionCreate", async (interaction) => {
-            return await this.interactionClient.create(interaction);
-        });
-        this.client.on("messageCreate", async (message) => {
-            return await this.messageClient.create(message);
-        });
+		});
+		this.client.on("interactionCreate", async (interaction) => {
+			return await this.interactionClient.create(interaction);
+		});
+		this.client.on("messageCreate", async (message) => {
+			return await this.messageClient.create(message);
+		});
 		this.client.on("guildMemberAdd", async (member) => {
 			return await this.guilds.guildMemberAdd(member);
-		})
-        this.client.on("guildUpdate", async (oldGuild, newGuild) => {
-            return await this.guilds.guildUpdate(oldGuild, newGuild);
-        });
-		this.client.on("guildMemberUpdate", async (oldMember, newMember) => {
-			return await this.guilds.guildMemberUpdate(oldMember, newMember);
 		});
-    }
+		this.client.on("guildUpdate", async (oldGuild, newGuild) => {
+			return await this.guilds.guildUpdate(oldGuild, newGuild);
+		});
+	}
 
-    public async login(): Promise<void> {
-        await this.client.login(this.token)
-    }
+	public async login(): Promise<void> {
+		await this.client.login(this.token);
+	}
 
-    public async logout(): Promise<void> {
-        await this.client.destroy();
-    }
+	public async logout(): Promise<void> {
+		await this.client.destroy();
+	}
 }

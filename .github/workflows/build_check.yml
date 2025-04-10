@@ -1,9 +1,9 @@
-name: Build Check
+name: CI
 
 on:
-    pull_request:
-        branches:
-            - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   update:
@@ -45,4 +45,7 @@ jobs:
         run: npm install
 
       - name: CI
-        run: npm run ci
+        run: |
+          npm run ci
+          npm run lint
+          npm run check

@@ -12,10 +12,16 @@ export const POST = (async (e) => {
 	if (auth instanceof ServerError) {
 		return generateErrorJson("AUTH_ERROR");
 	}
-	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
-		return json({
-			content: "SUCCESS",
-		}, { status: 200 });
+	if (
+		auth.data.id === PUBLIC_OWNER_ID ||
+		(await discord.bot.control.guild.isHonoraryMember(auth.data.id))
+	) {
+		return json(
+			{
+				content: "SUCCESS"
+			},
+			{ status: 200 }
+		);
 	}
 	return generateErrorJson("PERMISSIONS_DENIED");
 }) satisfies RequestHandler;

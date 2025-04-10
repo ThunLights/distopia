@@ -10,26 +10,33 @@
 
 	let searchWord = $state(data.searchWord);
 
-    async function search() {
-        location.href = `/people/search?content=${encodeURIComponent(searchWord)}`
-    }
+	async function search() {
+		location.href = `/people/search?content=${encodeURIComponent(searchWord)}`;
+	}
 
-    async function inputSearchCommand(e: KeyboardEvent) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            await search()
-        }
-    }
+	async function inputSearchCommand(e: KeyboardEvent) {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			await search();
+		}
+	}
 </script>
 
-<Meta/>
+<Meta />
 
 <main>
 	<div class="contents">
 		<div class="context">
 			<div class="info">
 				<div>
-					<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+					<input
+						class="search-input"
+						type="text"
+						spellcheck="false"
+						autocomplete="off"
+						onkeyup={inputSearchCommand}
+						bind:value={searchWord}
+					/>
 					<button onclick={search}>検索</button>
 				</div>
 				<div class="count">
@@ -39,8 +46,8 @@
 		</div>
 	</div>
 	<div class="peoples">
-		{#each elements as people}
-			<div class="contents people">
+		{#each elements as people (people)}
+			<div class="people contents">
 				<div class="context">
 					<div class="profile">
 						<p>通称: {people.name}</p>
@@ -68,15 +75,15 @@
 		overflow: hidden;
 		margin: 10px 20px;
 	}
-    .contents {
-        overflow: hidden;
-        display: block;
-        background-color: rgb(37, 36, 41);
-        border-radius: 10px;
-        width: 90%;
-        margin: 20px auto;
-    }
-	.context>div {
+	.contents {
+		overflow: hidden;
+		display: block;
+		background-color: rgb(37, 36, 41);
+		border-radius: 10px;
+		width: 90%;
+		margin: 20px auto;
+	}
+	.context > div {
 		margin: 10px 0;
 	}
 	.profile p {
@@ -96,7 +103,7 @@
 		background-color: rgb(37, 36, 41);
 		border-radius: 10px;
 	}
-	.people>div button {
+	.people > div button {
 		width: 100%;
 	}
 	.search-input {
@@ -112,20 +119,20 @@
 	p {
 		color: white;
 	}
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 
 	@media (max-width: 1100px) {
 		.peoples {

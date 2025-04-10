@@ -19,10 +19,15 @@ export class RankingClient {
 			const guilds = await database.guildTables.level.ranking();
 			for (const guild of guilds) {
 				const { guildId } = guild;
-				const rank = parseRanking(guildId, guilds.map(value => {return {
-					guildId: value.guildId,
-					content: value.level,
-				}}));
+				const rank = parseRanking(
+					guildId,
+					guilds.map((value) => {
+						return {
+							guildId: value.guildId,
+							content: value.level
+						};
+					})
+				);
 				if (rank) {
 					await database.archives.level.ranking.update(guildId, BigInt(Math.ceil(rank)));
 				}
@@ -57,7 +62,9 @@ export class RankingClient {
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
 				.setTitle("サーバーランキング: レベル")
-				.setDescription(`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=level)にアクセスお願いします。`)
+				.setDescription(
+					`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=level)にアクセスお願いします。`
+				)
 				.setColor("Purple")
 				.setURL(`${PUBLIC_URL}/ranking?type=level`)
 				.setFooter({ text: `最終更新: ${date}` });
@@ -65,7 +72,10 @@ export class RankingClient {
 				const { guildId } = ranking[i];
 				const guild = await id2Guild(guildId);
 				if (!(typeof guild === "string")) {
-					embed.addFields({ name: `${i+1}: ${guild.name}`, value: `${compressTxt(guild.description.replaceAll("\n", ""), 40)}` });
+					embed.addFields({
+						name: `${i + 1}: ${guild.name}`,
+						value: `${compressTxt(guild.description.replaceAll("\n", ""), 40)}`
+					});
 				}
 			}
 
@@ -74,7 +84,7 @@ export class RankingClient {
 				const channel = await this.client.channels.fetch(panel.channelId);
 				if (channel && channel.type === ChannelType.GuildText) {
 					const message = await channel.messages.fetch(panel.messageId);
-					await message.edit({ embeds: [ embed ], components: [] });
+					await message.edit({ embeds: [embed], components: [] });
 				}
 			}
 			return true;
@@ -90,7 +100,9 @@ export class RankingClient {
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
 				.setTitle("サーバーランキング: アクティブレート")
-				.setDescription(`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=activeRate)にアクセスお願いします。`)
+				.setDescription(
+					`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=activeRate)にアクセスお願いします。`
+				)
 				.setColor("Purple")
 				.setURL(`${PUBLIC_URL}/ranking?type=activeRate`)
 				.setFooter({ text: `最終更新: ${date}` });
@@ -98,7 +110,10 @@ export class RankingClient {
 				const { guildId } = ranking[i];
 				const guild = await id2Guild(guildId);
 				if (!(typeof guild === "string")) {
-					embed.addFields({ name: `${i+1}: ${guild.name}`, value: `${compressTxt(guild.description.replaceAll("\n", ""), 40)}` });
+					embed.addFields({
+						name: `${i + 1}: ${guild.name}`,
+						value: `${compressTxt(guild.description.replaceAll("\n", ""), 40)}`
+					});
 				}
 			}
 			const panels = await database.rankingPanel.rate.findMany();
@@ -106,7 +121,7 @@ export class RankingClient {
 				const channel = await this.client.channels.fetch(panel.channelId);
 				if (channel && channel.type === ChannelType.GuildText) {
 					const message = await channel.messages.fetch(panel.messageId);
-					await message.edit({ embeds: [ embed ], components: [] });
+					await message.edit({ embeds: [embed], components: [] });
 				}
 			}
 			return true;
@@ -117,12 +132,14 @@ export class RankingClient {
 	}
 
 	private async updateUserBumpPanel() {
-		try  {
+		try {
 			const ranking = await database.userBump.ranking(20);
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
 				.setTitle("サーバーランキング: アクティブレート")
-				.setDescription(`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=userBump)にアクセスお願いします。`)
+				.setDescription(
+					`ここでは20位までしか表示されません。追加で見たい場合は[こちら](${PUBLIC_URL}/ranking?type=userBump)にアクセスお願いします。`
+				)
 				.setColor("Purple")
 				.setURL(`${PUBLIC_URL}/ranking?type=userBump`)
 				.setFooter({ text: `最終更新: ${date}` });
@@ -130,7 +147,10 @@ export class RankingClient {
 				const { userId, count } = ranking[i];
 				const user = await User.fetch(this.client, userId);
 				if (user) {
-					embed.addFields({ name: `${i+1}: ${user.displayName}`, value: `合計: ${count}回\nユーザーネーム: ${user.username} (ID: ${user.id})` });
+					embed.addFields({
+						name: `${i + 1}: ${user.displayName}`,
+						value: `合計: ${count}回\nユーザーネーム: ${user.username} (ID: ${user.id})`
+					});
 				}
 			}
 			const panels = await database.rankingPanel.userBump.findMany();
@@ -138,7 +158,7 @@ export class RankingClient {
 				const channel = await this.client.channels.fetch(panel.channelId);
 				if (channel && channel.type === ChannelType.GuildText) {
 					const message = await channel.messages.fetch(panel.messageId);
-					await message.edit({ embeds: [ embed ], components: [] });
+					await message.edit({ embeds: [embed], components: [] });
 				}
 			}
 			return true;

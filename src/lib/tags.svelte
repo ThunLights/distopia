@@ -4,18 +4,22 @@
 
 	type KeyUpEvent = KeyboardEvent & {
 		currentTarget: EventTarget & HTMLInputElement;
-	}
+	};
 	type Props = {
-		tags: string[]
-		tagsUpdate: (params: string[]) => void
-		limit?: number
-	}
+		tags: string[];
+		tagsUpdate: (params: string[]) => void;
+		limit?: number;
+	};
 
 	let { tags, tagsUpdate, limit }: Props = $props();
 
 	function controller(e: KeyUpEvent) {
 		if (e.key === "Enter") {
-			if (!tags.includes(e.currentTarget.value) && (limit ?? TAG_COUNT_LIMIT) > tags.length && tagFormatCheck(e.currentTarget.value)) {
+			if (
+				!tags.includes(e.currentTarget.value) &&
+				(limit ?? TAG_COUNT_LIMIT) > tags.length &&
+				tagFormatCheck(e.currentTarget.value)
+			) {
 				tags.push(e.currentTarget.value);
 				e.currentTarget.value = "";
 				tagsUpdate(tags);
@@ -26,16 +30,16 @@
 
 	function deleteTag(content: string) {
 		return () => {
-			tags = tags.filter(value => value !== content);
+			tags = tags.filter((value) => value !== content);
 			tagsUpdate(tags);
-		}
+		};
 	}
 </script>
 
 <div>
-	<input type="text" maxlength="{CHARACTER_LIMIT.tag}" onkeyup={controller}>
+	<input type="text" maxlength={CHARACTER_LIMIT.tag} onkeyup={controller} />
 	<div class="tags">
-		{#each tags as tag}
+		{#each tags as tag (tag)}
 			<div class="tag">
 				<div class="content">
 					<p>{tag}</p>
