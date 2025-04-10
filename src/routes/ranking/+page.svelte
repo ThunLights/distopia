@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Meta from "$lib/meta.svelte";
-	import Icon from "$lib/icon.svelte";
+	import Icon from "$lib/components/icon.svelte";
 
 	import { generateEdge } from "$lib/edge";
 	import { onMount } from "svelte";
