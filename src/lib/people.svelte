@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Tags from "./tags.svelte";
+	import Tags from "./components/tags.svelte";
 
 	import { DangerousPeople } from "./dangerousPeople";
 

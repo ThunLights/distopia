@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants";
+	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "../constants";
 	import { tagFormatCheck } from "$lib/tag.svelte";
 
 	type KeyUpEvent = KeyboardEvent & {
