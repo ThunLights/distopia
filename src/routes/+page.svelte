@@ -6,9 +6,9 @@
 	import { guildJoin } from "$lib/join.svelte";
 	import { generateEdge } from "$lib/edge";
 
-	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
-	import Icon from "$lib/icon.svelte";
+	import Meta from "$lib/components/meta.svelte";
+	import Footer from "$lib/components/footer.svelte";
+	import Icon from "$lib/components/icon.svelte";
 
 	import type { PageData } from "./$types";
 	import type { Guild } from "$lib/server/guild";

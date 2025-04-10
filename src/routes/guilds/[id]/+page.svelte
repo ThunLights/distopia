@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
-	import Icon from "$lib/icon.svelte";
+	import Meta from "$lib/components/meta.svelte";
+	import Footer from "$lib/components/footer.svelte";
+	import Icon from "$lib/components/icon.svelte";
 
 	import { onMount } from "svelte";
 	import { token2data } from "$lib/auth.svelte";

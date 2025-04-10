@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
+	import Meta from "$lib/components/meta.svelte";
+	import Footer from "$lib/components/footer.svelte";
 
 	import { staffs } from "$lib/constants";
 	import { DISCORD_INVITE_LINK } from "$lib/invite";

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Meta from "$lib/meta.svelte";
+	import Meta from "$lib/components/meta.svelte";
 
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";

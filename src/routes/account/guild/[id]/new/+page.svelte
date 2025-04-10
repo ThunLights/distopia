@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
-	import Guild from "$lib/guild.svelte";
+	import Meta from "$lib/components/meta.svelte";
+	import Footer from "$lib/components/footer.svelte";
+	import Guild from "$lib/components/guild.svelte";
 
 	import { onMount } from "svelte";
 	import { getTmpGuild, GuildsApiError } from "$lib/guilds.svelte";

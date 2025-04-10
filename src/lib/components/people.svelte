@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Tags from "./tags.svelte";
 
-	import { DangerousPeople } from "./dangerousPeople";
+	import { DangerousPeople } from "../dangerousPeople";
 
-	import { DangerousPeopleTypes } from "./constants";
+	import { DangerousPeopleTypes } from "../constants";
 
 	type Content = {
 		targetId: string;
