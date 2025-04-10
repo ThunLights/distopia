@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Meta from "$lib/meta.svelte";
-	import People from "$lib/people.svelte";
+	import Meta from "$lib/components/meta.svelte";
+	import People from "$lib/components/people.svelte";
 
 	import { Toast } from "$lib/toast";
 	import { onMount } from "svelte";

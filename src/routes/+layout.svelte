@@ -1,6 +1,6 @@
 <script lang="ts">
 	import "../app.css";
-	import Header from "$lib/header.svelte";
+	import Header from "$lib/components/header.svelte";
 
 	import { SvelteToast } from "@zerodevx/svelte-toast";
 	import { headerStore } from "$lib/stores";

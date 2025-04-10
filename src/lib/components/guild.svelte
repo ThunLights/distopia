@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Tags from "$lib/tags.svelte";
+	import Tags from "$lib/components/tags.svelte";
 
-	import { CATEGORIES } from "./category";
-	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "./constants";
-	import { descriptionFormatCheck } from "./description.svelte";
+	import { CATEGORIES } from "../category";
+	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "../constants";
+	import { descriptionFormatCheck } from "../description.svelte";
 
 	type Guild = {
 		guildId: string;

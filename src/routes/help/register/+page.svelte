@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Meta from "$lib/meta.svelte";
-	import Footer from "$lib/footer.svelte";
+	import Meta from "$lib/components/meta.svelte";
+	import Footer from "$lib/components/footer.svelte";
 
 	const botInviteLink =
 		"https://discord.com/oauth2/authorize?client_id=1300797373374529557&permissions=8&integration_type=0&scope=bot+applications.commands";
