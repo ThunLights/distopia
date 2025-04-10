@@ -12,17 +12,17 @@
 
 	import type { PageData } from "./$types";
 	import type { Guild } from "$lib/server/guild";
-	import type { Response } from "$routes/api/home/+server";
+	import type { ResponseJson } from "$routes/api/home/+server";
 
 	const { data }: { data: PageData } = $props();
 	const initServersData = {
 		content: [],
 		active: []
-	} satisfies Response;
+	} satisfies ResponseJson;
 
 	let searchWord = $state("");
 	let loginData = $state(data.auth);
-	let servers = $state<Response>(initServersData);
+	let servers = $state<ResponseJson>(initServersData);
 	let showNsfw = $state(true);
 	let showNormal = $state(true);
 
@@ -94,7 +94,7 @@
 				</label>
 			</div>
 			<div class="guilds">
-				{#each servers.content as guild}
+				{#each servers.content as guild (guild)}
 					{@render generateGuildElement(guild)}
 				{/each}
 			</div>
@@ -102,7 +102,7 @@
 		<div>
 			<p class="name">アクティブなサーバー</p>
 			<div class="guilds">
-				{#each servers.active as guild}
+				{#each servers.active as guild (guild)}
 					{@render generateGuildElement(guild)}
 				{/each}
 			</div>
@@ -156,7 +156,7 @@
 					{#if guild.tags.length}
 						<p>タグ</p>
 						<div class="tags">
-							{#each guild.tags as tag}
+							{#each guild.tags as tag (tag)}
 								<a class="tag" href="/search?content={tag}">
 									<div class="content">
 										<p>{tag}</p>

@@ -15,7 +15,7 @@ export const _RequestZod = z.object({
 
 export type Request = z.infer<typeof _RequestZod>;
 
-export type Response = {
+export type ResponseJson = {
 	content: Guild[];
 	active: Guild[];
 };
@@ -56,7 +56,7 @@ export const POST = (async (e) => {
 		{
 			content: guilds,
 			active: await getActiveGuilds()
-		} satisfies Response,
+		} satisfies ResponseJson,
 		{ status: 200 }
 	);
 }) satisfies RequestHandler;

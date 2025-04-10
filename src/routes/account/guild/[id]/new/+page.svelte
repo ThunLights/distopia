@@ -47,7 +47,7 @@
 	{#if tmpGuild}
 		<Guild
 			token={data.auth ? data.auth.token : ""}
-			method={"POST"}
+			method="POST"
 			guild={{ ...tmpGuild, ...{ description: "", category: "other", tags: [], nsfw: false } }}
 		/>
 	{/if}

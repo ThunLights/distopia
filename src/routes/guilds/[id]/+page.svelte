@@ -11,7 +11,6 @@
 	import { guildJoin } from "$lib/join.svelte";
 	import { generateEdge } from "$lib/edge.js";
 
-	import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
 
 	type Auth = {
@@ -101,7 +100,7 @@
 				<div>
 					<p class="name">タグ一覧</p>
 					<div class="tags">
-						{#each guild.tags as tag}
+						{#each guild.tags as tag (tag)}
 							<a class="tag" href="/search?content={tag}">
 								<div class="content">
 									<p>{tag}</p>
@@ -113,7 +112,7 @@
 				<div>
 					<p class="name">説明</p>
 					<div>
-						{#each guild.description.split("\n") as line}
+						{#each guild.description.split("\n") as line (line)}
 							<p>{line}</p>
 						{/each}
 					</div>
@@ -158,7 +157,7 @@
 			<div class="context">
 				<p class="name">評価: {guild.review.toFixed(2)}</p>
 				<div>
-					{#each Array(5) as _, i}
+					{#each [0, 1, 2, 3, 4] as i (i)}
 						<div class="star">
 							<p><img src="/review/star.webp" alt="" />{i + 1}</p>
 							<p>
@@ -185,7 +184,7 @@
 				<div>
 					{#if reviews.length}
 						<div class="reviews">
-							{#each reviews as review}
+							{#each reviews as review (review)}
 								<div class="review">
 									<div class="context">
 										<div class="user">
@@ -206,7 +205,7 @@
 											<div class="inline-block">
 												<p class="section-title">評価</p>
 											</div>
-											{#each Array(5) as _, i}
+											{#each [0, 1, 2, 3, 4] as i (i)}
 												<div class="star inline-block">
 													<img
 														src={i + 1 <= review.star

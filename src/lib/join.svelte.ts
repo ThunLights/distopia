@@ -32,7 +32,7 @@ export async function guildJoin(token: string, guildId: string, guildName: strin
 			});
 		}
 		return null;
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }

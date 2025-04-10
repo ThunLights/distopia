@@ -46,7 +46,7 @@
 		</div>
 	</div>
 	<div class="peoples">
-		{#each elements as people}
+		{#each elements as people (people)}
 			<div class="people contents">
 				<div class="context">
 					<div class="profile">

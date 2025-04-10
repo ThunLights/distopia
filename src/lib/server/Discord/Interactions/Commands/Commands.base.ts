@@ -20,7 +20,7 @@ export abstract class CommandsBase {
 	async commands(
 		interaction: ChatInputCommandInteraction<CacheType>
 	): Promise<void | string | MessagePayload | InteractionReplyOptions | CommandsError | null> {
-		return new CommandsError("Commands Not Found");
+		return new CommandsError(`Commands Not Found: ${interaction.commandName}`);
 	}
 
 	async reply(interaction: ChatInputCommandInteraction<CacheType>): Promise<void | CommandsError> {

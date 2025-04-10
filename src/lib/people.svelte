@@ -59,7 +59,7 @@
 	<table>
 		<thead></thead>
 		<tbody>
-			{#each DangerousPeople.elementsList() as element}
+			{#each DangerousPeople.elementsList() as element (element)}
 				<tr class="score-element">
 					<th>
 						<input
@@ -92,7 +92,7 @@
 			targetType = DangerousPeopleTypes.includes(value) ? value : "criminal";
 		}}
 	>
-		{#each DangerousPeopleTypes as type}
+		{#each DangerousPeopleTypes as type (type)}
 			<option value={type}>{type}</option>
 		{/each}
 	</select>

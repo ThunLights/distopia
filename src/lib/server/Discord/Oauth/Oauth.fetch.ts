@@ -1,11 +1,7 @@
 import { errorHandling } from "$lib/server/error";
 
 import { config } from "$lib/server/config";
-import { database } from "$lib/server/Database/index";
-import { discord } from "$lib/server/discord";
 import { sleep } from "$lib/sleep";
-
-import type { UserElement } from "$lib/server/Database/Database.user";
 
 export type ResetAccessToken = {
 	token_type: string;
@@ -14,8 +10,6 @@ export type ResetAccessToken = {
 	refresh_token: string;
 	scope: string;
 };
-
-export type Options = {};
 
 export class FetchError {
 	constructor(public readonly content: string) {}

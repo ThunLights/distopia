@@ -1,7 +1,4 @@
-import { authorization } from "$lib/server/auth";
-import { ServerError } from "$lib/server/error";
 import { json } from "@sveltejs/kit";
-import { generateErrorJson } from "$lib/server/json";
 import { database } from "$lib/server/Database/index";
 import { discord } from "$lib/server/discord";
 
@@ -21,7 +18,7 @@ export type ResponseJson = {
 	};
 };
 
-export const POST = (async (e) => {
+export const POST = (async () => {
 	const result: ResponseJson["post"]["content"] = [];
 
 	for (const { guildId, eventId } of await database.eventBoost.findMany()) {

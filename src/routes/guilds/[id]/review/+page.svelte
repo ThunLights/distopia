@@ -93,7 +93,7 @@
 					<div>
 						<p class="name">スター (必須)</p>
 						<div>
-							{#each Array(5) as _, i}
+							{#each [0, 1, 2, 3, 4] as i (i)}
 								<button class="star-button" onclick={setStar(i + 1)}>
 									<img
 										src={i + 1 <= stars ? "/review/star.webp" : "/review/blackstar.webp"}

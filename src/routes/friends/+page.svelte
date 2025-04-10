@@ -4,7 +4,7 @@
 	import { toast } from "@zerodevx/svelte-toast";
 
 	const { data } = $props();
-	const { friends, page } = data;
+	const { friends } = data;
 
 	function copy(username: string) {
 		return async () => {
@@ -29,7 +29,7 @@
 	<div class="contents">
 		<p class="title">フレンド募集</p>
 		<div class="friends">
-			{#each friends as friend}
+			{#each friends as friend (friend)}
 				<div class="friend">
 					<div class="friend-content">
 						<div class="profile">
@@ -52,7 +52,7 @@
 						</div>
 						{#if friend.tags.length}
 							<div class="tags">
-								{#each friend.tags as tag}
+								{#each friend.tags as tag (tag)}
 									<div class="tag">
 										<p class="content">{tag}</p>
 									</div>

@@ -28,7 +28,7 @@
 				<div>
 					<p class="sub-title">タグ</p>
 					<div class="tags">
-						{#each tags as tag}
+						{#each tags as tag (tag)}
 							<div class="tag">
 								<p class="content">{tag}</p>
 							</div>
@@ -45,7 +45,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each score as element}
+							{#each score as element (element)}
 								<tr>
 									<th><p>{DangerousPeople.strToScore(element)}</p></th>
 									<td><p>{DangerousPeople.propertyToContent(element)}</p></td>

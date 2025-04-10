@@ -50,7 +50,7 @@ const PERMISSIONS = {
 	USE_EXTERNAL_APPS: 1 << 50
 };
 
-function parsePermissions(permissionFlags: number): string[] {
+export function parsePermissions(permissionFlags: number): string[] {
 	const grantedPermissions: string[] = [];
 
 	for (const [permission, flag] of Object.entries(PERMISSIONS)) {

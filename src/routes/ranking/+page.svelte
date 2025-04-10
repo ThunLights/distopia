@@ -59,15 +59,15 @@
 			</div>
 			<div class="ranking">
 				{#if searchType === "activeRate"}
-					{#each contents.activeRate as guild, i}
+					{#each contents.activeRate as guild, i (guild)}
 						{@render generateGuild(guild, i, true)}
 					{/each}
 				{:else if searchType === "level"}
-					{#each contents.level as guild, i}
+					{#each contents.level as guild, i (guild)}
 						{@render generateGuild(guild, i, false)}
 					{/each}
 				{:else}
-					{#each contents.users as user, i}
+					{#each contents.users as user, i (user)}
 						{@render generateUser(user, i)}
 					{/each}
 				{/if}

@@ -20,7 +20,7 @@
 	<div class="contents">
 		<div class="sections">
 			<p class="title">現在のスタッフ一覧</p>
-			{#each staffs as staff}
+			{#each staffs as staff (staff)}
 				<div class="staff">
 					<div>
 						<img class="icon" src={staff.icon} alt="" />
@@ -29,7 +29,7 @@
 						<p class="section-title">{staff.name}</p>
 						<p class="small">{staff.description}</p>
 						<div>
-							{#each staff.links as link}
+							{#each staff.links as link (link)}
 								<a class="link" href={link.url} target="_blank" rel="noopener noreferrer">
 									<img src={link.icon} alt={link.url} />
 								</a>

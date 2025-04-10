@@ -3,8 +3,6 @@
 
 	import { onMount } from "svelte";
 
-	const { data } = $props();
-
 	onMount(async () => {});
 </script>
 

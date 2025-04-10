@@ -54,7 +54,7 @@ export const POST = (async (e) => {
 	if (result instanceof globalThis.Response) {
 		return result;
 	}
-	let content =
+	const content =
 		result === 201 //201 新しく入った
 			? "entry"
 			: result === 204 //204 既に入ってる

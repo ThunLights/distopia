@@ -17,14 +17,14 @@ export abstract class ButtonsBase {
 	public readonly customId: string = "";
 	constructor(protected readonly client: Client) {}
 
-	async commands(
-		interaction: ButtonInteraction<CacheType>
-	): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
+	async commands(): Promise<
+		void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null
+	> {
 		return new ButtonsError("Commands Not Found");
 	}
 
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void | ButtonsError> {
-		const result = await this.commands(interaction);
+		const result = await this.commands();
 		if (result === null) {
 			return void (await interaction.reply({
 				content: codeBlock(`Error: Commands Not Found`),

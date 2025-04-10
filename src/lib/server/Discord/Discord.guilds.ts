@@ -2,7 +2,7 @@ import { DangerousPeople } from "$lib/dangerousPeople";
 import { database, DatabaseError } from "../Database/index";
 import { ChannelType, Client, EmbedBuilder } from "discord.js";
 
-import type { PartialGuildMember, GuildMember, Guild } from "discord.js";
+import type { GuildMember, Guild } from "discord.js";
 
 type LateLimit = {
 	user: string[];
@@ -117,9 +117,4 @@ export class GuildClient {
 			return;
 		}
 	}
-
-	public async guildMemberUpdate(
-		oldMember: GuildMember | PartialGuildMember,
-		newMember: GuildMember
-	): Promise<void> {}
 }

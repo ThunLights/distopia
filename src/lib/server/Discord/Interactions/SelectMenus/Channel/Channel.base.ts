@@ -21,7 +21,7 @@ export abstract class ChannelsBase {
 	async commands(
 		interaction: ChannelSelectMenuInteraction<CacheType>
 	): Promise<void | string | MessagePayload | InteractionReplyOptions | ChannelsError | null> {
-		return new ChannelsError("Commands Not Found");
+		return new ChannelsError(`Commands Not Found: ${interaction.customId}`);
 	}
 
 	async reply(interaction: ChannelSelectMenuInteraction<CacheType>): Promise<void | ChannelsError> {

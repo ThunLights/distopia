@@ -17,7 +17,7 @@
 	<div class="contents">
 		<div class="sections">
 			<p class="title">現在の支援団体一覧</p>
-			{#each supporters as supporter}
+			{#each supporters as supporter (supporter)}
 				<div class="guild">
 					<div>
 						<img class="icon" src={supporter.icon} alt="" />

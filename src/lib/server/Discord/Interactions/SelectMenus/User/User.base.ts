@@ -21,7 +21,7 @@ export abstract class UsersBase {
 	async commands(
 		interaction: UserSelectMenuInteraction<CacheType>
 	): Promise<void | string | MessagePayload | InteractionReplyOptions | UsersError | null> {
-		return new UsersError("Commands Not Found");
+		return new UsersError(`Commands Not Found: ${interaction.customId}`);
 	}
 
 	async reply(interaction: UserSelectMenuInteraction<CacheType>): Promise<void | UsersError> {
