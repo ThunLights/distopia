@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Tags from "$lib/components/tags.svelte";
-	import Meta from "$lib/meta.svelte";
+	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
 
 	import { onMount } from "svelte";

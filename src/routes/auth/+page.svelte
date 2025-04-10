@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	//	import { headerStore } from "$lib/stores";
 
-	import Meta from "$lib/meta.svelte";
+	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
 
 	const { data } = $props();
