@@ -1,4 +1,3 @@
-
 export function generateEdge(rank: number) {
 	if (rank < 1) return 1;
 	if (rank < 2) return 2;

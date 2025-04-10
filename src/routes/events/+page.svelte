@@ -11,16 +11,14 @@
 	onMount(async () => {});
 </script>
 
-<Meta
-	title="イベント一覧"
-/>
+<Meta title="イベント一覧" />
 
 <Main>
 	<p class="title">イベント一覧</p>
 
 	<div class="events">
 		{#if events.length}
-			{#each events as event}
+			{#each events as event (event)}
 				<div class="event"></div>
 			{/each}
 		{:else}

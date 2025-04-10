@@ -6,24 +6,24 @@
 	import { DangerousPeopleTypes } from "./constants";
 
 	type Content = {
-		targetId: string
-		name: string
-		score: string[]
-		tags: string[]
-		title: string
-		description: string
-		targetType: typeof DangerousPeopleTypes[number]
-		subAccounts: string[]
-	}
+		targetId: string;
+		name: string;
+		score: string[];
+		tags: string[];
+		title: string;
+		description: string;
+		targetType: (typeof DangerousPeopleTypes)[number];
+		subAccounts: string[];
+	};
 
 	type Props = {
-		send: (content: Content) => void
+		send: (content: Content) => void;
 		page: {
-			title: string
-			button: string
-		},
-		init: Partial<Content>,
-		canEditId?: boolean
+			title: string;
+			button: string;
+		};
+		init: Partial<Content>;
+		canEditId?: boolean;
 	};
 
 	const { send, page, init, canEditId }: Props = $props();
@@ -34,7 +34,7 @@
 	let tags = $state<string[]>(init.tags ?? []);
 	let title = $state(init.title ?? "");
 	let description = $state(init.description ?? "");
-	let targetType = $state<typeof DangerousPeopleTypes[number]>(init.targetType ?? "criminal");
+	let targetType = $state<(typeof DangerousPeopleTypes)[number]>(init.targetType ?? "criminal");
 	let scoreSum = $state(DangerousPeople.strArrToScore(init.score ?? []));
 	let subAccounts = $state<string[]>(init.subAccounts ?? []);
 
@@ -48,29 +48,33 @@
 </div>
 <div>
 	<p>ユーザーID</p>
-	<input type="text" readonly={canEditId} bind:value={targetId}>
+	<input type="text" readonly={canEditId} bind:value={targetId} />
 </div>
 <div>
 	<p>通称</p>
-	<input type="text" bind:value={name}>
+	<input type="text" bind:value={name} />
 </div>
 <div>
 	<p>スコア (現在の合計: {scoreSum})</p>
 	<table>
 		<thead></thead>
 		<tbody>
-			{#each DangerousPeople.elementsList() as element}
+			{#each DangerousPeople.elementsList() as element (element)}
 				<tr class="score-element">
 					<th>
-						<input type="checkbox" checked={score.includes(element.id)} onchange={e => {
-							if (e.currentTarget.checked) {
-								score.push(element.id);
-								scoreSum += element.score;
-							} else {
-								score = score.filter(value => value !== element.id);
-								scoreSum -= element.score;
-							}
-						}} />
+						<input
+							type="checkbox"
+							checked={score.includes(element.id)}
+							onchange={(e) => {
+								if (e.currentTarget.checked) {
+									score.push(element.id);
+									scoreSum += element.score;
+								} else {
+									score = score.filter((value) => value !== element.id);
+									scoreSum -= element.score;
+								}
+							}}
+						/>
 					</th>
 					<td><p>{element.label}</p></td>
 					<td><p>{element.score}</p></td>
@@ -81,11 +85,14 @@
 </div>
 <div>
 	<p>危険タイプ</p>
-	<select bind:value={targetType} onchange={e => {
-		const value = e.currentTarget.value as typeof DangerousPeopleTypes[number];
-		targetType = DangerousPeopleTypes.includes(value) ? value : "criminal";
-	}}>
-		{#each DangerousPeopleTypes as type}
+	<select
+		bind:value={targetType}
+		onchange={(e) => {
+			const value = e.currentTarget.value as (typeof DangerousPeopleTypes)[number];
+			targetType = DangerousPeopleTypes.includes(value) ? value : "criminal";
+		}}
+	>
+		{#each DangerousPeopleTypes as type (type)}
 			<option value={type}>{type}</option>
 		{/each}
 	</select>
@@ -93,21 +100,25 @@
 <div>
 	<p>タグ</p>
 	<Tags
-		tags={tags}
-		tagsUpdate={(newTags) => { tags = newTags }}
+		{tags}
+		tagsUpdate={(newTags) => {
+			tags = newTags;
+		}}
 	/>
 </div>
 <div>
 	<p>サブ垢</p>
 	<Tags
 		tags={subAccounts}
-		tagsUpdate={(newTags) => { subAccounts = newTags }}
+		tagsUpdate={(newTags) => {
+			subAccounts = newTags;
+		}}
 		limit={100}
 	/>
 </div>
 <div>
 	<p>理由 (簡潔)</p>
-	<input type="text" bind:value={title}>
+	<input type="text" bind:value={title} />
 </div>
 <div>
 	<p>説明</p>
@@ -128,20 +139,20 @@
 		width: 95%;
 		height: 20vh;
 	}
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 	input[type="text"] {
 		width: 60%;
 		font-size: 15px;

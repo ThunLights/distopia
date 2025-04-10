@@ -8,14 +8,12 @@
 
 	onMount(async () => {
 		if (!data.canUse) {
-			return location.href = "/";
+			return (location.href = "/");
 		}
-	})
+	});
 </script>
 
-<Meta
-	title="危険人物関係"
-/>
+<Meta title="危険人物関係" />
 
 <main>
 	<div class="contents">

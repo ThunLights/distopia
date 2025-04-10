@@ -23,36 +23,36 @@
 			const response = await fetch("/api/search", {
 				method: "POST",
 				headers: {
-					"Content-Type": "application/json",
+					"Content-Type": "application/json"
 				},
 				body: JSON.stringify({
-					content: searchWord,
-				}),
-			})
+					content: searchWord
+				})
+			});
 			if (response.ok) {
 				const json: Response = await response.json();
 				guilds = json.guilds;
 			}
 		}
-	})
+	});
 
-    async function search() {
-        location.href = `/search?content=${encodeURIComponent(searchWord)}`
-    }
+	async function search() {
+		location.href = `/search?content=${encodeURIComponent(searchWord)}`;
+	}
 
-    async function inputSearchCommand(e: KeyboardEvent) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            await search()
-        }
-    }
+	async function inputSearchCommand(e: KeyboardEvent) {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			await search();
+		}
+	}
 
 	function joinBtn(guildId: string, invite: string, name: string) {
 		if (loginData) {
 			const { token } = loginData;
 			return async () => {
 				await guildJoin(token, guildId, name);
-			}
+			};
 		} else {
 			return redirectUrl(`https://discord.gg/${invite}`);
 		}
@@ -64,12 +64,12 @@
 	description={[
 		`「${searchWord}」の検索結果です。`,
 		"現在沢山のサーバーが登録されています。",
-		"他ワードも試してみてください。",
+		"他ワードも試してみてください。"
 	].join("")}
 />
 
 <svelte:head>
-	<link rel="canonical" href="{PUBLIC_URL}/search">
+	<link rel="canonical" href="{PUBLIC_URL}/search" />
 </svelte:head>
 
 <main>
@@ -77,7 +77,14 @@
 		<div class="context">
 			<div>
 				<div>
-					<input class="search-input" type="text" spellcheck="false" autocomplete="off" onkeyup={inputSearchCommand} bind:value={searchWord}>
+					<input
+						class="search-input"
+						type="text"
+						spellcheck="false"
+						autocomplete="off"
+						onkeyup={inputSearchCommand}
+						bind:value={searchWord}
+					/>
 					<button onclick={search}>検索</button>
 				</div>
 				<div class="guilds-count">
@@ -86,7 +93,7 @@
 			</div>
 			{#if guilds.length}
 				<div class="guilds">
-					{#each guilds as guild}
+					{#each guilds as guild (guild)}
 						{@render generateGuildElement(guild)}
 					{/each}
 				</div>
@@ -104,9 +111,22 @@
 				<div class="guild-info">
 					<div>
 						{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
-							<Icon height={60} width={60} iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/ranking/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+							<Icon
+								height={60}
+								width={60}
+								iconPath={guild.icon
+									? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+									: "/ranking/discord.webp"}
+								edgePath="/ranking/{generateEdge(guild.ranking.activeRate - 1)}.webp"
+							/>
 						{:else}
-							<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+							<img
+								class="icon"
+								src={guild.icon
+									? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+									: "/discord.webp"}
+								alt=""
+							/>
 						{/if}
 					</div>
 					<div>
@@ -119,7 +139,7 @@
 					{#if guild.tags.length}
 						<p>タグ</p>
 						<div class="tags">
-							{#each guild.tags as tag}
+							{#each guild.tags as tag (tag)}
 								<div class="tag">
 									<p class="content">{tag}</p>
 								</div>
@@ -196,7 +216,7 @@
 		grid-template-columns: 32% 32% 32%;
 		grid-template-rows: auto auto auto auto auto auto auto auto auto auto auto;
 	}
-	.guild-context>div {
+	.guild-context > div {
 		margin-bottom: 8px;
 	}
 	.guild-context {
@@ -215,7 +235,7 @@
 		height: 95%;
 		margin: 14px;
 	}
-	.contents>div .name {
+	.contents > div .name {
 		margin-top: 14px;
 		font-size: 30px;
 		font-weight: 700;
@@ -224,36 +244,38 @@
 		overflow: hidden;
 		margin: 10px 20px;
 	}
-    .contents {
-        overflow: hidden;
-        display: block;
-        background-color: rgb(37, 36, 41);
-        border-radius: 10px;
-        width: 90%;
-        margin: 20px auto;
-    }
-	p, pre, a {
+	.contents {
+		overflow: hidden;
+		display: block;
+		background-color: rgb(37, 36, 41);
+		border-radius: 10px;
+		width: 90%;
+		margin: 20px auto;
+	}
+	p,
+	pre,
+	a {
 		color: white;
 	}
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 	@media (max-width: 1100px) {
 		.guilds {
 			grid-template-columns: 48% 48%;
 		}
-		.contents>div .name {
+		.contents > div .name {
 			font-size: 24px;
 		}
 	}
@@ -261,7 +283,7 @@
 		.guilds {
 			grid-template-columns: 98%;
 		}
-		.contents>div .name {
+		.contents > div .name {
 			font-size: 20px;
 		}
 	}

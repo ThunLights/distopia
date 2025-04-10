@@ -9,7 +9,7 @@ export class SubAccount {
 	public async fetch(mainId: string) {
 		try {
 			return await this.table.findMany({ where: { mainId } });
-		} catch (error)  {
+		} catch (error) {
 			errorHandling(error);
 			return [];
 		}
@@ -21,7 +21,7 @@ export class SubAccount {
 			if (element) {
 				await this.table.updateMany({
 					where: { userId },
-					data: { mainId },
+					data: { mainId }
 				});
 			} else {
 				await this.table.create({ data: { userId, mainId } });

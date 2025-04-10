@@ -5,25 +5,25 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class GuildVcMemberUpperTwo {
-    constructor(private readonly table: Prisma.GuildVcMemberUpperTwoDelegate<DefaultArgs>) {}
+	constructor(private readonly table: Prisma.GuildVcMemberUpperTwoDelegate<DefaultArgs>) {}
 
 	public async update(guildId: string, count: number) {
 		try {
 			const now = new Date(formatDate(new Date()));
 			const element = await this.table.findFirst({
-				where: { guildId, date: now },
+				where: { guildId, date: now }
 			});
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId, date: now },
 					data: {
-						count: element.count + count,
+						count: element.count + count
 					}
-				})
+				});
 			} else {
 				await this.table.create({
-					data: { guildId, count, date: now },
-				})
+					data: { guildId, count, date: now }
+				});
 			}
 			return true;
 		} catch (error) {
@@ -39,10 +39,10 @@ export class GuildVcMemberUpperTwo {
 				where: {
 					guildId,
 					date: {
-						gte: thirtyDaysAgo,
+						gte: thirtyDaysAgo
 					}
 				}
-			})
+			});
 		} catch (error) {
 			errorHandling(error);
 			return [];

@@ -5,23 +5,23 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class GuildVcMemberSum {
-    constructor(private readonly table: Prisma.GuildVcMemberSumDelegate<DefaultArgs>) {}
+	constructor(private readonly table: Prisma.GuildVcMemberSumDelegate<DefaultArgs>) {}
 
 	public async update(guildId: string, userId: string) {
 		try {
 			const now = new Date(formatDate(new Date()));
 			const element = await this.table.findFirst({
-				where: { guildId, userId },
+				where: { guildId, userId }
 			});
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId, userId },
-					data: { date: now },
+					data: { date: now }
 				});
 			} else {
 				await this.table.create({
 					data: { guildId, userId, date: now }
-				})
+				});
 			}
 			return true;
 		} catch (error) {
@@ -37,10 +37,10 @@ export class GuildVcMemberSum {
 				where: {
 					guildId,
 					date: {
-						gte: thirtyDaysAgo,
+						gte: thirtyDaysAgo
 					}
 				}
-			})
+			});
 		} catch (error) {
 			errorHandling(error);
 			return [];

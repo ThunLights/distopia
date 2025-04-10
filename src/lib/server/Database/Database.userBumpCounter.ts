@@ -9,9 +9,9 @@ export class UserBumpCounter {
 		try {
 			return await this.table.findMany({
 				orderBy: {
-					count: "desc",
+					count: "desc"
 				},
-				take,
+				take
 			});
 		} catch (error) {
 			errorHandling(error);
@@ -25,7 +25,7 @@ export class UserBumpCounter {
 			if (element) {
 				await this.table.updateMany({
 					where: { userId },
-					data: { count: element.count + 1 },
+					data: { count: element.count + 1 }
 				});
 			} else {
 				await this.table.create({ data: { userId, count: 1 } });

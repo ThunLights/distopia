@@ -10,38 +10,36 @@
 
 	onMount(async () => {
 		if (!data.canUse) {
-			return location.href = "/";
+			return (location.href = "/");
 		}
 	});
 
 	async function send() {
 		if (!data.auth) {
-			Toast.error("認証情報エラー")
+			Toast.error("認証情報エラー");
 			return;
 		}
 		const response = await fetch(`/admin/api/people/${targetId}`, {
 			method: "DELETE",
 			headers: {
-				Authorization: data.auth.token,
+				Authorization: data.auth.token
 			}
 		});
 		if (response.ok) {
-			Toast.success(`${targetId}を削除しました。`)
+			Toast.success(`${targetId}を削除しました。`);
 		} else {
 			try {
 				const json = await response.json();
-				Toast.error(`レスポンス「${json.content}」`)
+				Toast.error(`レスポンス「${json.content}」`);
 			} catch {
-				Toast.error("エラー")
+				Toast.error("エラー");
 			}
 		}
 		targetId = "";
 	}
 </script>
 
-<Meta
-	title="危険人物を削除"
-/>
+<Meta title="危険人物を削除" />
 
 <main>
 	<div class="contents">
@@ -50,7 +48,7 @@
 				<p>どのIDを消去しますか？</p>
 			</div>
 			<div>
-				<input type="text" bind:value={targetId}>
+				<input type="text" bind:value={targetId} />
 			</div>
 			<div>
 				<button onclick={send}>削除</button>
@@ -75,24 +73,24 @@
 		width: 90%;
 		margin: 20px auto;
 	}
-	.context>div {
+	.context > div {
 		margin-top: 20px;
 	}
 
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 	input {
 		width: 60%;
 		font-size: 15px;

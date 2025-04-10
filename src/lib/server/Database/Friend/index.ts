@@ -3,12 +3,12 @@ import { DatabaseClient } from "../index";
 import { FriendTag } from "./Friend.tag";
 
 export type Element = {
-    userId: string
-    username: string
-    description: string
-    nsfw: boolean
-    time: Date
-}
+	userId: string;
+	username: string;
+	description: string;
+	nsfw: boolean;
+	time: Date;
+};
 
 export class Friend {
 	public readonly tag = new FriendTag(DatabaseClient._prisma.friendTag);
@@ -22,10 +22,10 @@ export class Friend {
 			if (element) {
 				await this.table.updateMany({
 					where: { userId },
-					data,
-				})
+					data
+				});
 			} else {
-				await this.table.create({ data })
+				await this.table.create({ data });
 			}
 			return true;
 		} catch (error) {
@@ -50,7 +50,7 @@ export class Friend {
 					time: "desc"
 				},
 				take: 50,
-				skip: skip ?? 0,
+				skip: skip ?? 0
 			});
 		} catch (error) {
 			errorHandling(error);

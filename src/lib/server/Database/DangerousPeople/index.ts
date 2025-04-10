@@ -10,32 +10,32 @@ import type { DangerousPeopleTypeZod } from "$lib/constants";
 export type DangerousPeopleType = z.infer<typeof DangerousPeopleTypeZod>;
 
 export type UpdateElement = {
-    type: string
-    name: string
-    title: string
-    description: string
-    time: Date
-}
+	type: string;
+	name: string;
+	title: string;
+	description: string;
+	time: Date;
+};
 
 export type Element = {
-    userId: string
-} & Required<UpdateElement>
+	userId: string;
+} & Required<UpdateElement>;
 
 export type FetchOptions = {
-	partial?: boolean
-}
+	partial?: boolean;
+};
 
 export type SearchOptions = {
 	name?: {
-		contains: string
-	},
+		contains: string;
+	};
 	title?: {
-		contains: string
-	},
+		contains: string;
+	};
 	description?: {
-		contains: string
-	},
-}
+		contains: string;
+	};
+};
 
 export class DangerousPeople {
 	public readonly tag = new DangerousPeopleTag(DatabaseClient._prisma.dangerousPeopleTag);
@@ -61,16 +61,12 @@ export class DangerousPeople {
 			const whereContent = { contains: content };
 			return await this.table.findMany({
 				where: {
-					OR: [
-						{ name: whereContent },
-						{ title: whereContent },
-						{ description: whereContent },
-					],
+					OR: [{ name: whereContent }, { title: whereContent }, { description: whereContent }]
 				}
 			});
 		} catch (error) {
 			errorHandling(error);
-			return []
+			return [];
 		}
 	}
 
@@ -80,15 +76,15 @@ export class DangerousPeople {
 			if (element) {
 				await this.table.updateMany({
 					where: { userId },
-					data: target,
-				})
+					data: target
+				});
 			} else {
 				await this.table.create({
 					data: {
 						...target,
-						...{ userId },
+						...{ userId }
 					}
-				})
+				});
 			}
 			return true;
 		} catch (error) {
@@ -99,7 +95,7 @@ export class DangerousPeople {
 
 	public async delete(userId: string) {
 		try {
-			await this.table.deleteMany({ where: { userId } })
+			await this.table.deleteMany({ where: { userId } });
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -123,7 +119,7 @@ export class DangerousPeople {
 					time: "desc"
 				},
 				take: 50,
-				skip: skip ?? 0,
+				skip: skip ?? 0
 			});
 		} catch (error) {
 			errorHandling(error);

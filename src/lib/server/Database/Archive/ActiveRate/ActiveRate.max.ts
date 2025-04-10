@@ -4,8 +4,7 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class ActiveRateMaxTable {
-	constructor(private readonly table: Prisma.ArchiveActiveRateMaxDelegate<DefaultArgs>) {
-	}
+	constructor(private readonly table: Prisma.ArchiveActiveRateMaxDelegate<DefaultArgs>) {}
 
 	public async data(guildId: string) {
 		try {

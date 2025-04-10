@@ -5,13 +5,13 @@ import type { Client, Message, OmitPartialGroupDMChannel } from "discord.js";
 export class MessageClient {
 	private lateLimits: string[] = [];
 
-    constructor(private readonly client: Client) {}
+	constructor(private readonly client: Client) {}
 
 	private async calcScore(x: number) {
 		return Math.ceil(Math.sqrt(x));
 	}
 
-    public async create(message: OmitPartialGroupDMChannel<Message<boolean>>): Promise<void> {
+	public async create(message: OmitPartialGroupDMChannel<Message<boolean>>): Promise<void> {
 		if (message.author.bot) {
 			return;
 		}
@@ -26,11 +26,14 @@ export class MessageClient {
 			this.lateLimits.push(message.author.id);
 			await database.guildTables.newMessage.update(guild.guildId);
 			if (message.content.length) {
-				await database.guildTables.level.plus(message.guildId, BigInt(await this.calcScore(message.content.length)));
+				await database.guildTables.level.plus(
+					message.guildId,
+					BigInt(await this.calcScore(message.content.length))
+				);
 			}
 			setTimeout(() => {
-				this.lateLimits = this.lateLimits.filter(value => value !== message.author.id);
+				this.lateLimits = this.lateLimits.filter((value) => value !== message.author.id);
 			}, 15 * 1000);
 		}
-    }
+	}
 }

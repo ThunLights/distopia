@@ -17,7 +17,7 @@ export const _RequestZod = z.object({
 	nsfw: z.boolean(),
 	tags: z.string().array(),
 	category: z.string(),
-	description: z.string(),
+	description: z.string()
 });
 
 export type Request = z.infer<typeof _RequestZod>;
@@ -54,7 +54,12 @@ export const POST = (async (e) => {
 	if (!guildTmp) {
 		return generateErrorJson("TMP_NOT_FOUND");
 	}
-	if (!(ownerId === auth.data.id || await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))) {
+	if (
+		!(
+			ownerId === auth.data.id ||
+			(await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))
+		)
+	) {
 		return generateErrorJson("PERMISSION_DENIED");
 	}
 	const checkedBody = await invalidElementCheck(body);
@@ -65,7 +70,7 @@ export const POST = (async (e) => {
 		...guildTmp,
 		...{
 			category: body.category,
-			description: body.description.trim(),
+			description: body.description.trim()
 		}
 	});
 	if (!result) {
@@ -76,9 +81,12 @@ export const POST = (async (e) => {
 	await database.guildTables.tag.update(guildTmp.guildId, body.tags);
 	await database.guildTables.bump.update(guildTmp.guildId);
 	await database.guildTables.tmp.delete(guildTmp.guildId);
-	return json({
-		content: "SUCCESS"
-	}, { status: 200 });
+	return json(
+		{
+			content: "SUCCESS"
+		},
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;
 
 export const PATCH = (async (e) => {
@@ -93,7 +101,12 @@ export const PATCH = (async (e) => {
 	const ownerId = await discord.bot.control.guild.fetchOwner(body.guildId);
 	const checkedBody = await invalidElementCheck(body);
 
-	if (!(ownerId === auth.data.id || await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))) {
+	if (
+		!(
+			ownerId === auth.data.id ||
+			(await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))
+		)
+	) {
 		return generateErrorJson("PERMISSION_DENIED");
 	}
 	if (checkedBody) {
@@ -103,13 +116,19 @@ export const PATCH = (async (e) => {
 	if (guild instanceof DatabaseError || guild === null) {
 		return generateErrorJson("GUILD_NOT_FOUND");
 	}
-	const result = await database.guildTables.guild.update({...guild, ...{ category: body.category, description: body.description.trim() }});
+	const result = await database.guildTables.guild.update({
+		...guild,
+		...{ category: body.category, description: body.description.trim() }
+	});
 	if (!result) {
 		return generateErrorJson("DATABASE_ERROR");
 	}
 	await database.guildTables.nsfw.update(guild.guildId, body.nsfw);
 	await database.guildTables.tag.update(guild.guildId, body.tags);
-	return json({
-		content: "SUCCESS"
-	}, { status: 200 });
+	return json(
+		{
+			content: "SUCCESS"
+		},
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

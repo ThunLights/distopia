@@ -8,27 +8,27 @@
 	import type { DangerousPeopleTypes } from "$lib/constants";
 
 	type Content = {
-		targetId: string
-		name: string
-		score: string[]
-		tags: string[]
-		title: string
-		description: string
-		targetType: typeof DangerousPeopleTypes[number]
-		subAccounts: string[]
-	}
+		targetId: string;
+		name: string;
+		score: string[];
+		tags: string[];
+		title: string;
+		description: string;
+		targetType: (typeof DangerousPeopleTypes)[number];
+		subAccounts: string[];
+	};
 
 	const { data } = $props();
 
 	onMount(async () => {
 		if (!data.canUse) {
-			return location.href = "/";
+			return (location.href = "/");
 		}
 	});
 
 	async function send(content: Content) {
 		if (!data.auth) {
-			Toast.error("認証情報エラー")
+			Toast.error("認証情報エラー");
 			return;
 		}
 		const { targetId, targetType, tags, name, score, title, description, subAccounts } = content;
@@ -36,7 +36,7 @@
 			method: "POST",
 			headers: {
 				Authorization: data.auth.token,
-				"Content-Type": "application/json",
+				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
 				userId: targetId,
@@ -47,7 +47,7 @@
 				title,
 				description,
 				tags,
-				subAccounts,
+				subAccounts
 			})
 		});
 		if (response.ok) {
@@ -56,26 +56,24 @@
 		} else {
 			try {
 				const json = await response.json();
-				Toast.error(`レスポンス「${json.content}」`)
+				Toast.error(`レスポンス「${json.content}」`);
 			} catch {
-				Toast.error("エラー")
+				Toast.error("エラー");
 			}
 		}
 	}
 </script>
 
-<Meta
-	title="危険人物を追加"
-/>
+<Meta title="危険人物を追加" />
 
 <main>
 	<div class="contents">
 		<div class="context">
 			<People
-				send={send}
+				{send}
 				page={{
 					title: "危険人物リストに追加",
-					button: "追加",
+					button: "追加"
 				}}
 				init={{}}
 			/>

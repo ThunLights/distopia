@@ -1,4 +1,8 @@
-import { PUBLIC_HOME_SERVER_ID, PUBLIC_HONORARY_MEMBER_ROLE_ID, PUBLIC_STAFF_ROLE_ID } from "$env/static/public";
+import {
+	PUBLIC_HOME_SERVER_ID,
+	PUBLIC_HONORARY_MEMBER_ROLE_ID,
+	PUBLIC_STAFF_ROLE_ID
+} from "$env/static/public";
 import { database } from "$lib/server/Database/index";
 import { errorHandling } from "$lib/server/error";
 import { PermissionsBitField } from "discord.js";
@@ -12,8 +16,10 @@ export class Guild {
 		try {
 			const guild = client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
 			if (guild) {
-				const users = guild.members.cache.filter(member => member.roles.cache.has(PUBLIC_STAFF_ROLE_ID));
-				return users.map(user => user.id).includes(userId);
+				const users = guild.members.cache.filter((member) =>
+					member.roles.cache.has(PUBLIC_STAFF_ROLE_ID)
+				);
+				return users.map((user) => user.id).includes(userId);
 			}
 
 			return false;
@@ -59,7 +65,9 @@ export class Guild {
 			return null;
 		}
 		if (status) {
-			return guild.members.cache.filter(value => (value.presence && value.presence.status === status)).size;
+			return guild.members.cache.filter(
+				(value) => value.presence && value.presence.status === status
+			).size;
 		}
 		return guild.memberCount;
 	}
@@ -93,12 +101,12 @@ export class Guild {
 	}
 
 	public async isJoined(guildId: string): Promise<boolean> {
-        try {
-            return this.client.guilds.cache.map(value => value.id).includes(guildId);
-        } catch (error) {
-            errorHandling(error);
-            return false;
-        }
+		try {
+			return this.client.guilds.cache.map((value) => value.id).includes(guildId);
+		} catch (error) {
+			errorHandling(error);
+			return false;
+		}
 	}
 
 	public async isStaff(userId: string) {
@@ -109,8 +117,10 @@ export class Guild {
 		try {
 			const guild = this.client.guilds.cache.get(PUBLIC_HOME_SERVER_ID);
 			if (guild) {
-				const users = guild.members.cache.filter(member => member.roles.cache.has(PUBLIC_HONORARY_MEMBER_ROLE_ID));
-				return users.map(user => user.id).includes(userId);
+				const users = guild.members.cache.filter((member) =>
+					member.roles.cache.has(PUBLIC_HONORARY_MEMBER_ROLE_ID)
+				);
+				return users.map((user) => user.id).includes(userId);
 			}
 
 			return false;
@@ -125,7 +135,10 @@ export class Guild {
 			const guild = this.client.guilds.cache.get(guildId);
 			if (guild) {
 				const members = Array.from(guild.members.cache.values());
-				return members.filter(member => !member.user.bot && member.permissions.has(PermissionsBitField.Flags.Administrator));
+				return members.filter(
+					(member) =>
+						!member.user.bot && member.permissions.has(PermissionsBitField.Flags.Administrator)
+				);
 			}
 			return [];
 		} catch (error) {
@@ -137,7 +150,7 @@ export class Guild {
 	public async isAdmin(guildId: string, userId: string) {
 		try {
 			const admins = await this.adminUsers(guildId);
-			return admins.map(value => value.user.id).includes(userId)
+			return admins.map((value) => value.user.id).includes(userId);
 		} catch (error) {
 			errorHandling(error);
 			return false;

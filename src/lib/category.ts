@@ -1,58 +1,57 @@
-
 export type Category = {
-	id: string
-	name: string
-}
+	id: string;
+	name: string;
+};
 
 export const CATEGORIES = [
 	{
 		id: "general",
-		name: "雑談",
+		name: "雑談"
 	},
 	{
 		id: "game",
-		name: "ゲーム",
+		name: "ゲーム"
 	},
 	{
 		id: "community",
-		name: "コミュニティ",
+		name: "コミュニティ"
 	},
 	{
 		id: "anime",
-		name: "アニメ",
+		name: "アニメ"
 	},
 	{
 		id: "comic",
-		name: "漫画",
+		name: "漫画"
 	},
 	{
 		id: "music",
-		name: "音楽",
+		name: "音楽"
 	},
 	{
 		id: "technology",
-		name: "技術",
+		name: "技術"
 	},
 	{
 		id: "language",
-		name: "言語",
+		name: "言語"
 	},
 	{
 		id: "movie",
-		name: "映画",
+		name: "映画"
 	},
 	{
 		id: "nsfw",
-		name: "NSFW",
+		name: "NSFW"
 	},
 	{
 		id: "other",
-		name: "その他",
+		name: "その他"
 	}
 ] satisfies Array<Category>;
 
 export function foundCategory(content: string): boolean {
-	return CATEGORIES.map(value => value.id).includes(content);
+	return CATEGORIES.map((value) => value.id).includes(content);
 }
 
 export function getCategory(content: string): string | null {

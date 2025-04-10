@@ -9,13 +9,15 @@ export class DangerousPeopleTag {
 
 	public async search(content: string) {
 		try {
-			return deDepulication(await this.table.findMany({
-				where: {
-					content: {
-						contains: content
+			return deDepulication(
+				await this.table.findMany({
+					where: {
+						content: {
+							contains: content
+						}
 					}
-				}
-			})).map(value => value.userId);
+				})
+			).map((value) => value.userId);
 		} catch (error) {
 			errorHandling(error);
 			return [];
@@ -26,7 +28,7 @@ export class DangerousPeopleTag {
 		try {
 			await this.table.deleteMany({
 				where: { userId, content }
-			})
+			});
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -53,7 +55,7 @@ export class DangerousPeopleTag {
 		try {
 			return await this.table.findMany({
 				where: { userId }
-			})
+			});
 		} catch (error) {
 			errorHandling(error);
 			return [];

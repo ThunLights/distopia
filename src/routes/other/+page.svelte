@@ -5,10 +5,7 @@
 
 <Meta
 	title="Other Links / Distopia.top"
-	description={[
-		"Distopiaの色々なリンクをまとめてあります。",
-		"気軽にご覧ください。",
-	].join("")}
+	description={["Distopiaの色々なリンクをまとめてあります。", "気軽にご覧ください。"].join("")}
 />
 
 <main>
@@ -34,7 +31,7 @@
 		</div>
 	</div>
 </main>
-<Footer/>
+<Footer />
 
 <style>
 	main {

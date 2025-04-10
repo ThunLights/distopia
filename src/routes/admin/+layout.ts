@@ -9,20 +9,20 @@ export const load = (async (e) => {
 	if (!browser || !auth) {
 		return {
 			canUse: false
-		}
+		};
 	}
 
 	const response = await fetch("/api/admin", {
 		method: "POST",
 		headers: {
-			Authorization: auth.token,
+			Authorization: auth.token
 		}
 	});
 
 	if (response.status === 200) {
 		return {
-			canUse: true,
-		}
+			canUse: true
+		};
 	}
 	return redirect(301, "/");
 }) satisfies LayoutLoad;

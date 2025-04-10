@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class GuildActiveRateTable {
-    constructor(private readonly table: Prisma.GuildActiveRateDelegate<DefaultArgs>) {}
+	constructor(private readonly table: Prisma.GuildActiveRateDelegate<DefaultArgs>) {}
 
 	public async data(guildId: string) {
 		try {
@@ -19,9 +19,9 @@ export class GuildActiveRateTable {
 		try {
 			return await this.table.findMany({
 				orderBy: {
-					content: "desc",
+					content: "desc"
 				},
-				take,
+				take
 			});
 		} catch (error) {
 			errorHandling(error);
@@ -36,8 +36,8 @@ export class GuildActiveRateTable {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data,
-				})
+					data
+				});
 			} else {
 				await this.table.create({ data });
 			}

@@ -12,9 +12,9 @@ import type { RequestHandler } from "@sveltejs/kit";
 export const _Body = {
 	post: z.object({
 		guildId: z.string(),
-		eventId: z.string(),
-	}),
-}
+		eventId: z.string()
+	})
+};
 
 export const POST = (async (e) => {
 	const auth = await authorization(e);
@@ -28,10 +28,12 @@ export const POST = (async (e) => {
 	}
 
 	const owner = await discord.bot.control.guild.fetchOwner(body.guildId);
-	if (!(
-		(owner && owner === auth.data.id)
-		|| (await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))
-	)) {
+	if (
+		!(
+			(owner && owner === auth.data.id) ||
+			(await discord.bot.control.guild.isAdmin(body.guildId, auth.data.id))
+		)
+	) {
 		return generateErrorJson("PERMISSION_DENIED");
 	}
 
@@ -55,7 +57,10 @@ export const POST = (async (e) => {
 		return generateErrorJson("DATABASE_ERROR");
 	}
 
-	return json({
-		content: "success",
-	}, { status: 200 });
+	return json(
+		{
+			content: "success"
+		},
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

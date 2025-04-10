@@ -21,7 +21,7 @@ export class BumpCounter {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { count: element.count + 1 },
+					data: { count: element.count + 1 }
 				});
 			} else {
 				await this.table.create({

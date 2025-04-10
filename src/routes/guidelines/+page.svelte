@@ -7,7 +7,7 @@
 	title="Guidelines / Distopia"
 	description={[
 		"Distopiaのサーバーガイドラインです。",
-		"サービス利用前に一度ご確認ください。",
+		"サービス利用前に一度ご確認ください。"
 	].join("")}
 />
 
@@ -30,7 +30,7 @@
 		</div>
 	</div>
 </main>
-<Footer/>
+<Footer />
 
 <style>
 	main {

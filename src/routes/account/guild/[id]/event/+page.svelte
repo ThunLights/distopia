@@ -3,14 +3,10 @@
 
 	import { onMount } from "svelte";
 
-	const { data } = $props();
-
 	onMount(async () => {});
 </script>
 
-<Meta
-	title="イベントブーストを設定"
-/>
+<Meta title="イベントブーストを設定" />
 
 <main>
 	<div class="contents">

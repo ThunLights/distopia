@@ -1,40 +1,40 @@
 <script lang="ts">
-    import Meta from "$lib/meta.svelte";
-    import Footer from "$lib/footer.svelte";
+	import Meta from "$lib/meta.svelte";
+	import Footer from "$lib/footer.svelte";
 
-    import { onMount } from "svelte";
+	import { onMount } from "svelte";
 	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
 	import { CATEGORIES } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 
-    import type { PageData } from "./$types";
+	import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
 
-    const { data }: { data: PageData } = $props();
+	const { data }: { data: PageData } = $props();
 	const { guildId } = data;
-    const loginData = $state(data.auth);
+	const loginData = $state(data.auth);
 	let guild = $state<Response | null>(null);
 	let title = $derived(guild ? `「${guild.name}」の詳細情報` : "ロード中です。");
 	let category = $derived<string | null>(getCategory(guild ? guild.category : null));
 
 	function getCategory(category: string | null) {
-		const base = CATEGORIES.find(value => value.id === category) ?? null;
+		const base = CATEGORIES.find((value) => value.id === category) ?? null;
 		return base ? base.name : null;
 	}
 
-    onMount(async () => {
+	onMount(async () => {
 		if (!loginData) {
-			return location.href = "/account";
+			return (location.href = "/account");
 		}
 		const response = await getPublicGuild(loginData.token, guildId);
 		if (response instanceof GuildsApiError) {
-			return location.href = "/account";
+			return (location.href = "/account");
 		}
 		guild = response;
-	})
+	});
 </script>
 
-<Meta title={title}/>
+<Meta {title} />
 
 <main>
 	{#if guild}
@@ -42,7 +42,13 @@
 			<div class="contents">
 				<div class="info">
 					<div>
-						<img class="icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+						<img
+							class="icon"
+							src={guild.icon
+								? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+								: "/discord.webp"}
+							alt=""
+						/>
 					</div>
 					<div>
 						<p class="name">{guild.name}</p>
@@ -64,12 +70,18 @@
 						<button onclick={redirectUrl(`/guilds/${guildId}`)}>サーバーページを見る</button>
 					</div>
 					<div>
-						<button onclick={redirectUrl(`/account/guild/${guildId}/delete`)}>サーバーをDistopiaから消す</button>
+						<button onclick={redirectUrl(`/account/guild/${guildId}/delete`)}
+							>サーバーをDistopiaから消す</button
+						>
 					</div>
 				</div>
 				<div class="page">
 					<div>
-						<p class="title">現在の設定 <button onclick={redirectUrl(`/account/guild/${guildId}/edit`)}>編集</button></p>
+						<p class="title">
+							現在の設定 <button onclick={redirectUrl(`/account/guild/${guildId}/edit`)}
+								>編集</button
+							>
+						</p>
 					</div>
 					<div class="content">
 						<p>タグ</p>
@@ -133,36 +145,36 @@
 		<p>ロード中です。</p>
 	{/if}
 </main>
-<Footer/>
+<Footer />
 
 {#snippet generateTagsElement(tags: string[])}
-	{#each tags as tag}
+	{#each tags as tag (tag)}
 		<p class="tag">{tag}</p>
 	{/each}
 {/snippet}
 
 {#snippet description(content: string)}
-	{#each content.split("\n") as line}
+	{#each content.split("\n") as line (line)}
 		<p>{line}</p>
 	{/each}
 {/snippet}
 
 <style>
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
-	.control>div {
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
+	.control > div {
 		margin-top: 5px;
 	}
 	.tag {
@@ -175,36 +187,36 @@
 	.guild .info div {
 		display: inline-block;
 	}
-    .guild .icon {
-        height: 90px;
-        border-radius: 50%;
-    }
+	.guild .icon {
+		height: 90px;
+		border-radius: 50%;
+	}
 	.guild .name {
 		font-weight: 700;
-        font-size: 30px;
+		font-size: 30px;
 	}
 	.guild .informations p {
 		font-size: 10px;
 	}
 	.guild {
-        overflow: hidden;
-        display: block;
-        background-color: rgb(37, 36, 41);
-        border-radius: 20px;
-        width: 90%;
-        margin: 20px auto;
+		overflow: hidden;
+		display: block;
+		background-color: rgb(37, 36, 41);
+		border-radius: 20px;
+		width: 90%;
+		margin: 20px auto;
 	}
-	.contents>div>.content>p {
+	.contents > div > .content > p {
 		font-size: 18px;
 		font-weight: 600;
 		margin-top: 4px;
 	}
-	.contents>div .title {
+	.contents > div .title {
 		font-weight: 700;
 		font-size: 24px;
 		margin-top: 10px;
 	}
-	.contents>div {
+	.contents > div {
 		margin: 10px 0;
 		overflow: hidden;
 	}
