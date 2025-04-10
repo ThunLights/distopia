@@ -19,7 +19,10 @@ export const DELETE = (async (e) => {
 		return generateErrorJson("AUTHORIZATION_ERROR");
 	}
 
-	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
+	if (
+		auth.data.id === PUBLIC_OWNER_ID ||
+		(await discord.bot.control.guild.isHonoraryMember(auth.data.id))
+	) {
 		await database.dangerousPeople.score.delete(userId);
 		await database.dangerousPeople.tag.delete(userId);
 		await database.dangerousPeople.subAccount.delete(userId);
@@ -28,9 +31,12 @@ export const DELETE = (async (e) => {
 			return generateErrorJson("DATABASE_ERROR");
 		}
 
-		return json({
-			content: "success"
-		}, { status: 200 });
+		return json(
+			{
+				content: "success"
+			},
+			{ status: 200 }
+		);
 	}
 
 	return generateErrorJson("PERMISSION_DENIED");

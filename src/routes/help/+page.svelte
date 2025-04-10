@@ -7,7 +7,7 @@
 	title="Help / Distopia"
 	description={[
 		"Distopiaへのサーバー登録方法やアクティブレートに関する解説があります。",
-		"このページでも分からないことがある場合は公式Discordサーバーにて聞いてください",
+		"このページでも分からないことがある場合は公式Discordサーバーにて聞いてください"
 	].join("")}
 />
 
@@ -30,7 +30,7 @@
 		</div>
 	</div>
 </main>
-<Footer/>
+<Footer />
 
 <style>
 	main {

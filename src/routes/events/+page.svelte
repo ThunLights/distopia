@@ -11,9 +11,7 @@
 	onMount(async () => {});
 </script>
 
-<Meta
-	title="イベント一覧"
-/>
+<Meta title="イベント一覧" />
 
 <Main>
 	<p class="title">イベント一覧</p>

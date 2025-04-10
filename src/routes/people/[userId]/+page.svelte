@@ -10,10 +10,10 @@
 </script>
 
 <Meta
-	title={title}
+	{title}
 	description={[
 		`「${userId}」の検索結果を表示します。`,
-		"他にも色々なユーザーが登録されていますで是非一度検索してみてください",
+		"他にも色々なユーザーが登録されていますで是非一度検索してみてください"
 	].join("")}
 />
 
@@ -99,7 +99,7 @@
 	.center {
 		text-align: center;
 	}
-	.context>div {
+	.context > div {
 		margin-top: 18px;
 	}
 	.tags {

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Meta from "$lib/meta.svelte";
-    import Footer from "$lib/footer.svelte";
+	import Meta from "$lib/meta.svelte";
+	import Footer from "$lib/footer.svelte";
 	import Icon from "$lib/icon.svelte";
 
 	import { onMount } from "svelte";
@@ -11,7 +11,7 @@
 	import { guildJoin } from "$lib/join.svelte";
 	import { generateEdge } from "$lib/edge.js";
 
-    import type { PageData } from "./$types";
+	import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
 
 	type Auth = {
@@ -20,27 +20,29 @@
 		username: string;
 		email: string | null;
 		avatar: string | null;
-	}
+	};
 
-    const { data } = $props();
+	const { data } = $props();
 	const { guildId, content } = data;
 	const guild = $state<Response | null>(content);
 	const reviews = $derived(guild ? guild.reviews : []);
-	const title = $derived(content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`);
+	const title = $derived(
+		content ? `「${content.name}」のページ` : `ID:${guildId} は見つかりませんでした。`
+	);
 
-    let loginData = $state<Auth | null>(data.auth);
+	let loginData = $state<Auth | null>(data.auth);
 
 	onMount(async () => {
 		loginData = await token2data();
-	})
+	});
 
 	function joinBtn() {
 		if (!guild) {
 			toast.push(`ERROR: GUILD_DATA_NOT_FOUND`, {
 				theme: {
-					"--toastBackground": "rgb(168, 13, 13)",
+					"--toastBackground": "rgb(168, 13, 13)"
 				}
-			})
+			});
 			return () => {};
 		}
 		const { guildId, invite, name } = guild;
@@ -48,7 +50,7 @@
 			const { token } = loginData;
 			return async () => {
 				await guildJoin(token, guildId, name);
-			}
+			};
 		} else {
 			return redirectUrl(`https://discord.gg/${invite}`);
 		}
@@ -56,7 +58,7 @@
 </script>
 
 <Meta
-	title={title}
+	{title}
 	description={guild ? guild.description.replaceAll("\n", "").replaceAll(/\s+/g, "") : undefined}
 />
 
@@ -67,9 +69,22 @@
 				<div class="guild-info">
 					<div>
 						{#if guild.ranking.activeRate && guild.ranking.activeRate < 50}
-							<Icon width={128} height={128} iconPath={guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/ranking/discord.webp"} edgePath="/ranking/{generateEdge(guild.ranking.activeRate-1)}.webp"/>
+							<Icon
+								width={128}
+								height={128}
+								iconPath={guild.icon
+									? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+									: "/ranking/discord.webp"}
+								edgePath="/ranking/{generateEdge(guild.ranking.activeRate - 1)}.webp"
+							/>
 						{:else}
-							<img class="guild-icon" src="{guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp` : "/discord.webp"}" alt="">
+							<img
+								class="guild-icon"
+								src={guild.icon
+									? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.icon}.webp`
+									: "/discord.webp"}
+								alt=""
+							/>
 						{/if}
 					</div>
 					<div>
@@ -122,7 +137,9 @@
 					<div>
 						<div>
 							<p>{guild.level ? `Lv.${guild.level.level} ${guild.level.point}pt` : "Lv.0"}</p>
-							<p>アクティブレート: {guild.activeRate ?? 0} (最大: {guild.archives.activeRate.max})</p>
+							<p>
+								アクティブレート: {guild.activeRate ?? 0} (最大: {guild.archives.activeRate.max})
+							</p>
 						</div>
 					</div>
 				</div>
@@ -143,8 +160,14 @@
 				<div>
 					{#each Array(5) as _, i}
 						<div class="star">
-							<p><img src="/review/star.webp" alt="">{i+1}</p>
-							<p><progress max="{reviews.length}" value="{reviews.filter(value => value.star === i+1).length}"></progress> {reviews.filter(value => value.star === i+1).length}個</p>
+							<p><img src="/review/star.webp" alt="" />{i + 1}</p>
+							<p>
+								<progress
+									max={reviews.length}
+									value={reviews.filter((value) => value.star === i + 1).length}
+								></progress>
+								{reviews.filter((value) => value.star === i + 1).length}個
+							</p>
 						</div>
 					{/each}
 				</div>
@@ -152,9 +175,13 @@
 		</div>
 		<div class="contents">
 			<div class="context">
-				<p class="name">レビュー {#if loginData}
-					<button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}><a href="/guilds/{guildId}/review">レビューを投稿する</a></button>
-				{/if}</p>
+				<p class="name">
+					レビュー {#if loginData}
+						<button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}
+							><a href="/guilds/{guildId}/review">レビューを投稿する</a></button
+						>
+					{/if}
+				</p>
 				<div>
 					{#if reviews.length}
 						<div class="reviews">
@@ -163,7 +190,13 @@
 									<div class="context">
 										<div class="user">
 											<div>
-												<img class="icon" src="{review.user.avatar ? `https://cdn.discordapp.com/avatars/${review.userId}/${review.user.avatar}.webp` : "/discord.webp"}" alt="">
+												<img
+													class="icon"
+													src={review.user.avatar
+														? `https://cdn.discordapp.com/avatars/${review.userId}/${review.user.avatar}.webp`
+														: "/discord.webp"}
+													alt=""
+												/>
 											</div>
 											<div>
 												<p class="name">{review.user.username}</p>
@@ -175,7 +208,12 @@
 											</div>
 											{#each Array(5) as _, i}
 												<div class="star inline-block">
-													<img src={i + 1 <= review.star ? "/review/star.webp" : "/review/blackstar.webp"} alt="">
+													<img
+														src={i + 1 <= review.star
+															? "/review/star.webp"
+															: "/review/blackstar.webp"}
+														alt=""
+													/>
 												</div>
 											{/each}
 										</div>
@@ -203,7 +241,7 @@
 		</div>
 	{/if}
 </main>
-<Footer/>
+<Footer />
 
 <style>
 	.nsfw {
@@ -221,7 +259,7 @@
 		background-color: rgb(46, 46, 46);
 		margin-top: 12px;
 	}
-	.review .user>div {
+	.review .user > div {
 		display: inline-block;
 	}
 	.review .user .icon {
@@ -263,28 +301,28 @@
 		text-align: center;
 		padding: 10px;
 		width: 100%;
-        color: rgb(52, 198, 52);
-        background-color: rgb(59, 59, 59);
-        border: 1px solid rgb(85, 85, 85);
+		color: rgb(52, 198, 52);
+		background-color: rgb(59, 59, 59);
+		border: 1px solid rgb(85, 85, 85);
 	}
 	.join-button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
-    button {
-        cursor: pointer;
-        border-radius: 25px;
-        color: white;
-        background-color: rgb(49, 49, 49);
-        opacity: 0.8;
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
+	button {
+		cursor: pointer;
+		border-radius: 25px;
+		color: white;
+		background-color: rgb(49, 49, 49);
+		opacity: 0.8;
 		font-size: 14px;
-        padding: 4px 8px;
-        border: 1px solid rgb(85, 85, 85);
-    }
-    button:active {
-        border: 1px solid rgb(49, 49, 49);
-        background-color: rgb(85, 85, 85);
-    }
+		padding: 4px 8px;
+		border: 1px solid rgb(85, 85, 85);
+	}
+	button:active {
+		border: 1px solid rgb(49, 49, 49);
+		background-color: rgb(85, 85, 85);
+	}
 	.tags {
 		margin-top: 7px;
 		width: 100%;
@@ -315,25 +353,27 @@
 		overflow: hidden;
 		margin: 10px 20px;
 	}
-    .contents {
-        overflow: hidden;
-        display: block;
-        background-color: rgb(37, 36, 41);
-        border-radius: 10px;
-        width: 90%;
-        margin: 20px auto;
-    }
+	.contents {
+		overflow: hidden;
+		display: block;
+		background-color: rgb(37, 36, 41);
+		border-radius: 10px;
+		width: 90%;
+		margin: 20px auto;
+	}
 	.guild-name {
 		font-size: 28px;
 		font-weight: 700;
 	}
-	.guild-info>div {
+	.guild-info > div {
 		display: inline-block;
 	}
 	.guild-info {
 		margin-top: 15px;
 	}
-	a, p, pre {
+	a,
+	p,
+	pre {
 		font-size: 15px;
 		text-decoration: none;
 		color: white;

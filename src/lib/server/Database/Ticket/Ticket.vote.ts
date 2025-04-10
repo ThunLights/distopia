@@ -10,9 +10,9 @@ export class TicketVote {
 		try {
 			const elements = await this.table.findMany({ where: { targetUserId } });
 			return {
-				agree: elements.filter(element => element.agree).length,
-				disagree: elements.filter(element => !element.agree).length,
-			}
+				agree: elements.filter((element) => element.agree).length,
+				disagree: elements.filter((element) => !element.agree).length
+			};
 		} catch (error) {
 			errorHandling(error);
 			return null;
@@ -21,7 +21,7 @@ export class TicketVote {
 
 	public async update(targetUserId: string, userId: string, agree: boolean) {
 		try {
-			const element = await this.table.findFirst({ where: { targetUserId, userId }});
+			const element = await this.table.findFirst({ where: { targetUserId, userId } });
 			if (element) {
 				await this.table.updateMany({
 					where: { targetUserId, userId },
@@ -40,7 +40,7 @@ export class TicketVote {
 	public async remove(targetUserId: string) {
 		try {
 			return await this.table.deleteMany({
-				where: { targetUserId },
+				where: { targetUserId }
 			});
 		} catch (error) {
 			errorHandling(error);

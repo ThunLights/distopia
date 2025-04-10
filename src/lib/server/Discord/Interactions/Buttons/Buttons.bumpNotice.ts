@@ -1,21 +1,40 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags, PermissionsBitField } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	MessageFlags,
+	PermissionsBitField
+} from "discord.js";
 import { ButtonsBase, ButtonsError } from "./Buttons.base";
 import { errorHandling } from "$lib/server/error";
 
-import type { ButtonInteraction, CacheType, MessagePayload, InteractionReplyOptions } from "discord.js";
+import type {
+	ButtonInteraction,
+	CacheType,
+	MessagePayload,
+	InteractionReplyOptions
+} from "discord.js";
 
 export class BumpNoticeButton extends ButtonsBase {
 	public readonly customId = "bumpNotice";
 
-	public async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
+	public async commands(
+		interaction: ButtonInteraction<CacheType>
+	): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		try {
-			if (!(
-				interaction.member
-				&& interaction.member.permissions
-				&& interaction.member.permissions instanceof PermissionsBitField
-				&& interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
-			)) {
-				return { content: "権限がありません", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
+			if (
+				!(
+					interaction.member &&
+					interaction.member.permissions &&
+					interaction.member.permissions instanceof PermissionsBitField &&
+					interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)
+				)
+			) {
+				return {
+					content: "権限がありません",
+					flags: [MessageFlags.Ephemeral]
+				} satisfies InteractionReplyOptions;
 			}
 
 			const embed = new EmbedBuilder()
@@ -32,14 +51,17 @@ export class BumpNoticeButton extends ButtonsBase {
 				.setLabel("OFF")
 				.setStyle(ButtonStyle.Danger);
 
-			return void await interaction.reply({
-				embeds: [ embed ],
-				components: [ new ActionRowBuilder<ButtonBuilder>().addComponents(onButton, offButton) ],
-				flags: [ MessageFlags.Ephemeral ],
-			})
+			return void (await interaction.reply({
+				embeds: [embed],
+				components: [new ActionRowBuilder<ButtonBuilder>().addComponents(onButton, offButton)],
+				flags: [MessageFlags.Ephemeral]
+			}));
 		} catch (error) {
 			errorHandling(error);
-			return { content: "ERROR", flags: [ MessageFlags.Ephemeral ] } satisfies InteractionReplyOptions;
+			return {
+				content: "ERROR",
+				flags: [MessageFlags.Ephemeral]
+			} satisfies InteractionReplyOptions;
 		}
 	}
 }

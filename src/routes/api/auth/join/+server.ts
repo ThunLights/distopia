@@ -12,14 +12,14 @@ import type { RequestHandler } from "@sveltejs/kit";
 import type { UserElement } from "$lib/server/Database/Database.user";
 
 export const _RequestZod = z.object({
-	guildId: z.string(),
+	guildId: z.string()
 });
 
 export type Request = z.infer<typeof _RequestZod>;
 
 export type Response = {
-    content: "entry" | "joined" | "error";
-}
+	content: "entry" | "joined" | "error";
+};
 
 async function join(body: Request, id: string, data: UserElement) {
 	try {
@@ -32,11 +32,11 @@ async function join(body: Request, id: string, data: UserElement) {
 			return generateErrorJson("DISCORD_API_ERROR");
 		}
 		await cache.discord.guildsJoin.insert(id, {
-			status: result.status,
+			status: result.status
 		});
 		return result.status;
 	} catch (error) {
-		errorHandling (error);
+		errorHandling(error);
 		return generateErrorJson("DISCORD_API_ERROR");
 	}
 }
@@ -54,12 +54,16 @@ export const POST = (async (e) => {
 	if (result instanceof globalThis.Response) {
 		return result;
 	}
-	let content = result === 201 //201 新しく入った
-        ? "entry"
-        : result === 204 //204 既に入ってる
-            ? "joined"
-            : "error"; //それ以外 無理
-	return json({
-		content
-	}, { status: 200 })
+	let content =
+		result === 201 //201 新しく入った
+			? "entry"
+			: result === 204 //204 既に入ってる
+				? "joined"
+				: "error"; //それ以外 無理
+	return json(
+		{
+			content
+		},
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

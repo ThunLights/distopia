@@ -8,14 +8,12 @@
 
 	onMount(async () => {
 		if (!data.canUse) {
-			return location.href = "/";
+			return (location.href = "/");
 		}
-	})
+	});
 </script>
 
-<Meta
-	title="管理者パネル"
-/>
+<Meta title="管理者パネル" />
 
 <main>
 	<div class="contents">

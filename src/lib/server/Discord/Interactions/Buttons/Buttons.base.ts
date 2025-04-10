@@ -1,32 +1,46 @@
 import { codeBlock } from "$lib/codeblock";
 import { MessageFlags } from "discord.js";
 
-import type { ButtonInteraction, CacheType, Client, InteractionReplyOptions, MessagePayload } from "discord.js";
+import type {
+	ButtonInteraction,
+	CacheType,
+	Client,
+	InteractionReplyOptions,
+	MessagePayload
+} from "discord.js";
 
 export class ButtonsError {
-    constructor(public readonly content: string) {}
+	constructor(public readonly content: string) {}
 }
 
 export abstract class ButtonsBase {
 	public readonly customId: string = "";
 	constructor(protected readonly client: Client) {}
 
-	async commands(interaction: ButtonInteraction<CacheType>): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
+	async commands(
+		interaction: ButtonInteraction<CacheType>
+	): Promise<void | string | MessagePayload | InteractionReplyOptions | ButtonsError | null> {
 		return new ButtonsError("Commands Not Found");
 	}
 
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void | ButtonsError> {
 		const result = await this.commands(interaction);
 		if (result === null) {
-			return void await interaction.reply({ content: codeBlock(`Error: Commands Not Found`), flags: [ MessageFlags.Ephemeral ] });
+			return void (await interaction.reply({
+				content: codeBlock(`Error: Commands Not Found`),
+				flags: [MessageFlags.Ephemeral]
+			}));
 		}
 		if (result instanceof ButtonsError) {
-			return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
+			return void (await interaction.reply({
+				content: codeBlock(`Error: ${result.content}`),
+				flags: [MessageFlags.Ephemeral]
+			}));
 		}
 		if (result || typeof result === "string") {
-			return void await interaction.reply(result)
+			return void (await interaction.reply(result));
 		} else {
 			return result;
-		};
+		}
 	}
 }

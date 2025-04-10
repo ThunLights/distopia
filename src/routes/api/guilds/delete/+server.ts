@@ -11,7 +11,7 @@ import { discord } from "$lib/server/discord";
 import type { RequestHandler } from "@sveltejs/kit";
 
 export const _RequestZod = z.object({
-	guildId: z.string(),
+	guildId: z.string()
 });
 
 export type Request = z.infer<typeof _RequestZod>;

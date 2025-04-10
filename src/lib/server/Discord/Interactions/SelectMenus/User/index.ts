@@ -9,9 +9,7 @@ export class UserSelectMenu {
 	public readonly commands: UsersBase[];
 
 	constructor(client: Client) {
-		this.commands = [
-			new Owner(client),
-		];
+		this.commands = [new Owner(client)];
 	}
 
 	public async reply(interaction: UserSelectMenuInteraction<CacheType>): Promise<void> {
@@ -19,13 +17,19 @@ export class UserSelectMenu {
 			if (command.customId === interaction.customId) {
 				const result = await command.reply(interaction);
 				if (result) {
-					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
+					return void (await interaction.reply({
+						content: codeBlock(`Error: ${result.content}`),
+						flags: [MessageFlags.Ephemeral]
+					}));
 				} else {
 					return result;
 				}
 			}
 		}
 
-		return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
+		return void (await interaction.reply({
+			content: "Command Not Found",
+			flags: [MessageFlags.Ephemeral]
+		}));
 	}
 }

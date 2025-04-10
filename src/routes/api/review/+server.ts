@@ -13,7 +13,7 @@ import type { RequestHandler } from "@sveltejs/kit";
 export const _RequestZod = z.object({
 	guildId: z.string(),
 	star: z.number().min(1).max(5),
-	content: z.string().max(CHARACTER_LIMIT.review).optional(),
+	content: z.string().max(CHARACTER_LIMIT.review).optional()
 });
 
 export type Request = z.infer<typeof _RequestZod>;
@@ -36,12 +36,15 @@ export const POST = (async (e) => {
 		guildId: body.guildId,
 		userId: auth.data.id,
 		star: body.star,
-		content,
+		content
 	});
 	if (!result) {
 		return generateErrorJson("DATABASE_ERROR");
 	}
-	return json({
-		content: "SUCCESS",
-	}, { status: 200 });
+	return json(
+		{
+			content: "SUCCESS"
+		},
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

@@ -7,18 +7,14 @@ import type { User } from "$lib/server/Cache/Discord/Discord.users";
 import type { Guild } from "$lib/server/guild";
 import type { PageServerLoad } from "./$types";
 
-const searchTypes = [
-	"activeRate",
-	"level",
-	"userBump"
-] as const;
+const searchTypes = ["activeRate", "level", "userBump"] as const;
 
-export type SearchTypes = typeof searchTypes[number];
+export type SearchTypes = (typeof searchTypes)[number];
 
 function parseSearchType(content: string) {
 	for (const searchType of searchTypes) {
 		if (searchType === content) {
-			return searchType
+			return searchType;
 		}
 	}
 	return null;
@@ -26,9 +22,11 @@ function parseSearchType(content: string) {
 
 export const load = (async (e) => {
 	const searchTypeBase = e.url.searchParams.get("type");
-	const searchType: SearchTypes = searchTypeBase ? parseSearchType(searchTypeBase) ?? "activeRate" : "activeRate";
+	const searchType: SearchTypes = searchTypeBase
+		? (parseSearchType(searchTypeBase) ?? "activeRate")
+		: "activeRate";
 
 	return {
-		searchType,
-	}
+		searchType
+	};
 }) satisfies PageServerLoad;

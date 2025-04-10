@@ -29,7 +29,7 @@ import type { ButtonInteraction, CacheType, Client } from "discord.js";
 import type { ButtonsBase } from "./Buttons.base";
 
 export class Buttons {
-	public readonly buttons: ButtonsBase[]
+	public readonly buttons: ButtonsBase[];
 
 	constructor(private readonly client: Client) {
 		this.buttons = [
@@ -55,7 +55,7 @@ export class Buttons {
 			new TicketVoteEndButton(this.client),
 			new BumpNoticeContentButton(this.client),
 			new BumpNoticeContentSetButton(this.client),
-			new BumpNoticeContentCancelButton(this.client),
+			new BumpNoticeContentCancelButton(this.client)
 		];
 	}
 	async reply(interaction: ButtonInteraction<CacheType>): Promise<void> {
@@ -63,13 +63,19 @@ export class Buttons {
 			if (button.customId === interaction.customId) {
 				const result = await button.reply(interaction);
 				if (result) {
-					return void await interaction.reply({ content: codeBlock(`Error: ${result.content}`), flags: [ MessageFlags.Ephemeral ] });
+					return void (await interaction.reply({
+						content: codeBlock(`Error: ${result.content}`),
+						flags: [MessageFlags.Ephemeral]
+					}));
 				} else {
 					return result;
 				}
 			}
 		}
 
-		return void await interaction.reply({ content: "Command Not Found", flags: [ MessageFlags.Ephemeral ] });
+		return void (await interaction.reply({
+			content: "Command Not Found",
+			flags: [MessageFlags.Ephemeral]
+		}));
 	}
 }

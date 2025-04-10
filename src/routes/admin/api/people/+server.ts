@@ -22,7 +22,7 @@ export const _BodyZod = z.object({
 
 	score: z.string().array(),
 	tags: z.string().array(),
-	subAccounts: z.string().array(),
+	subAccounts: z.string().array()
 });
 
 export type Body = z.infer<typeof _BodyZod>;
@@ -38,7 +38,10 @@ export const POST = (async (e) => {
 		return generateErrorJson("BODY_FORMAT_ERROR");
 	}
 
-	if (auth.data.id === PUBLIC_OWNER_ID || await discord.bot.control.guild.isHonoraryMember(auth.data.id)) {
+	if (
+		auth.data.id === PUBLIC_OWNER_ID ||
+		(await discord.bot.control.guild.isHonoraryMember(auth.data.id))
+	) {
 		await database.dangerousPeople.score.delete(body.userId);
 		await database.dangerousPeople.tag.delete(body.userId);
 		await database.dangerousPeople.subAccount.delete(body.userId);
@@ -49,7 +52,7 @@ export const POST = (async (e) => {
 				score: undefined,
 				tags: undefined,
 				userId: undefined,
-				time: new Date(),
+				time: new Date()
 			}
 		});
 		if (!result) {
@@ -65,9 +68,12 @@ export const POST = (async (e) => {
 			await database.dangerousPeople.subAccount.update(subAccount, body.userId);
 		}
 
-		return json({
-			content: "success"
-		}, { status: 200 });
+		return json(
+			{
+				content: "success"
+			},
+			{ status: 200 }
+		);
 	}
 
 	return generateErrorJson("PERMISSION_DENIED");

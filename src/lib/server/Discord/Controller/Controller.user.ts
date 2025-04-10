@@ -14,7 +14,7 @@ export class User {
 					userId: user.id,
 					avatarUrl: user.avatarURL(),
 					username: user.username,
-					displayName: user.displayName,
+					displayName: user.displayName
 				});
 			}
 			return user;

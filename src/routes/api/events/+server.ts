@@ -10,16 +10,16 @@ import type { RequestHandler } from "@sveltejs/kit";
 export type ResponseJson = {
 	post: {
 		content: {
-			guildId: string
-			eventId: string
-			name: string
-			description: string
+			guildId: string;
+			eventId: string;
+			name: string;
+			description: string;
 			guild: {
-				name: string
-			}
-		}[]
-	}
-}
+				name: string;
+			};
+		}[];
+	};
+};
 
 export const POST = (async (e) => {
 	const result: ResponseJson["post"]["content"] = [];
@@ -29,16 +29,21 @@ export const POST = (async (e) => {
 		if (data && data.guild) {
 			const { name, description, guild } = data;
 			result.push({
-				guildId, eventId, name,
+				guildId,
+				eventId,
+				name,
 				description: description ?? "",
 				guild: {
-					name: guild.name,
+					name: guild.name
 				}
 			});
 		}
 	}
 
-	return json({
-		content: result,
-	} satisfies ResponseJson["post"], { status: 200 });
+	return json(
+		{
+			content: result
+		} satisfies ResponseJson["post"],
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

@@ -10,14 +10,14 @@ import type { RequestHandler } from "@sveltejs/kit";
 import type { Guild } from "$lib/server/guild";
 
 export const _RequestZod = z.object({
-	take: z.number().min(1).max(50),
+	take: z.number().min(1).max(50)
 });
 
 export type Request = z.infer<typeof _RequestZod>;
 
 export type Response = {
-	content: Guild[]
-	active: Guild[]
+	content: Guild[];
+	active: Guild[];
 };
 
 async function getActiveGuilds() {
@@ -31,7 +31,7 @@ async function getActiveGuilds() {
 			}
 			guilds.push(guild);
 		}
-		return guilds
+		return guilds;
 	} catch (error) {
 		errorHandling(error);
 		return [];
@@ -52,8 +52,11 @@ export const POST = (async (e) => {
 		}
 		guilds.push(guild);
 	}
-	return json({
-		content: guilds,
-		active: await getActiveGuilds(),
-	} satisfies Response, { status: 200 });
+	return json(
+		{
+			content: guilds,
+			active: await getActiveGuilds()
+		} satisfies Response,
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;

@@ -17,7 +17,7 @@ export class LateLimit {
 
 	public async fetchExpirationElements() {
 		try {
-			const limit = new Date(Date.now() - (14 * 24 * 60 * 60 * 1000));
+			const limit = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 			return await this.table.findMany({
 				where: {
 					date: {
@@ -38,7 +38,7 @@ export class LateLimit {
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data:  { date },
+					data: { date }
 				});
 			} else {
 				await this.table.create({ data: { guildId, date } });

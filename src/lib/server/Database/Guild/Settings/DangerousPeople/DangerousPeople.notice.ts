@@ -17,17 +17,17 @@ export class Notice {
 
 	public async update(guildId: string, channelId: string) {
 		try {
-			const element = await this.table.findFirst({ where: { guildId }});
+			const element = await this.table.findFirst({ where: { guildId } });
 
 			if (element) {
 				await this.table.updateMany({
 					where: { guildId },
-					data: { channelId },
-				})
+					data: { channelId }
+				});
 			} else {
 				await this.table.create({
 					data: { guildId, channelId }
-				})
+				});
 			}
 
 			return true;

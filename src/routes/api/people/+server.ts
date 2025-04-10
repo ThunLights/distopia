@@ -7,23 +7,23 @@ import { database } from "$lib/server/Database/index";
 import type { RequestHandler } from "@sveltejs/kit";
 
 const bodyZod = z.object({
-	userId: z.string(),
+	userId: z.string()
 });
 
 export type ResponseJson = {
-	userId: string
+	userId: string;
 	user: {
-		userId: string
-		type: string
-		name: string
-		title: string
-		description: string
-		time: Date
-	}
-	subAccounts: string[]
-	score: string[]
-	tags: string[]
-}
+		userId: string;
+		type: string;
+		name: string;
+		title: string;
+		description: string;
+		time: Date;
+	};
+	subAccounts: string[];
+	score: string[];
+	tags: string[];
+};
 
 export const POST = (async (e) => {
 	const body = structChecker(await e.request.json(), bodyZod);
@@ -38,11 +38,16 @@ export const POST = (async (e) => {
 		return generateErrorJson("USER_NOT_FOUND", 404);
 	}
 
-	return json({
-		userId,
-		user,
-		subAccounts: (await database.dangerousPeople.subAccount.fetch(userId)).map(value => value.userId),
-		score: await database.dangerousPeople.score.fetch(userId),
-		tags: (await database.dangerousPeople.tag.findUserTags(userId)).map(value => value.content),
-	} satisfies ResponseJson, { status: 200 });
+	return json(
+		{
+			userId,
+			user,
+			subAccounts: (await database.dangerousPeople.subAccount.fetch(userId)).map(
+				(value) => value.userId
+			),
+			score: await database.dangerousPeople.score.fetch(userId),
+			tags: (await database.dangerousPeople.tag.findUserTags(userId)).map((value) => value.content)
+		} satisfies ResponseJson,
+		{ status: 200 }
+	);
 }) satisfies RequestHandler;
