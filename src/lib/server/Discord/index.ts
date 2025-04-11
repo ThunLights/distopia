@@ -17,7 +17,7 @@ import {
 	PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID
 } from "$env/static/public";
 import { errorHandling } from "$lib/server/error";
-import { deDepulication } from "$lib/array";
+import { dedepulication } from "$lib/array";
 import { database } from "$lib/server/Database/index";
 import { DangerousPeopleClient } from "./Discord.dangerousPeople";
 
@@ -112,13 +112,13 @@ export class DiscordBotClient {
 					admins.push(adminMember.user.id);
 				}
 			}
-			for (const owner of deDepulication(owners)) {
+			for (const owner of dedepulication(owners)) {
 				const user = homeServer.members.cache.get(owner);
 				if (user) {
 					await user.roles.add(PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID);
 				}
 			}
-			for (const admin of deDepulication(admins)) {
+			for (const admin of dedepulication(admins)) {
 				const user = homeServer.members.cache.get(admin);
 				if (user) {
 					await user.roles.add(PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID);

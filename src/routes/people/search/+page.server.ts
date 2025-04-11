@@ -1,4 +1,4 @@
-import { deDepulicationStructs } from "$lib/array";
+import { dedepulicationStructs } from "$lib/array";
 import { database } from "$lib/server/Database/index";
 import { blank } from "$lib/blank";
 
@@ -35,7 +35,7 @@ export const load = (async (e) => {
 		}
 	}
 
-	elements = deDepulicationStructs(elements);
+	elements = dedepulicationStructs(elements);
 	for (const element of elements) {
 		const score = DangerousPeople.strArrToScore(
 			await database.dangerousPeople.score.fetch(element.userId)
