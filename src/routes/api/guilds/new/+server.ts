@@ -5,7 +5,7 @@ import { authorization } from "$lib/server/auth";
 import { ServerError } from "$lib/server/error";
 import { database, DatabaseError } from "$lib/server/Database";
 import { foundCategory } from "$lib/category";
-import { descriptionFormatCheck } from "$lib/description.svelte";
+import { descriptionFormatCheck } from "$lib/description";
 import { tagCountCheck, tagFormatCheck } from "$lib/tag";
 import { generateErrorJson } from "$lib/server/json";
 import { discord } from "$lib/server/discord";
