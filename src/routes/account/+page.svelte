@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 
 	import { getAccountGuilds } from "$lib/guilds.svelte";
-	import { logout } from "$lib/token.svelte";
+	import { logout } from "$lib/client/token";
 	import { redirectUrl } from "$lib/redirect.svelte";
 
 	import Meta from "$lib/components/meta.svelte";
