@@ -2,7 +2,7 @@
 	import Meta from "$lib/components/meta.svelte";
 	import People from "$lib/components/people.svelte";
 
-	import { Toast } from "$lib/toast";
+	import { Toast } from "$lib/client/toast";
 	import { DangerousPeopleTypes } from "$lib/constants";
 	import { onMount } from "svelte";
 

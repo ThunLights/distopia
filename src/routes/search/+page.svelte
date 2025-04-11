@@ -4,8 +4,8 @@
 
 	import { onMount } from "svelte";
 	import { getCategory } from "$lib/category";
-	import { guildJoin } from "$lib/join.svelte";
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { guildJoin } from "$lib/client/join.js";
+	import { createRedirectEvent } from "$lib/client/redirect.js";
 	import { generateEdge } from "$lib/edge.js";
 	import { blank } from "$lib/blank";
 
@@ -54,7 +54,7 @@
 				await guildJoin(token, guildId, name);
 			};
 		} else {
-			return redirectUrl(`https://discord.gg/${invite}`);
+			return createRedirectEvent(`https://discord.gg/${invite}`);
 		}
 	}
 </script>
@@ -151,7 +151,7 @@
 				</div>
 			</div>
 			<div>
-				<button onclick={redirectUrl(`/guilds/${guild.guildId}`)}>
+				<button onclick={createRedirectEvent(`/guilds/${guild.guildId}`)}>
 					<a href="/guilds/{guild.guildId}" class="button-a-tag">詳細を閲覧</a>
 				</button>
 				<button onclick={joinBtn(guild.guildId, guild.invite, guild.name)}>サーバーに参加</button>
@@ -235,11 +235,6 @@
 		height: 95%;
 		margin: 14px;
 	}
-	.contents > div .name {
-		margin-top: 14px;
-		font-size: 30px;
-		font-weight: 700;
-	}
 	.context {
 		overflow: hidden;
 		margin: 10px 20px;
@@ -275,16 +270,10 @@
 		.guilds {
 			grid-template-columns: 48% 48%;
 		}
-		.contents > div .name {
-			font-size: 24px;
-		}
 	}
 	@media (max-width: 800px) {
 		.guilds {
 			grid-template-columns: 98%;
-		}
-		.contents > div .name {
-			font-size: 20px;
 		}
 	}
 </style>

@@ -1,3 +1,4 @@
+import { VERSION } from "$lib/server/constants";
 import { UAParser } from "ua-parser-js";
 
 export const ssr = true;
@@ -12,6 +13,7 @@ export const load = async (e) => {
 
 	const { device } = UAParser(ua);
 	return {
+		version: VERSION,
 		isMobile: device.type === "mobile"
 	};
 };

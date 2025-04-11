@@ -3,7 +3,7 @@
 	import Footer from "$lib/components/footer.svelte";
 
 	import { date2Txt } from "$lib/date";
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { createRedirectEvent } from "$lib/client/redirect.js";
 
 	const { data } = $props();
 	const { elements } = data;
@@ -61,7 +61,7 @@
 						<p>登録日時: {date2Txt(people.time)}</p>
 					</div>
 					<div>
-						<button onclick={redirectUrl(`/people/${people.userId}`)}>詳細を閲覧</button>
+						<button onclick={createRedirectEvent(`/people/${people.userId}`)}>詳細を閲覧</button>
 					</div>
 				</div>
 			</div>

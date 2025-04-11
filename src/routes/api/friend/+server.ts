@@ -5,7 +5,7 @@ import { structChecker } from "$lib/struct";
 import { json } from "@sveltejs/kit";
 import { z } from "zod";
 import { database } from "$lib/server/Database/index";
-import { deDepulication } from "$lib/array";
+import { dedepulication } from "$lib/array";
 import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
 
 import type { RequestHandler } from "@sveltejs/kit";
@@ -35,7 +35,7 @@ export const POST = (async (e) => {
 		time: new Date(),
 		nsfw: body.nsfw
 	});
-	for (const tag of deDepulication(body.tags)) {
+	for (const tag of dedepulication(body.tags)) {
 		await database.friend.tag.update(auth.content.id, tag);
 	}
 	return json({}, { status: 200 });

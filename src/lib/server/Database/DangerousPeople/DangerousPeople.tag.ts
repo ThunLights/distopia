@@ -1,4 +1,4 @@
-import { deDepulication } from "$lib/array";
+import { dedepulication } from "$lib/array";
 import { errorHandling } from "$lib/server/error";
 
 import type { Prisma } from "@prisma/client";
@@ -9,7 +9,7 @@ export class DangerousPeopleTag {
 
 	public async search(content: string) {
 		try {
-			return deDepulication(
+			return dedepulication(
 				await this.table.findMany({
 					where: {
 						content: {

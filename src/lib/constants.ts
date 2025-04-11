@@ -159,3 +159,5 @@ export const INVALID_TAG_CHARACTOR = ["\n"];
 export const DangerousPeopleTypes = ["criminal", "disturber", "madman", "other"] as const;
 
 export const DangerousPeopleTypeZod = z.enum(DangerousPeopleTypes);
+
+export const DISCORD_INVITE_LINK = "https://discord.gg/QWUxsxWyYv";

@@ -1,4 +1,4 @@
-import { deDepulication } from "$lib/array";
+import { dedepulication } from "$lib/array";
 import { errorHandling, ServerError } from "$lib/server/error";
 
 import type { Prisma } from "@prisma/client";
@@ -28,7 +28,7 @@ export class GuildTagTable {
 
 	async update(guildId: string, guildTags: string[]) {
 		try {
-			const tags = deDepulication(guildTags);
+			const tags = dedepulication(guildTags);
 			await this.table.deleteMany({
 				where: {
 					guildId

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 
-	import { getAccountGuilds } from "$lib/guilds.svelte";
-	import { logout } from "$lib/token.svelte";
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { getAccountGuilds } from "$lib/client/guilds";
+	import { logout } from "$lib/client/token";
+	import { createRedirectEvent } from "$lib/client/redirect";
 
 	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
@@ -62,10 +62,10 @@
 				<div>
 					<p class="title">アカウント操作</p>
 					<div>
-						<button class="account-operation-btn" onclick={redirectUrl("/account/friend")}
+						<button class="account-operation-btn" onclick={createRedirectEvent("/account/friend")}
 							>フレンド募集する</button
 						>
-						<button class="account-operation-btn" onclick={redirectUrl("/account/settings")}
+						<button class="account-operation-btn" onclick={createRedirectEvent("/account/settings")}
 							>アカウント設定</button
 						>
 						<button class="account-operation-btn" onclick={logout}>ログアウト</button>
