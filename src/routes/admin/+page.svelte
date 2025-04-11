@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Meta from "$lib/components/meta.svelte";
 
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { createRedirectEvent } from "$lib/client/redirect.js";
 	import { onMount } from "svelte";
 
 	const { data } = $props();
@@ -22,7 +22,7 @@
 				<p>色々操作できるよ!!!</p>
 			</div>
 			<div>
-				<button onclick={redirectUrl("/admin/people")}>危険人物関係</button>
+				<button onclick={createRedirectEvent("/admin/people")}>危険人物関係</button>
 			</div>
 		</div>
 	</div>
