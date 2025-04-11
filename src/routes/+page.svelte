@@ -3,7 +3,7 @@
 	import { home } from "$lib/client/api";
 	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
-	import { guildJoin } from "$lib/join.svelte";
+	import { guildJoin } from "$lib/client/join";
 	import { generateEdge } from "$lib/edge";
 
 	import Meta from "$lib/components/meta.svelte";

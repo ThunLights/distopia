@@ -4,7 +4,7 @@
 
 	import { onMount } from "svelte";
 	import { getCategory } from "$lib/category";
-	import { guildJoin } from "$lib/join.svelte";
+	import { guildJoin } from "$lib/client/join.js";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { generateEdge } from "$lib/edge.js";
 	import { blank } from "$lib/blank";
