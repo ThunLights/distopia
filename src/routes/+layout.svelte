@@ -3,22 +3,9 @@
 	import Header from "$lib/components/header.svelte";
 
 	import { SvelteToast } from "@zerodevx/svelte-toast";
-	import { headerStore } from "$lib/stores";
-	import { onMount } from "svelte";
 
 	const { data, children } = $props();
 	const { auth, isMobile } = data;
-	let loginBlock = $state(true);
-
-	onMount(() => {
-		headerStore.set({
-			loginBlock: true
-		});
-	});
-
-	headerStore.subscribe((value) => {
-		loginBlock = value.loginBlock;
-	});
 </script>
 
 <svelte:head>
@@ -33,5 +20,5 @@
 
 <SvelteToast />
 
-<Header userData={auth} {loginBlock} />
+<Header userData={auth} />
 {@render children()}
