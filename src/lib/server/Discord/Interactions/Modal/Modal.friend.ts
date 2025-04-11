@@ -6,7 +6,7 @@ import { z } from "zod";
 import { MessageFlags } from "discord.js";
 import { compressTxt } from "$lib/compress";
 import { CHARACTER_LIMIT } from "$lib/constants";
-import { deDepulication } from "$lib/array";
+import { dedepulication } from "$lib/array";
 
 import type {
 	ModalSubmitInteraction,
@@ -33,7 +33,7 @@ export class FriendModal extends ModalsBase {
 	): Promise<
 		(InteractionReplyOptions & { fetchReply: true }) | string | MessagePayload | ModalsError | null
 	> {
-		const tags = deDepulication(
+		const tags = dedepulication(
 			await this.tagsChecker(interaction.fields.getTextInputValue("tags").split("\n"))
 		);
 		const nsfw = interaction.fields.getTextInputValue("nsfw") === "ok";

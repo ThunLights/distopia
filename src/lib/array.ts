@@ -1,8 +1,8 @@
 import type { Guild } from "$lib/server/guild";
 
-export const deDepulication = <T>(arr: T[]): T[] => Array.from(new Set(arr));
+export const dedepulication = <T>(arr: T[]): T[] => Array.from(new Set(arr));
 
-export function deDepulicationObject<T extends Guild>(arr: T[]): T[] {
+export function dedepulicationObject<T extends Guild>(arr: T[]): T[] {
 	const result: T[] = [];
 	for (const element of arr) {
 		if (result.map((value) => value.guildId).includes(element.guildId)) continue;
@@ -11,7 +11,7 @@ export function deDepulicationObject<T extends Guild>(arr: T[]): T[] {
 	return result;
 }
 
-export function deDepulicationStructs<T extends object>(arr: T[]): T[] {
+export function dedepulicationStructs<T extends object>(arr: T[]): T[] {
 	const result: T[] = [];
 	const stringElements: string[] = [];
 
