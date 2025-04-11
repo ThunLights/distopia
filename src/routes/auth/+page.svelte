@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	//	import { headerStore } from "$lib/stores";
 
 	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
@@ -15,9 +14,6 @@
 	);
 
 	onMount(() => {
-		//		headerStore.set({
-		//			loginBlock: false,
-		//		});
 		if (content) {
 			localStorage.setItem("token", content.token);
 			setTimeout(async () => {
