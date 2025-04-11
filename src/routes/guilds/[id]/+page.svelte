@@ -7,7 +7,7 @@
 	import { token2data } from "$lib/client/auth";
 	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
-	import { guildJoin } from "$lib/join.svelte";
+	import { guildJoin } from "$lib/client/join.js";
 	import { generateEdge } from "$lib/edge";
 	import { Toast } from "$lib/client/toast";
 

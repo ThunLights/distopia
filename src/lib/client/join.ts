@@ -1,4 +1,4 @@
-import { Toast } from "./client/toast";
+import { Toast } from "./toast";
 
 import type { Response } from "$routes/api/auth/join/+server";
 
