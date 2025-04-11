@@ -5,7 +5,7 @@
 
 	import { onMount } from "svelte";
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "$lib/constants";
-	import { toast } from "@zerodevx/svelte-toast";
+	import { Toast } from "$lib/client/toast";
 
 	const { data } = $props();
 	let loginData = $state(data.auth);
@@ -25,13 +25,7 @@
 
 	async function register() {
 		if (!loginData) {
-			toast.push("認証情報エラー", {
-				theme: {
-					"--toastColor": "mintcream",
-					"--toastBackground": "rgb(168, 13, 13)",
-					"--toastBarBackground": "#2F855A"
-				}
-			});
+			Toast.error("認証情報エラー");
 			return;
 		}
 		const response = await fetch("/api/friend", {
@@ -47,21 +41,9 @@
 			})
 		});
 		if (response.ok) {
-			toast.push("作成完了", {
-				theme: {
-					"--toastColor": "mintcream",
-					"--toastBackground": "rgba(72,187,120,0.9)",
-					"--toastBarBackground": "#2F855A"
-				}
-			});
+			Toast.success("作成完了");
 		} else {
-			toast.push("エラー", {
-				theme: {
-					"--toastColor": "mintcream",
-					"--toastBackground": "rgb(168, 13, 13)",
-					"--toastBarBackground": "#2F855A"
-				}
-			});
+			Toast.error("エラー");
 		}
 		location.href = "/account";
 	}

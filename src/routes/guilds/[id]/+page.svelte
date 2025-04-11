@@ -7,9 +7,9 @@
 	import { token2data } from "$lib/auth.svelte";
 	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
-	import { toast } from "@zerodevx/svelte-toast";
 	import { guildJoin } from "$lib/join.svelte";
-	import { generateEdge } from "$lib/edge.js";
+	import { generateEdge } from "$lib/edge";
+	import { Toast } from "$lib/client/toast";
 
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
 
@@ -37,11 +37,7 @@
 
 	function joinBtn() {
 		if (!guild) {
-			toast.push(`ERROR: GUILD_DATA_NOT_FOUND`, {
-				theme: {
-					"--toastBackground": "rgb(168, 13, 13)"
-				}
-			});
+			Toast.error(`ERROR: GUILD_DATA_NOT_FOUND`);
 			return () => {};
 		}
 		const { guildId, invite, name } = guild;
