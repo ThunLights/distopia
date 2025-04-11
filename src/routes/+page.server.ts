@@ -1,4 +1,4 @@
-import { getMeridiem } from "$lib/time.svelte";
+import { getMeridiem } from "$lib/time";
 
 import type { PageServerLoad } from "./$types";
 
