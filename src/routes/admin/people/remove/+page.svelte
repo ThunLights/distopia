@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Meta from "$lib/components/meta.svelte";
 
-	import { Toast } from "$lib/toast";
+	import { Toast } from "$lib/client/toast";
 	import { onMount } from "svelte";
 
 	const { data } = $props();

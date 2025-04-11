@@ -3,7 +3,7 @@
 	import Footer from "$lib/components/footer.svelte";
 
 	import { onMount } from "svelte";
-	import { toast } from "@zerodevx/svelte-toast";
+	import { Toast } from "$lib/client/toast";
 
 	import type { PageData } from "./$types";
 
@@ -30,11 +30,7 @@
 			location.href = "/";
 		} else {
 			const json = await response.json();
-			toast.push(`ERROR: ${json.content}`, {
-				theme: {
-					"--toastBackground": "rgb(168, 13, 13)"
-				}
-			});
+			Toast.error(`ERROR: ${json.content}`);
 		}
 	}
 </script>

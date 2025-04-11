@@ -2,7 +2,7 @@
 	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
 
-	import { toast } from "@zerodevx/svelte-toast";
+	import { Toast } from "$lib/client/toast";
 	import { getCategory } from "$lib/category";
 	import { blank } from "$lib/blank";
 	import { CHARACTER_LIMIT } from "$lib/constants";
@@ -29,13 +29,7 @@
 
 	async function register() {
 		if (!auth) {
-			toast.push("認証情報エラー", {
-				theme: {
-					"--toastColor": "mintcream",
-					"--toastBackground": "rgb(168, 13, 13)",
-					"--toastBarBackground": "#2F855A"
-				}
-			});
+			Toast.error("認証情報エラー");
 			return;
 		}
 		const response = await fetch("/api/review", {
@@ -53,13 +47,7 @@
 		if (response.ok) {
 			location.href = `/guilds/${guildId}`;
 		} else {
-			toast.push("エラーが発生しました。再ロードしてください", {
-				theme: {
-					"--toastColor": "mintcream",
-					"--toastBackground": !response.ok ? "rgb(168, 13, 13)" : "rgba(72,187,120,0.9)",
-					"--toastBarBackground": "#2F855A"
-				}
-			});
+			Toast.error("エラーが発生しました。再ロードしてください");
 		}
 	}
 </script>
