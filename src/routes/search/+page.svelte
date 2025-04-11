@@ -5,7 +5,7 @@
 	import { onMount } from "svelte";
 	import { getCategory } from "$lib/category";
 	import { guildJoin } from "$lib/client/join.js";
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { createRedirectEvent } from "$lib/client/redirect.js";
 	import { generateEdge } from "$lib/edge.js";
 	import { blank } from "$lib/blank";
 
@@ -54,7 +54,7 @@
 				await guildJoin(token, guildId, name);
 			};
 		} else {
-			return redirectUrl(`https://discord.gg/${invite}`);
+			return createRedirectEvent(`https://discord.gg/${invite}`);
 		}
 	}
 </script>
@@ -151,7 +151,7 @@
 				</div>
 			</div>
 			<div>
-				<button onclick={redirectUrl(`/guilds/${guild.guildId}`)}>
+				<button onclick={createRedirectEvent(`/guilds/${guild.guildId}`)}>
 					<a href="/guilds/{guild.guildId}" class="button-a-tag">詳細を閲覧</a>
 				</button>
 				<button onclick={joinBtn(guild.guildId, guild.invite, guild.name)}>サーバーに参加</button>

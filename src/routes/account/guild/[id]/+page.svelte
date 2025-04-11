@@ -5,7 +5,7 @@
 	import { onMount } from "svelte";
 	import { getPublicGuild, GuildsApiError } from "$lib/client/guilds";
 	import { CATEGORIES } from "$lib/category";
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { createRedirectEvent } from "$lib/client/redirect";
 
 	import type { PageData } from "./$types";
 	import type { Response } from "$routes/api/guilds/public/[id]/+server";
@@ -67,10 +67,11 @@
 						<button>イベントブーストを設定</button>
 					</div>
 					<div>
-						<button onclick={redirectUrl(`/guilds/${guildId}`)}>サーバーページを見る</button>
+						<button onclick={createRedirectEvent(`/guilds/${guildId}`)}>サーバーページを見る</button
+						>
 					</div>
 					<div>
-						<button onclick={redirectUrl(`/account/guild/${guildId}/delete`)}
+						<button onclick={createRedirectEvent(`/account/guild/${guildId}/delete`)}
 							>サーバーをDistopiaから消す</button
 						>
 					</div>
@@ -78,7 +79,7 @@
 				<div class="page">
 					<div>
 						<p class="title">
-							現在の設定 <button onclick={redirectUrl(`/account/guild/${guildId}/edit`)}
+							現在の設定 <button onclick={createRedirectEvent(`/account/guild/${guildId}/edit`)}
 								>編集</button
 							>
 						</p>

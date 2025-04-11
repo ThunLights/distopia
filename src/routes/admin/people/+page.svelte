@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Meta from "$lib/components/meta.svelte";
 
-	import { redirectUrl } from "$lib/redirect.svelte.js";
+	import { createRedirectEvent } from "$lib/client/redirect.js";
 	import { onMount } from "svelte";
 
 	const { data } = $props();
@@ -22,9 +22,9 @@
 				<p>どのような操作をしますか？</p>
 			</div>
 			<div>
-				<button onclick={redirectUrl("/admin/people/add")}>追加</button>
-				<button onclick={redirectUrl("/admin/people/update")}>更新</button>
-				<button onclick={redirectUrl("/admin/people/remove")}>削除</button>
+				<button onclick={createRedirectEvent("/admin/people/add")}>追加</button>
+				<button onclick={createRedirectEvent("/admin/people/update")}>更新</button>
+				<button onclick={createRedirectEvent("/admin/people/remove")}>削除</button>
 			</div>
 		</div>
 	</div>

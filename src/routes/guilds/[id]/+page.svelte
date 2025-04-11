@@ -6,7 +6,7 @@
 	import { onMount } from "svelte";
 	import { token2data } from "$lib/client/auth";
 	import { getCategory } from "$lib/category";
-	import { redirectUrl } from "$lib/redirect.svelte";
+	import { createRedirectEvent } from "$lib/client/redirect.js";
 	import { guildJoin } from "$lib/client/join.js";
 	import { generateEdge } from "$lib/edge";
 	import { Toast } from "$lib/client/toast";
@@ -47,7 +47,7 @@
 				await guildJoin(token, guildId, name);
 			};
 		} else {
-			return redirectUrl(`https://discord.gg/${invite}`);
+			return createRedirectEvent(`https://discord.gg/${invite}`);
 		}
 	}
 </script>
@@ -172,7 +172,7 @@
 			<div class="context">
 				<p class="name">
 					レビュー {#if loginData}
-						<button class="review-button" onclick={redirectUrl(`/guilds/${guildId}/review`)}
+						<button class="review-button" onclick={createRedirectEvent(`/guilds/${guildId}/review`)}
 							><a href="/guilds/{guildId}/review">レビューを投稿する</a></button
 						>
 					{/if}
