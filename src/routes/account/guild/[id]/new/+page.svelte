@@ -4,7 +4,7 @@
 	import Guild from "$lib/components/guild.svelte";
 
 	import { onMount } from "svelte";
-	import { getTmpGuild, GuildsApiError } from "$lib/guilds.svelte";
+	import { getTmpGuild, GuildsApiError } from "$lib/client/guilds";
 
 	import type { PageData } from "./$types";
 
