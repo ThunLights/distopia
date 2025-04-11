@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 
-	import { getAccountGuilds } from "$lib/guilds.svelte";
+	import { getAccountGuilds } from "$lib/client/guilds";
 	import { logout } from "$lib/client/token";
 	import { redirectUrl } from "$lib/redirect.svelte";
 

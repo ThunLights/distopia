@@ -3,7 +3,7 @@
 	import Footer from "$lib/components/footer.svelte";
 
 	import { onMount } from "svelte";
-	import { getPublicGuild, GuildsApiError } from "$lib/guilds.svelte";
+	import { getPublicGuild, GuildsApiError } from "$lib/client/guilds";
 	import { CATEGORIES } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 
