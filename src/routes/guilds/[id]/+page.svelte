@@ -4,7 +4,7 @@
 	import Icon from "$lib/components/icon.svelte";
 
 	import { onMount } from "svelte";
-	import { token2data } from "$lib/auth.svelte";
+	import { token2data } from "$lib/client/auth";
 	import { getCategory } from "$lib/category";
 	import { redirectUrl } from "$lib/redirect.svelte";
 	import { guildJoin } from "$lib/join.svelte";
