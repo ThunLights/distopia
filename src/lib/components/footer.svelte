@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DISCORD_INVITE_LINK } from "$lib/invite";
+	import { DISCORD_INVITE_LINK } from "$lib/constants";
 
 	export let fixed = false;
 </script>
