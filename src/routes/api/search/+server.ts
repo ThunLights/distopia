@@ -3,7 +3,7 @@ import { z } from "zod";
 import { structChecker } from "$lib/struct";
 import { generateErrorJson } from "$lib/server/json";
 import { blank } from "$lib/blank";
-import { deDepulicationObject } from "$lib/array";
+import { dedepulicationObject } from "$lib/array";
 import { errorHandling } from "$lib/server/error";
 import { database } from "$lib/server/Database";
 import { id2Guild } from "$lib/server/guild";
@@ -66,7 +66,7 @@ export const POST = (async (e) => {
 	const words = body.content.split(/\s+/g);
 	const nameElement = await searchName(words);
 	const tagElement = await searchTag(words);
-	const guilds = deDepulicationObject(nameElement.concat(tagElement));
+	const guilds = dedepulicationObject(nameElement.concat(tagElement));
 	return json(
 		{
 			guilds

@@ -3,7 +3,7 @@
 
 	import { CATEGORIES } from "../category";
 	import { CHARACTER_LIMIT, TAG_COUNT_LIMIT } from "../constants";
-	import { descriptionFormatCheck } from "../description.svelte";
+	import { descriptionFormatCheck } from "../description";
 
 	type Guild = {
 		guildId: string;

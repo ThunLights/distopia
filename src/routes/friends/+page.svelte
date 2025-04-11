@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
-	import { toast } from "@zerodevx/svelte-toast";
+
+	import { Toast } from "$lib/client/toast.js";
 
 	const { data } = $props();
 	const { friends } = data;
@@ -9,13 +10,7 @@
 	function copy(username: string) {
 		return async () => {
 			await navigator.clipboard.writeText(username);
-			toast.push("コピーしました。", {
-				theme: {
-					"--toastColor": "mintcream",
-					"--toastBackground": "rgba(72,187,120,0.9)",
-					"--toastBarBackground": "#2F855A"
-				}
-			});
+			Toast.success("コピーしました。");
 		};
 	}
 </script>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DISCORD_INVITE_LINK } from "$lib/invite";
+	import { DISCORD_INVITE_LINK } from "$lib/constants";
 
 	export let fixed = false;
 </script>
@@ -7,6 +7,7 @@
 <footer class={fixed ? "fixed" : ""}>
 	<p>Contact: <a href={DISCORD_INVITE_LINK}>Official Discord Server</a></p>
 	<p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
+	<p>Distopia</p>
 </footer>
 
 <style>
