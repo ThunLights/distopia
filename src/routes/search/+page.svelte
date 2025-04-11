@@ -235,11 +235,6 @@
 		height: 95%;
 		margin: 14px;
 	}
-	.contents > div .name {
-		margin-top: 14px;
-		font-size: 30px;
-		font-weight: 700;
-	}
 	.context {
 		overflow: hidden;
 		margin: 10px 20px;
@@ -275,16 +270,10 @@
 		.guilds {
 			grid-template-columns: 48% 48%;
 		}
-		.contents > div .name {
-			font-size: 24px;
-		}
 	}
 	@media (max-width: 800px) {
 		.guilds {
 			grid-template-columns: 98%;
-		}
-		.contents > div .name {
-			font-size: 20px;
 		}
 	}
 </style>
