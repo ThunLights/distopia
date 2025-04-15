@@ -1,10 +1,10 @@
 import { dedepulicationStructs } from "$lib/array";
-import { database } from "$lib/server/Database/index";
 import { blank } from "$lib/blank";
+import { DPDB } from "$lib/dangerousPeople";
 
 import type { PageServerLoad } from "./$types";
 import type { Element } from "$lib/server/Database/DangerousPeople/index";
-import { DangerousPeople } from "$lib/dangerousPeople";
+import type { DPDBFormat } from "$lib/dangerousPeople";
 
 export type Elements = Array<Element & { tags?: string[]; score?: number }>;
 
@@ -19,35 +19,29 @@ export const load = (async (e) => {
 		};
 	}
 
-	let elements: Elements = [];
+	const elements: DPDBFormat = [];
 
-	for (const word of words) {
-		elements = elements.concat(
-			(await database.dangerousPeople.fetch(word, { partial: true })) ?? []
-		);
-		elements = elements.concat(await database.dangerousPeople.search(word));
-
-		for (const userId of await database.dangerousPeople.tag.search(word)) {
-			const user = await database.dangerousPeople.fetch(userId);
-			if (user) {
-				elements.push(user);
+	for (const data of DPDB) {
+		const { userId } = data;
+		if (words.includes(userId)) {
+			elements.push(data);
+			continue;
+		}
+		for (const word of words) {
+			if (
+				data.name.includes(word) ||
+				data.title.includes(word) ||
+				data.description.includes(word) ||
+				data.tags.includes(word)
+			) {
+				elements.push(data);
+				continue;
 			}
 		}
 	}
 
-	elements = dedepulicationStructs(elements);
-	for (const element of elements) {
-		const score = DangerousPeople.strArrToScore(
-			await database.dangerousPeople.score.fetch(element.userId)
-		);
-		const tags = await database.dangerousPeople.tag.findUserTags(element.userId);
-
-		element.score = score;
-		element.tags = tags.map((value) => value.content);
-	}
-
 	return {
 		searchWord: decodeURIComponent(searchWord),
-		elements
+		elements: dedepulicationStructs(elements)
 	};
 }) satisfies PageServerLoad;

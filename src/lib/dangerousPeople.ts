@@ -1,3 +1,17 @@
+import { DangerousPeopleTypes } from "$lib/constants";
+
+export type DPDBFormat = {
+	userId: string;
+	type: (typeof DangerousPeopleTypes)[number];
+	name: string;
+	title: string;
+	description: string;
+	time: Date;
+	score: Array<Score>;
+	subAccounts: string[];
+	tags: string[];
+}[];
+
 export type Element = {
 	id: string;
 	score: number;
@@ -69,7 +83,7 @@ export class DangerousPeople {
 }
 
 //上からの追加をお願いします。
-export const DPDB = [
+export const DPDB: DPDBFormat = [
 	{
 		userId: "1185887801506541624",
 		name: "Nika",
@@ -528,14 +542,4 @@ export const DPDB = [
 		tags: ["トラブルメイカー", "ヤバいやつ", "話が通じない"],
 		score: ["madman"]
 	}
-] satisfies Array<{
-	userId: string;
-	type: string;
-	name: string;
-	title: string;
-	description: string;
-	time: Date;
-	score: Array<Score>;
-	subAccounts: string[];
-	tags: string[];
-}>;
+];
