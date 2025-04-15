@@ -5,7 +5,7 @@
 	import Meta from "$lib/components/meta.svelte";
 
 	const { data } = $props();
-	const { userId, user, tags, score, subAccounts } = data;
+	const { user, userId } = data;
 	const title = user ? `「${user.name}」は危険人物です。` : `「${userId}」は登録されていません`;
 </script>
 
@@ -28,7 +28,7 @@
 				<div>
 					<p class="sub-title">タグ</p>
 					<div class="tags">
-						{#each tags as tag (tag)}
+						{#each user.tags as tag (tag)}
 							<div class="tag">
 								<p class="content">{tag}</p>
 							</div>
@@ -36,7 +36,7 @@
 					</div>
 				</div>
 				<div>
-					<p class="sub-title">危険指数: {DangerousPeople.strArrToScore(score)}</p>
+					<p class="sub-title">危険指数: {DangerousPeople.strArrToScore(user.score)}</p>
 					<table>
 						<thead>
 							<tr>
@@ -45,7 +45,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each score as element (element)}
+							{#each user.score as element (element)}
 								<tr>
 									<th><p>{DangerousPeople.strToScore(element)}</p></th>
 									<td><p>{DangerousPeople.propertyToContent(element)}</p></td>
@@ -55,8 +55,8 @@
 					</table>
 				</div>
 				<div class="info">
-					{#if subAccounts.length}
-						<p>サブ垢: {subAccounts.join(", ")}</p>
+					{#if user.subAccounts.length}
+						<p>サブ垢: {user.subAccounts.join(", ")}</p>
 					{/if}
 					<p>理由: {user.title}</p>
 					<p>識別タイプ: {user.type}</p>
@@ -72,7 +72,7 @@
 		</div>
 	</div>
 </main>
-<Footer></Footer>
+<Footer />
 
 <style>
 	main {
