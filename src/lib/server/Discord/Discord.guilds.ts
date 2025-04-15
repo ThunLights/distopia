@@ -1,4 +1,4 @@
-import { DangerousPeople } from "$lib/dangerousPeople";
+import { DangerousPeople, DPDB } from "$lib/dangerousPeople";
 import { database, DatabaseError } from "../Database/index";
 import { ChannelType, Client, EmbedBuilder } from "discord.js";
 
@@ -45,7 +45,14 @@ export class GuildClient {
 
 	public async guildMemberAdd(member: GuildMember): Promise<void> {
 		try {
-			const dangerousPeople = await database.dangerousPeople.fetch(member.user.id);
+			const dangerousPeople = await (async () => {
+				for (const data of DPDB) {
+					if (data.userId === member.id) {
+						return data;
+					}
+				}
+				return null;
+			})();
 			const guild = await database.guildTables.guild.id2Data(member.guild.id);
 
 			if (dangerousPeople) {
@@ -53,9 +60,7 @@ export class GuildClient {
 					member.guild.id
 				);
 				const ban = await database.guildTables.settings.dangerousPeople.ban.fetch(member.guild.id);
-				const score = DangerousPeople.strArrToScore(
-					await database.dangerousPeople.score.fetch(member.id)
-				);
+				const score = DangerousPeople.strArrToScore(dangerousPeople.score);
 				const isBanUser = ban && ban.score <= score;
 				const registeredChannels = notice ? this.client.channels.cache.get(notice.channelId) : null;
 				const channel =
