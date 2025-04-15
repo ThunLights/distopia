@@ -1,8 +1,10 @@
 <script lang="ts">
 	import Meta from "$lib/components/meta.svelte";
 	import Footer from "$lib/components/footer.svelte";
-	import { createRedirectEvent } from "$lib/client/redirect.js";
-	import { date2Txt } from "$lib/date.js";
+
+	import { createRedirectEvent } from "$lib/client/redirect";
+	import { date2Txt } from "$lib/date";
+	import { DangerousPeople } from "$lib/dangerousPeople";
 
 	const { data } = $props();
 	const { peoples, count } = data;
@@ -68,7 +70,7 @@
 						<div class="info">
 							<p>理由: {people.title}</p>
 							<p>識別タイプ: {people.type}</p>
-							<p>危険度: {people.score}</p>
+							<p>危険度: {DangerousPeople.strArrToScore(people.score)}</p>
 							<p>タグ: {people.tags.length ? people.tags.join(", ") : "未設定"}</p>
 							<p>登録日時: {date2Txt(people.time)}</p>
 						</div>
