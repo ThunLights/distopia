@@ -3,7 +3,8 @@
 	import Footer from "$lib/components/footer.svelte";
 
 	import { date2Txt } from "$lib/date";
-	import { createRedirectEvent } from "$lib/client/redirect.js";
+	import { createRedirectEvent } from "$lib/client/redirect";
+	import { DangerousPeople } from "$lib/dangerousPeople";
 
 	const { data } = $props();
 	const { elements } = data;
@@ -56,7 +57,7 @@
 					<div class="info">
 						<p>理由: {people.title}</p>
 						<p>識別タイプ: {people.type}</p>
-						<p>危険度: {people.score ?? 0}</p>
+						<p>危険度: {DangerousPeople.strArrToScore(people.score) ?? 0}</p>
 						<p>タグ: {people.tags ? people.tags.join(", ") : "タグなし"}</p>
 						<p>登録日時: {date2Txt(people.time)}</p>
 					</div>
