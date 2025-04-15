@@ -1,18 +1,18 @@
-import { database } from "$lib/server/Database/index";
+import { DPDB } from "$lib/dangerousPeople";
 
 import type { PageServerLoad } from "./$types";
 
 export const load = (async (e) => {
 	const { userId } = e.params;
-	const user = await database.dangerousPeople.fetch(userId);
 
-	return {
-		userId,
-		user,
-		subAccounts: (await database.dangerousPeople.subAccount.fetch(userId)).map(
-			(value) => value.userId
-		),
-		score: await database.dangerousPeople.score.fetch(userId),
-		tags: (await database.dangerousPeople.tag.findUserTags(userId)).map((value) => value.content)
-	};
+	for (const data of DPDB) {
+		if (data.userId === userId) {
+			return {
+				userId,
+				user: data
+			};
+		}
+	}
+
+	return { userId, user: null };
 }) satisfies PageServerLoad;
