@@ -9,7 +9,6 @@ import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
 import { Panel } from "./Panel/index";
 import { DatabaseBlackList } from "./Database.blacklist";
-import { Ticket } from "./Ticket/index";
 
 export class DatabaseError {
 	constructor(public readonly content: string) {}
@@ -29,7 +28,6 @@ export class DatabaseClient {
 	public readonly rankingPanel = new DatabaseRankingPanelTables();
 	public readonly dangerousPeople = new DangerousPeople();
 	public readonly panel = new Panel();
-	public readonly ticket = new Ticket();
 }
 
 export const database = new DatabaseClient();

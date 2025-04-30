@@ -15,12 +15,6 @@ import { MessageFlags } from "discord.js";
 import { BumpRoleButton } from "./Buttons.bumpRole";
 import { BumpRoleCancelButton } from "./Buttons.bumpRoleCancel";
 import { RankingUserBumpButton } from "./Buttons.rankingUserBump";
-import { TicketCreateButton } from "./Buttons.ticketCreate";
-import { TicketCloseButton } from "./Buttons.ticketClose";
-import { TicketVoteButton } from "./Buttons.ticketVote";
-import { TicketVoteAgreeButton } from "./Buttons.ticketVoteAgree";
-import { TicketVoteDisagreeButton } from "./Buttons.ticketVoteDisagree";
-import { TicketVoteEndButton } from "./Buttons.ticketVoteEnd";
 import { BumpNoticeContentButton } from "./Buttons.bumpNoticeContent";
 import { BumpNoticeContentSetButton } from "./Buttons.bumpNoticeContentSet";
 import { BumpNoticeContentCancelButton } from "./Buttons.bumpNoticeContentCancel";
@@ -47,12 +41,6 @@ export class Buttons {
 			new ActingOwnerCancelButton(this.client),
 			new BumpRoleButton(this.client),
 			new BumpRoleCancelButton(this.client),
-			new TicketCreateButton(this.client),
-			new TicketVoteButton(this.client),
-			new TicketVoteAgreeButton(this.client),
-			new TicketVoteDisagreeButton(this.client),
-			new TicketCloseButton(this.client),
-			new TicketVoteEndButton(this.client),
 			new BumpNoticeContentButton(this.client),
 			new BumpNoticeContentSetButton(this.client),
 			new BumpNoticeContentCancelButton(this.client)
