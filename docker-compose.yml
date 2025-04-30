@@ -1,0 +1,17 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: distopia
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-store:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "0000"
+      POSTGRES_DB: "test"
+      POSTGRES_HOST_AUTH_METHOD: trust
+volumes:
+  db-store:
