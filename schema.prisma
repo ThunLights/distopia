@@ -1,98 +1,64 @@
 datasource db {
-    provider = "sqlite"
-    url      = "file:./db/database.sqlite3"
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
 generator client {
     provider = "prisma-client-js"
+    output   = "./node_modules/.prisma/client"
 }
 
-//ユーザーの為のテーブル
 model User {
     id           String @id
     username     String
     accessToken  String
     refreshToken String
     time         BigInt
+
+    email       String?
+    avatar      String?
+    bumpCounter Int?
+
+    tokens UserToken[]
 }
 
-model Token {
-    id    String
-    token String @id
+model UserToken {
+    userId String
+    token  String @id
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Email {
-    id      String @id
-    content String
-}
-
-model Avatar {
-    id      String @id
-    content String
-}
-
-//ブラックリスト
-model BlackList {
-    userId      String @id
-    description String
-}
-
-//重要人物システム用
-model DangerousPeople {
-    userId      String @id
-    name        String
-    type        String
-    title       String
-    description String
-    time        DateTime
-}
-
-model DangerousPeopleSubAccount {
-    userId String @id
-    mainId String
-}
-
-model DangerousPeopleScore {
-    userId  String
-    content String
-
-    @@id([userId, content])
-}
-
-model DangerousPeopleTag {
-    userId  String
-    content String
-
-    @@id([userId, content])
-}
-
-//フレンド募集用
 model Friend {
-    userId      String @id
+    userId      String   @id
     username    String
     description String
     nsfw        Boolean
     time        DateTime
+    tags        String[]
 }
 
-model FriendTag {
-    userId  String
-    content String
-
-    @@id([userId, content])
-}
-
-//登録サーバーの為のテーブル
 model Guild {
-    guildId     String @id
+    guildId String @id
 
-    name        String
-    invite      String
-    icon        String?
-    banner      String?
+    name   String
+    invite String
+    icon   String?
+    banner String?
 
     category    String
     description String
+
+    nsfw     Boolean?
+    bumpTime DateTime?
+
+    tags String[]
+
+    reviews  GuildReview[]
+    settings GuildSetting[]
+    infos    GuildInfo[]
+    datas    GuildData[]
 }
 
 model GuildReview {
@@ -101,197 +67,79 @@ model GuildReview {
     star    Int
     content String?
 
+    guild Guild @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
     @@id([userId, guildId])
 }
 
-model GuildTag {
+model GuildData {
     guildId String
-    tag     String
+    date    DateTime
 
-    @@id([guildId, tag])
+    vcMembers   String[]
+    newMembers  Int?
+    newMessages Int?
+    vcUpperTwo  Int?
+
+    guild Guild @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+    @@id([guildId, date])
+}
+
+model GuildInfo {
+    guildId String @id
+
+    levelRank BigInt?
+    rateRank  BigInt?
+    rateMax   BigInt?
+
+    removed     DateTime?
+    bumpCounter Int?
+    activeRate  BigInt?
+
+    level BigInt?
+    point BigInt?
+
+    guild Guild @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+}
+
+model GuildSetting {
+    guildId           String   @id
+    actingOwner       String?
+    bumpNotice        Boolean?
+    bumpNoticeRole    String?
+    bumpNoticeContent String?
+    dpNoticeChannel   String?
+    dpBanBasis        Int?
+
+    guild Guild @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
 }
 
 model GuildTmp {
-    guildId     String @id
-
-    name        String
-    invite      String
-    icon        String?
-    banner      String?
-}
-
-model GuildNSFW {
-    id      String @id
-    content Boolean
-}
-
-model GuildBump {
-    id   String @id
-    time BigInt
-}
-
-model GuildLevel {
     guildId String @id
-    level   BigInt
-    point   BigInt
+
+    name   String
+    invite String
+    icon   String?
+    banner String?
+}
+
+//パネル用
+model Panel {
+    guildId   String
+    type      String
+    channelId String
+    messageId String
+
+    @@id([guildId, type])
+}
+
+//ブラックリスト達
+model BlackList {
+    userId      String @id
+    description String
 }
 
 model GuildBlackList {
     guildId String @id
-}
-
-model GuildRemoved {
-    guildId String   @id
-    date    DateTime
-}
-
-model BumpCounter {
-    guildId String @id
-    count   Int
-}
-
-model UserBumpCounter {
-    userId String @id
-    count  Int
-}
-
-//アクティブレートの為のテーブル
-model GuildNewMember {
-    guildId String
-    count   Int
-    date    DateTime
-
-    @@id([guildId, date])
-}
-
-model GuildNewMessage {
-    guildId String
-    count   Int
-    date    DateTime
-
-    @@id([guildId, date])
-}
-
-model GuildVcMemberSum {
-    guildId String
-    userId  String
-    date    DateTime
-
-    @@id([guildId, userId, date])
-}
-
-model GuildVcMemberUpperTwo {
-    guildId String
-    date    DateTime
-
-    count   Int
-
-    @@id([guildId, date])
-}
-
-model GuildActiveRate {
-    guildId String @id
-    content BigInt
-}
-
-//レベル関係のアーカイブテーブル
-model ArchiveLevelRanking {
-    guildId String @id
-    content BigInt
-}
-
-model ArchiveActiveRateRanking {
-    guildId String @id
-    content BigInt
-}
-
-model ArchiveActiveRateMax {
-    guildId String @id
-    content BigInt
-}
-
-//色々なパネル用
-model RankingPanelRate {
-    guildId   String @id
-    channelId String
-    messageId String
-}
-
-model RankingPanelLevel {
-    guildId   String @id
-    channelId String
-    messageId String
-}
-
-model RankingPanelUserBump {
-    guildId   String @id
-    channelId String
-    messageId String
-}
-
-model DangerousPeopleScorePanel {
-    guildId   String @id
-    channelId String
-    messageId String
-}
-
-//サーバーごとの設定用
-model ActingOwner {
-    guildId String @id
-    userId  String
-}
-
-model BumpNotice {
-    guildId String @id
-    content Boolean
-}
-
-model BumpNoticeRole {
-    guildId String @id
-    roleId  String
-}
-
-model BumpNoticeContent {
-    guildId String @id
-    content String
-}
-
-model DangerousPeopleNoticeChannel {
-    guildId   String @id
-    channelId String
-}
-
-model DangerousPeopleBanBasis {
-    guildId String @id
-    score   Int
-}
-
-//イベントブースト関係
-model EventBoost {
-    guildId String @id
-    eventId String
-}
-
-model EventBoostLateLimit {
-    guildId String   @id
-    date    DateTime
-}
-
-//チケット関係
-model Ticket {
-    userId    String @id
-    channelId String @unique
-}
-
-model TicketVotePanel {
-    targetUserId String @unique
-    messageId    String @id
-}
-
-model TicketVote {
-    targetUserId String
-    userId       String
-    agree        Boolean
-
-    @@id([targetUserId, userId])
 }
