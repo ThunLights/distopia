@@ -6,7 +6,7 @@ import type { Prisma } from "@prisma/client";
 import type { DefaultArgs } from "@prisma/client/runtime/library";
 
 export class Token {
-	constructor(private readonly table: Prisma.TokenDelegate<DefaultArgs>) {}
+	constructor(private readonly table: Prisma.UserTokenDelegate<DefaultArgs>) {}
 
 	private async generateToken() {
 		let token = randomString(70);
@@ -18,7 +18,7 @@ export class Token {
 
 	public async delete(userId: string) {
 		try {
-			await this.table.deleteMany({ where: { id: userId } });
+			await this.table.deleteMany({ where: { userId } });
 			return true;
 		} catch (error) {
 			errorHandling(error);
@@ -26,19 +26,19 @@ export class Token {
 		}
 	}
 
-	public async add(id: string): Promise<string> {
+	public async add(userId: string): Promise<string> {
 		const token = await this.generateToken();
 		await this.table.create({
 			data: {
-				id,
+				userId,
 				token: tokenHash(token)
 			}
 		});
 		return token;
 	}
 
-	public async remove(content: string, selectorType: "id" | "token"): Promise<void> {
-		const where: Prisma.TokenWhereInput = {};
+	public async remove(content: string, selectorType: "userId" | "token"): Promise<void> {
+		const where: Prisma.UserTokenWhereInput = {};
 		where[selectorType] = content;
 		await this.table.deleteMany({ where });
 	}
@@ -47,7 +47,7 @@ export class Token {
 		try {
 			const element = await this.table.findFirst({ where: { token: tokenHash(token) } });
 			if (element) {
-				return element.id;
+				return element.userId;
 			}
 			return null;
 		} catch (error) {

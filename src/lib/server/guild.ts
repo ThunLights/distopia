@@ -79,14 +79,13 @@ export async function id2Guild(guildId: string) {
 	}
 	for (const review of baserReviews) {
 		const user = await database.user.data(review.userId);
-		const avatar = await database.avatar.data(review.userId);
 		if (user) {
 			reviews.push({
 				...review,
 				...{
 					user: {
 						username: user.username,
-						avatar
+						avatar: user.avatar
 					}
 				}
 			});

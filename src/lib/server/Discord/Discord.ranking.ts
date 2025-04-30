@@ -133,7 +133,12 @@ export class RankingClient {
 
 	private async updateUserBumpPanel() {
 		try {
-			const ranking = await database.userBump.ranking(20);
+			const ranking = await database.user.findMany({
+				orderBy: {
+					bumpCounter: "desc"
+				},
+				take: 20
+			});
 			const date = formatDate(new Date(new Date().toLocaleDateString("ja-JP")));
 			const embed = new EmbedBuilder()
 				.setTitle("サーバーランキング: アクティブレート")
@@ -144,12 +149,12 @@ export class RankingClient {
 				.setURL(`${PUBLIC_URL}/ranking?type=userBump`)
 				.setFooter({ text: `最終更新: ${date}` });
 			for (let i = 0; i < ranking.length; i++) {
-				const { userId, count } = ranking[i];
-				const user = await User.fetch(this.client, userId);
+				const { id, bumpCounter } = ranking[i];
+				const user = await User.fetch(this.client, id);
 				if (user) {
 					embed.addFields({
 						name: `${i + 1}: ${user.displayName}`,
-						value: `合計: ${count}回\nユーザーネーム: ${user.username} (ID: ${user.id})`
+						value: `合計: ${bumpCounter ?? 0}回\nユーザーネーム: ${user.username} (ID: ${user.id})`
 					});
 				}
 			}

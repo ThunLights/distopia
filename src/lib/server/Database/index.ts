@@ -2,15 +2,12 @@ import { PrismaClient } from "@prisma/client";
 
 import { Token } from "./Database.token";
 import { User } from "./Database.user";
-import { Email } from "./Database.email";
-import { Avatar } from "./Database.avatar";
 import { DatabaseGuildTables } from "./Guild/index";
 import { DatabaseArchiveTables } from "./Archive/index";
 import { Friend } from "./Friend/index";
 import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
 import { Panel } from "./Panel/index";
-import { UserBumpCounter } from "./Database.userBumpCounter";
 import { DatabaseBlackList } from "./Database.blacklist";
 import { EventBoost } from "./EventBoost/index";
 import { Ticket } from "./Ticket/index";
@@ -23,11 +20,8 @@ export class DatabaseClient {
 	public static readonly _prisma = new PrismaClient();
 
 	public readonly prisma = DatabaseClient._prisma;
-	public readonly token = new Token(this.prisma.token);
+	public readonly token = new Token(this.prisma.userToken);
 	public readonly user = new User(this.prisma.user);
-	public readonly email = new Email(this.prisma.email);
-	public readonly avatar = new Avatar(this.prisma.avatar);
-	public readonly userBump = new UserBumpCounter(this.prisma.userBumpCounter);
 	public readonly blacklist = new DatabaseBlackList(this.prisma.blackList);
 
 	public readonly eventBoost = new EventBoost();

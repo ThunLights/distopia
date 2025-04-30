@@ -52,7 +52,15 @@ export class BumpCommands extends CommandsBase {
 			} satisfies InteractionReplyOptions;
 		}
 		await database.guildTables.bumpCounter.update(interaction.guild.id);
-		await database.userBump.update(interaction.user.id);
+		const user = await database.user.data(interaction.user.id);
+		if (user) {
+			await database.user.update({
+				...user,
+				...{
+					bumpCounter: user.bumpCounter ? user.bumpCounter + 1 : 1
+				}
+			});
+		}
 		this.lateLimit[guild.guildId] = new Date();
 		setTimeout(
 			async () => {

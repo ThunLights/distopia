@@ -7,10 +7,22 @@ export const load = (async (e) => {
 	const page = pageQuery > 0 ? pageQuery : 1;
 	const friends = await database.friend.findMany(page - 1);
 
-	const elementsAvatar: Record<string, string | null> = {};
+	const elementsAvatar: Record<
+		string,
+		{
+			username: string;
+			time: bigint;
+			id: string;
+			accessToken: string;
+			refreshToken: string;
+			email: string | null;
+			avatar: string | null;
+			bumpCounter: number | null;
+		} | null
+	> = {};
 	const elementsTag: Record<string, string[]> = {};
 	for (const element of friends) {
-		elementsAvatar[element.userId] = await database.avatar.data(element.userId);
+		elementsAvatar[element.userId] = await database.user.data(element.userId);
 		elementsTag[element.userId] = (await database.friend.tag.findUserTags(element.userId)).map(
 			(value) => value.content
 		);
@@ -19,10 +31,11 @@ export const load = (async (e) => {
 	return {
 		page,
 		friends: friends.map((value) => {
+			const avatar = elementsAvatar[value.userId];
 			return {
 				...value,
 				...{
-					avatar: elementsAvatar[value.userId] ?? null,
+					avatar: avatar ? avatar.avatar : null,
 					tags: elementsTag[value.userId] ?? []
 				}
 			};

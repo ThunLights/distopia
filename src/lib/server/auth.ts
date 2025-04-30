@@ -19,8 +19,8 @@ export async function authorization(e: RequestEvent) {
 				token,
 				id: data.id,
 				username: data.username,
-				email: await database.email.data(data.id),
-				avatar: await database.avatar.data(data.id)
+				email: data.email,
+				avatar: data.avatar
 			},
 			data
 		};

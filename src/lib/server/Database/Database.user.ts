@@ -9,6 +9,11 @@ export type UserElement = {
 	accessToken: string;
 	refreshToken: string;
 	time: bigint;
+
+	tags?: string[];
+	bumpCounter?: number | null;
+	email?: string | null;
+	avatar?: string | null;
 };
 
 export class User {
@@ -53,7 +58,25 @@ export class User {
 		}
 	}
 
-	public async update(id: string, username: string, accessToken: string, refreshToken: string) {
+	public async findMany<T extends Prisma.UserFindManyArgs>(
+		args?: Prisma.SelectSubset<T, Prisma.UserFindManyArgs<DefaultArgs>>
+	) {
+		try {
+			return await this.table.findMany(args);
+		} catch (error) {
+			errorHandling(error);
+			return [];
+		}
+	}
+
+	public async update({
+		id,
+		username,
+		accessToken,
+		refreshToken,
+		email,
+		avatar
+	}: Omit<UserElement, "time"> & { time?: bigint }) {
 		try {
 			const time = BigInt(Date.now());
 			const element = await this.table.findFirst({
@@ -68,7 +91,9 @@ export class User {
 						username,
 						accessToken,
 						refreshToken,
-						time
+						time,
+						email,
+						avatar
 					}
 				});
 			} else {
@@ -78,7 +103,9 @@ export class User {
 						username,
 						accessToken,
 						refreshToken,
-						time
+						time,
+						email,
+						avatar
 					}
 				});
 			}

@@ -36,20 +36,25 @@ export const POST = (async () => {
 		if (typeof data === "string") continue;
 		activeRate.push(data);
 	}
-	for (const { userId, count } of await database.userBump.ranking(50)) {
-		const cacheData = await cache.discord.users.checkCache(userId);
+	for (const { id, bumpCounter } of await database.user.findMany({
+		orderBy: {
+			bumpCounter: "desc"
+		},
+		take: 50
+	})) {
+		const cacheData = await cache.discord.users.checkCache(id);
 		if (cacheData) {
-			users.push({ ...cacheData, ...{ count } });
+			users.push({ ...cacheData, ...{ count: bumpCounter ?? 0 } });
 			continue;
 		}
-		const user = await discord.bot.control.user.fetch(userId);
+		const user = await discord.bot.control.user.fetch(id);
 		if (user) {
 			users.push({
 				userId: user.id,
 				avatarUrl: user.avatarURL(),
 				username: user.username,
 				displayName: user.displayName,
-				count
+				count: bumpCounter ?? 0
 			});
 		}
 	}
