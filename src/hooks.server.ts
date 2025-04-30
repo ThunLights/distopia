@@ -15,23 +15,12 @@ async function updateExpireDatas() {
 			await database.user.delete(user.id);
 			await database.token.delete(user.id);
 		} else {
-			await database.user.update(
-				user.id,
-				user.username,
-				newData.access_token,
-				newData.refresh_token
-			);
-		}
-	}
-
-	for (const { guildId } of await database.eventBoost.latelimit.fetchExpirationElements()) {
-		await database.eventBoost.latelimit.remove(guildId);
-	}
-
-	for (const { guildId, eventId } of await database.eventBoost.findMany()) {
-		const data = await discord.bot.control.guild.fetchEvent(guildId, eventId);
-		if (!data) {
-			await database.eventBoost.remove(guildId);
+			await database.user.update({
+				id: user.id,
+				username: user.username,
+				accessToken: newData.access_token,
+				refreshToken: newData.refresh_token
+			});
 		}
 	}
 }
@@ -71,9 +60,6 @@ async function updateGuildRemove() {
 		await database.archives.level.ranking.remove(guildId);
 		await database.archives.activeRate.max.remove(guildId);
 		await database.archives.activeRate.ranking.remove(guildId);
-
-		await database.eventBoost.remove(guildId);
-		await database.eventBoost.latelimit.remove(guildId);
 	}
 }
 

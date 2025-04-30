@@ -9,7 +9,6 @@ import { DatabaseRankingPanelTables } from "./RankingPanel/index";
 import { DangerousPeople } from "./DangerousPeople/index";
 import { Panel } from "./Panel/index";
 import { DatabaseBlackList } from "./Database.blacklist";
-import { EventBoost } from "./EventBoost/index";
 import { Ticket } from "./Ticket/index";
 
 export class DatabaseError {
@@ -24,7 +23,6 @@ export class DatabaseClient {
 	public readonly user = new User(this.prisma.user);
 	public readonly blacklist = new DatabaseBlackList(this.prisma.blackList);
 
-	public readonly eventBoost = new EventBoost();
 	public readonly guildTables = new DatabaseGuildTables();
 	public readonly friend = new Friend();
 	public readonly archives = new DatabaseArchiveTables();
