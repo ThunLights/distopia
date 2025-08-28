@@ -8,7 +8,7 @@ https://distopia.top/ 用のやつです。
 
 **.envを作らないと動かないよ**
 
-.env.exampleを元に.envを作成しよう!じゃないと動かないよ!GG!
+.env.exampleを元に.envを作成しよう!じゃないと動かないよ!
 
 ### 2: setupコマンドを打とう
 
