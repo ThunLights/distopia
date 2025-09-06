@@ -57,11 +57,7 @@
 
 <main>
 	<div class="entrance-img">
-		{#if data.bg === "AM"}
-			<enhanced:img src="/static/am.webp" alt="loading" />
-		{:else}
-			<enhanced:img src="/static/pm.webp" alt="loading" />
-		{/if}
+		<enhanced:img src="/static/summer/background.webp?enhanced" alt="loading" />
 	</div>
 	<div class="contents">
 		<div>
