@@ -130,17 +130,6 @@ export const staffs = [
 				url: "https://twitter.com/sumire_8691"
 			}
 		]
-	},
-	{
-		name: "えと元帥",
-		icon: "/staff/etogensui.webp",
-		description: "ウェブページの更新、修正作業や営業を担当",
-		links: [
-			{
-				icon: "/service/twitter.webp",
-				url: "https://x.com/Etogensui_ATCK1"
-			}
-		]
 	}
 ] satisfies Array<Staff>;
 
