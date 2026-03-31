@@ -1,7 +1,0 @@
-:root {
-	--a-tag-color: blue;
-}
-
-a {
-	color: var(--a-tag-color);
-}
