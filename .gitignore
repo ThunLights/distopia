@@ -30,4 +30,4 @@ archive/**.sqlite3
 
 migrations/**
 
-test.ts
+dist

@@ -1,6 +1,14 @@
 {
 	"name": "distopia-workspace",
 	"private": true,
-  "type": "module",
-	"workspaces": []
+	"type": "module",
+	"scripts": {
+		"build": "npm run build --workspaces --if-present"
+	},
+	"workspaces": [
+		"./src/**/*"
+	],
+	"devDependencies": {
+		"bun": "^1.3.11"
+	}
 }
