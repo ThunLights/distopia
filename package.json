@@ -1,0 +1,6 @@
+{
+	"name": "distopia-workspace",
+	"private": true,
+  "type": "module",
+	"workspaces": []
+}
