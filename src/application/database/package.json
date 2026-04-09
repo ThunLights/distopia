@@ -1,0 +1,14 @@
+{
+  "name": "app-database",
+  "private": true,
+  "type": "module",
+  "scripts": {},
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "infra-database": "workspace:*"
+  }
+}
