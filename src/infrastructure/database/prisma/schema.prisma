@@ -1,0 +1,147 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/prisma-client"
+}
+
+generator zod {
+  provider = "zod-prisma-types"
+  output   = "../src/zod"
+}
+
+model User {
+  id String @id
+
+  bumpCounter Int?
+}
+
+model UserDiscord {
+  id           String   @id
+  username     String
+  accessToken  String
+  refreshToken String
+  time         DateTime
+
+  email  String?
+  avatar String?
+}
+
+model UserToken {
+  userId String
+  token  String @id
+}
+
+model Friend {
+  userId      String   @id
+  username    String
+  description String
+  nsfw        Boolean
+  time        DateTime
+  tags        String[]
+}
+
+model Guild {
+  guildId String @id
+
+  status GuildStatus
+  name   String
+  invite String
+  icon   String?
+  banner String?
+
+  category    GuildCategory
+  description String
+
+  nsfw     Boolean?
+  bumpTime DateTime?
+
+  tags String[]
+
+  reviews GuildReview[]
+}
+
+enum GuildStatus {
+  Temporarily
+  Registered
+}
+
+enum GuildCategory {
+  General
+  Game
+  Community
+  Anime
+  Comic
+  Music
+  Technology
+  Language
+  Movie
+  Nsfw
+  Other
+}
+
+model GuildReview {
+  userId  String
+  guildId String
+  star    Int
+  content String?
+
+  guild Guild @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+
+  @@id([userId, guildId])
+}
+
+model GuildRecordOneDay {
+  guildId String
+  date    DateTime
+
+  vcMembers        String[]
+  newMembers       String[]
+  newMessages      Int?
+  vcMemberUpperTwo Int?
+
+  @@id([guildId, date])
+}
+
+model GuildRecord {
+  guildId String @id
+
+  MaxlevelRank BigInt?
+  maxRateRank  BigInt?
+  MaxRate      BigInt?
+
+  bumpCounter Int?
+  activeRate  BigInt?
+
+  level BigInt?
+  point BigInt?
+}
+
+model GuildSetting {
+  guildId           String   @id
+  actingOwner       String?
+  bumpNotice        Boolean?
+  bumpNoticeRole    String?
+  bumpNoticeContent String?
+  dpNoticeChannel   String?
+  dpBanBasis        Int?
+}
+
+//パネル用
+model Panel {
+  guildId   String
+  type      PanelType
+  channelId String
+  messageId String
+
+  @@id([guildId, type])
+}
+
+enum PanelType {
+  ActiveRateRanking
+  LevelRanking
+  UserBumpRanking
+  DPScore
+}

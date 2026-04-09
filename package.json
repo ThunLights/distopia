@@ -9,6 +9,9 @@
 		"./src/**/*"
 	],
 	"devDependencies": {
-		"bun": "^1.3.11"
+		"bun": "1.3.11"
+	},
+	"dependencies": {
+		"tsdown": "0.21.7"
 	}
 }

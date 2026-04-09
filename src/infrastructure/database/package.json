@@ -1,0 +1,41 @@
+{
+  "name": "infra-database",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "prisma generate && tsdown"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./zod": {
+      "types": "./dist/zod/index.d.mts",
+      "import": "./dist/zod/index.mjs",
+      "require": "./dist/zod/index.cjs"
+    },
+    "./prisma": {
+      "types": "./dist/prisma.d.mts",
+      "import": "./dist/prisma.mjs",
+      "require": "./dist/prisma.cjs"
+    }
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
+  },
+  "devDependencies": {
+    "bun": "1.3.11",
+    "dotenv": "17.4.1",
+    "tsdown": "0.21.7",
+    "zod-prisma-types": "3.3.11"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.7.0",
+    "@prisma/client": "7.7.0",
+    "@prisma/client-runtime-utils": "7.7.0",
+    "prisma": "7.7.0",
+    "zod": "4.3.6"
+  }
+}
