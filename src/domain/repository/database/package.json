@@ -1,5 +1,5 @@
 {
-  "name": "app-database",
+  "name": "domain-repo-database",
   "private": true,
   "type": "module",
   "scripts": {},
