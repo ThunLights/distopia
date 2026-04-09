@@ -1,29 +1,20 @@
 {
   "name": "infra-discord",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./prelude": {
-      "types": "./dist/prelude.d.mts",
-      "require": "./dist/prelude.cjs",
-      "import": "./dist/prelude.mjs"
-    }
-  },
-  "scripts": {
-    "build": "tsdown"
-  },
   "dependencies": {
     "discord.js": "14.26.2"
   },
-  "devDependencies": {
-    "tsdown": "0.21.7"
-  },
   "peerDependencies": {
     "typescript": "6.0.2"
-  }
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    },
+    "./prelude": {
+      "import": "./src/prelude.ts"
+    }
+  },
+  "private": true,
+  "scripts": {},
+  "type": "module"
 }
