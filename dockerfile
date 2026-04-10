@@ -2,6 +2,7 @@ FROM ubuntu:24.04
 
 USER root
 
+ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update \
