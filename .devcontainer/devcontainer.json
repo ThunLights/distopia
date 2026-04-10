@@ -2,5 +2,7 @@
     "name": "Distopia",
     "build": {
         "dockerfile": "../dockerfile"
-    }
+    },
+    "overrideCommand": false,
+    "privileged": true
 }
