@@ -1,3 +1,8 @@
 {
-  "extends": "./tsconfig.base.json"
+  "extends": "./tsconfig.base.json",
+  "references": [
+    { "path": "./src/domain/repository/database" },
+    { "path": "./src/infrastructure/database" },
+    { "path": "./src/infrastructure/discord" }
+  ]
 }
