@@ -1,0 +1,6 @@
+{
+    "name": "Distopia",
+    "build": {
+        "dockerfile": "../dockerfile"
+    }
+}
