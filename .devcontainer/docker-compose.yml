@@ -2,7 +2,6 @@ services:
   db:
     container_name: distopia
     image: postgres:17
-    privileged: true
     volumes:
       - distopia-db-store:/var/lib/postgresql/data
     environment:
@@ -14,14 +13,13 @@ services:
     depends_on:
       - db
     restart: always
-    working_dir: /workspaces/distopia
     build:
       context: ./
       dockerfile: dockerfile
     init: true
-    privileged: true
+    command: sleep infinity
     volumes:
-      - ../..:/workspaces:cached
+      - ..:/workspaces/distopia:cached
 
 volumes:
   distopia-db-store:

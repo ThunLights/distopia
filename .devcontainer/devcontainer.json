@@ -1,11 +1,9 @@
 {
   "name": "Distopia",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "dockerComposeFile": "../docker-compose.yml",
+  "workspaceFolder": "/workspaces/distopia",
+  "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "overrideCommand": false,
-  "privileged": true,
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached"
-  ]
+  "updateRemoteUserUID": true,
+  "remoteUser": "ubuntu"
 }
