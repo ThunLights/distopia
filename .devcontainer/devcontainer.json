@@ -1,8 +1,11 @@
 {
-    "name": "Distopia",
-    "build": {
-        "dockerfile": "../dockerfile"
-    },
-    "overrideCommand": false,
-    "privileged": true
+  "name": "Distopia",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "overrideCommand": false,
+  "privileged": true,
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached"
+  ]
 }

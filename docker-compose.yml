@@ -1,0 +1,27 @@
+services:
+  db:
+    container_name: distopia
+    image: postgres:17
+    privileged: true
+    volumes:
+      - distopia-db-store:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "0000"
+      POSTGRES_DB: "test"
+
+  app:
+    depends_on:
+      - db
+    restart: always
+    working_dir: /workspaces/distopia
+    build:
+      context: ./
+      dockerfile: dockerfile
+    init: true
+    privileged: true
+    volumes:
+      - ../..:/workspaces:cached
+
+volumes:
+  distopia-db-store:
