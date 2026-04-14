@@ -1,8 +1,9 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true
+    "composite": true,
+    "noEmit": true
   },
+  "files": [],
   "references": [
     { "path": "./src/domain/repository/database" },
     { "path": "./src/infrastructure/database" },
