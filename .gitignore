@@ -31,3 +31,7 @@ archive/**.sqlite3
 migrations/**
 
 dist
+
+.turbo
+
+tsconfig.tsbuildinfo
