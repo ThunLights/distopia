@@ -3,6 +3,8 @@
         "svelte.svelte-vscode",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "ms-playwright.playwright"
+        "ms-playwright.playwright",
+        "ms-azuretools.vscode-docker",
+        "docker.docker"
     ]
 }
