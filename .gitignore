@@ -3,6 +3,8 @@ node_modules
 # Output
 .output
 .vercel
+.netlify
+.wrangler
 /.svelte-kit
 /build
 
@@ -35,3 +37,8 @@ dist
 .turbo
 
 tsconfig.tsbuildinfo
+
+test-results
+
+*storybook.log
+storybook-static
