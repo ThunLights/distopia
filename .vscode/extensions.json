@@ -5,6 +5,7 @@
         "dbaeumer.vscode-eslint",
         "ms-playwright.playwright",
         "ms-azuretools.vscode-docker",
-        "docker.docker"
+        "docker.docker",
+        "editorconfig.editorconfig"
     ]
 }
