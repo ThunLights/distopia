@@ -1,0 +1,13 @@
+{
+  "name": "domain-service-bot",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
+  },
+  "dependencies": {
+    "infra-discord": "workspace:*"
+  }
+}

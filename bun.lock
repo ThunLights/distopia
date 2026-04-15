@@ -21,6 +21,15 @@
         "typescript": "6.0.2",
       },
     },
+    "src/domain/service/bot": {
+      "name": "domain-service-bot",
+      "dependencies": {
+        "infra-discord": "workspace:*",
+      },
+      "peerDependencies": {
+        "typescript": "6.0.2",
+      },
+    },
     "src/infrastructure/database": {
       "name": "infra-database",
       "dependencies": {
@@ -56,6 +65,12 @@
     },
     "src/presentation/bot": {
       "name": "presentation-bot",
+      "dependencies": {
+        "infra-discord": "workspace:*",
+      },
+      "peerDependencies": {
+        "typescript": "6.0.2",
+      },
     },
     "src/presentation/web": {
       "name": "presentation-web",
@@ -640,6 +655,8 @@
     "dom-accessibility-api": ["dom-accessibility-api@0.6.3", "", {}, "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w=="],
 
     "domain-repo-database": ["domain-repo-database@workspace:src/domain/repository/database"],
+
+    "domain-service-bot": ["domain-service-bot@workspace:src/domain/service/bot"],
 
     "dotenv": ["dotenv@16.6.1", "", {}, "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="],
 

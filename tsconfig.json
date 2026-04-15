@@ -7,6 +7,8 @@
   "references": [
     { "path": "./src/domain/repository/database" },
     { "path": "./src/infrastructure/database" },
-    { "path": "./src/infrastructure/discord" }
+    { "path": "./src/infrastructure/discord" },
+    { "path": "./src/presentation/web" },
+    { "path": "./src/presentation/bot" }
   ]
 }
