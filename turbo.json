@@ -1,7 +1,8 @@
 {
-    "tasks": {
-        "build": {
-            "dependsOn": ["^build"]
-        }
+  "$schema": "./node_modules/turbo/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"]
     }
+  }
 }
