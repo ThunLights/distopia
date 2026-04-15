@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "prisma generate"
+    "build": "prisma generate",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     ".": {

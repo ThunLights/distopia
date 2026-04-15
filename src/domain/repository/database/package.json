@@ -2,7 +2,9 @@
   "name": "domain-repo-database",
   "private": true,
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
     ".": {
       "import": "./src/index.ts"
@@ -10,5 +12,8 @@
   },
   "dependencies": {
     "infra-database": "workspace:*"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
   }
 }
