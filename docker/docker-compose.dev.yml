@@ -1,0 +1,13 @@
+services:
+  app:
+    extends:
+      file: docker-compose.yml
+      service: app
+    environment:
+      - PROD_PORT=3000
+      - DEV_PORT=5173
+      - PREVIEW_PORT=4173
+    ports:
+      - "127.0.0.1:${PROD_PORT}:3000"
+      - "127.0.0.1:${DEV_PORT}:5173"
+      - "127.0.0.1:${PREVIEW_PORT}:4173"

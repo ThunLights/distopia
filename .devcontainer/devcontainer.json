@@ -1,7 +1,10 @@
 {
   "name": "Distopia",
   "workspaceFolder": "/workspaces/distopia",
-  "dockerComposeFile": "../docker/docker-compose.yml",
+  "dockerComposeFile": [
+    "../docker/docker-compose.yml",
+    "../docker/docker-compose.dev.yml"
+  ],
   "service": "app",
   "overrideCommand": false,
   "updateRemoteUserUID": true,
