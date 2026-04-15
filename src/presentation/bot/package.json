@@ -1,13 +1,21 @@
 {
   "name": "presentation-bot",
   "private": true,
+  "type": "module",
   "scripts": {
+    "lint": "oxfmt --check && oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
     "typecheck": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "typescript": "6.0.2"
   },
   "dependencies": {
     "infra-discord": "workspace:*"
+  },
+  "devDependencies": {
+    "oxfmt": "0.45.0",
+    "oxlint": "1.60.0"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
   }
 }
