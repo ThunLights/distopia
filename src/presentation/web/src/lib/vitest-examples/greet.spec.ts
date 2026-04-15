@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { greet } from "./greet";
+import { describe, it, expect } from "vitest";
 
 describe("greet", () => {
   it("returns a greeting", () => {

@@ -1,7 +1,5 @@
 import type { StorybookConfig } from "@storybook/sveltekit";
-
 import { dirname } from "path";
-
 import { fileURLToPath } from "url";
 
 /**
