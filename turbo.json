@@ -4,6 +4,9 @@
     "build": {
       "dependsOn": ["^build"]
     },
+    "test": {
+      "dependsOn": ["^test"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },

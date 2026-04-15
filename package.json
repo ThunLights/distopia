@@ -1,22 +1,23 @@
 {
-	"name": "distopia-workspace",
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"build": "turbo run build",
-		"lint": "turbo run lint",
-		"format": "turbo run format",
+  "name": "distopia-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
     "typecheck": "turbo run typecheck"
-	},
-    "packageManager": "bun@1.3.11",
-	"devDependencies": {
-		"bun": "1.3.11",
-		"turbo": "2.9.6"
-	},
-	"peerDependencies": {
-		"typescript": "6.0.2"
-	},
-	"workspaces": [
-		"./src/**/*"
-	]
+  },
+  "packageManager": "bun@1.3.11",
+  "devDependencies": {
+    "bun": "1.3.11",
+    "turbo": "2.9.6"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
+  },
+  "workspaces": [
+    "./src/**/*"
+  ]
 }
