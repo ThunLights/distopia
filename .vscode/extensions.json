@@ -6,6 +6,7 @@
         "ms-playwright.playwright",
         "ms-azuretools.vscode-docker",
         "docker.docker",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "oxc.oxc-vscode"
     ]
 }
