@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: distopia
+    container_name: distopia-db
     image: postgres:17
     volumes:
       - distopia-db-store:/var/lib/postgresql/data
@@ -12,6 +12,7 @@ services:
       POSTGRES_DB: "test"
 
   app:
+    container_name: distopia-app
     depends_on:
       - db
     restart: always
