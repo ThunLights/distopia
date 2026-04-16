@@ -68,6 +68,7 @@
     "src/presentation/bot": {
       "name": "presentation-bot",
       "dependencies": {
+        "distopia-template": "workspace:*",
         "infra-discord": "workspace:*",
       },
       "devDependencies": {

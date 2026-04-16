@@ -1,12 +1,3 @@
-import { defineConfig } from "oxlint";
+import { config } from "distopia-template/oxlint";
 
-export default defineConfig({
-  plugins: ["typescript", "unicorn", "oxc"],
-  categories: {
-    correctness: "error",
-  },
-  rules: {},
-  env: {
-    builtin: true,
-  },
-});
+export default config;

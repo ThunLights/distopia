@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "distopia-template": "workspace:*",
     "infra-discord": "workspace:*"
   },
   "devDependencies": {
