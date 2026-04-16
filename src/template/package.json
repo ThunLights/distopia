@@ -1,0 +1,29 @@
+{
+  "name": "distopia-template",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./oxfmt": {
+      "import": "./src/oxfmt.ts"
+    },
+    "./oxlint": {
+      "import": "./src/oxlint.ts"
+    }
+  },
+  "scripts": {
+    "lint": "oxfmt --check && oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "oxfmt": "0.45.0",
+    "oxlint": "1.60.0"
+  },
+  "devDependencies": {
+    "bun": "1.3.12"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
+  }
+}
