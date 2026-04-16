@@ -9,7 +9,7 @@ const config = {
   kit: {
     adapter: adapter(),
     env: {
-        dir: "../../../"
+      dir: "../../../",
     },
   },
 };

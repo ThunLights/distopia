@@ -6,6 +6,6 @@ services:
     working_dir: /workspaces/distopia
     command: sudo /workspaces/distopia/scripts/prod.sh
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:${PROD_PORT:-3000}:3000"
     volumes:
       - ..:/workspaces/distopia
