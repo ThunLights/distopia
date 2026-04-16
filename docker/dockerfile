@@ -26,7 +26,7 @@ RUN [[ $(id -u ubuntu) = $USER_UID ]] || usermod -u $USER_UID ubuntu \
 
 # Update node and npm version
 RUN npm i -g n \
-    && yes | n 22.21.1 \
+    && yes | n 24.15.0 \
     && apt purge -y nodejs npm
 
 # Install npm packages
