@@ -1,0 +1,27 @@
+{
+  "name": "domain-service-core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "oxfmt --check && oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "distopia-template": "workspace:*"
+  },
+  "devDependencies": {
+    "oxfmt": "0.45.0",
+    "oxlint": "1.60.0",
+    "vitest": "4.1.4"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.2"
+  }
+}
