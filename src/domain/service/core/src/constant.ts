@@ -32,7 +32,7 @@ export const supporters = [
     name: "大檸檬帝国",
     invite: "https://discord.gg/BgZddsVPMH",
   },
-] satisfies Array<SupporterServer>;
+] as const satisfies Array<SupporterServer>;
 
 export const staffs = [
   {
