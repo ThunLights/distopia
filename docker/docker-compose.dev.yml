@@ -3,10 +3,10 @@ services:
     extends:
       file: docker-compose.yml
       service: app
+    hostname: thunlights
+    container_name: distopia-dev
     working_dir: /workspaces/distopia
     ports:
       - "127.0.0.1:${PROD_PORT:-3000}:3000"
       - "127.0.0.1:${DEV_PORT:-5173}:5173"
       - "127.0.0.1:${PREVIEW_PORT:-4173}:4173"
-    volumes:
-      - ..:/workspaces/distopia

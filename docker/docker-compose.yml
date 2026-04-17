@@ -23,8 +23,10 @@ services:
     command: sleep infinity
     volumes:
       - ..:/workspaces/distopia:cached
+      - distopia-cache:/workspaces/distopia/.cache
       - distopia-node-modules:/workspaces/distopia/node_modules
 
 volumes:
   distopia-db-store:
+  distopia-cache:
   distopia-node-modules:
