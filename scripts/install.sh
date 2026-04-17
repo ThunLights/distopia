@@ -9,3 +9,4 @@ rm -rf $project_dir/node_modules/.bun
 cd $project_dir
 
 bun ci
+bun run setup
