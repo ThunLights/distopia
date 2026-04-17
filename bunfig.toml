@@ -1,0 +1,4 @@
+[install.cache]
+dir = "./.cache/bun/install"
+disable = false
+disableManifest = false
