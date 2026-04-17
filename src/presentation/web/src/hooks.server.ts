@@ -1,4 +1,4 @@
-import type { Handle } from "@sveltejs/kit";
+import { type Handle, type HandleServerError } from "@sveltejs/kit";
 
 export const handle = (async ({ event, resolve }) => {
   const response = await resolve(event);
@@ -6,3 +6,12 @@ export const handle = (async ({ event, resolve }) => {
   response.headers.set("Pragma", "no-cache");
   return response;
 }) satisfies Handle;
+
+export const handleError = (async (input) => {
+  if (input.status === 404) {
+    return { message: "Page Not found" };
+  }
+  if (input.status === 405) {
+    return { message: "Method Not Allowed" };
+  }
+}) satisfies HandleServerError;
