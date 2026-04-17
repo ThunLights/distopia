@@ -54,6 +54,7 @@
     "vitest-browser-svelte": "2.1.0"
   },
   "dependencies": {
+    "domain-service-core": "workspace:*",
     "node-cron": "4.2.1"
   }
 }
