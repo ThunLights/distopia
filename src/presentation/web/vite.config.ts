@@ -1,4 +1,5 @@
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import { enhancedImages } from "@sveltejs/enhanced-img";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
@@ -10,7 +11,7 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [sveltekit()],
+  plugins: [sveltekit(), enhancedImages()],
   test: {
     expect: {
       requireAssertions: true,
