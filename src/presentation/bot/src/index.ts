@@ -1,4 +1,8 @@
 import { ActivityType, type Client } from "infra-discord/prelude";
+import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler";
+import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
+import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
+import { GuildUpdate } from "./EventHandler/GuildUpdate";
 
 export function handleClient(client: Client) {
   client.on("clientReady", async (client) => {
@@ -8,13 +12,13 @@ export function handleClient(client: Client) {
     });
   });
 
-  //    client.on("interactionCreate", async (interaction) => {});
+  client.on("interactionCreate", new InteractionCreateHandler(client).handle);
 
-  //    client.on("messageCreate", async (message) => {});
+  client.on("messageCreate", new MessageCreateHandler(client).handle);
 
-  //    client.on("guildMemberAdd", async (member) => {});
+  client.on("guildMemberAdd", new GuildMemberAdd(client).handle);
 
-  //    client.on("guildUpdate", async (oldGuild, newGuild) => {});
+  client.on("guildUpdate", new GuildUpdate(client).handle);
 
   return client;
 }
