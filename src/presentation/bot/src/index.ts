@@ -1,8 +1,9 @@
 import { ActivityType, type Client } from "infra-discord/prelude";
-import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler";
-import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
+
 import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
 import { GuildUpdate } from "./EventHandler/GuildUpdate";
+import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler";
+import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
 
 export function handleClient(client: Client) {
   client.on("clientReady", async (client) => {

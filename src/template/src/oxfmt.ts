@@ -7,4 +7,5 @@ export const config = defineConfig({
   tabWidth: 2,
   singleQuote: false,
   trailingComma: "all",
+  sortImports: true,
 });

@@ -1,5 +1,6 @@
-import { BaseHandler } from "./BaseHandler";
 import type { Message, OmitPartialGroupDMChannel } from "infra-discord/prelude";
+
+import { BaseHandler } from "./BaseHandler";
 
 export class MessageCreateHandler extends BaseHandler<
   (message: OmitPartialGroupDMChannel<Message<boolean>>) => void

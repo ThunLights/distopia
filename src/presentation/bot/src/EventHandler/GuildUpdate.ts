@@ -1,4 +1,5 @@
 import type { Guild } from "infra-discord/prelude";
+
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildUpdate extends BaseHandler<(oldGuild: Guild, newGuild: Guild) => void> {

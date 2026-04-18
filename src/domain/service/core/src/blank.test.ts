@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+
 import { isBlank, isBlankSync } from "./blank";
 
 describe("isBlank", async () => {
