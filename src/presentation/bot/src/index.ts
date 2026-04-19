@@ -4,15 +4,19 @@ import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
 import { GuildUpdate } from "./EventHandler/GuildUpdate";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
-import type { Appdata } from "./model";
+import type { AppData } from "./model";
 
-export function handleClient(client: Client, appData: Appdata) {
+export function handleClient(client: Client, appData: AppData) {
   const interactionCreateHandler = new InteractionCreateHandler(client, appData);
 
   client.on("clientReady", async (client) => {
     client.user.setActivity({
       name: `${client.guilds.cache.size}server | ${client.users.cache.size}users | distopia.top`,
       type: ActivityType.Playing,
+    });
+
+    await client.rest.put(`/applications/${client.user.id}/commands`, {
+      body: {},
     });
   });
 

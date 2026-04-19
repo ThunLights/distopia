@@ -1,4 +1,4 @@
-export type Appdata = {
+export type AppData = {
   owner: {
     id: string;
   };
