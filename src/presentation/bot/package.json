@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "vitest run",
     "lint": "oxfmt --check --config ../../template/oxfmt.config.ts && oxlint --config ../../template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../../template/oxlint.config.ts",
     "format": "oxfmt --config ../../template/oxfmt.config.ts",
@@ -14,7 +15,8 @@
   },
   "devDependencies": {
     "oxfmt": "0.45.0",
-    "oxlint": "1.60.0"
+    "oxlint": "1.60.0",
+    "vitest": "4.1.4"
   },
   "peerDependencies": {
     "typescript": "6.0.2"
