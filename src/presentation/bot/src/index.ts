@@ -2,10 +2,18 @@ import { ActivityType, type Client } from "infra-discord/prelude";
 
 import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
 import { GuildUpdate } from "./EventHandler/GuildUpdate";
-import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler";
+import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
 
-export function handleClient(client: Client) {
+export type AppData = {
+  owner: {
+    id: string;
+  };
+};
+
+export function handleClient(client: Client, appData: AppData) {
+  const interactionCreateHandler = new InteractionCreateHandler(client, appData);
+
   client.on("clientReady", async (client) => {
     client.user.setActivity({
       name: `${client.guilds.cache.size}server | ${client.users.cache.size}users | distopia.top`,
@@ -13,13 +21,13 @@ export function handleClient(client: Client) {
     });
   });
 
-  client.on("interactionCreate", new InteractionCreateHandler(client).handle);
+  client.on("interactionCreate", interactionCreateHandler.handle);
 
-  client.on("messageCreate", new MessageCreateHandler(client).handle);
+  client.on("messageCreate", new MessageCreateHandler(client, appData).handle);
 
-  client.on("guildMemberAdd", new GuildMemberAdd(client).handle);
+  client.on("guildMemberAdd", new GuildMemberAdd(client, appData).handle);
 
-  client.on("guildUpdate", new GuildUpdate(client).handle);
+  client.on("guildUpdate", new GuildUpdate(client, appData).handle);
 
   return client;
 }
