@@ -9,4 +9,5 @@ export const config = defineConfig({
   env: {
     builtin: true,
   },
+  ignorePatterns: ["*.auto.ts"],
 });

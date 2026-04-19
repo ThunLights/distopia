@@ -8,4 +8,5 @@ export const config = defineConfig({
   singleQuote: false,
   trailingComma: "all",
   sortImports: true,
+  ignorePatterns: ["*.auto.ts"],
 });
