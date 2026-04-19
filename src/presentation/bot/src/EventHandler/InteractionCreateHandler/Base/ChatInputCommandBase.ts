@@ -30,7 +30,7 @@ export abstract class ChatInputCommandBase<
 
   public abstract parseOptions(interaction: ChatInputCommandInteraction<CacheType>): Promise<O>;
 
-  public abstract exec(
+  protected abstract exec(
     interaction: ChatInputCommandInteraction<CacheType>,
     options: O,
   ): Promise<string | InteractionReplyOptions | MessagePayload>;
