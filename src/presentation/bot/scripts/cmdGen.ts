@@ -34,7 +34,7 @@ await fs.writeFile(
       (command) =>
         `import { ${path.basename(command, ".ts")} } from "./ChatInputCommand/${command}";`,
     ),
-    "export async function getCommands(client: Client, appData: AppData) {",
+    "export function getCommands(client: Client, appData: AppData) {",
     `const commands: ChatInputCommandBase[] = [${commands.map((command) => `new ${path.basename(command, ".ts")}(client, appData)`).join(", ")}];`,
     "return commands",
     "};",

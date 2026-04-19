@@ -15,8 +15,10 @@ export function handleClient(client: Client, appData: AppData) {
       type: ActivityType.Playing,
     });
 
+    const commands = interactionCreateHandler.commands.map((command) => command.regist);
+
     await client.rest.put(`/applications/${client.user.id}/commands`, {
-      body: {},
+      body: commands,
     });
   });
 
