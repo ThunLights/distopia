@@ -4,14 +4,9 @@ import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
 import { GuildUpdate } from "./EventHandler/GuildUpdate";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
+import type { Appdata } from "./model";
 
-export type AppData = {
-  owner: {
-    id: string;
-  };
-};
-
-export function handleClient(client: Client, appData: AppData) {
+export function handleClient(client: Client, appData: Appdata) {
   const interactionCreateHandler = new InteractionCreateHandler(client, appData);
 
   client.on("clientReady", async (client) => {
