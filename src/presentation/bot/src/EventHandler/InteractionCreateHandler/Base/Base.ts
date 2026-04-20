@@ -1,4 +1,4 @@
-import type { BaseInteraction, Client } from "shared-lib/discord.js";
+import type { BaseInteraction, Client } from "discord.js";
 
 import type { AppData } from "../../../model";
 

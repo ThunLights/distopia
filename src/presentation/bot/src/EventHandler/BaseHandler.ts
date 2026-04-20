@@ -1,4 +1,4 @@
-import type { Client } from "shared-lib/discord.js";
+import type { Client } from "discord.js";
 
 import type { AppData } from "../model";
 

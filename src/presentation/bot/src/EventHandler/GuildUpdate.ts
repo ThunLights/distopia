@@ -1,4 +1,4 @@
-import type { Guild } from "shared-lib/discord.js";
+import type { Guild } from "discord.js";
 
 import { BaseHandler } from "./BaseHandler";
 

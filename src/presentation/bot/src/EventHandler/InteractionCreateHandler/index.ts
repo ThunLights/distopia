@@ -1,4 +1,4 @@
-import { MessageFlags, type CacheType, type Interaction } from "shared-lib/discord.js";
+import { MessageFlags, type CacheType, type Interaction } from "discord.js";
 
 import { BaseHandler } from "../BaseHandler";
 import { getCommands } from "./commands.auto";

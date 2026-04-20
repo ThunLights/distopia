@@ -10,7 +10,7 @@ import {
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from "shared-lib/discord.js";
+} from "discord.js";
 
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 

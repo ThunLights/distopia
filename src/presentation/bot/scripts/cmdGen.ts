@@ -27,7 +27,7 @@ for (const fileName of await fs.readdir(chatInputCommandDir)) {
 await fs.writeFile(
   outputFilePath,
   [
-    'import type { Client } from "shared-lib/discord.js";',
+    'import type { Client } from "discord.js";',
     'import type { AppData } from "../../model.ts";',
     'import { ChatInputCommandBase } from "./Base/ChatInputCommandBase";',
     ...commands.map(

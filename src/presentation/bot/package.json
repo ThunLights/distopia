@@ -2,6 +2,11 @@
   "name": "presentation-bot",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
   "scripts": {
     "build": "bun run scripts/cmdGen.ts",
     "setup": "npm run build",
@@ -13,7 +18,7 @@
   },
   "dependencies": {
     "app-core": "workspace:*",
-    "shared-lib": "workspace:*"
+    "discord.js": "catalog:"
   },
   "devDependencies": {
     "bun": "1.3.12",

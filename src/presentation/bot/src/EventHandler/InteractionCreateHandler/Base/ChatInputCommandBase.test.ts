@@ -6,7 +6,7 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from "shared-lib/discord.js";
+} from "discord.js";
 import { describe, expect, test } from "vitest";
 
 import type { AppData } from "../../../model";

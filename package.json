@@ -20,8 +20,13 @@
   "peerDependencies": {
     "typescript": "6.0.2"
   },
-  "workspaces": [
-    "./lib/*",
-    "./src/**/*"
-  ]
+  "workspaces": {
+    "packages": [
+      "./lib/*",
+      "./src/**/*"
+    ],
+    "catalog": {
+      "discord.js": "14.26.2"
+    }
+  }
 }

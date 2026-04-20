@@ -3,8 +3,9 @@ import {
   type CacheType,
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
+  type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from "shared-lib/discord.js";
+} from "discord.js";
 
 import { Base } from "./Base";
 
@@ -17,6 +18,7 @@ export abstract class ChatInputCommandBase<
   string | InteractionReplyOptions | MessagePayload
 > {
   public abstract readonly regist: T;
+  public readonly requirePermissions: PermissionResolvable[] = [];
 
   public override async run(
     interaction: ChatInputCommandInteraction<CacheType>,
