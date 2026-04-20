@@ -114,8 +114,8 @@
     "src/presentation/web": {
       "name": "presentation-web",
       "dependencies": {
+        "app-core": "workspace:*",
         "discord.js": "catalog:",
-        "domain-service-core": "workspace:*",
         "infra-discord": "workspace:*",
         "node-cron": "4.2.1",
         "presentation-bot": "workspace:*",

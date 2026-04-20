@@ -1,7 +1,11 @@
+import { getPublicConstants } from "app-core/constants";
+
 export type SiteAbout = {
   title: string;
   description: string[];
 };
+
+export const { staffs, supporters, DISCORD_INVITE_LINK } = getPublicConstants();
 
 export const siteAbout = [
   {

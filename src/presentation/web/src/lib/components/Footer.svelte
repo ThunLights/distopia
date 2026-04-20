@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DISCORD_INVITE_LINK } from "domain-service-core";
+  import { DISCORD_INVITE_LINK } from "$lib/shared/constant";
 
   const { fixed = false } = $props();
 </script>
