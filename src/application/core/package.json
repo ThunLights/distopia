@@ -1,0 +1,23 @@
+{
+  "name": "app-core",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
+    "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "domain-service-core": "workspace:*"
+  },
+  "devDependencies": {
+    "bun": "1.3.12",
+    "oxfmt": "0.45.0",
+    "oxlint": "1.60.0",
+    "vitest": "4.1.4"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.3"
+  }
+}
