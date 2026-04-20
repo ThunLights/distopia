@@ -6,6 +6,7 @@ export type SupporterServer = {
 export type Staff = {
   name: string;
   description: string;
+  discordId: string;
   links: {
     url: string;
   }[];
@@ -38,6 +39,7 @@ export const staffs = [
   {
     name: "ROBOT",
     description: "Distopiaの代表兼創設者でDistopiaの全てのプログラムを作成",
+    discordId: "1261634733037719593",
     links: [
       {
         url: "https://github.com/ROBOTofficial",
@@ -50,6 +52,7 @@ export const staffs = [
   {
     name: "Sumire",
     description: "Distopiaのイラスト担当でDistopia内の全てのイラストを作成",
+    discordId: "1309790121763143782",
     links: [
       {
         url: "https://www.tiktok.com/@sumire_8691",
