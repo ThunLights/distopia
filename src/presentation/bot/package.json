@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "bun run scripts/cmdGen.ts",
+    "setup": "npm run build",
     "test": "vitest run",
     "lint": "oxfmt --check --config ../../template/oxfmt.config.ts && oxlint --config ../../template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../../template/oxlint.config.ts",
@@ -11,9 +13,11 @@
   },
   "dependencies": {
     "distopia-template": "workspace:*",
+    "domain-service-core": "workspace:*",
     "infra-discord": "workspace:*"
   },
   "devDependencies": {
+    "bun": "1.3.12",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
     "vitest": "4.1.4"
