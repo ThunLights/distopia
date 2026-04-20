@@ -19,7 +19,8 @@
             "ms-azuretools.vscode-docker",
             "docker.docker",
             "editorconfig.editorconfig",
-            "oxc.oxc-vscode"
+            "oxc.oxc-vscode",
+            "ms-vscode.vscode-typescript-next"
         ]
     }
   }
