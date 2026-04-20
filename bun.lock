@@ -66,9 +66,6 @@
     },
     "src/domain/service/core": {
       "name": "domain-service-core",
-      "dependencies": {
-        "distopia-template": "workspace:*",
-      },
       "devDependencies": {
         "oxfmt": "0.45.0",
         "oxlint": "1.60.0",
@@ -114,7 +111,6 @@
     "src/presentation/bot": {
       "name": "presentation-bot",
       "dependencies": {
-        "distopia-template": "workspace:*",
         "domain-service-core": "workspace:*",
         "shared-lib": "workspace:*",
       },

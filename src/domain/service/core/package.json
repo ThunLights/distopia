@@ -14,9 +14,6 @@
     "format": "oxfmt --config ../../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "distopia-template": "workspace:*"
-  },
   "devDependencies": {
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",

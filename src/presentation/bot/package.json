@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "distopia-template": "workspace:*",
     "domain-service-core": "workspace:*",
     "shared-lib": "workspace:*"
   },
