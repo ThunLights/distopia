@@ -55,7 +55,10 @@
     "vitest-browser-svelte": "2.1.0"
   },
   "dependencies": {
+    "discord.js": "catalog:",
     "domain-service-core": "workspace:*",
-    "node-cron": "4.2.1"
+    "infra-discord": "workspace:*",
+    "node-cron": "4.2.1",
+    "presentation-bot": "workspace:*"
   }
 }

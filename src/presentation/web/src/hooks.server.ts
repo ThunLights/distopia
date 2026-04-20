@@ -1,4 +1,18 @@
+import { BOT_TOKEN } from "$env/static/private";
+import { client } from "$lib/server/discord";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
+
+process.on("uncaughtException", async (error) => {
+  console.error(error);
+});
+
+process.on("unhandledRejection", async (reason) => {
+  console.error(reason);
+});
+
+async function start() {
+  await client.login(BOT_TOKEN);
+}
 
 export const handle = (async ({ event, resolve }) => {
   const response = await resolve(event);
@@ -15,3 +29,5 @@ export const handleError = (async (input) => {
     return { message: "Method Not Allowed" };
   }
 }) satisfies HandleServerError;
+
+await start();
