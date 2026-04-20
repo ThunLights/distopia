@@ -8,18 +8,21 @@ import {
 
 import { Base } from "./Base";
 
-export class ParseOptionsError {}
-
 export abstract class ChatInputCommandBase<
   O = {},
   T extends RESTPostAPIChatInputApplicationCommandsJSONBody =
     RESTPostAPIChatInputApplicationCommandsJSONBody,
-> extends Base<ChatInputCommandInteraction<CacheType>, void> {
+> extends Base<
+  ChatInputCommandInteraction<CacheType>,
+  string | InteractionReplyOptions | MessagePayload
+> {
   public abstract readonly regist: T;
 
-  public override async run(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+  public override async run(
+    interaction: ChatInputCommandInteraction<CacheType>,
+  ): Promise<string | InteractionReplyOptions | MessagePayload> {
     const options = await this.parseOptions(interaction);
-    await this.exec(interaction, options);
+    return await this.exec(interaction, options);
   }
 
   public override async match(

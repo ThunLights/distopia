@@ -12,7 +12,8 @@ export class InteractionCreateHandler extends BaseHandler<
     if (interaction.isChatInputCommand()) {
       for (const command of this.commands) {
         if (await command.match(interaction)) {
-          return await command.run(interaction);
+          const res = await command.run(interaction);
+          return void (await interaction.reply(res));
         }
       }
       return void (await interaction.reply({
