@@ -14,7 +14,7 @@
   "dependencies": {
     "distopia-template": "workspace:*",
     "domain-service-core": "workspace:*",
-    "infra-discord": "workspace:*"
+    "shared-lib": "workspace:*"
   },
   "devDependencies": {
     "bun": "1.3.12",

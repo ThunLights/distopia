@@ -1,4 +1,4 @@
-import type { Message, OmitPartialGroupDMChannel } from "infra-discord/prelude";
+import type { Message, OmitPartialGroupDMChannel } from "shared-lib/discord.js";
 
 import { BaseHandler } from "./BaseHandler";
 

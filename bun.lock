@@ -43,7 +43,7 @@
     "src/domain/service/bot": {
       "name": "domain-service-bot",
       "dependencies": {
-        "infra-discord": "workspace:*",
+        "shared-lib": "workspace:*",
       },
       "peerDependencies": {
         "typescript": "6.0.2",
@@ -101,7 +101,7 @@
       "dependencies": {
         "distopia-template": "workspace:*",
         "domain-service-core": "workspace:*",
-        "infra-discord": "workspace:*",
+        "shared-lib": "workspace:*",
       },
       "devDependencies": {
         "bun": "1.3.12",

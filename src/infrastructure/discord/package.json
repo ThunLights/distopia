@@ -5,9 +5,6 @@
   "exports": {
     ".": {
       "import": "./src/index.ts"
-    },
-    "./prelude": {
-      "import": "./src/prelude.ts"
     }
   },
   "scripts": {

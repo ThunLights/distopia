@@ -1,4 +1,4 @@
-import type { Client } from "infra-discord/prelude";
+import type { Client } from "shared-lib/discord.js";
 
 export abstract class BaseController {
     constructor(protected readonly client: Client) {}

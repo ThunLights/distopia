@@ -1,4 +1,4 @@
-import { MessageFlags, type CacheType, type Interaction } from "infra-discord/prelude";
+import { MessageFlags, type CacheType, type Interaction } from "shared-lib/discord.js";
 
 import { BaseHandler } from "../BaseHandler";
 import { getCommands } from "./commands.auto";

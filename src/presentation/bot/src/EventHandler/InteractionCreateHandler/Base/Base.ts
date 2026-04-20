@@ -1,4 +1,4 @@
-import type { BaseInteraction, Client } from "infra-discord/prelude";
+import type { BaseInteraction, Client } from "shared-lib/discord.js";
 
 import type { AppData } from "../../../model";
 

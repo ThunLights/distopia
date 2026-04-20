@@ -1,4 +1,4 @@
-import { ActivityType, type Client } from "infra-discord/prelude";
+import { ActivityType, type Client } from "shared-lib/discord.js";
 
 import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
 import { GuildUpdate } from "./EventHandler/GuildUpdate";

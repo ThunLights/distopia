@@ -8,7 +8,7 @@ import {
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   type User,
-} from "infra-discord/prelude";
+} from "shared-lib/discord.js";
 
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 

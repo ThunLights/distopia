@@ -4,7 +4,7 @@ import {
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from "infra-discord/prelude";
+} from "shared-lib/discord.js";
 
 import { Base } from "./Base";
 

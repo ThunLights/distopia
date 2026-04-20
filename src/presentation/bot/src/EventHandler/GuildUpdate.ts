@@ -1,4 +1,4 @@
-import type { Guild } from "infra-discord/prelude";
+import type { Guild } from "shared-lib/discord.js";
 
 import { BaseHandler } from "./BaseHandler";
 
