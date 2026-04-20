@@ -14,15 +14,6 @@
         "typescript": "6.0.2",
       },
     },
-    "src/domain/repository/database": {
-      "name": "domain-repo-database",
-      "dependencies": {
-        "infra-database": "workspace:*",
-      },
-      "peerDependencies": {
-        "typescript": "6.0.2",
-      },
-    },
     "src/domain/service/bot": {
       "name": "domain-service-bot",
       "dependencies": {
@@ -842,8 +833,6 @@
     "distopia-template": ["distopia-template@workspace:src/template"],
 
     "dom-accessibility-api": ["dom-accessibility-api@0.6.3", "", {}, "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w=="],
-
-    "domain-repo-database": ["domain-repo-database@workspace:src/domain/repository/database"],
 
     "domain-service-bot": ["domain-service-bot@workspace:src/domain/service/bot"],
 
