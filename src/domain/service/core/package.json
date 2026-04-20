@@ -9,9 +9,9 @@
   },
   "scripts": {
     "test": "vitest run",
-    "lint": "oxfmt --check --config ../../../template/oxfmt.config.ts && oxlint --config ../../../template/oxlint.config.ts",
-    "lint:fix": "oxlint --fix --config ../../../template/oxlint.config.ts",
-    "format": "oxfmt --config ../../../template/oxfmt.config.ts",
+    "lint": "oxfmt --check --config ../../../../lib/template/oxfmt.config.ts && oxlint --config ../../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../../lib/template/oxlint.config.ts",
+    "format": "oxfmt --config ../../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

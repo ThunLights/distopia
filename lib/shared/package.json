@@ -1,0 +1,25 @@
+{
+  "name": "shared-lib",
+  "private": true,
+  "exports": {
+    "./discord.js": {
+      "import": "./src/discord.ts"
+    }
+  },
+  "scripts": {
+    "lint": "oxfmt --check --config ../template/oxfmt.config.ts && oxlint --config ../template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../template/oxlint.config.ts",
+    "format": "oxfmt --config ../template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "discord.js": "14.26.2"
+  },
+  "devDependencies": {
+    "oxfmt": "0.45.0",
+    "oxlint": "1.60.0"
+  },
+  "peerDependencies": {
+    "typescript": "6.0.3"
+  }
+}
