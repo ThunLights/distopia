@@ -1,6 +1,11 @@
 {
   "name": "app-core",
   "private": true,
+  "exports": {
+    "./*": {
+      "import": "./src/*.ts"
+    }
+  },
   "scripts": {
     "test": "vitest run",
     "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",

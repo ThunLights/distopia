@@ -111,7 +111,7 @@
     "src/presentation/bot": {
       "name": "presentation-bot",
       "dependencies": {
-        "domain-service-core": "workspace:*",
+        "app-core": "workspace:*",
         "shared-lib": "workspace:*",
       },
       "devDependencies": {

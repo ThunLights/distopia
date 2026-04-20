@@ -1,4 +1,4 @@
-import { staffs } from "domain-service-core";
+import { isStaff } from "app-core/staff";
 import {
   ApplicationCommandOptionType,
   EmbedBuilder,
@@ -43,9 +43,8 @@ export class StaffCommand extends ChatInputCommandBase<Options> {
     options: Options,
   ): Promise<string | InteractionReplyOptions | MessagePayload> {
     const userId = options.user ? options.user.id : interaction.user.id;
-    const staffIds = staffs.map(({ discordId }) => discordId as string);
 
-    if (staffIds.includes(userId)) {
+    if (await isStaff(userId)) {
       const embed = new EmbedBuilder()
         .setColor("Green")
         .setTitle("Staff")
