@@ -83,7 +83,7 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
       const embed = new EmbedBuilder()
         .setColor("Gold")
         .setTitle("ステータス")
-        .setDescription(`ping: ${this.client.ws.ping}`);
+        .setDescription(`ping: ${interaction.client.ws.ping}`);
       return {
         embeds: [embed],
         flags: [MessageFlags.Ephemeral],

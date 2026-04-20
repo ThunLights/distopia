@@ -2,7 +2,6 @@ import {
   ApplicationCommandOptionType,
   type CacheType,
   type ChatInputCommandInteraction,
-  type Client,
   type InteractionReplyOptions,
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -46,7 +45,7 @@ class Command extends ChatInputCommandBase<Options> {
 }
 
 describe("ChatInputCommandBase", () => {
-  const command = new Command({} as Client, {} as AppData);
+  const command = new Command({} as AppData);
 
   test("match", async () => {
     expect(

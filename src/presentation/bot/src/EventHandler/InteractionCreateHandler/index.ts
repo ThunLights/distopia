@@ -1,12 +1,15 @@
 import { MessageFlags, type CacheType, type Interaction } from "discord.js";
 
 import { BaseHandler } from "../BaseHandler";
-import { getCommands } from "./commands.auto";
+import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
+import { commands } from "./commands.auto";
 
 export class InteractionCreateHandler extends BaseHandler<
   (interaction: Interaction<CacheType>) => void
 > {
-  public readonly commands = getCommands(this.client, this.appData);
+  public readonly commands: ChatInputCommandBase[] = commands.map(
+    (Command) => new Command(this.appData),
+  );
 
   public override async handle(interaction: Interaction<CacheType>): Promise<void> {
     if (interaction.isChatInputCommand()) {

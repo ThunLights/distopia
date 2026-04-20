@@ -7,7 +7,10 @@ import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
 import type { AppData } from "./model";
 
 export function handleClient(client: Client, appData: AppData) {
-  const interactionCreateHandler = new InteractionCreateHandler(client, appData);
+  const interactionCreateHandler = new InteractionCreateHandler(appData);
+  const messageCreateHandler = new MessageCreateHandler(appData);
+  const guildMemberAdd = new GuildMemberAdd(appData);
+  const guildUpdate = new GuildUpdate(appData);
 
   client.on("clientReady", async (client) => {
     client.user.setActivity({
@@ -22,13 +25,19 @@ export function handleClient(client: Client, appData: AppData) {
     });
   });
 
-  client.on("interactionCreate", interactionCreateHandler.handle);
+  client.on(
+    "interactionCreate",
+    async (interaction) => await interactionCreateHandler.handle(interaction),
+  );
 
-  client.on("messageCreate", new MessageCreateHandler(client, appData).handle);
+  client.on("messageCreate", async (message) => await messageCreateHandler.handle(message));
 
-  client.on("guildMemberAdd", new GuildMemberAdd(client, appData).handle);
+  client.on("guildMemberAdd", async (member) => await guildMemberAdd.handle(member));
 
-  client.on("guildUpdate", new GuildUpdate(client, appData).handle);
+  client.on(
+    "guildUpdate",
+    async (oldGuild, newGuild) => await guildUpdate.handle(oldGuild, newGuild),
+  );
 
   return client;
 }

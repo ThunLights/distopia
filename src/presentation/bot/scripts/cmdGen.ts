@@ -27,16 +27,9 @@ for (const fileName of await fs.readdir(chatInputCommandDir)) {
 await fs.writeFile(
   outputFilePath,
   [
-    'import type { Client } from "discord.js";',
-    'import type { AppData } from "../../model.ts";',
-    'import { ChatInputCommandBase } from "./Base/ChatInputCommandBase";',
-    ...commands.map(
-      (command) =>
-        `import { ${path.basename(command, ".ts")} } from "./ChatInputCommand/${command}";`,
-    ),
-    "export function getCommands(client: Client, appData: AppData) {",
-    `const commands: ChatInputCommandBase[] = [${commands.map((command) => `new ${path.basename(command, ".ts")}(client, appData)`).join(", ")}];`,
-    "return commands",
-    "};",
+    ...commands
+      .map((command) => path.basename(command, ".ts"))
+      .map((command) => `import { ${command} } from "./ChatInputCommand/${command}";`),
+    `export const commands = [${commands.map((command) => path.basename(command, ".ts")).join(", ")}];`,
   ].join("\n"),
 );

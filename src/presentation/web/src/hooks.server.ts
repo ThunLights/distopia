@@ -12,6 +12,7 @@ process.on("unhandledRejection", async (reason) => {
 
 async function start() {
   await client.login(BOT_TOKEN);
+  console.log("BOT logined.");
 }
 
 export const handle = (async ({ event, resolve }) => {
