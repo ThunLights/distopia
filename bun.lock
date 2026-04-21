@@ -33,6 +33,7 @@
         "domain-model": "workspace:*",
         "domain-service-core": "workspace:*",
         "infra-database": "workspace:*",
+        "repo-memory": "workspace:*",
       },
       "devDependencies": {
         "bun": "1.3.12",
