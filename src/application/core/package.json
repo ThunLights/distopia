@@ -5,6 +5,9 @@
     ".": {
       "import": "./src/index.ts"
     },
+    "./AppData": {
+      "import": "./src/utils/AppData.ts"
+    },
     "./staff": {
       "import": "./src/utils/staff.ts"
     },

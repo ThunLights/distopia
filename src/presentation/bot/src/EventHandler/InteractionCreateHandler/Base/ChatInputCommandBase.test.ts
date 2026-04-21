@@ -1,3 +1,4 @@
+import type { AppData } from "app-core/AppData";
 import {
   ApplicationCommandOptionType,
   type CacheType,
@@ -8,7 +9,6 @@ import {
 } from "discord.js";
 import { describe, expect, test } from "vitest";
 
-import type { AppData } from "../../../model";
 import { ChatInputCommandBase } from "./ChatInputCommandBase";
 
 type Options = {

@@ -1,6 +1,5 @@
+import type { AppData } from "app-core/AppData";
 import type { BaseInteraction } from "discord.js";
-
-import type { AppData } from "../../../model";
 
 export abstract class Base<T extends BaseInteraction, R = void> {
   constructor(protected readonly appData: AppData) {}

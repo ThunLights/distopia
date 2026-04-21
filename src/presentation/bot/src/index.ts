@@ -1,10 +1,10 @@
+import type { AppData } from "app-core/AppData";
 import { ActivityType, type Client } from "discord.js";
 
 import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
 import { GuildUpdate } from "./EventHandler/GuildUpdate";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
-import type { AppData } from "./model";
 
 export function handleClient(client: Client, appData: AppData) {
   const interactionCreateHandler = new InteractionCreateHandler(appData);
