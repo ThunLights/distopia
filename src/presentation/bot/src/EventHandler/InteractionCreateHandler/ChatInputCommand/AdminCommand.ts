@@ -72,13 +72,13 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
         .setLabel("ユーザーBump")
         .setStyle(ButtonStyle.Primary);
 
-      const component = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         levelButton,
         rateButton,
         userBumpButton,
       );
 
-      return { embeds: [embed], components: [component] };
+      return { embeds: [embed], components: [row] };
     } else if (subCommand === "status") {
       const embed = new EmbedBuilder()
         .setColor("Gold")
