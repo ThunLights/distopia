@@ -5,4 +5,4 @@ export type User = {
   globalName?: string;
   avatarUrl?: string;
   bannerUrl?: string;
-}
+};
