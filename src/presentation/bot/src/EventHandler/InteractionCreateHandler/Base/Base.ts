@@ -45,13 +45,14 @@ export abstract class Base<T extends BaseInteraction, R = void> {
   }
 
   protected async parseUser(interaction: T): Promise<User> {
+    const { user } = interaction;
     return {
-      id: interaction.user.id,
-      name: interaction.user.username,
-      displayName: interaction.user.displayName,
-      globalName: interaction.user.globalName ?? undefined,
-      avatarUrl: interaction.user.avatarURL() ?? undefined,
-      bannerUrl: interaction.user.bannerURL() ?? undefined,
+      id: user.id,
+      name: user.username,
+      displayName: user.displayName,
+      globalName: user.globalName ?? undefined,
+      avatarUrl: user.avatarURL() ?? undefined,
+      bannerUrl: user.bannerURL() ?? undefined,
     };
   }
 
