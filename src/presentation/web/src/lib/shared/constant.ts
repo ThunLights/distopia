@@ -1,4 +1,4 @@
-import { getPublicConstants } from "app-core/constants";
+import { getPublicConstants } from "app-core/constant";
 
 export type SiteAbout = {
   title: string;
