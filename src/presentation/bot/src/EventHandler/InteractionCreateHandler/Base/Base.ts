@@ -13,7 +13,7 @@ export abstract class Base<T extends BaseInteraction, R = void> {
       globalName: interaction.user.globalName ?? undefined,
       avatarUrl: interaction.user.avatarURL() ?? undefined,
       bannerUrl: interaction.user.bannerURL() ?? undefined,
-    }
+    };
   }
 
   public abstract match(interaction: T): Promise<boolean>;
