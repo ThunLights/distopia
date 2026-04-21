@@ -2,8 +2,8 @@
   "name": "domain-model",
   "private": true,
   "exports": {
-    "./*": {
-      "import": "./src/*.ts"
+    ".": {
+      "import": "./src/index.ts"
     }
   },
   "scripts": {
