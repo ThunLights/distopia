@@ -2,8 +2,14 @@
   "name": "app-core",
   "private": true,
   "exports": {
-    "./*": {
-      "import": "./src/*.ts"
+    ".": {
+      "import": "./src/index.ts"
+    },
+    "./staff": {
+      "import": "./src/utils/staff.ts"
+    },
+    "./constant": {
+      "import": "./src/utils/constant.ts"
     }
   },
   "scripts": {
@@ -14,7 +20,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "domain-service-core": "workspace:*"
+    "domain-model": "workspace:*",
+    "domain-service-core": "workspace:*",
+    "infra-database": "workspace:*"
   },
   "devDependencies": {
     "bun": "1.3.12",
