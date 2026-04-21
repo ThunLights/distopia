@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "app-core": "workspace:*",
-    "discord.js": "catalog:"
+    "discord.js": "catalog:",
+    "domain-model": "workspace:*"
   },
   "devDependencies": {
     "bun": "1.3.12",
