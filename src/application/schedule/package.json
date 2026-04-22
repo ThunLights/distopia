@@ -13,7 +13,9 @@
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/node": "catalog:"
+  },
   "devDependencies": {
     "bun": "catalog:",
     "oxfmt": "0.45.0",
@@ -21,6 +23,7 @@
     "vitest": "4.1.4"
   },
   "peerDependencies": {
+    "node-cron": "4.2.1",
     "typescript": "catalog:"
   }
 }

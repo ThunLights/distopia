@@ -32,6 +32,7 @@
       "@prisma/adapter-pg": "7.7.0",
       "@prisma/client": "7.7.0",
       "@prisma/client-runtime-utils": "7.7.0",
+      "@types/node": "24",
       "prisma": "7.7.0"
     }
   }
