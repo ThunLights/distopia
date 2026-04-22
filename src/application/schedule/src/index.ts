@@ -1,1 +1,1 @@
-export class ScheduleManager {}
+export * from "./ScheduleTaskManager";
