@@ -17,7 +17,7 @@ type Options = {
 };
 
 export class StaffCommand extends ChatInputCommandBase<Options> {
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "staff",
     description: "スタッフかどうかチェックできるよ",
     options: [

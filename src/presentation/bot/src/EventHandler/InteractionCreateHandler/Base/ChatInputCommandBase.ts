@@ -11,11 +11,11 @@ export abstract class ChatInputCommandBase<
   T extends RESTPostAPIChatInputApplicationCommandsJSONBody =
     RESTPostAPIChatInputApplicationCommandsJSONBody,
 > extends CommandInteractionBase<O, ChatInputCommandInteraction<CacheType>> {
-  public abstract readonly regist: T;
+  public abstract readonly register: T;
 
   public override async match(
     interaction: ChatInputCommandInteraction<CacheType>,
   ): Promise<boolean> {
-    return interaction.commandName === this.regist.name;
+    return interaction.commandName === this.register.name;
   }
 }

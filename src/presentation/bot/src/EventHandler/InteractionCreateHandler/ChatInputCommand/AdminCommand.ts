@@ -19,7 +19,7 @@ type Options = {
 };
 
 export class AdminCommand extends ChatInputCommandBase<Options> {
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "admin",
     description: "only admin",
     options: [

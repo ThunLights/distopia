@@ -15,7 +15,7 @@ import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 type Options = {};
 
 export class BumpCommand extends ChatInputCommandBase<Options> {
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "bump",
     description: "サーバーの表示順を上げる",
   };

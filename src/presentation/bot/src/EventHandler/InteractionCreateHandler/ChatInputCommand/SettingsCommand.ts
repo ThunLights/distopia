@@ -20,7 +20,7 @@ type Options = {};
 
 export class SettingsCommand extends ChatInputCommandBase<Options> {
   public override requireGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "settings",
     description: "設定コマンドです。",
   };

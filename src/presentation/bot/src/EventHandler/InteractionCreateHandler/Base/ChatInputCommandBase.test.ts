@@ -19,7 +19,7 @@ type Options = {
 };
 
 class Command extends ChatInputCommandBase<Options> {
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "hoge",
     description: "huga",
     options: [

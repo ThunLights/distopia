@@ -16,7 +16,7 @@ import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 type Options = {};
 
 export class FriendCommand extends ChatInputCommandBase<Options> {
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "friend",
     description: "フレンド募集用のコマンドです。",
   };

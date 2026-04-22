@@ -12,7 +12,7 @@ import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 type Options = {};
 
 export class HelpCommand extends ChatInputCommandBase<Options> {
-  public override regist: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "help",
     description: "ヘルプを表示",
   };
