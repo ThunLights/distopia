@@ -16,6 +16,9 @@
   "dependencies": {
     "discord.js": "catalog:"
   },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
   "peerDependencies": {
     "typescript": "catalog:"
   }

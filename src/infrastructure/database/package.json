@@ -21,6 +21,7 @@
     "typescript": "catalog:"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "bun": "catalog:",
     "zod-prisma-types": "3.3.11"
   },

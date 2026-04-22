@@ -21,6 +21,7 @@
     "oxlint": "1.60.0"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "bun": "catalog:"
   },
   "peerDependencies": {
