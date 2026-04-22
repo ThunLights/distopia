@@ -1,4 +1,4 @@
-import type { AppData } from "app-core/AppData";
+import type { AppCore } from "app-core";
 import type { BaseInteraction, PermissionResolvable } from "discord.js";
 import type { Guild, User } from "domain-model";
 
@@ -14,7 +14,7 @@ export abstract class Base<T extends BaseInteraction, R = void> {
   public readonly requireGuildPermissions: PermissionResolvable[] = [];
   public readonly requireChannelPermissions: PermissionResolvable[] = [];
 
-  constructor(protected readonly appData: AppData) {}
+  constructor(protected readonly core: AppCore) {}
 
   protected async checkPermission(interaction: T) {
     if (!interaction.guild?.members.me?.permissions.has(this.requireGuildPermissions)) {

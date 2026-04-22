@@ -1,4 +1,4 @@
-import type { AppData } from "app-core/AppData";
+import type { AppCore } from "app-core";
 import { ActivityType, type Client } from "discord.js";
 
 import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
@@ -6,11 +6,11 @@ import { GuildUpdate } from "./EventHandler/GuildUpdate";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
 
-export function handleClient(client: Client, appData: AppData) {
-  const interactionCreateHandler = new InteractionCreateHandler(appData);
-  const messageCreateHandler = new MessageCreateHandler(appData);
-  const guildMemberAdd = new GuildMemberAdd(appData);
-  const guildUpdate = new GuildUpdate(appData);
+export function handleClient(client: Client, core: AppCore) {
+  const interactionCreateHandler = new InteractionCreateHandler(core);
+  const messageCreateHandler = new MessageCreateHandler(core);
+  const guildMemberAdd = new GuildMemberAdd(core);
+  const guildUpdate = new GuildUpdate(core);
 
   client.on("clientReady", async (client) => {
     client.user.setActivity({

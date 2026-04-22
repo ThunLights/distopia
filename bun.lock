@@ -160,6 +160,7 @@
         "infra-discord": "workspace:*",
         "node-cron": "4.2.1",
         "presentation-bot": "workspace:*",
+        "repo-memory": "workspace:*",
       },
       "devDependencies": {
         "@chromatic-com/storybook": "5.1.2",

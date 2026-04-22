@@ -8,7 +8,7 @@ export class InteractionCreateHandler extends BaseHandler<
   (interaction: Interaction<CacheType>) => void
 > {
   public readonly commands: ChatInputCommandBase[] = commands.map(
-    (Command) => new Command(this.appData),
+    (Command) => new Command(this.core),
   );
 
   public override async handle(interaction: Interaction<CacheType>): Promise<void> {

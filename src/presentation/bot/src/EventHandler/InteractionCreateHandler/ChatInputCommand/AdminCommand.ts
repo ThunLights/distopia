@@ -49,7 +49,7 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
   ): Promise<string | InteractionReplyOptions | MessagePayload> {
     const { subCommand } = options;
 
-    if (interaction.user.id !== this.appData.owner.id) {
+    if (interaction.user.id !== this.core.state.owner.id) {
       return { content: "権限がありません", flags: [MessageFlags.Ephemeral] };
     }
 

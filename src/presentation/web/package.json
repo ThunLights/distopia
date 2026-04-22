@@ -60,6 +60,7 @@
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "node-cron": "4.2.1",
-    "presentation-bot": "workspace:*"
+    "presentation-bot": "workspace:*",
+    "repo-memory": "workspace:*"
   }
 }

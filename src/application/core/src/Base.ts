@@ -1,5 +1,5 @@
-import type { AppData } from "./utils/AppData";
+import type { AppState } from "./AppState";
 
 export class Base {
-  constructor(protected readonly appData: AppData) {}
+  constructor(public readonly state: AppState) {}
 }

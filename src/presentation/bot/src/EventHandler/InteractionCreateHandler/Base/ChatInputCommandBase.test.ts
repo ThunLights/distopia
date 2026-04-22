@@ -1,8 +1,11 @@
-import type { AppData } from "app-core/AppData";
+import { AppCore } from "app-core";
+import type { AppState } from "app-core/AppState";
 import {
   ApplicationCommandOptionType,
+  Guild,
   type CacheType,
   type ChatInputCommandInteraction,
+  type GuildChannelResolvable,
   type InteractionReplyOptions,
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -45,7 +48,7 @@ class Command extends ChatInputCommandBase<Options> {
 }
 
 describe("ChatInputCommandBase", () => {
-  const command = new Command({} as AppData);
+  const command = new Command(new AppCore({} as AppState));
 
   test("match", async () => {
     expect(
@@ -70,6 +73,24 @@ describe("ChatInputCommandBase", () => {
         options: {
           getString: (name) => (name === "data" ? "foo" : "Error"),
         },
+        guild: {
+          members: {
+            me: {
+              permissions: {
+                has(_permission, _checkAdmin) {
+                  return true;
+                },
+              },
+              permissionsIn(_channel: GuildChannelResolvable) {
+                return {
+                  has(_permission, _checkAdmin) {
+                    return true;
+                  },
+                };
+              },
+            },
+          },
+        } as Guild,
       } as ChatInputCommandInteraction<CacheType>),
     ).toEqual({ content: "123456" + "foo" });
   });
