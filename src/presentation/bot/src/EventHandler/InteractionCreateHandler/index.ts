@@ -1,4 +1,9 @@
-import { MessageFlags, type CacheType, type Interaction } from "discord.js";
+import {
+  InteractionCallbackResponse,
+  MessageFlags,
+  type CacheType,
+  type Interaction,
+} from "discord.js";
 
 import { BaseHandler } from "../BaseHandler";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
@@ -16,7 +21,9 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          return void (await interaction.reply(res));
+          if (!(res instanceof InteractionCallbackResponse)) {
+            return void (await interaction.reply(res));
+          }
         }
       }
       return void (await interaction.reply({

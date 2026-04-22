@@ -65,3 +65,11 @@ export const staffs = [
 ] as const satisfies Array<Staff>;
 
 export const DISCORD_INVITE_LINK = "https://discord.gg/QWUxsxWyYv";
+
+export const CHARACTER_LIMIT = {
+  description: 400,
+  tag: 25,
+  review: 100,
+} as const;
+
+export const NUM_TAG_LIMIT = 5;

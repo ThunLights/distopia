@@ -1,4 +1,5 @@
 import {
+  InteractionCallbackResponse,
   MessageFlags,
   type CommandInteraction,
   type InteractionReplyOptions,
@@ -10,7 +11,7 @@ import { Base, PermissionError } from "./Base";
 export abstract class CommandInteractionBase<
   O extends {},
   T extends CommandInteraction,
-  R = string | InteractionReplyOptions | MessagePayload,
+  R = string | InteractionReplyOptions | MessagePayload | InteractionCallbackResponse<boolean>,
 > extends Base<T, R> {
   public override async run(interaction: T): Promise<R> {
     const permission = await this.checkPermission(interaction);
