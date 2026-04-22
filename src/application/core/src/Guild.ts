@@ -16,6 +16,7 @@ export class Guild extends Base {
     }
 
     latelimit.set(guild.id, nowDate);
+    setTimeout(() => latelimit.delete(guild.id), twoHours);
 
     await database.guild.update({
       where: { guildId: guild.id },
@@ -24,7 +25,19 @@ export class Guild extends Base {
       },
     });
 
-    const { bumpCounter } = await database.user.upsert({
+    const { bumpCounter: guildBumpCounter } = await database.guildRecord.upsert({
+      where: { guildId: guild.id },
+      update: {
+        bumpCounter: {
+          increment: 1,
+        },
+      },
+      create: {
+        guildId: guild.id,
+      },
+    });
+
+    const { bumpCounter: userBumpCounter } = await database.user.upsert({
       where: {
         id: user.id,
       },
@@ -39,6 +52,9 @@ export class Guild extends Base {
       },
     });
 
-    return { bumpCounter };
+    return {
+      guildBumpCounter: guildBumpCounter ?? 1,
+      userBumpCounter: userBumpCounter ?? 1,
+    };
   }
 }
