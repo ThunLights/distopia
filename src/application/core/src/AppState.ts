@@ -1,3 +1,4 @@
+import type { ScheduleTaskManager } from "app-schedule";
 import type { PrismaClient } from "infra-database/prelude/prisma";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 
@@ -11,4 +12,5 @@ export type AppState = {
     };
   };
   database: PrismaClient;
+  schedule: ScheduleTaskManager;
 };

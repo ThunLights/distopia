@@ -31,6 +31,7 @@
     "src/application/core": {
       "name": "app-core",
       "dependencies": {
+        "app-schedule": "workspace:*",
         "domain-model": "workspace:*",
         "domain-service-core": "workspace:*",
         "infra-database": "workspace:*",
@@ -172,6 +173,7 @@
       "name": "presentation-web",
       "dependencies": {
         "app-core": "workspace:*",
+        "app-schedule": "workspace:*",
         "discord.js": "catalog:",
         "infra-database": "workspace:*",
         "infra-discord": "workspace:*",
