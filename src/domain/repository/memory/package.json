@@ -19,6 +19,6 @@
     "vitest": "4.1.4"
   },
   "peerDependencies": {
-    "typescript": "6.0.3"
+    "typescript": "catalog:"
   }
 }

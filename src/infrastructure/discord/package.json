@@ -17,6 +17,6 @@
     "discord.js": "catalog:"
   },
   "peerDependencies": {
-    "typescript": "6.0.2"
+    "typescript": "catalog:"
   }
 }
