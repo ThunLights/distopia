@@ -2,12 +2,12 @@ import { MessageFlags, type CacheType, type Interaction } from "discord.js";
 
 import { BaseHandler } from "../BaseHandler";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
-import { commands } from "./commands.auto";
+import { commands as chatInputCommands } from "./ChatInputCommands.auto";
 
 export class InteractionCreateHandler extends BaseHandler<
   (interaction: Interaction<CacheType>) => void
 > {
-  public readonly commands: ChatInputCommandBase[] = commands.map(
+  public readonly commands: ChatInputCommandBase[] = chatInputCommands.map(
     (Command) => new Command(this.core),
   );
 
