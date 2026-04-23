@@ -31,7 +31,6 @@
     "src/application/core": {
       "name": "app-core",
       "dependencies": {
-        "app-schedule": "workspace:*",
         "domain-model": "workspace:*",
         "domain-service-core": "workspace:*",
         "infra-database": "workspace:*",
