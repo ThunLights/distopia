@@ -91,6 +91,11 @@ describe("ChatInputCommandBase", () => {
             },
           },
         } as Guild,
+        memberPermissions: {
+          has(_permission, _checkAdmin) {
+            return true;
+          },
+        },
       } as ChatInputCommandInteraction<CacheType>),
     ).toEqual({ content: "123456" + "foo" });
   });
