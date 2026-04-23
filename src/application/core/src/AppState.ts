@@ -7,6 +7,7 @@ export type AppState = {
   owner: {
     id: string;
   };
+  url: string;
   memory: {
     latelimit: {
       bump: GuildBumpLateLimit;
