@@ -9,8 +9,9 @@ export class ScheduleTaskManager {
     return task.id;
   }
 
-  public async remove(id: string) {
+  public async delete(id: string) {
     await this.schedules.get(id)?.destroy();
+    return this.schedules.delete(id);
   }
 
   public async get(id: string) {
