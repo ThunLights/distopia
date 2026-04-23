@@ -19,7 +19,7 @@ import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 type Options = {};
 
 export class SettingsCommand extends ChatInputCommandBase<Options> {
-  public override requireGuildPermissions: PermissionResolvable[] = ["Administrator"];
+  public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "settings",
     description: "設定コマンドです。",

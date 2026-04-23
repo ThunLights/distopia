@@ -1,5 +1,5 @@
 import type { AppCore } from "app-core";
-import type { BaseInteraction, PermissionResolvable } from "discord.js";
+import { type BaseInteraction, type PermissionResolvable } from "discord.js";
 import type { Guild, User } from "domain-model";
 
 import { codeBlock } from "../../../utils/codeblock";
@@ -11,17 +11,18 @@ export class PermissionSuccess {}
 export class PermissionError extends Error {}
 
 export abstract class Base<T extends BaseInteraction, R = void> {
-  public readonly requireGuildPermissions: PermissionResolvable[] = [];
-  public readonly requireChannelPermissions: PermissionResolvable[] = [];
+  public readonly requireBotGuildPermissions: PermissionResolvable[] = [];
+  public readonly requireBotChannelPermissions: PermissionResolvable[] = [];
+  public readonly requireUserGuildPermissions: PermissionResolvable[] = [];
 
   constructor(protected readonly core: AppCore) {}
 
   protected async checkPermission(interaction: T) {
-    if (!interaction.guild?.members.me?.permissions.has(this.requireGuildPermissions)) {
+    if (!interaction.guild?.members.me?.permissions.has(this.requireBotGuildPermissions)) {
       return new PermissionError(
         [
-          "このコマンドの実行には以下の権限が必要です。",
-          await codeBlock(this.requireGuildPermissions.join(" ")),
+          "このコマンドの実行にはボットに以下の権限が必要です。",
+          await codeBlock(this.requireBotGuildPermissions.join(" ")),
           "サーバー権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
         ].join("\n"),
       );
@@ -30,13 +31,22 @@ export abstract class Base<T extends BaseInteraction, R = void> {
       interaction.channelId &&
       !interaction.guild?.members.me
         ?.permissionsIn(interaction.channelId)
-        .has(this.requireChannelPermissions)
+        .has(this.requireBotChannelPermissions)
     ) {
       return new PermissionError(
         [
-          "このコマンドの実行には以下の権限が必要です。",
-          await codeBlock(this.requireChannelPermissions.join(" ")),
+          "このコマンドの実行にはボットに以下の権限が必要です。",
+          await codeBlock(this.requireBotChannelPermissions.join(" ")),
           "チャンネル権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
+        ].join("\n"),
+      );
+    }
+    if (!interaction.memberPermissions?.has(this.requireUserGuildPermissions)) {
+      return new PermissionError(
+        [
+          "このコマンドの実行にはユーザーに以下の権限が必要です。",
+          await codeBlock(this.requireUserGuildPermissions.join(" ")),
+          "ユーザー権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
         ].join("\n"),
       );
     }
