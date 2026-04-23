@@ -52,8 +52,7 @@ model Guild {
   icon   String?
   banner String?
 
-  category    GuildCategory
-  description String
+  description String?
 
   nsfw     Boolean?
   bumpTime DateTime?
@@ -66,20 +65,6 @@ model Guild {
 enum GuildStatus {
   Temporarily
   Registered
-}
-
-enum GuildCategory {
-  General
-  Game
-  Community
-  Anime
-  Comic
-  Music
-  Technology
-  Language
-  Movie
-  Nsfw
-  Other
 }
 
 model GuildReview {
@@ -125,8 +110,6 @@ model GuildSetting {
   bumpNotice        Boolean?
   bumpNoticeRole    String?
   bumpNoticeContent String?
-  dpNoticeChannel   String?
-  dpBanBasis        Int?
 }
 
 //パネル用
