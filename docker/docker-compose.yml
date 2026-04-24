@@ -6,6 +6,8 @@ services:
       - distopia-db-store:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
+    networks:
+      - distopia-network
     environment:
       POSTGRES_USER: "user"
       POSTGRES_PASSWORD: "0000"
@@ -20,6 +22,8 @@ services:
       context: ./
       dockerfile: dockerfile
     init: true
+    networks:
+      - distopia-network
     command: sleep infinity
     volumes:
       - ..:/workspaces/distopia:cached
@@ -30,3 +34,6 @@ volumes:
   distopia-db-store:
   distopia-cache:
   distopia-node-modules:
+
+networks:
+  distopia-network:
