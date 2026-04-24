@@ -53,11 +53,11 @@ model Guild {
 
   description String?
 
-  nsfw       Boolean?
+  nsfw       Boolean         @default(false)
   visibility GuildVisibility @default(Public)
-  bumpTime   DateTime?
+  bumpTime   DateTime        @default(now())
 
-  tags String[]
+  tags String[]              @default([])
 
   reviews GuildReview[]
 }
@@ -82,10 +82,10 @@ model GuildRecordOneDay {
   guildId String
   date    DateTime
 
-  vcMembers        String[]
-  newMembers       String[]
-  newMessages      Int?
-  vcMemberUpperTwo Int?
+  vcMembers        String[] @default([])
+  newMembers       String[] @default([])
+  newMessages      Int      @default(0)
+  vcMemberUpperTwo Int      @default(0)
 
   @@id([guildId, date])
 }
@@ -93,21 +93,21 @@ model GuildRecordOneDay {
 model GuildRecord {
   guildId String @id
 
-  MaxlevelRank BigInt?
+  maxlevelRank BigInt?
   maxRateRank  BigInt?
   MaxRate      BigInt?
 
-  bumpCounter Int?
+  bumpCounter Int     @default(0)
   activeRate  BigInt?
 
-  level BigInt?
-  point BigInt?
+  level BigInt @default(0)
+  point BigInt @default(0)
 }
 
 model GuildSetting {
-  guildId           String   @id
+  guildId           String  @id
   actingOwner       String?
-  bumpNotice        Boolean?
+  bumpNotice        Boolean @default(false)
   bumpNoticeRole    String?
   bumpNoticeContent String?
 }
