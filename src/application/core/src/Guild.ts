@@ -1,4 +1,5 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
+import { Prisma } from "infra-database/prelude/prisma";
 
 import { Base } from "./Base";
 
@@ -56,5 +57,35 @@ export class Guild extends Base {
       guildBumpCounter: guildBumpCounter ?? 1,
       userBumpCounter: userBumpCounter ?? 1,
     };
+  }
+
+  public async register(
+    guildId: string,
+    data: Prisma.XOR<Prisma.GuildCreateInput, Prisma.GuildUncheckedCreateInput>,
+  ) {
+    return await this.state.database.guild.upsert({
+      where: { guildId },
+      update: data,
+      create: data,
+    });
+  }
+
+  public async save(
+    guildId: string,
+    data: Prisma.XOR<Prisma.GuildUpdateInput, Prisma.GuildUncheckedUpdateInput>,
+  ) {
+    await this.state.database.guild.update({
+      where: { guildId },
+      data,
+    });
+  }
+
+  public async find(guildId: string) {
+    return await this.state.database.guild.findUnique({
+      where: { guildId },
+      include: {
+        reviews: true,
+      },
+    });
   }
 }
