@@ -1,4 +1,5 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
+import { useAsync } from "domain-service-core";
 import { Prisma } from "infra-database/prelude/prisma";
 
 import { Base } from "./Base";
@@ -6,7 +7,7 @@ import { Base } from "./Base";
 export class Guild extends Base {
   public async getDraft(guildId: string) {
     const dbData = await this.state.database.guild.findUnique({ where: { guildId } });
-    const memoryData = this.state.memory.guildEdit.get(guildId);
+    const memoryData = await useAsync(this.state.memory.guildEdit.get)(guildId);
     return {
       description: memoryData?.description ?? dbData?.description ?? undefined,
       nsfw: memoryData?.nsfw ?? dbData?.nsfw,
@@ -20,15 +21,15 @@ export class Guild extends Base {
     const { database, memory } = this.state;
     const latelimit = memory.latelimit.bump;
 
-    const settedDate = latelimit.get(guild.id);
+    const settedDate = await useAsync(latelimit.get)(guild.id);
     const nowDate = new Date();
     if (settedDate) {
       const remainDate = twoHours - (nowDate.getTime() - settedDate.getTime());
       return new LateLimitError(settedDate, remainDate);
     }
 
-    latelimit.set(guild.id, nowDate);
-    setTimeout(() => latelimit.delete(guild.id), twoHours);
+    await useAsync(latelimit.set)(guild.id, nowDate);
+    setTimeout(() => useAsync(latelimit.delete)(guild.id), twoHours);
 
     await database.guild.update({
       where: { guildId: guild.id },
