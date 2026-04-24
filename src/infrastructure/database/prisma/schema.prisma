@@ -46,7 +46,6 @@ model Friend {
 model Guild {
   guildId String @id
 
-  status GuildStatus
   name   String
   invite String
   icon   String?
@@ -54,17 +53,18 @@ model Guild {
 
   description String?
 
-  nsfw     Boolean?
-  bumpTime DateTime?
+  nsfw       Boolean?
+  visibility GuildVisibility @default(Public)
+  bumpTime   DateTime?
 
   tags String[]
 
   reviews GuildReview[]
 }
 
-enum GuildStatus {
-  Temporarily
-  Registered
+enum GuildVisibility {
+  Public
+  Private
 }
 
 model GuildReview {
