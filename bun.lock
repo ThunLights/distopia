@@ -79,7 +79,6 @@
     "src/domain/repository/memory": {
       "name": "repo-memory",
       "dependencies": {
-        "domain-service-core": "workspace:*",
         "infra-database": "workspace:*",
       },
       "devDependencies": {
@@ -120,10 +119,10 @@
     "src/infrastructure/database": {
       "name": "infra-database",
       "dependencies": {
-        "@prisma/adapter-pg": "catalog:",
-        "@prisma/client": "catalog:",
-        "@prisma/client-runtime-utils": "catalog:",
-        "prisma": "catalog:",
+        "@prisma/adapter-pg": "7.7.0",
+        "@prisma/client": "7.7.0",
+        "@prisma/client-runtime-utils": "7.7.0",
+        "prisma": "7.7.0",
         "zod": "4.3.6",
       },
       "devDependencies": {
@@ -222,13 +221,9 @@
     },
   },
   "catalog": {
-    "@prisma/adapter-pg": "7.7.0",
-    "@prisma/client": "7.7.0",
-    "@prisma/client-runtime-utils": "7.7.0",
     "@types/node": "24",
     "bun": "1.3.13",
     "discord.js": "14.26.2",
-    "prisma": "7.7.0",
     "typescript": "6.0.2",
   },
   "packages": {
