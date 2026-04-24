@@ -20,7 +20,7 @@
     "bun": "catalog:",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
-    "vitest": "4.1.4"
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "typescript": "catalog:"
