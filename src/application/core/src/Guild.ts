@@ -4,6 +4,17 @@ import { Prisma } from "infra-database/prelude/prisma";
 import { Base } from "./Base";
 
 export class Guild extends Base {
+  public async getDraft(guildId: string) {
+    const dbData = await this.state.database.guild.findUnique({ where: { guildId } });
+    const memoryData = this.state.memory.guildEdit.get(guildId);
+    return {
+      description: memoryData?.description ?? dbData?.description ?? undefined,
+      nsfw: memoryData?.nsfw ?? dbData?.nsfw,
+      visibility: memoryData?.visibility ?? dbData?.visibility,
+      tag: memoryData?.tags ?? dbData?.tags,
+    };
+  }
+
   public async bump(user: User, guild: GuildModel) {
     const twoHours = 2 * 60 * 60 * 1000;
     const { database, memory } = this.state;
@@ -59,7 +70,7 @@ export class Guild extends Base {
     };
   }
 
-  public async register(
+  public async save(
     guildId: string,
     data: Prisma.XOR<Prisma.GuildCreateInput, Prisma.GuildUncheckedCreateInput>,
   ) {
@@ -70,22 +81,9 @@ export class Guild extends Base {
     });
   }
 
-  public async save(
-    guildId: string,
-    data: Prisma.XOR<Prisma.GuildUpdateInput, Prisma.GuildUncheckedUpdateInput>,
-  ) {
-    await this.state.database.guild.update({
-      where: { guildId },
-      data,
-    });
-  }
-
   public async find(guildId: string) {
     return await this.state.database.guild.findUnique({
       where: { guildId },
-      include: {
-        reviews: true,
-      },
     });
   }
 }

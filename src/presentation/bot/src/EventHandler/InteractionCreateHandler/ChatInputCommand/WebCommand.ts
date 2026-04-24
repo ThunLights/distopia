@@ -14,6 +14,7 @@ import {
 
 import { GuildParseError } from "../Base/Base";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { page } from "../Page/WebEdit";
 
 type Options = {
   subCommand: string;
@@ -100,6 +101,8 @@ export class WebCommand extends ChatInputCommandBase<Options> {
           flags: [MessageFlags.Ephemeral],
         };
       }
+
+      return await page(this.core, guild);
     } else if (subCommand === "invite") {
       if (!guildData) {
         return {
@@ -116,7 +119,10 @@ export class WebCommand extends ChatInputCommandBase<Options> {
 
       const invite = await interaction.channel.createInvite();
 
-      await this.core.guild.save(guildData.guildId, { invite: invite.code });
+      await this.core.guild.save(guildData.guildId, {
+        ...guildData,
+        invite: invite.code,
+      });
 
       const embed = new EmbedBuilder()
         .setColor("Gold")

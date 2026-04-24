@@ -1,4 +1,5 @@
 import type { PrismaClient } from "infra-database/prelude/prisma";
+import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 
 import type { getPublicConstants } from "./utils/constant";
@@ -12,6 +13,7 @@ export type AppState = {
     latelimit: {
       bump: GuildBumpLateLimit;
     };
+    guildEdit: GuildEdit;
   };
   constants: ReturnType<typeof getPublicConstants>;
   database: PrismaClient;

@@ -78,6 +78,9 @@
     },
     "src/domain/repository/memory": {
       "name": "repo-memory",
+      "dependencies": {
+        "infra-database": "workspace:*",
+      },
       "devDependencies": {
         "@types/node": "catalog:",
         "bun": "catalog:",
