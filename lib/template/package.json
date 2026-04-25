@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "oxfmt": "catalog:",
-    "oxlint": "1.60.0"
+    "oxlint": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -14,7 +14,7 @@
   "devDependencies": {
     "bun": "catalog:",
     "oxfmt": "catalog:",
-    "oxlint": "1.60.0",
+    "oxlint": "catalog:",
     "turbo": "2.9.6"
   },
   "peerDependencies": {
@@ -31,7 +31,8 @@
       "typescript": "6.0.2",
       "@types/node": "24",
       "vitest": "4.1.4",
-      "oxfmt": "0.45.0"
+      "oxfmt": "0.45.0",
+      "oxlint": "1.60.0"
     }
   }
 }

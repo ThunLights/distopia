@@ -19,7 +19,7 @@
   "devDependencies": {
     "bun": "catalog:",
     "oxfmt": "catalog:",
-    "oxlint": "1.60.0",
+    "oxlint": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
