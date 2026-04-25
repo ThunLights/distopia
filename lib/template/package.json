@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "oxfmt": "0.45.0",
+    "oxfmt": "catalog:",
     "oxlint": "1.60.0"
   },
   "devDependencies": {
