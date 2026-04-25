@@ -119,7 +119,7 @@ export class WebCommand extends ChatInputCommandBase<Options> {
 
       const invite = await interaction.channel.createInvite();
 
-      await this.core.guild.save(guildData.guildId, {
+      await this.core.guild.save({
         ...guildData,
         invite: invite.code,
       });

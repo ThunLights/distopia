@@ -6,11 +6,8 @@
     ".": {
       "import": "./src/index.ts"
     },
-    "./prelude/zod": {
-      "import": "./src/zod/index.ts"
-    },
-    "./prelude/prisma": {
-      "import": "./src/prisma.ts"
+    "./types": {
+      "import": "./src/types/index.ts"
     }
   },
   "scripts": {

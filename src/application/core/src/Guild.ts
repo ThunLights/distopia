@@ -1,12 +1,12 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
 import { useAsync } from "domain-service-core";
-import { Prisma } from "infra-database/prelude/prisma";
+import type { GuildUpsertInput } from "infra-database/types";
 
 import { Base } from "./Base";
 
 export class Guild extends Base {
   public async getDraft(guildId: string) {
-    const dbData = await this.state.database.guild.findUnique({ where: { guildId } });
+    const dbData = await this.state.database.guild.find(guildId);
     const memoryData = await useAsync(this.state.memory.guildEdit.get)(guildId);
     return {
       description: memoryData?.description ?? dbData?.description ?? undefined,
@@ -32,38 +32,15 @@ export class Guild extends Base {
     setTimeout(() => useAsync(latelimit.delete)(guild.id), twoHours);
 
     await database.guild.update({
-      where: { guildId: guild.id },
-      data: {
-        bumpTime: nowDate,
-      },
+      guildId: guild.id,
+      bumpTime: nowDate,
     });
 
-    const { bumpCounter: guildBumpCounter } = await database.guildRecord.upsert({
-      where: { guildId: guild.id },
-      update: {
-        bumpCounter: {
-          increment: 1,
-        },
-      },
-      create: {
-        guildId: guild.id,
-      },
-    });
+    const { bumpCounter: guildBumpCounter } = await database.guildRecord.increaseBumpCounter(
+      guild.id,
+    );
 
-    const { bumpCounter: userBumpCounter } = await database.user.upsert({
-      where: {
-        id: user.id,
-      },
-      update: {
-        bumpCounter: {
-          increment: 1,
-        },
-      },
-      create: {
-        id: user.id,
-        bumpCounter: 1,
-      },
-    });
+    const { bumpCounter: userBumpCounter } = await database.user.increaseBumpCounter(user.id);
 
     return {
       guildBumpCounter: guildBumpCounter ?? 1,
@@ -71,20 +48,15 @@ export class Guild extends Base {
     };
   }
 
-  public async save(
-    guildId: string,
-    data: Prisma.XOR<Prisma.GuildCreateInput, Prisma.GuildUncheckedCreateInput>,
-  ) {
-    return await this.state.database.guild.upsert({
-      where: { guildId },
-      update: data,
-      create: data,
-    });
+  public async save(input: GuildUpsertInput) {
+    return await this.state.database.guild.upsert(input);
   }
 
   public async find(guildId: string) {
-    return await this.state.database.guild.findUnique({
-      where: { guildId },
-    });
+    return await this.state.database.guild.find(guildId);
+  }
+
+  public async getSetting(guildId: string) {
+    return await this.state.database.guildsetting.find(guildId);
   }
 }

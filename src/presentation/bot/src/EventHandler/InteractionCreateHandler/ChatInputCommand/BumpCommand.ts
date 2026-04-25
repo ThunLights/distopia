@@ -52,9 +52,7 @@ export class BumpCommand extends ChatInputCommandBase<Options> {
       return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
     }
 
-    const settings = await this.core.state.database.guildSetting.findUnique({
-      where: { guildId: guild.id },
-    });
+    const settings = await this.core.guild.getSetting(guild.id);
 
     if (settings && settings.bumpNotice && channel?.isSendable()) {
       setTimeout(async () => {

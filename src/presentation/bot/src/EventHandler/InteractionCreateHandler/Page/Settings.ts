@@ -10,9 +10,7 @@ import {
 import type { Guild } from "domain-model";
 
 export async function page(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
-  const settings = await core.state.database.guildSetting.findUnique({
-    where: { guildId: guild.id },
-  });
+  const settings = await core.guild.getSetting(guild.id);
 
   const embed = new EmbedBuilder()
     .setColor("Navy")

@@ -1,4 +1,4 @@
-import type { PrismaClient } from "infra-database/prelude/prisma";
+import type { DatabaseClient } from "infra-database/types";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 
@@ -16,5 +16,6 @@ export type AppState = {
     guildEdit: GuildEdit;
   };
   constants: ReturnType<typeof getPublicConstants>;
-  database: PrismaClient;
+  /** @deprecated */
+  database: DatabaseClient;
 };

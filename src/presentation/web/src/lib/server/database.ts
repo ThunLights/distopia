@@ -1,4 +1,4 @@
 import { DATABASE_URL } from "$env/static/private";
-import { genPrismaClient } from "infra-database";
+import { genDatabaseClient } from "infra-database";
 
-export const database = genPrismaClient(DATABASE_URL);
+export const database = genDatabaseClient(DATABASE_URL);
