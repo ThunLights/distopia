@@ -3,6 +3,8 @@ import { isBooleanObject } from "util/types";
 import type { AppCore } from "app-core";
 import {
   ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   EmbedBuilder,
   MessageFlags,
   StringSelectMenuBuilder,
@@ -34,22 +36,32 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       { name: "タグ", value: draft.tag?.join(", ") ?? "未設定", inline: true },
     );
 
-  const component = new ActionRowBuilder<StringSelectMenuBuilder>().setComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId("webEdit")
-      .setPlaceholder("変更要素を選択")
-      .addOptions(
-        new StringSelectMenuOptionBuilder().setLabel("招待リンク").setValue("invite"),
-        new StringSelectMenuOptionBuilder().setLabel("説明文").setValue("description"),
-        new StringSelectMenuOptionBuilder().setLabel("nsfw").setValue("nsfw"),
-        new StringSelectMenuOptionBuilder().setLabel("公開設定").setValue("visibility"),
-        new StringSelectMenuOptionBuilder().setLabel("タグ").setValue("tag"),
-      ),
-  );
+  const selectMenu = new StringSelectMenuBuilder()
+    .setCustomId("webEdit")
+    .setPlaceholder("変更要素を選択")
+    .addOptions(
+      new StringSelectMenuOptionBuilder().setLabel("招待リンク").setValue("invite"),
+      new StringSelectMenuOptionBuilder().setLabel("説明文").setValue("description"),
+      new StringSelectMenuOptionBuilder().setLabel("nsfw").setValue("nsfw"),
+      new StringSelectMenuOptionBuilder().setLabel("公開設定").setValue("visibility"),
+      new StringSelectMenuOptionBuilder().setLabel("タグ").setValue("tag"),
+    );
+
+  const cancelButton = new ButtonBuilder()
+    .setStyle(ButtonStyle.Danger)
+    .setLabel("キャンセル")
+    .setCustomId("webEditCancel");
+  const submitButton = new ButtonBuilder()
+    .setStyle(ButtonStyle.Success)
+    .setLabel("保存")
+    .setCustomId("webEditSubmit");
 
   return {
     embeds: [embed],
-    components: [component],
+    components: [
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu),
+      new ActionRowBuilder<ButtonBuilder>().addComponents(cancelButton, submitButton),
+    ],
     flags: [MessageFlags.Ephemeral],
   };
 }
