@@ -16,6 +16,5 @@ export type AppState = {
     guildEdit: GuildEdit;
   };
   constants: ReturnType<typeof getPublicConstants>;
-  /** @deprecated */
   database: DatabaseClient;
 };
