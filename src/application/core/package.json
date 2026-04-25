@@ -13,6 +13,9 @@
     },
     "./constant": {
       "import": "./src/utils/constant.ts"
+    },
+    "./date": {
+      "import": "./src/utils/date.ts"
     }
   },
   "scripts": {
