@@ -30,7 +30,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       },
       {
         name: "公開設定",
-        value: draft.visibility ? (draft.visibility === "Public" ? "公開" : "非公開") : "未設定",
+        value: draft.public !== undefined ? (draft.public ? "公開" : "非公開") : "未設定",
         inline: true,
       },
       { name: "タグ", value: draft.tag?.join(", ") ?? "未設定", inline: true },
@@ -43,7 +43,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder().setLabel("招待リンク").setValue("invite"),
       new StringSelectMenuOptionBuilder().setLabel("説明文").setValue("description"),
       new StringSelectMenuOptionBuilder().setLabel("nsfw").setValue("nsfw"),
-      new StringSelectMenuOptionBuilder().setLabel("公開設定").setValue("visibility"),
+      new StringSelectMenuOptionBuilder().setLabel("公開設定").setValue("public"),
       new StringSelectMenuOptionBuilder().setLabel("タグ").setValue("tag"),
     );
 
