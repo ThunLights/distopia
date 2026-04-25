@@ -59,16 +59,17 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
         .setDescription("何を設置するか選んでください")
         .setColor("Gold");
 
+      // It's not grammatically correct, but I went with this customId because it's easier to read.
       const levelButton = new ButtonBuilder()
-        .setCustomId("rankingPanelLevel")
+        .setCustomId("PanelRankingLevel")
         .setLabel("レベル")
         .setStyle(ButtonStyle.Primary);
       const rateButton = new ButtonBuilder()
-        .setCustomId("rankingPanelRate")
+        .setCustomId("PanelRankingRate")
         .setLabel("アクティブレート")
         .setStyle(ButtonStyle.Primary);
       const userBumpButton = new ButtonBuilder()
-        .setCustomId("rankingPanelUserBump")
+        .setCustomId("PanelRankingUserBump")
         .setLabel("ユーザーBump")
         .setStyle(ButtonStyle.Primary);
 
