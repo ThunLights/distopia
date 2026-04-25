@@ -18,7 +18,7 @@ export function handleClient(client: Client, core: AppCore) {
       type: ActivityType.Playing,
     });
 
-    const commands = interactionCreateHandler.commands.map((command) => command.register);
+    const commands = interactionCreateHandler.commands.chatInput.map((command) => command.register);
 
     await client.rest.put(`/applications/${client.user.id}/commands`, {
       body: commands,

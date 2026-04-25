@@ -53,18 +53,11 @@ model Guild {
 
   description String?
 
-  nsfw       Boolean         @default(false)
-  visibility GuildVisibility @default(Public)
-  bumpTime   DateTime        @default(now())
-
-  tags String[]              @default([])
-
-  reviews GuildReview[]
-}
-
-enum GuildVisibility {
-  Public
-  Private
+  nsfw     Boolean       @default(false)
+  public   Boolean       @default(true)
+  bumpTime DateTime      @default(now())
+  tags     String[]      @default([])
+  reviews  GuildReview[]
 }
 
 model GuildReview {

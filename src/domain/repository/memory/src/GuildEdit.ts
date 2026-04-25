@@ -1,9 +1,7 @@
-import type { GuildVisibility } from "infra-database/prelude/prisma";
-
 export type Value = {
   description?: string;
   nsfw?: boolean;
-  visibility: GuildVisibility;
+  public?: boolean;
   tags?: string[];
 };
 
