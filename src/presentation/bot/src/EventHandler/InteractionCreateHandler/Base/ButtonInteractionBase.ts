@@ -9,7 +9,7 @@ import { PermissionError } from "./Base";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export abstract class ButtonInteractionBase<
-  T extends ButtonInteraction,
+  T extends ButtonInteraction = ButtonInteraction,
   R = string | InteractionReplyOptions | MessagePayload,
 > extends MessageComponentInteractionBase<T, R> {
   public override async run(interaction: T): Promise<R> {
