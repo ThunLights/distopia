@@ -29,11 +29,6 @@ model UserDiscord {
   avatar String?
 }
 
-model UserToken {
-  userId String
-  token  String @id
-}
-
 model Friend {
   userId      String   @id
   username    String
