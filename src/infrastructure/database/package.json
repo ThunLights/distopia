@@ -2,10 +2,6 @@
   "name": "infra-database",
   "private": true,
   "type": "module",
-  "scripts": {
-    "build": "prisma generate",
-    "typecheck": "tsc --noEmit"
-  },
   "exports": {
     ".": {
       "import": "./src/index.ts"
@@ -17,14 +13,12 @@
       "import": "./src/prisma.ts"
     }
   },
-  "peerDependencies": {
-    "typescript": "catalog:"
-  },
-  "devDependencies": {
-    "@types/node": "catalog:",
-    "bun": "catalog:",
-    "dotenv": "17.4.2",
-    "zod-prisma-types": "3.3.11"
+  "scripts": {
+    "build": "prisma generate",
+    "lint": "prisma format --check && prisma validate && oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
+    "format": "prisma format && oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.7.0",
@@ -32,5 +26,16 @@
     "@prisma/client-runtime-utils": "7.7.0",
     "prisma": "7.7.0",
     "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "bun": "catalog:",
+    "dotenv": "17.4.2",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "zod-prisma-types": "3.3.11"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
   }
 }
