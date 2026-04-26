@@ -4,7 +4,7 @@ export type GuildRecord = {
   guildId: string;
   maxlevelRank: bigint | null;
   maxRateRank: bigint | null;
-  MaxRate: bigint | null;
+  maxRate: bigint | null;
   bumpCounter: number;
   activeRate: bigint | null;
   level: bigint;

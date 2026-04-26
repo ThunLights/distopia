@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "prisma generate && prisma generate --sql",
+    "build": "prisma generate --sql",
     "lint": "bun run lint:prisma && oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
     "lint:prisma": "prisma format --check && prisma validate",
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",

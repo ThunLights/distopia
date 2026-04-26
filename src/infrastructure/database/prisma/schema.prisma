@@ -49,6 +49,9 @@ model Guild {
 
   description String?
 
+  registeredAt DateTime @default(now())
+  updatedAt    DateTime @default(now())
+
   nsfw     Boolean       @default(false)
   public   Boolean       @default(true)
   bumpTime DateTime      @default(now())
@@ -84,7 +87,7 @@ model GuildRecord {
 
   maxlevelRank BigInt?
   maxRateRank  BigInt?
-  MaxRate      BigInt?
+  maxRate      BigInt?
 
   bumpCounter Int     @default(0)
   activeRate  BigInt?

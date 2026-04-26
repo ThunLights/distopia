@@ -5,6 +5,8 @@ export type Guild = {
   icon: string | null;
   banner: string | null;
   description: string | null;
+  registeredAt: Date;
+  updatedAt: Date;
   nsfw: boolean;
   public: boolean;
   bumpTime: Date;
