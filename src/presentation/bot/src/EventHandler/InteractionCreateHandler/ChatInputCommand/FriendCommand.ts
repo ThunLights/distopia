@@ -1,3 +1,4 @@
+import { NUM_TAG_LIMIT, CHARACTER_LIMIT } from "app-core/constant";
 import {
   InteractionCallbackResponse,
   LabelBuilder,
@@ -47,7 +48,7 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
           ),
         new LabelBuilder()
           .setLabel(
-            `検索タグ (最大${this.core.state.constants.NUM_TAG_LIMIT}}個, 最大${this.core.state.constants.CHARACTER_LIMIT.tag}文字, Enterで区切り)`,
+            `検索タグ (最大${NUM_TAG_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`,
           )
           .setTextInputComponent(
             new TextInputBuilder().setCustomId("tags").setStyle(TextInputStyle.Paragraph),
@@ -58,7 +59,7 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
             new TextInputBuilder()
               .setCustomId("profile")
               .setStyle(TextInputStyle.Paragraph)
-              .setMaxLength(this.core.state.constants.CHARACTER_LIMIT.description),
+              .setMaxLength(CHARACTER_LIMIT.description),
           ),
       );
 
