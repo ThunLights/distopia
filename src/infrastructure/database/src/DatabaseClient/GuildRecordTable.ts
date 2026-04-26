@@ -1,5 +1,8 @@
+import { getRankingActiveRate } from "../prisma-client/sql/getRankingActiveRate";
+import { getRankingLevel } from "../prisma-client/sql/getRankingLevel";
 import type {
   GuildRecord,
+  GuildRecordRanking,
   GuildRecordUpdateInput,
   GuildRecordUpsertInput,
 } from "../types/GuildRecord";
@@ -44,5 +47,14 @@ export class GuildRecordTable extends Base {
         bumpCounter: 1,
       },
     });
+  }
+
+  public async ranking(
+    rankingType: "level" | "activeRate",
+    num: number,
+  ): Promise<GuildRecordRanking[]> {
+    return rankingType === "level"
+      ? await this.prisma.$queryRawTyped(getRankingLevel(num))
+      : await this.prisma.$queryRawTyped(getRankingActiveRate(num));
   }
 }

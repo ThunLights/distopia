@@ -41,4 +41,13 @@ export class UserTable extends Base {
       },
     });
   }
+
+  public async ranking(rankingType: "userBump", num: number): Promise<User[]> {
+    return await this.prisma.user.findMany({
+      orderBy: {
+        bumpCounter: rankingType === "userBump" ? "desc" : undefined,
+      },
+      take: num,
+    });
+  }
 }

@@ -1,3 +1,5 @@
+import type { Guild } from "./Guild";
+
 export type GuildRecord = {
   guildId: string;
   maxlevelRank: bigint | null;
@@ -12,3 +14,5 @@ export type GuildRecord = {
 export type GuildRecordUpdateInput = Pick<GuildRecord, "guildId"> & Partial<GuildRecord>;
 
 export type GuildRecordUpsertInput = Pick<GuildRecord, "guildId"> & Partial<GuildRecord>;
+
+export type GuildRecordRanking = GuildRecord & Omit<Guild, "tags"> & { tags: string[] | null };
