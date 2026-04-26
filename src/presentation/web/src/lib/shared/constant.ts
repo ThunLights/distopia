@@ -1,11 +1,9 @@
-import { getPublicConstants } from "app-core/constant";
+export * from "app-core/constant";
 
 export type SiteAbout = {
   title: string;
   description: string[];
 };
-
-export const { staffs, supporters, DISCORD_INVITE_LINK } = getPublicConstants();
 
 export const siteAbout = [
   {

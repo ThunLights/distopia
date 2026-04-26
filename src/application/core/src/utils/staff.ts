@@ -1,4 +1,5 @@
-import { staffs, useAsync } from "domain-service-core";
+import { useAsync } from "./async";
+import { staffs } from "./constant";
 
 export function isStaffSync(userId: string): boolean {
   const staffIds = staffs.map(({ discordId }) => discordId as string);
