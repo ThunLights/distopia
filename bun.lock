@@ -89,19 +89,7 @@
         "typescript": "catalog:",
       },
     },
-    "src/domain/service/bot": {
-      "name": "domain-service-bot",
-      "dependencies": {
-        "discord.js": "catalog:",
-      },
-      "devDependencies": {
-        "@types/node": "catalog:",
-      },
-      "peerDependencies": {
-        "typescript": "catalog:",
-      },
-    },
-    "src/domain/service/core": {
+    "src/domain/service": {
       "name": "domain-service-core",
       "devDependencies": {
         "@types/node": "catalog:",
@@ -925,9 +913,7 @@
 
     "domain-model": ["domain-model@workspace:src/domain/model"],
 
-    "domain-service-bot": ["domain-service-bot@workspace:src/domain/service/bot"],
-
-    "domain-service-core": ["domain-service-core@workspace:src/domain/service/core"],
+    "domain-service-core": ["domain-service-core@workspace:src/domain/service"],
 
     "dotenv": ["dotenv@17.4.2", "", {}, "sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw=="],
 
