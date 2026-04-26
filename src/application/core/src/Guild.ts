@@ -1,5 +1,5 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
-import { useAsync } from "domain-service-core";
+import { useAsync } from "domain-service";
 import type { GuildUpsertInput } from "infra-database/types";
 
 import { Base } from "./Base";

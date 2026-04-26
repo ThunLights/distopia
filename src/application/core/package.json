@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "domain-model": "workspace:*",
-    "domain-service-core": "workspace:*",
+    "domain-service": "workspace:*",
     "infra-database": "workspace:*",
     "repo-memory": "workspace:*"
   },

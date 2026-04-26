@@ -32,7 +32,7 @@
       "name": "app-core",
       "dependencies": {
         "domain-model": "workspace:*",
-        "domain-service-core": "workspace:*",
+        "domain-service": "workspace:*",
         "infra-database": "workspace:*",
         "repo-memory": "workspace:*",
       },
@@ -90,7 +90,7 @@
       },
     },
     "src/domain/service": {
-      "name": "domain-service-core",
+      "name": "domain-service",
       "devDependencies": {
         "@types/node": "catalog:",
         "oxfmt": "catalog:",
@@ -913,7 +913,7 @@
 
     "domain-model": ["domain-model@workspace:src/domain/model"],
 
-    "domain-service-core": ["domain-service-core@workspace:src/domain/service"],
+    "domain-service": ["domain-service@workspace:src/domain/service"],
 
     "dotenv": ["dotenv@17.4.2", "", {}, "sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw=="],
 

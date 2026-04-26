@@ -1,1 +1,1 @@
-export { useAsync } from "domain-service-core";
+export { useAsync } from "domain-service";

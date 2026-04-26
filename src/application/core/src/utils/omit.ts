@@ -1,1 +1,1 @@
-export { omitTxt, omitTxtSync } from "domain-service-core";
+export { omitTxt, omitTxtSync } from "domain-service";
