@@ -16,6 +16,12 @@
     },
     "./date": {
       "import": "./src/utils/date.ts"
+    },
+    "./async": {
+      "import": "./src/utils/async.ts"
+    },
+    "./omit": {
+      "import": "./src/utils/omit.ts"
     }
   },
   "scripts": {
