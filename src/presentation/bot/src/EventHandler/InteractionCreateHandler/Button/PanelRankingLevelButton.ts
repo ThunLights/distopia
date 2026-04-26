@@ -10,7 +10,7 @@ import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { page } from "../Page/Ranking/Level";
 
 export class PanelRankingLevelButton extends ButtonInteractionBase {
-  public override customId: string = "rankingPanelLevel";
+  public override customId: string = "panelRankingLevel";
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,

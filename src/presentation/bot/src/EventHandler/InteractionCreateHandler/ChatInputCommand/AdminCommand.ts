@@ -61,15 +61,15 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
 
       // It's not grammatically correct, but I went with this customId because it's easier to read.
       const levelButton = new ButtonBuilder()
-        .setCustomId("PanelRankingLevel")
+        .setCustomId("panelRankingLevel")
         .setLabel("レベル")
         .setStyle(ButtonStyle.Primary);
       const rateButton = new ButtonBuilder()
-        .setCustomId("PanelRankingRate")
+        .setCustomId("panelRankingRate")
         .setLabel("アクティブレート")
         .setStyle(ButtonStyle.Primary);
       const userBumpButton = new ButtonBuilder()
-        .setCustomId("PanelRankingUserBump")
+        .setCustomId("panelRankingUserBump")
         .setLabel("ユーザーBump")
         .setStyle(ButtonStyle.Primary);
 
