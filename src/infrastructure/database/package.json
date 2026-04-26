@@ -11,8 +11,9 @@
     }
   },
   "scripts": {
-    "build": "prisma generate",
-    "lint": "prisma format --check && prisma validate && oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "build": "prisma generate && prisma generate --sql",
+    "lint": "bun run lint:prisma && oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:prisma": "prisma format --check && prisma validate",
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
     "format": "prisma format && oxfmt --config ../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
