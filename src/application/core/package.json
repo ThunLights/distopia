@@ -35,6 +35,7 @@
     "domain-model": "workspace:*",
     "domain-service": "workspace:*",
     "infra-database": "workspace:*",
+    "infra-discord": "workspace:*",
     "repo-memory": "workspace:*"
   },
   "devDependencies": {

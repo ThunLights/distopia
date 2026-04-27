@@ -5,3 +5,5 @@ import { INTENTS } from "./intents";
 export function genClient(): Client {
   return new Client({ intents: INTENTS });
 }
+
+export * from "./Controller/index";

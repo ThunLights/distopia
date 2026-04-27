@@ -1,4 +1,5 @@
 import type { DatabaseClient } from "infra-database/types";
+import type { Controller } from "infra-discord";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 
@@ -13,5 +14,6 @@ export type AppState = {
     };
     guildEdit: GuildEdit;
   };
+  discord: Controller;
   database: DatabaseClient;
 };
