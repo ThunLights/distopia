@@ -1,9 +1,8 @@
 import type { AppCore } from "app-core";
-import { useAsync } from "app-core/async";
 import { formatYMD } from "app-core/date";
-import { Client, EmbedBuilder, type InteractionReplyOptions } from "discord.js";
+import { EmbedBuilder, type InteractionReplyOptions } from "discord.js";
 
-export async function page(core: AppCore, client: Client<true>): Promise<InteractionReplyOptions> {
+export async function page(core: AppCore): Promise<InteractionReplyOptions> {
   const date = await formatYMD(new Date(new Date().toLocaleDateString("ja-JP")));
   const embed = new EmbedBuilder()
     .setTitle("ユーザーランキング: Bump")
@@ -18,10 +17,9 @@ export async function page(core: AppCore, client: Client<true>): Promise<Interac
     user,
     rank: index + 1,
   }))) {
-    const userDiscord = await useAsync(client.users.cache.get)(user.id);
     embed.addFields({
-      name: `${rank}: ${userDiscord?.displayName ?? "unknown"}`,
-      value: `合計: ${user.bumpCounter}回\nユーザーネーム: ${userDiscord?.username ?? "unknown"} (ID: ${user.id})`,
+      name: `${rank}: ${user?.displayName ?? "unknown"}`,
+      value: `合計: ${user.bumpCounter}回\nユーザーネーム: ${user?.name ?? "unknown"} (ID: ${user.id})`,
     });
   }
 

@@ -19,6 +19,6 @@ export class PanelRankingUserBumpButton extends ButtonInteractionBase {
       return { content: "権限がありません", flags: [MessageFlags.Ephemeral] };
     }
 
-    return await page(this.core, interaction.client);
+    return await page(this.core);
   }
 }
