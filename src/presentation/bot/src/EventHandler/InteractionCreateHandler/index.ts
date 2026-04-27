@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 
 import { BaseHandler } from "../BaseHandler";
-import type { ButtonInteractionBase } from "./Base/ButtonInteractionBase";
+import { ModalSended, type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";
@@ -45,7 +45,7 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          if (res instanceof Message || res === undefined) {
+          if (res instanceof Message || res instanceof ModalSended) {
             return;
           } else {
             return void (await interaction.reply(res));

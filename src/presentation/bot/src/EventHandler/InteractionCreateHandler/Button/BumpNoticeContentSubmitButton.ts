@@ -13,16 +13,9 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { ButtonInteractionBase, ModalSended } from "../Base/ButtonInteractionBase";
 
-export class BumpNoticeContentSubmitButton extends ButtonInteractionBase<
-  ButtonInteraction,
-  | string
-  | InteractionReplyOptions
-  | MessagePayload
-  | OmitPartialGroupDMChannel<Message<boolean>>
-  | undefined
-> {
+export class BumpNoticeContentSubmitButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override customId: string = "bumpNoticeContentSubmit";
 
@@ -33,7 +26,7 @@ export class BumpNoticeContentSubmitButton extends ButtonInteractionBase<
     | InteractionReplyOptions
     | MessagePayload
     | OmitPartialGroupDMChannel<Message<boolean>>
-    | undefined
+    | ModalSended
   > {
     const modal = new ModalBuilder()
       .setCustomId("bumpNoticeContent")
@@ -49,6 +42,8 @@ export class BumpNoticeContentSubmitButton extends ButtonInteractionBase<
           ),
       );
 
-    return await interaction.showModal(modal);
+    await interaction.showModal(modal);
+
+    return new ModalSended();
   }
 }

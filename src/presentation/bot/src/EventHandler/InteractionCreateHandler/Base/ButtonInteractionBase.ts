@@ -10,9 +10,16 @@ import {
 import { PermissionError } from "./Base";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
+export class ModalSended {}
+
 export abstract class ButtonInteractionBase<
   T extends ButtonInteraction = ButtonInteraction,
-  R = string | InteractionReplyOptions | MessagePayload | OmitPartialGroupDMChannel<Message>,
+  R =
+    | string
+    | InteractionReplyOptions
+    | MessagePayload
+    | OmitPartialGroupDMChannel<Message>
+    | ModalSended,
 > extends MessageComponentInteractionBase<T, R> {
   public override async run(interaction: T): Promise<R> {
     const permission = await this.checkPermission(interaction);
