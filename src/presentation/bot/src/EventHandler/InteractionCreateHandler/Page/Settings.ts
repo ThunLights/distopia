@@ -31,6 +31,10 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       },
     );
 
+  const actingOwnerButton = new ButtonBuilder()
+    .setCustomId("actingOwner")
+    .setLabel("代理オーナー設定")
+    .setStyle(ButtonStyle.Danger);
   const bumpNoticeButton = new ButtonBuilder()
     .setCustomId("bumpNotice")
     .setLabel("Bump通知")
@@ -39,10 +43,6 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
     .setCustomId("bumpRole")
     .setLabel("Bump通知ロール")
     .setStyle(ButtonStyle.Primary);
-  const actingOwnerButton = new ButtonBuilder()
-    .setCustomId("actingOwner")
-    .setLabel("代理オーナー設定")
-    .setStyle(ButtonStyle.Danger);
   const bumpNoticeContentButton = new ButtonBuilder()
     .setCustomId("bumpNoticeContent")
     .setLabel("Bump時のメッセージを変更")
