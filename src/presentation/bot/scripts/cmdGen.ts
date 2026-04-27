@@ -6,7 +6,7 @@ const interactionCreateHandlerDir = path.join(
   __dirname,
   "../src/EventHandler/InteractionCreateHandler",
 );
-const dirs = ["ChatInputCommand", "Button"];
+const dirs = ["ChatInputCommand", "Button", "Modal"];
 const outputDirPath = path.join(__dirname, "../src/EventHandler/InteractionCreateHandler");
 
 for (const dir of dirs) {

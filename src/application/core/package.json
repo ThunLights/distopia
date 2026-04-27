@@ -22,6 +22,9 @@
     },
     "./omit": {
       "import": "./src/utils/omit.ts"
+    },
+    "./blank": {
+      "import": "./src/utils/blank.ts"
     }
   },
   "scripts": {

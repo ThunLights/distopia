@@ -34,9 +34,10 @@ model Friend {
   userId      String   @id
   username    String
   description String
-  nsfw        Boolean
-  time        DateTime
-  tags        String[]
+  nsfw        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  tags        String[] @default([])
 }
 
 model Guild {

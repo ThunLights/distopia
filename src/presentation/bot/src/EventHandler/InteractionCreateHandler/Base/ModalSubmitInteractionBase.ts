@@ -9,7 +9,7 @@ import {
 import { Base, PermissionError } from "./Base";
 
 export abstract class ModalSubmitInteractionBase<
-  O extends {},
+  O extends {} = {},
   T extends ModalSubmitInteraction = ModalSubmitInteraction,
   R = InteractionReplyOptions | OmitPartialGroupDMChannel<Message>,
 > extends Base<T, R> {
