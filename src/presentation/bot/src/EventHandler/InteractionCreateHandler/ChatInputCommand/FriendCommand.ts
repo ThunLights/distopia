@@ -39,12 +39,13 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
       .setTitle("フレンド募集 (ウェブサイトに表示されます。)")
       .addLabelComponents(
         new LabelBuilder()
-          .setLabel("R18にしたい場合は下記にokと入力してください")
+          .setLabel("R18にしたい場合は下記にyesと入力してください")
           .setTextInputComponent(
             new TextInputBuilder()
               .setCustomId("nsfw")
               .setValue("no")
-              .setStyle(TextInputStyle.Short),
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(3),
           ),
         new LabelBuilder()
           .setLabel(
