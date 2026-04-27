@@ -1,6 +1,6 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
 import { useAsync } from "domain-service";
-import type { GuildUpsertInput } from "infra-database/types";
+import type { GuildSettingUpsertInput, GuildUpsertInput } from "infra-database/types";
 
 import { Base } from "./Base";
 
@@ -58,5 +58,9 @@ export class Guild extends Base {
 
   public async getSetting(guildId: string) {
     return await this.state.database.guildsetting.find(guildId);
+  }
+
+  public async saveSetting(input: GuildSettingUpsertInput) {
+    return await this.state.database.guildsetting.upsert(input);
   }
 }

@@ -1,5 +1,6 @@
 import {
   InteractionCallbackResponse,
+  Message,
   MessageFlags,
   type CacheType,
   type Interaction,
@@ -29,7 +30,9 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.chatInput) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          if (!(res instanceof InteractionCallbackResponse)) {
+          if (res instanceof InteractionCallbackResponse) {
+            return;
+          } else {
             return void (await interaction.reply(res));
           }
         }
@@ -42,7 +45,11 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          return void (await interaction.reply(res));
+          if (res instanceof Message) {
+            return;
+          } else {
+            return void (await interaction.reply(res));
+          }
         }
       }
       return void (await interaction.reply({

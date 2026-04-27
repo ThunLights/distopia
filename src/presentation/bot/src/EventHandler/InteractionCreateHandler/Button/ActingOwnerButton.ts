@@ -3,12 +3,13 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
-  MessageFlags,
+  Message,
   UserSelectMenuBuilder,
   type ButtonInteraction,
   type CacheType,
   type InteractionReplyOptions,
   type MessagePayload,
+  type OmitPartialGroupDMChannel,
   type PermissionResolvable,
 } from "discord.js";
 
@@ -20,8 +21,10 @@ export class ActingOwnerButton extends ButtonInteractionBase {
   public override customId: string = "actingOwner";
 
   protected override async exec(
-    _interaction: ButtonInteraction<CacheType>,
-  ): Promise<string | InteractionReplyOptions | MessagePayload> {
+    interaction: ButtonInteraction<CacheType>,
+  ): Promise<
+    string | InteractionReplyOptions | MessagePayload | OmitPartialGroupDMChannel<Message>
+  > {
     const embed = new EmbedBuilder()
       .setColor("Blurple")
       .setTitle("オーナー代理設定")
@@ -36,7 +39,7 @@ export class ActingOwnerButton extends ButtonInteractionBase {
       .setLabel("自分に権限を戻す。")
       .setStyle(ButtonStyle.Danger);
 
-    return {
+    return await interaction.message.edit({
       embeds: [embed],
       components: [
         new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(userSelector),
@@ -45,7 +48,6 @@ export class ActingOwnerButton extends ButtonInteractionBase {
           resetButton,
         ),
       ],
-      flags: [MessageFlags.Ephemeral],
-    };
+    });
   }
 }
