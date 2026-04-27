@@ -1,8 +1,9 @@
-import type {
-  ButtonInteraction,
-  CacheType,
-  InteractionReplyOptions,
-  MessagePayload,
+import {
+  MessageFlags,
+  type ButtonInteraction,
+  type CacheType,
+  type InteractionReplyOptions,
+  type MessagePayload,
 } from "discord.js";
 
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
@@ -12,8 +13,12 @@ export class PanelRankingRateButton extends ButtonInteractionBase {
   public override customId: string = "panelRankingRate";
 
   protected override async exec(
-    _interaction: ButtonInteraction<CacheType>,
+    interaction: ButtonInteraction<CacheType>,
   ): Promise<string | InteractionReplyOptions | MessagePayload> {
+    if (interaction.user.id !== this.core.state.owner.id) {
+      return { content: "権限がありません", flags: [MessageFlags.Ephemeral] };
+    }
+
     return await page(this.core);
   }
 }
