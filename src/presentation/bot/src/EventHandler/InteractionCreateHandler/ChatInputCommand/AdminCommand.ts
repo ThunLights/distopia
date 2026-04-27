@@ -79,7 +79,7 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
         userBumpButton,
       );
 
-      return { embeds: [embed], components: [row] };
+      return { embeds: [embed], components: [row], flags: [MessageFlags.Ephemeral] };
     } else if (subCommand === "status") {
       const embed = new EmbedBuilder()
         .setColor("Gold")

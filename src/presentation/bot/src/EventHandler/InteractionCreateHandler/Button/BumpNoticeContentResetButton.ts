@@ -1,9 +1,9 @@
 import {
-  Message,
   MessageFlags,
   type ButtonInteraction,
   type CacheType,
   type InteractionReplyOptions,
+  type Message,
   type MessagePayload,
   type OmitPartialGroupDMChannel,
   type PermissionResolvable,
@@ -13,21 +13,26 @@ import { GuildParseError } from "../Base/Base";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { page } from "../Page/Settings";
 
-export class BackSettingsPageButton extends ButtonInteractionBase {
+export class BumpNoticeContentResetButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override customId: string = "backSettingsPage";
+  public override customId: string = "bumpNoticeContentReset";
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
   ): Promise<
-    string | InteractionReplyOptions | MessagePayload | OmitPartialGroupDMChannel<Message>
+    string | InteractionReplyOptions | MessagePayload | OmitPartialGroupDMChannel<Message<boolean>>
   > {
     const guild = await this.parseGuild(interaction);
+
     if (guild instanceof GuildParseError) {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    const { content, components, embeds, allowedMentions, files } = await page(this.core, guild);
+    await this.core.guild.saveSetting({ guildId: guild.id, bumpNoticeContent: null });
+
+    const settingPage = await page(this.core, guild);
+
+    const { content, components, embeds, allowedMentions, files } = settingPage;
 
     return await interaction.message.edit({
       content,

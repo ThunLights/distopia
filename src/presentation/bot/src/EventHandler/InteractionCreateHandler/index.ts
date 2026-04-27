@@ -45,7 +45,7 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          if (res instanceof Message) {
+          if (res instanceof Message || res === undefined) {
             return;
           } else {
             return void (await interaction.reply(res));
