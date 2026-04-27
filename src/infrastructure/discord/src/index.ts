@@ -7,3 +7,5 @@ export function genClient(): Client {
 }
 
 export * from "./Controller/index";
+export * from "./types/Guild";
+export * from "./types/User";

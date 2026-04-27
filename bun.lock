@@ -66,6 +66,9 @@
     },
     "src/domain/model": {
       "name": "domain-model",
+      "dependencies": {
+        "infra-discord": "workspace:*",
+      },
       "devDependencies": {
         "@types/node": "catalog:",
         "bun": "catalog:",
