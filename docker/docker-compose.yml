@@ -32,6 +32,7 @@ services:
 
 volumes:
   distopia-db-store:
+    external: true
   distopia-cache:
   distopia-node-modules:
 
