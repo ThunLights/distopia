@@ -1,4 +1,11 @@
-import "dotenv/config";
+import { join } from "path";
+
+import { config } from "dotenv";
+
+config({
+  path: join(process.cwd(), "../../../.env"),
+});
+
 import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
