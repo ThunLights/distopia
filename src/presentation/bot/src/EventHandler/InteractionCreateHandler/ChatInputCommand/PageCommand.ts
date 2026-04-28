@@ -1,3 +1,5 @@
+import { URL } from "node:url";
+
 import {
   MessageFlags,
   type CacheType,
@@ -5,21 +7,18 @@ import {
   type InteractionCallbackResponse,
   type InteractionReplyOptions,
   type MessagePayload,
-  type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
-import { page } from "../Page/WebEdit";
 
 type Options = {};
 
-export class WebCommand extends ChatInputCommandBase<Options> {
-  public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
+export class PageCommand extends ChatInputCommandBase<Options> {
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-    name: "web",
-    description: "サーバーのWeb設定を変更できます。",
+    name: "page",
+    description: "このサーバーのページを表示",
   };
 
   public override async parseOptions(
@@ -40,15 +39,18 @@ export class WebCommand extends ChatInputCommandBase<Options> {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    const guildData = await this.core.guild.find(guild.id);
+    const registeredGuild = await this.core.guild.find(guild.id);
 
-    if (guildData) {
+    if (registeredGuild) {
       return {
-        content: "登録が済んでいます。",
+        content: new URL(`/guilds/${registeredGuild.guildId}`, this.core.state.url).toString(),
+        flags: [MessageFlags.Ephemeral],
+      };
+    } else {
+      return {
+        content: "サーバーが見つかりませんでした。登録が済んでいるか確認してみてください",
         flags: [MessageFlags.Ephemeral],
       };
     }
-
-    return await page(this.core, guild);
   }
 }
