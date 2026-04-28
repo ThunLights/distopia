@@ -1,7 +1,6 @@
 import {
   InteractionCallbackResponse,
   InteractionResponse,
-  Message,
   MessageFlags,
   type CacheType,
   type Interaction,
@@ -70,7 +69,7 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.modal) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          if (res instanceof Message) {
+          if (res instanceof InteractionResponse) {
             return;
           } else {
             return void (await interaction.reply(res));

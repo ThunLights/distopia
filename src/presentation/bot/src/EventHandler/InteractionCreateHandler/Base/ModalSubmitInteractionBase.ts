@@ -1,9 +1,8 @@
 import {
-  Message,
+  InteractionResponse,
   MessageFlags,
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
-  type OmitPartialGroupDMChannel,
 } from "discord.js";
 
 import { Base } from "./Base";
@@ -12,7 +11,7 @@ import { PermissionError } from "./Error/PermissionError";
 export abstract class ModalSubmitInteractionBase<
   O extends {} = {},
   T extends ModalSubmitInteraction = ModalSubmitInteraction,
-  R = InteractionReplyOptions | OmitPartialGroupDMChannel<Message>,
+  R = InteractionReplyOptions | InteractionResponse,
 > extends Base<T, R> {
   public abstract readonly customId: string;
 

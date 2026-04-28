@@ -1,12 +1,11 @@
 import { isBlankSync } from "app-core/blank";
 import { CHARACTER_LIMIT, NUM_TAG_LIMIT } from "app-core/constant";
 import {
+  InteractionResponse,
   MessageFlags,
   type CacheType,
   type InteractionReplyOptions,
-  type Message,
   type ModalSubmitInteraction,
-  type OmitPartialGroupDMChannel,
   type PermissionResolvable,
 } from "discord.js";
 
@@ -40,7 +39,7 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
   protected override async exec(
     interaction: ModalSubmitInteraction<CacheType>,
     options: Options,
-  ): Promise<InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>> {
+  ): Promise<InteractionReplyOptions | InteractionResponse> {
     const user = await this.parseUser(interaction);
     const guild = await this.parseGuild(interaction);
 
@@ -70,21 +69,24 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
       tags: options.tags,
     });
 
-    const settingPage = await page(this.core, guild);
+    if (interaction.isFromMessage()) {
+      const settingPage = await page(this.core, guild);
 
-    const { content, components, embeds, allowedMentions, files } = settingPage;
+      const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return (
-      (await interaction.message?.edit({
+      const res = await interaction.update({
         content,
         components,
         embeds,
         allowedMentions,
         files,
-      })) ?? {
+      });
+      return res;
+    } else {
+      return {
         content: "元のメッセージが削除されたため元のページに戻れませんでした",
         flags: [MessageFlags.Ephemeral],
-      }
-    );
+      };
+    }
   }
 }

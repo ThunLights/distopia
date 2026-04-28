@@ -2,10 +2,9 @@ import {
   type ModalSubmitInteraction,
   type CacheType,
   type InteractionReplyOptions,
-  type Message,
-  type OmitPartialGroupDMChannel,
   type PermissionResolvable,
   MessageFlags,
+  InteractionResponse,
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -31,7 +30,7 @@ export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> 
   protected override async exec(
     interaction: ModalSubmitInteraction<CacheType>,
     options: Options,
-  ): Promise<InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>> {
+  ): Promise<InteractionReplyOptions | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -44,17 +43,20 @@ export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> 
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return (
-      (await interaction.message?.edit({
+    if (interaction.isFromMessage()) {
+      const res = await interaction.update({
         content,
         components,
         embeds,
         allowedMentions,
         files,
-      })) ?? {
+      });
+      return res;
+    } else {
+      return {
         content: "元のメッセージが削除されたため元のページに戻れませんでした",
         flags: [MessageFlags.Ephemeral],
-      }
-    );
+      };
+    }
   }
 }
