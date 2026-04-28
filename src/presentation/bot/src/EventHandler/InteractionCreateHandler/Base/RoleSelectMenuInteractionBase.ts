@@ -1,9 +1,8 @@
 import {
-  Message,
+  InteractionResponse,
   MessageFlags,
   type InteractionReplyOptions,
   type MessagePayload,
-  type OmitPartialGroupDMChannel,
   type RoleSelectMenuInteraction,
 } from "discord.js";
 
@@ -14,7 +13,7 @@ import { MessageComponentInteractionBase } from "./MessageComponentInteractionBa
 export abstract class RoleSelectMenuInteractionBase<
   O extends { roleId: string } = { roleId: string },
   T extends RoleSelectMenuInteraction = RoleSelectMenuInteraction,
-  R = string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message>,
+  R = string | MessagePayload | InteractionReplyOptions | InteractionResponse,
 > extends MessageComponentInteractionBase<T, R> {
   public override async run(interaction: T): Promise<R> {
     const permission = await this.checkPermission(interaction);

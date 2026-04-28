@@ -1,10 +1,9 @@
 import {
-  Message,
+  InteractionResponse,
   MessageFlags,
   type ButtonInteraction,
   type InteractionReplyOptions,
   type MessagePayload,
-  type OmitPartialGroupDMChannel,
 } from "discord.js";
 
 import { PermissionError } from "./Error/PermissionError";
@@ -13,12 +12,7 @@ import type { ModalSended } from "./Modal/ModalSended";
 
 export abstract class ButtonInteractionBase<
   T extends ButtonInteraction = ButtonInteraction,
-  R =
-    | string
-    | InteractionReplyOptions
-    | MessagePayload
-    | OmitPartialGroupDMChannel<Message>
-    | ModalSended,
+  R = string | InteractionReplyOptions | MessagePayload | InteractionResponse | ModalSended,
 > extends MessageComponentInteractionBase<T, R> {
   public override async run(interaction: T): Promise<R> {
     const permission = await this.checkPermission(interaction);

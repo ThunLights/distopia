@@ -1,10 +1,10 @@
 import type { AppCore } from "app-core";
 import {
   ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
   EmbedBuilder,
   MessageFlags,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
   type InteractionReplyOptions,
 } from "discord.js";
 import type { Guild } from "domain-model";
@@ -31,33 +31,21 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       },
     );
 
-  const actingOwnerButton = new ButtonBuilder()
-    .setCustomId("actingOwner")
-    .setLabel("代理オーナー設定")
-    .setStyle(ButtonStyle.Danger);
-  const bumpNoticeButton = new ButtonBuilder()
-    .setCustomId("bumpNotice")
-    .setLabel("Bump通知")
-    .setStyle(ButtonStyle.Success);
-  const bumpRoleButton = new ButtonBuilder()
-    .setCustomId("bumpRole")
-    .setLabel("Bump通知ロール")
-    .setStyle(ButtonStyle.Primary);
-  const bumpNoticeContentButton = new ButtonBuilder()
-    .setCustomId("bumpNoticeContent")
-    .setLabel("Bump時のメッセージを変更")
-    .setStyle(ButtonStyle.Primary);
+  const selector = new StringSelectMenuBuilder()
+    .setCustomId("setting")
+    .setPlaceholder("変更要素を選択")
+    .addOptions(
+      new StringSelectMenuOptionBuilder().setLabel("代理オーナー設定").setValue("actingOwner"),
+      new StringSelectMenuOptionBuilder().setLabel("Bump通知 ON/OFF").setValue("bumpNotice"),
+      new StringSelectMenuOptionBuilder().setLabel("Bumpt通知ロール").setValue("bumpRole"),
+      new StringSelectMenuOptionBuilder()
+        .setLabel("Bump時のメッセージを変更")
+        .setValue("bumpNoticeContent"),
+    );
 
   return {
     embeds: [embed],
-    components: [
-      new ActionRowBuilder<ButtonBuilder>().addComponents(
-        actingOwnerButton,
-        bumpNoticeButton,
-        bumpRoleButton,
-        bumpNoticeContentButton,
-      ),
-    ],
+    components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selector)],
     flags: [MessageFlags.Ephemeral],
   };
 }

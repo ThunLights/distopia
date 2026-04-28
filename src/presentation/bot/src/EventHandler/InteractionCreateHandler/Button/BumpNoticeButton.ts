@@ -3,13 +3,12 @@ import {
   type CacheType,
   type InteractionReplyOptions,
   type MessagePayload,
-  type OmitPartialGroupDMChannel,
-  type Message,
   type PermissionResolvable,
   ButtonBuilder,
   ButtonStyle,
   ActionRowBuilder,
   EmbedBuilder,
+  InteractionResponse,
 } from "discord.js";
 
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
@@ -21,9 +20,7 @@ export class BumpNoticeButton extends ButtonInteractionBase {
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
-  ): Promise<
-    string | InteractionReplyOptions | MessagePayload | OmitPartialGroupDMChannel<Message<boolean>>
-  > {
+  ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
     const embed = new EmbedBuilder()
       .setColor("Navy")
       .setTitle("Bump通知設定")
@@ -39,7 +36,7 @@ export class BumpNoticeButton extends ButtonInteractionBase {
       .setLabel("通知OFF")
       .setStyle(ButtonStyle.Success);
 
-    return await interaction.message.edit({
+    return await interaction.update({
       embeds: [embed],
       components: [
         new ActionRowBuilder<ButtonBuilder>().addComponents(

@@ -3,10 +3,9 @@ import {
   type CacheType,
   type MessagePayload,
   type InteractionReplyOptions,
-  type OmitPartialGroupDMChannel,
-  type Message,
   MessageFlags,
   type PermissionResolvable,
+  InteractionResponse,
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -20,9 +19,7 @@ export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
   protected override async exec(
     interaction: RoleSelectMenuInteraction<CacheType>,
     options: { roleId: string },
-  ): Promise<
-    string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>
-  > {
+  ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -38,7 +35,7 @@ export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return await interaction.message.edit({
+    return await interaction.update({
       content,
       components,
       embeds,

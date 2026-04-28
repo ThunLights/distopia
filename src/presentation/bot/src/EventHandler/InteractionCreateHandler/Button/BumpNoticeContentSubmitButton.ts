@@ -1,5 +1,6 @@
 import { CHARACTER_LIMIT } from "app-core/constant";
 import {
+  InteractionResponse,
   LabelBuilder,
   ModalBuilder,
   TextInputBuilder,
@@ -7,9 +8,7 @@ import {
   type ButtonInteraction,
   type CacheType,
   type InteractionReplyOptions,
-  type Message,
   type MessagePayload,
-  type OmitPartialGroupDMChannel,
   type PermissionResolvable,
 } from "discord.js";
 
@@ -23,11 +22,7 @@ export class BumpNoticeContentSubmitButton extends ButtonInteractionBase {
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
   ): Promise<
-    | string
-    | InteractionReplyOptions
-    | MessagePayload
-    | OmitPartialGroupDMChannel<Message<boolean>>
-    | ModalSended
+    string | InteractionReplyOptions | MessagePayload | InteractionResponse | ModalSended
   > {
     const modal = new ModalBuilder()
       .setCustomId("bumpNoticeContent")

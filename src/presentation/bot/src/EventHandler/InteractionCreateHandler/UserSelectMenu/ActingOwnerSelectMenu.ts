@@ -4,9 +4,8 @@ import {
   type MessagePayload,
   MessageFlags,
   type InteractionReplyOptions,
-  Message,
-  type OmitPartialGroupDMChannel,
   type PermissionResolvable,
+  InteractionResponse,
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -20,9 +19,7 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
   protected override async exec(
     interaction: UserSelectMenuInteraction<CacheType>,
     options: { userId: string },
-  ): Promise<
-    string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>
-  > {
+  ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -38,7 +35,7 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return await interaction.message.edit({
+    return await interaction.update({
       content,
       components,
       embeds,

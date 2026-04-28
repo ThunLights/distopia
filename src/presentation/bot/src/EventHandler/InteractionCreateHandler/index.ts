@@ -1,5 +1,6 @@
 import {
   InteractionCallbackResponse,
+  InteractionResponse,
   Message,
   MessageFlags,
   type CacheType,
@@ -12,11 +13,13 @@ import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
 import { ModalSended } from "./Base/Modal/ModalSended";
 import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
 import type { RoleSelectMenuInteractionBase } from "./Base/RoleSelectMenuInteractionBase";
+import type { StringSelectMenuInteractionBase } from "./Base/StringSelectMenuInteractionBase";
 import type { UserSelectMenuInteractionBase } from "./Base/UserSelectMenuInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";
 import { commands as modalCommands } from "./Modals.auto";
 import { commands as roleSelectMenus } from "./RoleSelectMenus.auto";
+import { commands as stringSelectMenus } from "./StringSelectMenus.auto";
 import { commands as userSelectMenus } from "./UserSelectMenus.auto";
 
 type Commands = {
@@ -24,6 +27,7 @@ type Commands = {
   button: ButtonInteractionBase[];
   modal: ModalSubmitInteractionBase[];
   roleSelectMenu: RoleSelectMenuInteractionBase[];
+  stringSelectMenu: StringSelectMenuInteractionBase[];
   userSelectMenu: UserSelectMenuInteractionBase[];
 };
 
@@ -35,6 +39,7 @@ export class InteractionCreateHandler extends BaseHandler<
     button: buttonCommands.map((Command) => new Command(this.core)),
     modal: modalCommands.map((Command) => new Command(this.core)),
     roleSelectMenu: roleSelectMenus.map((Menu) => new Menu(this.core)),
+    stringSelectMenu: stringSelectMenus.map((Menu) => new Menu(this.core)),
     userSelectMenu: userSelectMenus.map((Menu) => new Menu(this.core)),
   };
 
@@ -54,7 +59,7 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          if (res instanceof Message || res instanceof ModalSended) {
+          if (res instanceof InteractionResponse || res instanceof ModalSended) {
             return;
           } else {
             return void (await interaction.reply(res));
@@ -76,7 +81,7 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const menu of this.commands.userSelectMenu) {
         if (await menu.match(interaction)) {
           const res = await menu.run(interaction);
-          if (res instanceof Message) {
+          if (res instanceof InteractionResponse) {
             return;
           } else {
             return void (await interaction.reply(res));
@@ -87,7 +92,18 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const menu of this.commands.roleSelectMenu) {
         if (await menu.match(interaction)) {
           const res = await menu.run(interaction);
-          if (res instanceof Message) {
+          if (res instanceof InteractionResponse) {
+            return;
+          } else {
+            return void (await interaction.reply(res));
+          }
+        }
+      }
+    } else if (interaction.isStringSelectMenu()) {
+      for (const menu of this.commands.stringSelectMenu) {
+        if (await menu.match(interaction)) {
+          const res = await menu.run(interaction);
+          if (res instanceof InteractionResponse) {
             return;
           } else {
             return void (await interaction.reply(res));

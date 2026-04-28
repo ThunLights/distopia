@@ -1,11 +1,10 @@
 import {
-  Message,
+  InteractionResponse,
   MessageFlags,
   type ButtonInteraction,
   type CacheType,
   type InteractionReplyOptions,
   type MessagePayload,
-  type OmitPartialGroupDMChannel,
   type PermissionResolvable,
 } from "discord.js";
 
@@ -19,9 +18,7 @@ export class ActingOwnerResetButton extends ButtonInteractionBase {
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
-  ): Promise<
-    string | InteractionReplyOptions | MessagePayload | OmitPartialGroupDMChannel<Message>
-  > {
+  ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -34,7 +31,7 @@ export class ActingOwnerResetButton extends ButtonInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return await interaction.message.edit({
+    return await interaction.update({
       content,
       components,
       embeds,

@@ -1,7 +1,7 @@
 import {
+  Message,
   MessageFlags,
   type InteractionReplyOptions,
-  type Message,
   type ModalSubmitInteraction,
   type OmitPartialGroupDMChannel,
 } from "discord.js";
