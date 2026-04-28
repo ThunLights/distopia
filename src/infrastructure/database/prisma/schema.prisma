@@ -1,11 +1,7 @@
-datasource db {
-  provider = "postgresql"
-}
-
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["typedSql"]
   output          = "../src/prisma-client"
+  previewFeatures = ["typedSql"]
 }
 
 generator zod {
@@ -13,9 +9,12 @@ generator zod {
   output   = "../src/zod"
 }
 
-model User {
-  id String @id
+datasource db {
+  provider = "postgresql"
+}
 
+model User {
+  id          String @id
   bumpCounter Int?
 }
 
@@ -25,9 +24,8 @@ model UserDiscord {
   accessToken  String
   refreshToken String
   time         DateTime
-
-  email  String?
-  avatar String?
+  email        String?
+  avatar       String?
 }
 
 model Friend {
@@ -41,23 +39,19 @@ model Friend {
 }
 
 model Guild {
-  guildId String @id
-
-  name   String
-  invite String
-  icon   String?
-  banner String?
-
-  description String?
-
-  registeredAt DateTime @default(now())
-  updatedAt    DateTime @default(now())
-
-  nsfw     Boolean       @default(false)
-  public   Boolean       @default(true)
-  bumpTime DateTime      @default(now())
-  tags     String[]      @default([])
-  reviews  GuildReview[]
+  guildId      String        @id
+  name         String
+  invite       String
+  icon         String?
+  banner       String?
+  description  String?
+  registeredAt DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
+  nsfw         Boolean       @default(false)
+  public       Boolean       @default(true)
+  bumpTime     DateTime      @default(now())
+  tags         String[]      @default([])
+  reviews      GuildReview[]
 }
 
 model GuildReview {
@@ -65,16 +59,14 @@ model GuildReview {
   guildId String
   star    Int
   content String?
-
-  guild Guild @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+  guild   Guild   @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
 
   @@id([userId, guildId])
 }
 
 model GuildRecordOneDay {
-  guildId String
-  date    DateTime
-
+  guildId          String
+  date             DateTime
   vcMembers        String[] @default([])
   newMembers       String[] @default([])
   newMessages      Int      @default(0)
@@ -84,17 +76,14 @@ model GuildRecordOneDay {
 }
 
 model GuildRecord {
-  guildId String @id
-
+  guildId      String  @id
   maxlevelRank BigInt?
   maxRateRank  BigInt?
   maxRate      BigInt?
-
-  bumpCounter Int     @default(0)
-  activeRate  BigInt?
-
-  level BigInt @default(0)
-  point BigInt @default(0)
+  bumpCounter  Int     @default(0)
+  activeRate   BigInt?
+  level        BigInt  @default(0)
+  point        BigInt  @default(0)
 }
 
 model GuildSetting {
@@ -105,7 +94,6 @@ model GuildSetting {
   bumpNoticeContent String?
 }
 
-//パネル用
 model Panel {
   guildId   String
   type      PanelType
