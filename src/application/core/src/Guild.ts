@@ -11,8 +11,9 @@ export class Guild extends Base {
     return {
       description: memoryData?.description ?? dbData?.description ?? undefined,
       nsfw: memoryData?.nsfw ?? dbData?.nsfw,
-      public: memoryData?.public ?? dbData?.public,
+      pub: memoryData?.pub ?? dbData?.public,
       tag: memoryData?.tags ?? dbData?.tags,
+      invite: memoryData?.invite ?? dbData?.invite,
     };
   }
 
