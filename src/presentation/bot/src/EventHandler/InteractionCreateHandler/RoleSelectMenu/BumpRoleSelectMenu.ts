@@ -1,26 +1,26 @@
 import {
-  type UserSelectMenuInteraction,
+  type RoleSelectMenuInteraction,
   type CacheType,
-  type User,
+  type Role,
   type MessagePayload,
-  MessageFlags,
   type InteractionReplyOptions,
-  Message,
   type OmitPartialGroupDMChannel,
+  type Message,
+  MessageFlags,
   type PermissionResolvable,
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
-import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
+import { RoleSelectMenuInteractionBase } from "../Base/RoleSelectMenuInteractionBase";
 import { page } from "../Page/Settings";
 
-export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
+export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override customId: string = "actingOwner";
+  public override customId: string = "bumpRole";
 
   protected override async exec(
-    interaction: UserSelectMenuInteraction<CacheType>,
-    options: { user: User },
+    interaction: RoleSelectMenuInteraction<CacheType>,
+    options: { role: Role },
   ): Promise<
     string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>
   > {
@@ -32,7 +32,7 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
 
     await this.core.guild.saveSetting({
       guildId: guild.id,
-      actingOwner: options.user.id,
+      bumpNoticeRole: options.role.id,
     });
 
     const settingPage = await page(this.core, guild);

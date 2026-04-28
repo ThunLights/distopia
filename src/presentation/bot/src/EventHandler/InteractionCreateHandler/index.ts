@@ -11,16 +11,19 @@ import { type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
 import { ModalSended } from "./Base/Modal/ModalSended";
 import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
+import type { RoleSelectMenuInteractionBase } from "./Base/RoleSelectMenuInteractionBase";
 import type { UserSelectMenuInteractionBase } from "./Base/UserSelectMenuInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";
 import { commands as modalCommands } from "./Modals.auto";
+import { commands as roleSelectMenus } from "./RoleSelectMenus.auto";
 import { commands as userSelectMenus } from "./UserSelectMenus.auto";
 
 type Commands = {
   chatInput: ChatInputCommandBase[];
   button: ButtonInteractionBase[];
   modal: ModalSubmitInteractionBase[];
+  roleSelectMenu: RoleSelectMenuInteractionBase[];
   userSelectMenu: UserSelectMenuInteractionBase[];
 };
 
@@ -31,6 +34,7 @@ export class InteractionCreateHandler extends BaseHandler<
     chatInput: chatInputCommands.map((Command) => new Command(this.core)),
     button: buttonCommands.map((Command) => new Command(this.core)),
     modal: modalCommands.map((Command) => new Command(this.core)),
+    roleSelectMenu: roleSelectMenus.map((Menu) => new Menu(this.core)),
     userSelectMenu: userSelectMenus.map((Menu) => new Menu(this.core)),
   };
 
@@ -70,6 +74,17 @@ export class InteractionCreateHandler extends BaseHandler<
       }
     } else if (interaction.isUserSelectMenu()) {
       for (const menu of this.commands.userSelectMenu) {
+        if (await menu.match(interaction)) {
+          const res = await menu.run(interaction);
+          if (res instanceof Message) {
+            return;
+          } else {
+            return void (await interaction.reply(res));
+          }
+        }
+      }
+    } else if (interaction.isRoleSelectMenu()) {
+      for (const menu of this.commands.roleSelectMenu) {
         if (await menu.match(interaction)) {
           const res = await menu.run(interaction);
           if (res instanceof Message) {
