@@ -38,7 +38,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
 
       const resetButton = new ButtonBuilder()
         .setCustomId("actingOwnerReset")
-        .setLabel("自分に権限を戻す。")
+        .setLabel("自分に権限を戻す")
         .setStyle(ButtonStyle.Danger);
 
       return await interaction.update({
