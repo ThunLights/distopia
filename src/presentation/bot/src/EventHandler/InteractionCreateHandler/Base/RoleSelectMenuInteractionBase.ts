@@ -6,8 +6,9 @@ import {
   type RoleSelectMenuInteraction,
 } from "discord.js";
 
-import { GuildParseError, PermissionError } from "./Base";
+import { GuildParseError } from "./Error/GuildParseError";
 import { ParseOptionsError } from "./Error/ParseOptionsError";
+import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export abstract class RoleSelectMenuInteractionBase<

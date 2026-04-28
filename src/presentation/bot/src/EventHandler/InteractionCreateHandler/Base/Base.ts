@@ -3,12 +3,10 @@ import { type BaseInteraction, type PermissionResolvable } from "discord.js";
 import type { Guild, User } from "domain-model";
 
 import { codeBlock } from "../../../utils/codeblock";
-
-export class GuildParseError extends Error {}
+import { GuildParseError } from "./Error/GuildParseError";
+import { PermissionError } from "./Error/PermissionError";
 
 export class PermissionSuccess {}
-
-export class PermissionError extends Error {}
 
 export abstract class Base<T extends BaseInteraction, R = void> {
   public readonly requireBotGuildPermissions: PermissionResolvable[] = [];

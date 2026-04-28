@@ -7,7 +7,7 @@ import {
   type OmitPartialGroupDMChannel,
 } from "discord.js";
 
-import { PermissionError } from "./Base";
+import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export class ModalSended {}

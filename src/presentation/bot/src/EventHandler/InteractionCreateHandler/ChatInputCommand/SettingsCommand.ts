@@ -9,8 +9,8 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 
-import { GuildParseError } from "../Base/Base";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { GuildParseError } from "../Base/Error/GuildParseError";
 import { page } from "../Page/Settings";
 
 type Options = {};

@@ -9,8 +9,8 @@ import {
 } from "discord.js";
 import { LateLimitError } from "domain-model";
 
-import { GuildParseError } from "../Base/Base";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { GuildParseError } from "../Base/Error/GuildParseError";
 
 type Options = {};
 

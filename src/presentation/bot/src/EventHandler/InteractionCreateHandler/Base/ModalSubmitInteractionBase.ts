@@ -6,7 +6,8 @@ import {
   type OmitPartialGroupDMChannel,
 } from "discord.js";
 
-import { Base, PermissionError } from "./Base";
+import { Base } from "./Base";
+import { PermissionError } from "./Error/PermissionError";
 
 export abstract class ModalSubmitInteractionBase<
   O extends {} = {},

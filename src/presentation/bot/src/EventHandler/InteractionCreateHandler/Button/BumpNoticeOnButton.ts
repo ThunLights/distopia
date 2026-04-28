@@ -9,8 +9,8 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { GuildParseError } from "../Base/Base";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { GuildParseError } from "../Base/Error/GuildParseError";
 import { page } from "../Page/Settings";
 
 export class BumpNoticeOnButton extends ButtonInteractionBase {

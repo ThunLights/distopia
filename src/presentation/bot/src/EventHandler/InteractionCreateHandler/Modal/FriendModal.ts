@@ -10,7 +10,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { GuildParseError } from "../Base/Base";
+import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { page } from "../Page/Settings";
 

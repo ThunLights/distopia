@@ -6,8 +6,8 @@ import {
   type UserSelectMenuInteraction,
 } from "discord.js";
 
-import { PermissionError } from "./Base";
 import { ParseOptionsError } from "./Error/ParseOptionsError";
+import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export abstract class UserSelectMenuInteractionBase<
