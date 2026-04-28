@@ -1,5 +1,6 @@
 import { NUM_TAG_LIMIT, CHARACTER_LIMIT } from "app-core/constant";
 import {
+  CheckboxBuilder,
   InteractionCallbackResponse,
   LabelBuilder,
   ModalBuilder,
@@ -40,13 +41,7 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
       .addLabelComponents(
         new LabelBuilder()
           .setLabel("R18にしたい場合は下記にyesと入力してください")
-          .setTextInputComponent(
-            new TextInputBuilder()
-              .setCustomId("nsfw")
-              .setValue("no")
-              .setStyle(TextInputStyle.Short)
-              .setMaxLength(3),
-          ),
+          .setCheckboxComponent(new CheckboxBuilder().setCustomId("nsfw").setDefault(false)),
         new LabelBuilder()
           .setLabel(
             `検索タグ (最大${NUM_TAG_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`,

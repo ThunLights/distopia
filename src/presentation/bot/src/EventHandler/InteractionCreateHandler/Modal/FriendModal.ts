@@ -27,7 +27,7 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
     interaction: ModalSubmitInteraction<CacheType>,
   ): Promise<Options> {
     return {
-      nsfw: interaction.fields.getTextInputValue("nsfw") === "yes",
+      nsfw: interaction.fields.getCheckbox("nsfw"),
       tags: interaction.fields
         .getTextInputValue("tags")
         .split("\n")
