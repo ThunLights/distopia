@@ -33,7 +33,7 @@ export class WebEditSubmitButton extends ButtonInteractionBase {
     const { description, nsfw, pub, tag, invite } = draft;
 
     if (!invite) {
-      return { content: "招待コードが見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
+      return { content: "チャンネルが見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
     }
 
     if ([description, nsfw, pub, invite].includes(undefined)) {
