@@ -20,7 +20,8 @@
       "dependsOn": ["^typecheck"]
     },
     "migrate-db": {
-      "dependsOn": ["^migrate-db"]
+      "dependsOn": ["^migrate-db"],
+      "cache": false
     }
   }
 }
