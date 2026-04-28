@@ -47,6 +47,5 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
     embeds: [embed],
     components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selector)],
     flags: [MessageFlags.Ephemeral],
-    withResponse: true,
   };
 }
