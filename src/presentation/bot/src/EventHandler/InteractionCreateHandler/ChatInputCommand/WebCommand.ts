@@ -2,7 +2,6 @@ import { URL } from "node:url";
 
 import {
   ChannelType,
-  EmbedBuilder,
   MessageFlags,
   type CacheType,
   type ChatInputCommandInteraction,
@@ -29,11 +28,6 @@ export class WebCommand extends ChatInputCommandBase<Options> {
         type: 1,
         name: "edit",
         description: "サーバーの仮登録をする。",
-      },
-      {
-        type: 1,
-        name: "invite",
-        description: "招待リンクをこのチャンネルに変える。",
       },
       {
         type: 1,
@@ -103,34 +97,6 @@ export class WebCommand extends ChatInputCommandBase<Options> {
       }
 
       return await page(this.core, guild);
-    } else if (subCommand === "invite") {
-      if (!guildData) {
-        return {
-          content: `サーバーが本登録されていません。\n詳しくは\`/help\`のコマンドを使用してく確認してください`,
-          flags: [MessageFlags.Ephemeral],
-        };
-      }
-      if (!(interaction.channel?.type === ChannelType.GuildText)) {
-        return {
-          content: "テキストチャンネルでのみ招待リンクを設定することが出来ます。",
-          flags: [MessageFlags.Ephemeral],
-        };
-      }
-
-      const invite = await interaction.channel.createInvite();
-
-      await this.core.guild.save({
-        ...guildData,
-        invite: invite.code,
-      });
-
-      const embed = new EmbedBuilder()
-        .setColor("Gold")
-        .setTitle("招待リンクを更新しました。")
-        .setDescription("このチャンネルに新しく招待リンクを作成しました。")
-        .addFields({ name: "新しい招待リンク", value: `https://discord.gg/${invite.code}` });
-
-      return { embeds: [embed] };
     }
 
     return {
