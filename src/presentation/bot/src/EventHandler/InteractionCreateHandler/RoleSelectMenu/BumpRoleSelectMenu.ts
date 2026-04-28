@@ -1,7 +1,6 @@
 import {
   type RoleSelectMenuInteraction,
   type CacheType,
-  type Role,
   type MessagePayload,
   type InteractionReplyOptions,
   type OmitPartialGroupDMChannel,
@@ -20,7 +19,7 @@ export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
 
   protected override async exec(
     interaction: RoleSelectMenuInteraction<CacheType>,
-    options: { role: Role },
+    options: { roleId: string },
   ): Promise<
     string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>
   > {
@@ -32,7 +31,7 @@ export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
 
     await this.core.guild.saveSetting({
       guildId: guild.id,
-      bumpNoticeRole: options.role.id,
+      bumpNoticeRole: options.roleId,
     });
 
     const settingPage = await page(this.core, guild);

@@ -1,7 +1,6 @@
 import {
   Message,
   MessageFlags,
-  User,
   type InteractionReplyOptions,
   type MessagePayload,
   type OmitPartialGroupDMChannel,
@@ -13,7 +12,7 @@ import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export abstract class UserSelectMenuInteractionBase<
-  O extends { user: User } = { user: User },
+  O extends { userId: string } = { userId: string },
   T extends UserSelectMenuInteraction = UserSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message>,
 > extends MessageComponentInteractionBase<T, R> {
@@ -43,13 +42,7 @@ export abstract class UserSelectMenuInteractionBase<
       return new ParseOptionsError("ユーザーが選択されていません");
     }
 
-    const user = interaction.client.users.cache.get(userId);
-
-    if (!user) {
-      return new ParseOptionsError("ユーザー情報が取得できませんでした");
-    }
-
-    return { user } as O;
+    return { userId } as O;
   }
 
   protected abstract exec(interaction: T, options: O): Promise<R>;

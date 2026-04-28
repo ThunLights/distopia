@@ -1,7 +1,6 @@
 import {
   type UserSelectMenuInteraction,
   type CacheType,
-  type User,
   type MessagePayload,
   MessageFlags,
   type InteractionReplyOptions,
@@ -20,7 +19,7 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
 
   protected override async exec(
     interaction: UserSelectMenuInteraction<CacheType>,
-    options: { user: User },
+    options: { userId: string },
   ): Promise<
     string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message<boolean>>
   > {
@@ -32,7 +31,7 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
 
     await this.core.guild.saveSetting({
       guildId: guild.id,
-      actingOwner: options.user.id,
+      actingOwner: options.userId,
     });
 
     const settingPage = await page(this.core, guild);

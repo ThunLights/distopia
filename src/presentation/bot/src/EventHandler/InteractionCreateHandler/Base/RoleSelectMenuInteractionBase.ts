@@ -4,17 +4,15 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
   type OmitPartialGroupDMChannel,
-  type Role,
   type RoleSelectMenuInteraction,
 } from "discord.js";
 
-import { GuildParseError } from "./Error/GuildParseError";
 import { ParseOptionsError } from "./Error/ParseOptionsError";
 import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export abstract class RoleSelectMenuInteractionBase<
-  O extends { role: Role } = { role: Role },
+  O extends { roleId: string } = { roleId: string },
   T extends RoleSelectMenuInteraction = RoleSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | OmitPartialGroupDMChannel<Message>,
 > extends MessageComponentInteractionBase<T, R> {
@@ -38,24 +36,13 @@ export abstract class RoleSelectMenuInteractionBase<
   }
 
   public async parseOptions(interaction: T): Promise<O | ParseOptionsError> {
-    const guild = await this.parseGuild(interaction);
     const [roleId] = interaction.values;
-
-    if (guild instanceof GuildParseError) {
-      return new ParseOptionsError(guild.message);
-    }
 
     if (!roleId) {
       return new ParseOptionsError("ロールが選択されていません");
     }
 
-    const role = interaction.client.guilds.cache.get(guild.id)?.roles.cache.get(roleId);
-
-    if (!role) {
-      return new ParseOptionsError("ロール情報が取得できませんでした");
-    }
-
-    return { role } as O;
+    return { roleId } as O;
   }
 
   protected abstract exec(interaction: T, options: O): Promise<R>;
