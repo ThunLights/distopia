@@ -13,7 +13,8 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { ButtonInteractionBase, ModalSended } from "../Base/ButtonInteractionBase";
+import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { ModalSended } from "../Base/Modal/ModalSended";
 
 export class BumpNoticeContentSubmitButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

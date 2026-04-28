@@ -7,8 +7,9 @@ import {
 } from "discord.js";
 
 import { BaseHandler } from "../BaseHandler";
-import { ModalSended, type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
+import { type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
+import { ModalSended } from "./Base/Modal/ModalSended";
 import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";

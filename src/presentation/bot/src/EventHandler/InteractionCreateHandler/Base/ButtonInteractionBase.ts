@@ -9,8 +9,7 @@ import {
 
 import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
-
-export class ModalSended {}
+import type { ModalSended } from "./Modal/ModalSended";
 
 export abstract class ButtonInteractionBase<
   T extends ButtonInteraction = ButtonInteraction,

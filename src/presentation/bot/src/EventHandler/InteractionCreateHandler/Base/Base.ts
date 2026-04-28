@@ -5,8 +5,7 @@ import type { Guild, User } from "domain-model";
 import { codeBlock } from "../../../utils/codeblock";
 import { GuildParseError } from "./Error/GuildParseError";
 import { PermissionError } from "./Error/PermissionError";
-
-export class PermissionSuccess {}
+import { PermissionSuccess } from "./Permission/PermissionSuccess";
 
 export abstract class Base<T extends BaseInteraction, R = void> {
   public readonly requireBotGuildPermissions: PermissionResolvable[] = [];
