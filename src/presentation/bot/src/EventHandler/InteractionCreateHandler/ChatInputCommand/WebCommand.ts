@@ -1,6 +1,7 @@
 import { URL } from "node:url";
 
 import {
+  ApplicationCommandOptionType,
   ChannelType,
   MessageFlags,
   type CacheType,
@@ -25,12 +26,12 @@ export class WebCommand extends ChatInputCommandBase<Options> {
     description: "web",
     options: [
       {
-        type: 1,
+        type: ApplicationCommandOptionType.Subcommand,
         name: "edit",
         description: "サーバーの仮登録をする。",
       },
       {
-        type: 1,
+        type: ApplicationCommandOptionType.Subcommand,
         name: "page",
         description: "このサーバーのページを表示",
       },
