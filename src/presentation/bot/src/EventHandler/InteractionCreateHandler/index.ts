@@ -11,14 +11,17 @@ import { type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
 import { ModalSended } from "./Base/Modal/ModalSended";
 import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
+import type { UserSelectMenuInteractionBase } from "./Base/UserSelectMenuInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";
-import { commands as ModalCommands } from "./Modals.auto";
+import { commands as modalCommands } from "./Modals.auto";
+import { commands as userSelectMenus } from "./UserSelectMenus.auto";
 
 type Commands = {
   chatInput: ChatInputCommandBase[];
   button: ButtonInteractionBase[];
   modal: ModalSubmitInteractionBase[];
+  userSelectMenu: UserSelectMenuInteractionBase[];
 };
 
 export class InteractionCreateHandler extends BaseHandler<
@@ -27,7 +30,8 @@ export class InteractionCreateHandler extends BaseHandler<
   public readonly commands: Commands = {
     chatInput: chatInputCommands.map((Command) => new Command(this.core)),
     button: buttonCommands.map((Command) => new Command(this.core)),
-    modal: ModalCommands.map((Command) => new Command(this.core)),
+    modal: modalCommands.map((Command) => new Command(this.core)),
+    userSelectMenu: userSelectMenus.map((Menu) => new Menu(this.core)),
   };
 
   public override async handle(interaction: Interaction<CacheType>): Promise<void> {
@@ -42,10 +46,6 @@ export class InteractionCreateHandler extends BaseHandler<
           }
         }
       }
-      return void (await interaction.reply({
-        content: "コマンドが見つかりませんでした",
-        flags: [MessageFlags.Ephemeral],
-      }));
     } else if (interaction.isButton()) {
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
@@ -57,10 +57,6 @@ export class InteractionCreateHandler extends BaseHandler<
           }
         }
       }
-      return void (await interaction.reply({
-        content: "コマンドが見つかりませんでした",
-        flags: [MessageFlags.Ephemeral],
-      }));
     } else if (interaction.isModalSubmit()) {
       for (const command of this.commands.modal) {
         if (await command.match(interaction)) {
@@ -72,6 +68,24 @@ export class InteractionCreateHandler extends BaseHandler<
           }
         }
       }
+    } else if (interaction.isUserSelectMenu()) {
+      for (const menu of this.commands.userSelectMenu) {
+        if (await menu.match(interaction)) {
+          const res = await menu.run(interaction);
+          if (res instanceof Message) {
+            return;
+          } else {
+            return void (await interaction.reply(res));
+          }
+        }
+      }
+    }
+
+    if (interaction.isRepliable()) {
+      return void (await interaction.reply({
+        content: "コマンドが見つかりませんでした",
+        flags: [MessageFlags.Ephemeral],
+      }));
     }
   }
 }
