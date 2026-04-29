@@ -62,11 +62,11 @@ export class Guild extends Base {
   }
 
   public async getSetting(guildId: string) {
-    return await this.state.database.guildsetting.find(guildId);
+    return await this.state.database.guildSetting.find(guildId);
   }
 
   public async saveSetting(input: GuildSettingUpsertInput) {
-    return await this.state.database.guildsetting.upsert(input);
+    return await this.state.database.guildSetting.upsert(input);
   }
 
   public async addRecordVcMembers(guildId: string, date: Date, vcMember: string) {
