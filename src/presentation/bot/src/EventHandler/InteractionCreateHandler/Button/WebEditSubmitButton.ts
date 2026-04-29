@@ -46,10 +46,13 @@ export class WebEditSubmitButton extends ButtonInteractionBase {
     await this.core.guild.save({
       guildId: guild.id,
       name: guild.name,
+      icon: guild.icon,
+      banner: guild.banner,
       invite,
       description: guild.description,
       public: pub,
       nsfw,
+      updatedAt: new Date(),
       tags: tag ?? [],
     });
     await useAsync(this.core.state.memory.guildEdit.delete)(guild.id);

@@ -3,6 +3,6 @@ export type Guild = {
   name: string;
   ownerId: string;
   description?: string;
-  iconUrl?: string;
-  bannerUrl?: string;
+  icon?: string;
+  banner?: string;
 };

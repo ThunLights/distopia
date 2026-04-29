@@ -74,8 +74,8 @@ export abstract class Base<T extends BaseInteraction, R = void> {
       name: guild.name,
       ownerId: guild.ownerId,
       description: guild.description ?? undefined,
-      iconUrl: guild.iconURL() ?? undefined,
-      bannerUrl: guild.bannerURL() ?? undefined,
+      icon: guild.icon ?? undefined,
+      banner: guild.banner ?? undefined,
     };
   }
 
