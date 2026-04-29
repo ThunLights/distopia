@@ -1,4 +1,4 @@
-import { NUM_TAG_LIMIT, CHARACTER_LIMIT } from "app-core/constant";
+import { CHARACTER_LIMIT } from "app-core/constant";
 import {
   CheckboxBuilder,
   InteractionCallbackResponse,
@@ -40,15 +40,8 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
       .setTitle("フレンド募集 (ウェブサイトに表示されます。)")
       .addLabelComponents(
         new LabelBuilder()
-          .setLabel("R18にしたい場合は下記にyesと入力してください")
+          .setLabel("NSFW")
           .setCheckboxComponent(new CheckboxBuilder().setCustomId("nsfw").setDefault(false)),
-        new LabelBuilder()
-          .setLabel(
-            `検索タグ (最大${NUM_TAG_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`,
-          )
-          .setTextInputComponent(
-            new TextInputBuilder().setCustomId("tags").setStyle(TextInputStyle.Paragraph),
-          ),
         new LabelBuilder()
           .setLabel("自己紹介")
           .setTextInputComponent(
@@ -56,6 +49,46 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
               .setCustomId("profile")
               .setStyle(TextInputStyle.Paragraph)
               .setMaxLength(CHARACTER_LIMIT.description),
+          ),
+        new LabelBuilder()
+          .setLabel("タグ1")
+          .setTextInputComponent(
+            new TextInputBuilder()
+              .setCustomId("tag1")
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(CHARACTER_LIMIT.tag),
+          ),
+        new LabelBuilder()
+          .setLabel("タグ2")
+          .setTextInputComponent(
+            new TextInputBuilder()
+              .setCustomId("tag2")
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(CHARACTER_LIMIT.tag),
+          ),
+        new LabelBuilder()
+          .setLabel("タグ3")
+          .setTextInputComponent(
+            new TextInputBuilder()
+              .setCustomId("tag3")
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(CHARACTER_LIMIT.tag),
+          ),
+        new LabelBuilder()
+          .setLabel("タグ4")
+          .setTextInputComponent(
+            new TextInputBuilder()
+              .setCustomId("tag4")
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(CHARACTER_LIMIT.tag),
+          ),
+        new LabelBuilder()
+          .setLabel("タグ5")
+          .setTextInputComponent(
+            new TextInputBuilder()
+              .setCustomId("tag5")
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(CHARACTER_LIMIT.tag),
           ),
       );
 
