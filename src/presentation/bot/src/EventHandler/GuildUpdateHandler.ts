@@ -7,12 +7,19 @@ export class GuildUpdateHandler extends BaseHandler<(oldGuild: Guild, newGuild: 
     const guild = await this.core.guild.find(newGuild.id);
 
     if (guild) {
-      await this.core.guild.save({
-        ...guild,
-        name: oldGuild.name !== newGuild.name ? newGuild.name : guild.name,
-        icon: oldGuild.icon !== newGuild.icon ? newGuild.icon : guild.icon,
-        banner: oldGuild.banner !== newGuild.banner ? newGuild.banner : guild.banner,
-      });
+      const isChanged = {
+        name: oldGuild.name !== newGuild.name,
+        icon: oldGuild.icon !== newGuild.icon,
+        banner: oldGuild.banner !== newGuild.banner,
+      };
+      if (isChanged.name || isChanged.icon || isChanged.banner) {
+        await this.core.guild.save({
+          ...guild,
+          name: isChanged.name ? newGuild.name : guild.name,
+          icon: isChanged.icon ? newGuild.icon : guild.icon,
+          banner: isChanged.banner ? newGuild.banner : guild.banner,
+        });
+      }
     }
   }
 }
