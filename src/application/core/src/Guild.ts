@@ -69,6 +69,14 @@ export class Guild extends Base {
     return await this.state.database.guildsetting.upsert(input);
   }
 
+  public async addRecordVcMembers(guildId: string, date: Date, vcMember: string) {
+    return await this.state.database.guildRecordOneDay.upsertVcMembers(guildId, date, vcMember);
+  }
+
+  public async addRecordNewMembers(guildId: string, date: Date, newMember: string) {
+    return await this.state.database.guildRecordOneDay.upsertNewMembers(guildId, date, newMember);
+  }
+
   public async saveReview(input: GuildReviewUpsertInput) {
     return await this.state.database.guildReview.upsert(input);
   }
