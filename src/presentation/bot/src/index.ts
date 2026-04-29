@@ -1,16 +1,16 @@
 import type { AppCore } from "app-core";
 import { ActivityType, type Client } from "discord.js";
 
-import { GuildMemberAdd } from "./EventHandler/GuildMemberAdd";
-import { GuildUpdate } from "./EventHandler/GuildUpdate";
+import { GuildMemberAddHandler } from "./EventHandler/GuildMemberAddHandler";
+import { GuildUpdateHandler } from "./EventHandler/GuildUpdateHandler";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
 
 export function handleClient(client: Client, core: AppCore) {
   const interactionCreateHandler = new InteractionCreateHandler(core);
   const messageCreateHandler = new MessageCreateHandler(core);
-  const guildMemberAdd = new GuildMemberAdd(core);
-  const guildUpdate = new GuildUpdate(core);
+  const guildMemberAddHandler = new GuildMemberAddHandler(core);
+  const guildUpdateHandler = new GuildUpdateHandler(core);
 
   client.on("clientReady", async (client) => {
     client.user.setActivity({
@@ -32,11 +32,11 @@ export function handleClient(client: Client, core: AppCore) {
 
   client.on("messageCreate", async (message) => await messageCreateHandler.handle(message));
 
-  client.on("guildMemberAdd", async (member) => await guildMemberAdd.handle(member));
+  client.on("guildMemberAdd", async (member) => await guildMemberAddHandler.handle(member));
 
   client.on(
     "guildUpdate",
-    async (oldGuild, newGuild) => await guildUpdate.handle(oldGuild, newGuild),
+    async (oldGuild, newGuild) => await guildUpdateHandler.handle(oldGuild, newGuild),
   );
 
   return client;

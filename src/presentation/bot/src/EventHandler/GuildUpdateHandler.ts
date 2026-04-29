@@ -2,7 +2,7 @@ import type { Guild } from "discord.js";
 
 import { BaseHandler } from "./BaseHandler";
 
-export class GuildUpdate extends BaseHandler<(oldGuild: Guild, newGuild: Guild) => void> {
+export class GuildUpdateHandler extends BaseHandler<(oldGuild: Guild, newGuild: Guild) => void> {
   public override async handle(_oldGuild: Guild, newGuild: Guild): Promise<void> {
     const guild = await this.core.guild.find(newGuild.id);
 
