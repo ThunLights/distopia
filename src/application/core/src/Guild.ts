@@ -1,6 +1,10 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
 import { useAsync } from "domain-service";
-import type { GuildSettingUpsertInput, GuildUpsertInput } from "infra-database/types";
+import type {
+  GuildReviewUpsertInput,
+  GuildSettingUpsertInput,
+  GuildUpsertInput,
+} from "infra-database/types";
 
 import { Base } from "./Base";
 
@@ -63,5 +67,13 @@ export class Guild extends Base {
 
   public async saveSetting(input: GuildSettingUpsertInput) {
     return await this.state.database.guildsetting.upsert(input);
+  }
+
+  public async saveReview(input: GuildReviewUpsertInput) {
+    return await this.state.database.guildReview.upsert(input);
+  }
+
+  public async deleteReview(guildId: string, userId: string) {
+    return await this.state.database.guildReview.delete(guildId, userId);
   }
 }
