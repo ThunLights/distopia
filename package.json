@@ -9,7 +9,7 @@
     "format": "turbo run format",
     "setup": "turbo run setup",
     "typecheck": "turbo run typecheck",
-    "migrate-db": "turbo run migrate-db"
+    "deploy-db": "turbo run deploy-db"
   },
   "packageManager": "bun@1.3.13",
   "devDependencies": {

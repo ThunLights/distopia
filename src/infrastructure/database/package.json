@@ -17,7 +17,7 @@
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
     "format": "prisma format && oxfmt --config ../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit",
-    "migrate-db": "prisma migrate deploy"
+    "deploy-db": "prisma migrate dev --name deploy && prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.7.0",

@@ -19,8 +19,8 @@
     "typecheck": {
       "dependsOn": ["^typecheck"]
     },
-    "migrate-db": {
-      "dependsOn": ["^migrate-db"],
+    "deploy-db": {
+      "dependsOn": ["^deploy-db"],
       "cache": false
     }
   }
