@@ -1,4 +1,3 @@
-import { useAsync } from "app-core/async";
 import {
   type ButtonInteraction,
   type CacheType,
@@ -28,7 +27,7 @@ export class WebEditCancelButton extends ButtonInteractionBase {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    await useAsync(this.core.state.memory.guildEdit.delete)(guild.id);
+    await this.core.guild.deleteDraft(guild.id);
 
     return await interaction.update({
       content: "サーバープロフィール設定をキャンセルしました。",

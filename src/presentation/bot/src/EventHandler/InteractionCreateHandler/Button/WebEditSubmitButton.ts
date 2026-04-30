@@ -1,4 +1,3 @@
-import { useAsync } from "app-core/async";
 import {
   type ButtonInteraction,
   type CacheType,
@@ -55,7 +54,7 @@ export class WebEditSubmitButton extends ButtonInteractionBase {
       updatedAt: new Date(),
       tags: tag ?? [],
     });
-    await useAsync(this.core.state.memory.guildEdit.delete)(guild.id);
+    await this.core.guild.deleteDraft(guild.id);
 
     const { content, components, embeds, allowedMentions, files } = await page(this.core, guild);
 

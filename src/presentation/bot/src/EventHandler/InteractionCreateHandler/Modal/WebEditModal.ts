@@ -1,4 +1,3 @@
-import { useAsync } from "app-core/async";
 import { isBlankSync } from "app-core/blank";
 import {
   type ModalSubmitInteraction,
@@ -80,7 +79,7 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
       maxUses: 0,
     });
 
-    await useAsync(this.core.state.memory.guildEdit.set)(guild.id, {
+    await this.core.guild.saveDraft(guild.id, {
       description,
       nsfw,
       pub,

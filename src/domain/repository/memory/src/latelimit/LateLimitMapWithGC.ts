@@ -1,9 +1,10 @@
+import { MapWithGC } from "../MapWithGC";
 import type { LimitDate } from "./LimitDate";
 
-export class MapWithGC<K extends string = string, V extends LimitDate = LimitDate> extends Map<
-  K,
-  V
-> {
+export class LateLimitMapWithGC<
+  K extends string = string,
+  V extends LimitDate = LimitDate,
+> extends MapWithGC<K, V> {
   public gc() {
     const nowTime = Date.now();
 

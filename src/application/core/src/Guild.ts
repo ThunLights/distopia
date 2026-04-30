@@ -6,6 +6,7 @@ import type {
   GuildSettingUpsertInput,
   GuildUpsertInput,
 } from "infra-database/types";
+import type { Value } from "repo-memory/GuildEdit";
 
 import { Base } from "./Base";
 
@@ -20,6 +21,18 @@ export class Guild extends Base {
       tag: memoryData?.tags ?? dbData?.tags,
       invite: memoryData?.invite ?? dbData?.invite,
     };
+  }
+
+  public async saveDraft(guildId: string, value: Value, updateAll: boolean = true) {
+    const memoryData = await useAsync(this.state.memory.guildEdit.get)(guildId);
+    return await useAsync(this.state.memory.guildEdit.set)(
+      guildId,
+      updateAll ? { ...memoryData, ...value } : value,
+    );
+  }
+
+  public async deleteDraft(guildId: string) {
+    return await useAsync(this.state.memory.guildEdit.delete)(guildId);
   }
 
   public async bump(user: User, guild: GuildModel) {
