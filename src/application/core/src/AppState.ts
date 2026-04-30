@@ -2,6 +2,7 @@ import type { DatabaseClient } from "infra-database/types";
 import type { Controller } from "infra-discord";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
+import type { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
 
 export type AppState = {
   owner: {
@@ -10,6 +11,7 @@ export type AppState = {
   url: string;
   memory: {
     latelimit: {
+      messageCreate: MessageCreateLateLimit;
       bump: GuildBumpLateLimit;
     };
     guildEdit: GuildEdit;
