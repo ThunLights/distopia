@@ -1,4 +1,5 @@
 import { describe, test, expect } from "vitest";
+
 import { levelUp, levelUpSync } from "./level";
 
 describe("levelUp", () => {

@@ -1,6 +1,7 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
-import { useAsync } from "domain-service";
+import { levelUp, useAsync } from "domain-service";
 import type {
+  GuildRecordUpsertInput,
   GuildReviewUpsertInput,
   GuildSettingUpsertInput,
   GuildUpsertInput,
@@ -65,6 +66,17 @@ export class Guild extends Base {
 
   public async saveSetting(input: GuildSettingUpsertInput) {
     return await this.state.database.guildSetting.upsert(input);
+  }
+
+  public async saveRecord(input: GuildRecordUpsertInput) {
+    return await this.state.database.guildRecord.upsert(input);
+  }
+
+  public async levelUp(guildId: string, plusPoint: number) {
+    const data = await this.state.database.guildRecord.find(guildId);
+    const { level, point } = await levelUp(data?.level ?? 0n, data?.point ?? 0n, BigInt(Math.ceil(Math.sqrt(plusPoint))));
+
+    return await this.state.database.guildRecord.upsert({ guildId, level, point });
   }
 
   public async addRecordVcMembers(guildId: string, date: Date, vcMember: string) {
