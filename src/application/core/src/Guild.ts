@@ -74,7 +74,11 @@ export class Guild extends Base {
 
   public async levelUp(guildId: string, plusPoint: number) {
     const data = await this.state.database.guildRecord.find(guildId);
-    const { level, point } = await levelUp(data?.level ?? 0n, data?.point ?? 0n, BigInt(Math.ceil(Math.sqrt(plusPoint))));
+    const { level, point } = await levelUp(
+      data?.level ?? 0n,
+      data?.point ?? 0n,
+      BigInt(Math.ceil(Math.sqrt(plusPoint))),
+    );
 
     return await this.state.database.guildRecord.upsert({ guildId, level, point });
   }

@@ -24,14 +24,20 @@ export class GuildRecordOneDayTable extends Base {
       where: { guildId_date: { guildId, date } },
     });
 
+    const vcMembers = data ? [...new Set(data.vcMembers).add(vcMember)] : [vcMember];
+
+    if (data && data.vcMembers.length === vcMembers.length) {
+      return data;
+    }
+
     return await this.prisma.guildRecordOneDay.upsert({
       where: { guildId_date: { guildId, date } },
       update: {
         vcMembers: {
-          set: data ? [...new Set(data.vcMembers).add(vcMember)] : [vcMember],
+          set: vcMembers,
         },
       },
-      create: { guildId, date, vcMembers: [vcMember] },
+      create: { guildId, date, vcMembers },
     });
   }
 
@@ -40,14 +46,20 @@ export class GuildRecordOneDayTable extends Base {
       where: { guildId_date: { guildId, date } },
     });
 
+    const newMembers = data ? [...new Set(data.newMembers).add(newMember)] : [newMember];
+
+    if (data && data.newMembers.length === newMembers.length) {
+      return data;
+    }
+
     return await this.prisma.guildRecordOneDay.upsert({
       where: { guildId_date: { guildId, date } },
       update: {
         newMembers: {
-          set: data ? [...new Set(data.newMembers).add(newMember)] : [newMember],
+          set: newMembers,
         },
       },
-      create: { guildId, date, newMembers: [newMember] },
+      create: { guildId, date, newMembers },
     });
   }
 
