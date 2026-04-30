@@ -1,8 +1,5 @@
 export class LateLimitError extends Error {
-  constructor(
-    public readonly limit: Date,
-    public readonly remainTime: number,
-  ) {
+  constructor(public readonly limit: Date) {
     super("LateLimit Error");
   }
 }

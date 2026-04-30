@@ -47,7 +47,7 @@ export class BumpCommand extends ChatInputCommandBase<Options> {
         .setTitle("Distopia: Discordサーバー掲示板")
         .setURL(`https://distopia.top/`)
         .setDescription(
-          `レートリミットです。${Math.ceil(bumped.remainTime / (60 * 1000))}分経ってから再度実行してください`,
+          `レートリミットです。${Math.ceil((bumped.limit.getTime() - Date.now()) / (60 * 1000))}分経ってから再度実行してください`,
         );
       return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
     }

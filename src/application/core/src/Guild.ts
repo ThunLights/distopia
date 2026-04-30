@@ -25,16 +25,14 @@ export class Guild extends Base {
     const twoHours = 2 * 60 * 60 * 1000;
     const { database, memory } = this.state;
     const latelimit = memory.latelimit.bump;
-
-    const settedDate = await useAsync(latelimit.get)(guild.id);
     const nowDate = new Date();
-    if (settedDate) {
-      const remainDate = twoHours - (nowDate.getTime() - settedDate.getTime());
-      return new LateLimitError(settedDate, remainDate);
+    const limit = await useAsync(latelimit.get)(guild.id);
+
+    if (limit && limit.getTime() > Date.now()) {
+      return new LateLimitError(limit);
     }
 
-    await useAsync(latelimit.set)(guild.id, nowDate);
-    setTimeout(() => useAsync(latelimit.delete)(guild.id), twoHours);
+    await useAsync(latelimit.set)(guild.id, new Date(nowDate.getTime() + twoHours));
 
     await database.guild.update({
       guildId: guild.id,
