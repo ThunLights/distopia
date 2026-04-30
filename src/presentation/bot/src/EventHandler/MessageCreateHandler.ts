@@ -13,7 +13,8 @@ export class MessageCreateHandler extends BaseHandler<
     const limit = message.member?.id && messageCreate.get(message.member.id);
 
     if (message.guildId && limit && Date.now() > limit.getTime()) {
-      messageCreate.delete(message.member.id);
+      const minute = 60 * 1000;
+      messageCreate.set(message.member.id, new Date(Date.now() + minute));
       await this.core.guild.increaseNewMessage(message.guildId, await formatYMD(new Date()));
     }
   }
