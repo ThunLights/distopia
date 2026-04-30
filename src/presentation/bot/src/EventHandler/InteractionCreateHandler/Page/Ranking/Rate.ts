@@ -1,10 +1,10 @@
 import type { AppCore } from "app-core";
-import { formatYMD } from "app-core/date";
+import { formatYMDString } from "app-core/date";
 import { omitTxt } from "app-core/omit";
 import { EmbedBuilder, type InteractionReplyOptions } from "discord.js";
 
 export async function page(core: AppCore): Promise<InteractionReplyOptions> {
-  const date = await formatYMD(new Date(new Date().toLocaleDateString("ja-JP")));
+  const date = await formatYMDString(new Date(new Date().toLocaleDateString("ja-JP")));
   const embed = new EmbedBuilder()
     .setTitle("サーバーランキング: アクティブレート")
     .setDescription(
