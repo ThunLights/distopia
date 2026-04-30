@@ -1,5 +1,7 @@
 import { BOT_TOKEN } from "$env/static/private";
+import { core } from "$lib/server/core";
 import { client } from "$lib/server/discord";
+import { schedule } from "$lib/server/schedule";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 
 process.on("uncaughtException", async (error) => {
@@ -13,6 +15,10 @@ process.on("unhandledRejection", async (reason) => {
 async function start() {
   await client.login(BOT_TOKEN);
   console.log("BOT logined.");
+
+  schedule.add("*/15 * * * *", async () => {
+    await core.memory.gc();
+  });
 }
 
 export const handle = (async ({ event, resolve }) => {
