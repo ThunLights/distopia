@@ -5,6 +5,12 @@
   "exports": {
     ".": {
       "import": "./src/index.ts"
+    },
+    "./page/*": {
+      "import": "./src/EventHandler/InteractionCreateHandler/Page/*.ts"
+    },
+    "./component/*": {
+      "import": "./src/EventHandler/InteractionCreateHandler/Component/*.ts"
     }
   },
   "scripts": {
