@@ -24,6 +24,7 @@ async function start() {
 
   schedule.add("*/20 * * * *", async () => {
     await core.memory.gc();
+    await core.activeRate.update();
     await core.ranking.updateCache();
     await core.updateHomeGuildRoles(
       PUBLIC_HOME_SERVER_ID,

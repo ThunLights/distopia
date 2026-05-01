@@ -1,3 +1,4 @@
+import { ActiveRate } from "./ActiveRate";
 import { Base } from "./Base";
 import { Friend } from "./Friend";
 import { Guild } from "./Guild";
@@ -5,6 +6,7 @@ import { Memory } from "./Memory";
 import { Ranking } from "./Ranking";
 
 export class AppCore extends Base {
+  public readonly activeRate = new ActiveRate(this.state);
   public readonly guild = new Guild(this.state);
   public readonly friend = new Friend(this.state);
   public readonly memory = new Memory(this.state);
@@ -14,7 +16,7 @@ export class AppCore extends Base {
     await this.ranking.updateCache();
   }
 
-  public async updateHomeGuildSpecialDirectorsRole(
+  private async updateHomeGuildSpecialDirectorsRole(
     homeGuildId: string,
     specialDirectorsRoleId: string,
   ) {
@@ -43,7 +45,7 @@ export class AppCore extends Base {
     }
   }
 
-  public async updateHomeGuildDirectorsRole(homeGuildId: string, directorsRoleId: string) {
+  private async updateHomeGuildDirectorsRole(homeGuildId: string, directorsRoleId: string) {
     const ownerIds = new Set<string>();
 
     for (const guild of await this.ranking.fetchGuild("activeRate", 100)) {
@@ -67,7 +69,7 @@ export class AppCore extends Base {
     }
   }
 
-  public async updateHomeGuildSubDirectorsRole(homeGuildId: string, subDirectorsRoleId: string) {
+  private async updateHomeGuildSubDirectorsRole(homeGuildId: string, subDirectorsRoleId: string) {
     const adminIds = new Set<string>();
 
     for (const guild of await this.ranking.fetchGuild("activeRate", 100)) {
@@ -99,6 +101,7 @@ export class AppCore extends Base {
     directorsRoleId: string,
     subDirectorsRoleId: string,
   ) {
+    await this.updateHomeGuildSpecialDirectorsRole(homeGuildId, specialDirectorsRoleId);
     await this.updateHomeGuildDirectorsRole(homeGuildId, directorsRoleId);
     await this.updateHomeGuildSubDirectorsRole(homeGuildId, subDirectorsRoleId);
   }

@@ -11,6 +11,15 @@ export class GuildRecordOneDayTable extends Base {
     });
   }
 
+  public async findFixedTimes(guildId: string, gte: Date) {
+    return await this.prisma.guildRecordOneDay.findMany({
+      where: {
+        guildId,
+        date: { gte }
+      },
+    });
+  }
+
   public async upsert(input: GuildRecordOneDayUpsertInput) {
     return await this.prisma.guildRecordOneDay.upsert({
       where: { guildId_date: { guildId: input.guildId, date: input.date } },

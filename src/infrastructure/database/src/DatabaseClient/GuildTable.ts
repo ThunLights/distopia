@@ -8,6 +8,10 @@ export class GuildTable extends Base {
     });
   }
 
+  public async findAll(): Promise<Guild[]> {
+    return await this.prisma.guild.findMany();
+  }
+
   public async update(input: GuildUpdateInput): Promise<Guild> {
     return await this.prisma.guild.update({
       where: { guildId: input.guildId },
