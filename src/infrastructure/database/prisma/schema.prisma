@@ -105,5 +105,4 @@ enum PanelType {
   ActiveRateRanking
   LevelRanking
   UserBumpRanking
-  DPScore
 }

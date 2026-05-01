@@ -6,7 +6,7 @@ import {
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
 } from "$env/static/public";
 import { core } from "$lib/server/core";
-import { client } from "$lib/server/discord";
+import { client, updatePanels } from "$lib/server/discord";
 import { schedule } from "$lib/server/schedule";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 
@@ -32,6 +32,7 @@ async function start() {
       PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
       PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
     );
+    await updatePanels();
   });
 }
 
