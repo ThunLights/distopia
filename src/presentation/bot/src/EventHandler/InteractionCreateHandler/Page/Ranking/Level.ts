@@ -18,10 +18,12 @@ export async function page(core: AppCore): Promise<InteractionReplyOptions> {
     rank: index + 1,
     guild,
   }))) {
-    embed.addFields({
-      name: `${rank}: ${guild.name}`,
-      value: `${await omitTxt((guild.description ?? "未記入").replaceAll("\n", ""), 40)}`,
-    });
+    if (guild.public) {
+      embed.addFields({
+        name: `${rank}: ${guild.name}`,
+        value: `${await omitTxt((guild.description ?? "未記入").replaceAll("\n", ""), 40)}`,
+      });
+    }
   }
 
   return {
