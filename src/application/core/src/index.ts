@@ -13,4 +13,93 @@ export class AppCore extends Base {
   public async updateCache() {
     await this.ranking.updateCache();
   }
+
+  public async updateHomeGuildSpecialDirectorsRole(
+    homeGuildId: string,
+    specialDirectorsRoleId: string,
+  ) {
+    const ownerIds = new Set<string>();
+
+    for (const guild of await this.ranking.fetchGuild("activeRate", 10)) {
+      const owner = await this.state.discord.guild.fetchOwner(guild.guildId);
+      const ownerId = owner?.id;
+      if (ownerId) {
+        ownerIds.add(ownerId);
+      }
+    }
+
+    for (const ownerId of ownerIds) {
+      await this.state.discord.role.give(homeGuildId, ownerId, specialDirectorsRoleId);
+    }
+
+    for (const user of (
+      await this.state.discord.role.fetchGuild(homeGuildId, specialDirectorsRoleId)
+    )
+      ?.values()
+      .toArray() ?? []) {
+      if (!Array.from(ownerIds).includes(user.id)) {
+        await this.state.discord.role.deprive(homeGuildId, user.id, specialDirectorsRoleId);
+      }
+    }
+  }
+
+  public async updateHomeGuildDirectorsRole(homeGuildId: string, directorsRoleId: string) {
+    const ownerIds = new Set<string>();
+
+    for (const guild of await this.ranking.fetchGuild("activeRate", 100)) {
+      const owner = await this.state.discord.guild.fetchOwner(guild.guildId);
+      const ownerId = owner?.id;
+      if (ownerId) {
+        ownerIds.add(ownerId);
+      }
+    }
+
+    for (const ownerId of ownerIds) {
+      await this.state.discord.role.give(homeGuildId, ownerId, directorsRoleId);
+    }
+
+    for (const user of (await this.state.discord.role.fetchGuild(homeGuildId, directorsRoleId))
+      ?.values()
+      .toArray() ?? []) {
+      if (!Array.from(ownerIds).includes(user.id)) {
+        await this.state.discord.role.deprive(homeGuildId, user.id, directorsRoleId);
+      }
+    }
+  }
+
+  public async updateHomeGuildSubDirectorsRole(homeGuildId: string, subDirectorsRoleId: string) {
+    const adminIds = new Set<string>();
+
+    for (const guild of await this.ranking.fetchGuild("activeRate", 100)) {
+      const admins =
+        (await this.state.discord.guild.fetchHasPermissionUsers(guild.guildId, ["Administrator"]))
+          ?.values()
+          .toArray() ?? [];
+      for (const admin of admins) {
+        adminIds.add(admin.id);
+      }
+    }
+
+    for (const adminId of adminIds) {
+      await this.state.discord.role.give(homeGuildId, adminId, subDirectorsRoleId);
+    }
+
+    for (const user of (await this.state.discord.role.fetchGuild(homeGuildId, subDirectorsRoleId))
+      ?.values()
+      .toArray() ?? []) {
+      if (!Array.from(adminIds).includes(user.id)) {
+        await this.state.discord.role.deprive(homeGuildId, user.id, subDirectorsRoleId);
+      }
+    }
+  }
+
+  public async updateHomeGuildRoles(
+    homeGuildId: string,
+    specialDirectorsRoleId: string,
+    directorsRoleId: string,
+    subDirectorsRoleId: string,
+  ) {
+    await this.updateHomeGuildDirectorsRole(homeGuildId, directorsRoleId);
+    await this.updateHomeGuildSubDirectorsRole(homeGuildId, subDirectorsRoleId);
+  }
 }

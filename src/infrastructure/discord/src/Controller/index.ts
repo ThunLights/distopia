@@ -1,6 +1,10 @@
 import { Base } from "./Base";
+import { GuildController } from "./GuildController";
+import { RoleController } from "./RoleController";
 import { UserController } from "./UserController";
 
 export class Controller extends Base {
+  public readonly guild = new GuildController(this.client);
+  public readonly role = new RoleController(this.client);
   public readonly user = new UserController(this.client);
 }

@@ -10,9 +10,13 @@ export class Ranking extends Base {
   private guildActiveRate: GuildRecordRanking[] = [];
   private userBump: UserBumpRanking = [];
 
-  public async fetchGuild(rankingType: "level" | "activeRate") {
+  public async fetchGuild(rankingType: "level" | "activeRate", num?: number) {
     if (!this.guildLevel.length || !this.guildActiveRate.length) {
       await this.updateCache();
+    }
+
+    if (num) {
+      return await this.state.database.guildRecord.ranking(rankingType, num);
     }
 
     return rankingType === "level" ? this.guildLevel : this.guildActiveRate;
