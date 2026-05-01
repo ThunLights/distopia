@@ -15,7 +15,7 @@ export class GuildRecordOneDayTable extends Base {
     return await this.prisma.guildRecordOneDay.findMany({
       where: {
         guildId,
-        date: { gte }
+        date: { gte },
       },
     });
   }

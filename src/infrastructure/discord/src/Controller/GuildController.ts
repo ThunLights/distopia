@@ -17,7 +17,9 @@ export class GuildController extends Base {
     const guild = this.client.guilds.cache.get(guildId);
 
     if (status) {
-      return guild?.members.cache.filter(member => member.presence?.status && status.includes(member.presence.status)).size;
+      return guild?.members.cache.filter(
+        (member) => member.presence?.status && status.includes(member.presence.status),
+      ).size;
     } else {
       return guild?.memberCount;
     }

@@ -30,6 +30,18 @@ export class GuildRecordTable extends Base {
     });
   }
 
+  public async upsertAll(input: GuildRecordUpsertInput[]) {
+    return await this.prisma.$transaction(
+      input.map((value) =>
+        this.prisma.guildRecord.upsert({
+          where: { guildId: value.guildId },
+          update: value,
+          create: value,
+        }),
+      ),
+    );
+  }
+
   public async delete(guildId: string): Promise<GuildRecord> {
     return await this.prisma.guildRecord.delete({ where: { guildId } });
   }
