@@ -19,6 +19,10 @@ async function start() {
   schedule.add("*/15 * * * *", async () => {
     await core.memory.gc();
   });
+
+  schedule.add("*/20 * * * *", async () => {
+    await core.ranking.updateCache();
+  });
 }
 
 export const handle = (async ({ event, resolve }) => {

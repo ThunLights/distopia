@@ -1,17 +1,38 @@
 import type { User } from "domain-model";
-import type { User as DBUser } from "infra-database/types";
+import type { User as DBUser, GuildRecordRanking } from "infra-database/types";
 
 import { Base } from "./Base";
 
+export type UserBumpRanking = (User & DBUser)[];
+
 export class Ranking extends Base {
-  public async fetchGuild(rankingType: "level" | "activeRate", num: number = 20) {
-    return await this.state.database.guildRecord.ranking(rankingType, num);
+  private guildLevel: GuildRecordRanking[] = [];
+  private guildActiveRate: GuildRecordRanking[] = [];
+  private userBump: UserBumpRanking = [];
+
+  public async fetchGuild(rankingType: "level" | "activeRate") {
+    if (!this.guildLevel.length || !this.guildActiveRate.length) {
+      await this.updateCache();
+    }
+
+    return rankingType === "level" ? this.guildLevel : this.guildActiveRate;
   }
 
-  public async fetchUser(rankingType: "userBump", num: number = 20): Promise<(User & DBUser)[]> {
-    const users = [];
+  public async fetchUser(_rankingType: "userBump"): Promise<UserBumpRanking> {
+    if (!this.userBump.length) {
+      await this.updateCache();
+    }
 
-    const dbUsers = await this.state.database.user.ranking(rankingType, num);
+    return this.userBump;
+  }
+
+  public async updateCache(num: number = 20) {
+    this.guildLevel = await this.state.database.guildRecord.ranking("level", num);
+    this.guildActiveRate = await this.state.database.guildRecord.ranking("activeRate", num);
+
+    const users: UserBumpRanking = [];
+
+    const dbUsers = await this.state.database.user.ranking("userBump", num);
 
     for (const user of dbUsers) {
       const discordUserData = await this.state.discord.user.find(user.id);
@@ -20,6 +41,6 @@ export class Ranking extends Base {
       }
     }
 
-    return users;
+    this.userBump = users;
   }
 }

@@ -9,4 +9,8 @@ export class AppCore extends Base {
   public readonly friend = new Friend(this.state);
   public readonly memory = new Memory(this.state);
   public readonly ranking = new Ranking(this.state);
+
+  public async updateCache() {
+    await this.ranking.updateCache();
+  }
 }
