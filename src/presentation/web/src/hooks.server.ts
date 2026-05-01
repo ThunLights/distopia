@@ -16,11 +16,8 @@ async function start() {
   await client.login(BOT_TOKEN);
   console.log("BOT logined.");
 
-  schedule.add("*/15 * * * *", async () => {
-    await core.memory.gc();
-  });
-
   schedule.add("*/20 * * * *", async () => {
+    await core.memory.gc();
     await core.ranking.updateCache();
   });
 }
