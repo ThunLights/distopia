@@ -5,34 +5,48 @@ import { Base } from "./Base";
 
 export type UserBumpRanking = (User & DBUser)[];
 
+export type FetchOptions = {
+  num?: number;
+};
+
 export class Ranking extends Base {
-  private guildLevel: GuildRecordRanking[] = [];
-  private guildActiveRate: GuildRecordRanking[] = [];
-  private userBump: UserBumpRanking = [];
+  private guildLevel = new Map<number, GuildRecordRanking[]>();
+  private guildActiveRate = new Map<number, GuildRecordRanking[]>();
+  private userBump = new Map<number, UserBumpRanking>();
 
-  public async fetchGuild(rankingType: "level" | "activeRate", num?: number) {
-    if (!this.guildLevel.length || !this.guildActiveRate.length) {
-      await this.updateCache();
+  public async fetchGuild(rankingType: "level" | "activeRate", options?: FetchOptions) {
+    const num = options?.num ?? 20;
+    const cache =
+      rankingType === "level" ? this.guildLevel.get(num) : this.guildActiveRate.get(num);
+
+    if (cache) {
+      return cache;
     }
 
-    if (num) {
-      return await this.state.database.guildRecord.ranking(rankingType, num);
+    const data =
+      rankingType === "level"
+        ? await this.state.database.guildRecord.ranking("level", num)
+        : await this.state.database.guildRecord.ranking("activeRate", num);
+
+    if (rankingType === "level") {
+      this.guildLevel.set(num, data);
+    } else {
+      this.guildActiveRate.set(num, data);
     }
 
-    return rankingType === "level" ? this.guildLevel : this.guildActiveRate;
+    return data;
   }
 
-  public async fetchUser(_rankingType: "userBump"): Promise<UserBumpRanking> {
-    if (!this.userBump.length) {
-      await this.updateCache();
+  public async fetchUser(
+    _rankingType: "userBump",
+    options?: FetchOptions,
+  ): Promise<UserBumpRanking> {
+    const num = options?.num ?? 20;
+    const cache = this.userBump.get(num);
+
+    if (cache) {
+      return cache;
     }
-
-    return this.userBump;
-  }
-
-  public async updateCache(num: number = 20) {
-    this.guildLevel = await this.state.database.guildRecord.ranking("level", num);
-    this.guildActiveRate = await this.state.database.guildRecord.ranking("activeRate", num);
 
     const users: UserBumpRanking = [];
 
@@ -45,6 +59,14 @@ export class Ranking extends Base {
       }
     }
 
-    this.userBump = users;
+    this.userBump.set(num, users);
+
+    return users;
+  }
+
+  public async cleanCache() {
+    this.guildLevel.clear();
+    this.guildActiveRate.clear();
+    this.userBump.clear();
   }
 }

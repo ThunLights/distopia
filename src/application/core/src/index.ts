@@ -12,17 +12,13 @@ export class AppCore extends Base {
   public readonly memory = new Memory(this.state);
   public readonly ranking = new Ranking(this.state);
 
-  public async updateCache() {
-    await this.ranking.updateCache();
-  }
-
   private async updateHomeGuildSpecialDirectorsRole(
     homeGuildId: string,
     specialDirectorsRoleId: string,
   ) {
     const ownerIds = new Set<string>();
 
-    for (const guild of await this.ranking.fetchGuild("activeRate", 10)) {
+    for (const guild of await this.ranking.fetchGuild("activeRate", { num: 10 })) {
       const owner = await this.state.discord.guild.fetchOwner(guild.guildId);
       const ownerId = owner?.id;
       if (ownerId) {
@@ -48,7 +44,7 @@ export class AppCore extends Base {
   private async updateHomeGuildDirectorsRole(homeGuildId: string, directorsRoleId: string) {
     const ownerIds = new Set<string>();
 
-    for (const guild of await this.ranking.fetchGuild("activeRate", 100)) {
+    for (const guild of await this.ranking.fetchGuild("activeRate", { num: 100 })) {
       const owner = await this.state.discord.guild.fetchOwner(guild.guildId);
       const ownerId = owner?.id;
       if (ownerId) {
@@ -72,7 +68,7 @@ export class AppCore extends Base {
   private async updateHomeGuildSubDirectorsRole(homeGuildId: string, subDirectorsRoleId: string) {
     const adminIds = new Set<string>();
 
-    for (const guild of await this.ranking.fetchGuild("activeRate", 100)) {
+    for (const guild of await this.ranking.fetchGuild("activeRate", { num: 100 })) {
       const admins =
         (await this.state.discord.guild.fetchHasPermissionUsers(guild.guildId, ["Administrator"]))
           ?.values()
