@@ -1,19 +1,29 @@
 import { calcActiveRate } from "domain-service";
-import type { GuildRecordUpsertInput } from "infra-database/types";
+import type { GuildRecordOneDay, GuildRecordUpsertInput } from "infra-database/types";
 
 import { Base } from "./Base";
 
 export class ActiveRate extends Base {
   public async update() {
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = new Date(Date.now() - thirtyDays);
     const query: GuildRecordUpsertInput[] = [];
 
+    const allGuildRecord =
+      await this.state.database.guildRecordOneDay.findFixedTimesAll(thirtyDaysAgo);
+
     for (const guild of await this.state.database.guild.findAll()) {
-      const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-      const thirtyDaysAgo = new Date(Date.now() - thirtyDays);
-      const records = await this.state.database.guildRecordOneDay.findFixedTimes(
-        guild.guildId,
-        thirtyDaysAgo,
-      );
+      const records = await (async () => {
+        const records: GuildRecordOneDay[] = [];
+
+        for (const record of allGuildRecord) {
+          if (record.guildId === guild.guildId) {
+            records.push(record);
+          }
+        }
+
+        return records;
+      })();
 
       const newMember = records.reduce((sum, record) => sum + record.newMembers.length, 0);
       const newMessage = records.reduce((sum, record) => sum + record.newMessages, 0);
