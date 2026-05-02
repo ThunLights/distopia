@@ -24,6 +24,7 @@ async function start() {
 
   schedule.add("*/20 * * * *", async () => {
     await core.memory.gc();
+    await core.voice.update();
     await core.activeRate.update();
     await core.ranking.cleanCache();
     await core.updateHomeGuildRoles(

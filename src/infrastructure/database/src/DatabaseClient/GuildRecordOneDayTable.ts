@@ -92,6 +92,18 @@ export class GuildRecordOneDayTable extends Base {
     });
   }
 
+  public async upsertVcMemberUpperTwo(guildId: string, date: Date, num: number = 1) {
+    return await this.prisma.guildRecordOneDay.upsert({
+      where: { guildId_date: { guildId, date } },
+      update: {
+        vcMemberUpperTwo: {
+          increment: num,
+        },
+      },
+      create: { guildId, date, vcMemberUpperTwo: num },
+    });
+  }
+
   public async update(input: GuildRecordOneDayUpdateInput) {
     return await this.prisma.guildRecordOneDay.update({
       where: { guildId_date: { guildId: input.guildId, date: input.date } },

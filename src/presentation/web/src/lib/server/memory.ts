@@ -1,5 +1,6 @@
 import type { AppState } from "app-core/AppState";
 import { GuildEdit } from "repo-memory/GuildEdit";
+import { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
 import { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
 
@@ -9,4 +10,5 @@ export const memory: AppState["memory"] = {
     bump: new GuildBumpLateLimit(),
   },
   guildEdit: new GuildEdit(),
+  voiceChannelMember: new VoiceChannelMember(),
 };
