@@ -33,7 +33,7 @@ export class Voice extends Base {
         const { level, point } = await levelUp(
           data?.level ?? 0n,
           data?.point ?? 0n,
-          BigInt(Math.ceil(plusPoint)),
+          BigInt(Math.ceil(plusPoint) * 20),
         );
 
         return await this.state.database.guildRecord.upsert({ guildId, level, point });
