@@ -9,6 +9,7 @@ import type {
 import type { Value } from "repo-memory/GuildEdit";
 
 import { Base } from "./Base";
+import { formatYMD } from "./utils/date";
 
 export class Guild extends Base {
   public async getDraft(guildId: string) {
@@ -96,16 +97,20 @@ export class Guild extends Base {
     return await this.state.database.guildRecord.upsert({ guildId, level, point });
   }
 
-  public async addRecordVcMembers(guildId: string, date: Date, vcMember: string) {
-    return await this.state.database.guildRecordOneDay.upsertVcMembers(guildId, date, vcMember);
+  public async addRecordNewMembers(guildId: string, newMember: string) {
+    return await this.state.database.guildRecordOneDay.upsertNewMembers(
+      guildId,
+      await formatYMD(new Date()),
+      newMember,
+    );
   }
 
-  public async addRecordNewMembers(guildId: string, date: Date, newMember: string) {
-    return await this.state.database.guildRecordOneDay.upsertNewMembers(guildId, date, newMember);
-  }
-
-  public async increaseNewMessage(guildId: string, date: Date, num: number = 1) {
-    return await this.state.database.guildRecordOneDay.upsertNewMessages(guildId, date, num);
+  public async increaseNewMessage(guildId: string, num: number = 1) {
+    return await this.state.database.guildRecordOneDay.upsertNewMessages(
+      guildId,
+      await formatYMD(new Date()),
+      num,
+    );
   }
 
   public async saveReview(input: GuildReviewUpsertInput) {

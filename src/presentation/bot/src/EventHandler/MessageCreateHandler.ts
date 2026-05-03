@@ -1,4 +1,3 @@
-import { formatYMD } from "app-core/date";
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
 
 import { BaseHandler } from "./BaseHandler";
@@ -17,7 +16,7 @@ export class MessageCreateHandler extends BaseHandler<
 
       messageCreate.set(message.member.id, new Date(Date.now() + minute));
 
-      await this.core.guild.increaseNewMessage(message.guildId, await formatYMD(new Date()));
+      await this.core.guild.increaseNewMessage(message.guildId);
 
       if (message.content.length) {
         await this.core.guild.levelUp(message.guildId, message.content.length);
