@@ -47,7 +47,7 @@ export class Record extends Base {
   }
 
   public async saveGuilds(inputs: SaveGuildInput[]) {
-    const guild = new Map(
+    const guilds = new Map(
       (await this.state.database.guildRecord.findAll()).map(
         ({ guildId, maxlevelRank, maxRateRank, maxRate }) => [
           guildId,
@@ -61,17 +61,17 @@ export class Record extends Base {
         return {
           guildId,
           maxlevelRank: maxlevelRank
-            ? this.isNewRecord(guildId, maxlevelRank, "maxlevelRank", guild)
+            ? this.isNewRecord(guildId, maxlevelRank, "maxlevelRank", guilds)
               ? maxlevelRank
               : undefined
             : undefined,
           maxRateRank: maxRateRank
-            ? this.isNewRecord(guildId, maxRateRank, "maxRateRank", guild)
+            ? this.isNewRecord(guildId, maxRateRank, "maxRateRank", guilds)
               ? maxRateRank
               : undefined
             : undefined,
           maxRate: maxRate
-            ? this.isNewRecord(guildId, maxRate, "maxRate", guild)
+            ? this.isNewRecord(guildId, maxRate, "maxRate", guilds)
               ? maxRate
               : undefined
             : undefined,
