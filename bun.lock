@@ -127,7 +127,7 @@
       },
     },
     "src/infrastructure/database/src/prisma-client": {
-      "name": "prisma-client-f43c3a173627896d522365861c1972e5af78f777ff5b65205e8714ed5eae5256",
+      "name": "prisma-client-17fcd52fc20ff2318bb1f9eecc9229f566c62e3ed90a4bee91746129e27b5aab",
       "version": "7.7.0",
       "dependencies": {
         "@prisma/client-runtime-utils": "7.7.0",
@@ -1245,7 +1245,7 @@
 
     "prisma": ["prisma@7.7.0", "", { "dependencies": { "@prisma/config": "7.7.0", "@prisma/dev": "0.24.3", "@prisma/engines": "7.7.0", "@prisma/studio-core": "0.27.3", "mysql2": "3.15.3", "postgres": "3.4.7" }, "peerDependencies": { "better-sqlite3": ">=9.0.0", "typescript": ">=5.4.0" }, "optionalPeers": ["better-sqlite3", "typescript"], "bin": { "prisma": "build/index.js" } }, "sha512-HlgwRBt1uEFB9LStHL4HLYDvoi4BNu1rYA0hPG0zCAEyK9SaZBqp7E5Rjpc3Qh8Lex/ye/svoHZ0OWoFNhWxuQ=="],
 
-    "prisma-client-f43c3a173627896d522365861c1972e5af78f777ff5b65205e8714ed5eae5256": ["prisma-client-f43c3a173627896d522365861c1972e5af78f777ff5b65205e8714ed5eae5256@workspace:src/infrastructure/database/src/prisma-client"],
+    "prisma-client-17fcd52fc20ff2318bb1f9eecc9229f566c62e3ed90a4bee91746129e27b5aab": ["prisma-client-17fcd52fc20ff2318bb1f9eecc9229f566c62e3ed90a4bee91746129e27b5aab@workspace:src/infrastructure/database/src/prisma-client"],
 
     "proper-lockfile": ["proper-lockfile@4.1.2", "", { "dependencies": { "graceful-fs": "^4.2.4", "retry": "^0.12.0", "signal-exit": "^3.0.2" } }, "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA=="],
 
