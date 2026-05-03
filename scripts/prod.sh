@@ -2,7 +2,7 @@
 
 project_dir=$(cd $(dirname $0); cd ../; pwd)
 
-$project_dir/scripts/install.sh
+$project_dir/scripts/setup.sh
 
 cd $project_dir
 
