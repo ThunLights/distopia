@@ -9,9 +9,9 @@ services:
     networks:
       - distopia-network
     environment:
-      POSTGRES_USER: "user"
-      POSTGRES_PASSWORD: "0000"
-      POSTGRES_DB: "test"
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PW:-0000}
+      POSTGRES_DB: ${DB_NAME:-distopia}
 
   app:
     container_name: distopia-app
