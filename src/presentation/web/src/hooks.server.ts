@@ -33,6 +33,7 @@ async function start() {
       PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
       PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
     );
+    await core.record.update();
     await updatePanels();
   });
 }

@@ -5,6 +5,7 @@ import { Guild } from "./Guild";
 import { Memory } from "./Memory";
 import { Panel } from "./Panel";
 import { Ranking } from "./Ranking";
+import { Record } from "./Record";
 import { Voice } from "./Voice";
 
 export class AppCore extends Base {
@@ -14,6 +15,7 @@ export class AppCore extends Base {
   public readonly memory = new Memory(this.state);
   public readonly panel = new Panel(this.state);
   public readonly ranking = new Ranking(this.state);
+  public readonly record = new Record(this.state);
   public readonly voice = new Voice(this.state);
 
   private async updateHomeGuildSpecialDirectorsRole(
