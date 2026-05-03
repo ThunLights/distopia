@@ -58,6 +58,44 @@ export class GuildRecordOneDayTable extends Base {
     });
   }
 
+  public async upsertVcMembersAll(inputs: { guildId: string; vcMember: string }[], date: Date) {
+    const query: GuildRecordOneDayUpsertInput[] = [];
+    const records = new Map(
+      (await this.prisma.guildRecordOneDay.findMany({ where: { date } })).map((value) => [
+        value.guildId,
+        value,
+      ]),
+    );
+
+    for (const input of inputs) {
+      const record = records.get(input.guildId);
+      const vcMembers = record
+        ? [...new Set(record.vcMembers).add(input.vcMember)]
+        : [input.vcMember];
+      if (!(record && record.vcMembers.length === vcMembers.length)) {
+        query.push({
+          guildId: input.guildId,
+          date,
+          vcMembers,
+        });
+      }
+    }
+
+    return await this.prisma.$transaction(
+      query.map(({ guildId, date, vcMembers }) =>
+        this.prisma.guildRecordOneDay.upsert({
+          where: { guildId_date: { guildId, date } },
+          update: {
+            vcMembers: {
+              set: vcMembers,
+            },
+          },
+          create: { guildId, date, vcMembers },
+        }),
+      ),
+    );
+  }
+
   public async upsertNewMembers(guildId: string, date: Date, newMember: string) {
     const data = await this.prisma.guildRecordOneDay.findUnique({
       where: { guildId_date: { guildId, date } },

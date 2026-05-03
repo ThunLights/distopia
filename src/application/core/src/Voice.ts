@@ -5,25 +5,32 @@ import { formatYMD } from "./utils/date";
 
 export class Voice extends Base {
   public async update() {
-    const upsertVcMembersQuery: string[] = [];
+    const upsertVcMemberUpperTwoQuery: string[] = [];
+    const upsertVcMembersQuery: {
+      guildId: string;
+      vcMember: string;
+    }[] = [];
     const voiceChannels = await this.state.discord.channel.fetchVoiceChannel();
 
     for (const vc of voiceChannels) {
       if (vc.activeMemberCount >= 2) {
-        upsertVcMembersQuery.push(vc.guildId);
+        upsertVcMemberUpperTwoQuery.push(vc.guildId);
       }
       for (const member of vc.members.filter((member) => member.isActive)) {
-        await this.state.database.guildRecordOneDay.upsertVcMembers(
-          vc.guildId,
-          await formatYMD(new Date()),
-          member.id,
-        );
+        upsertVcMembersQuery.push({
+          guildId: vc.guildId,
+          vcMember: member.id,
+        });
       }
 
       this.state.memory.voiceChannelMember.pushMemberCounts(vc.guildId, vc.activeMemberCount);
     }
 
     await this.state.database.guildRecordOneDay.upsertVcMemberUpperTwoAll(
+      upsertVcMemberUpperTwoQuery,
+      await formatYMD(new Date()),
+    );
+    await this.state.database.guildRecordOneDay.upsertVcMembersAll(
       upsertVcMembersQuery,
       await formatYMD(new Date()),
     );
