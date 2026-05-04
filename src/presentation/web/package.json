@@ -60,6 +60,7 @@
     "discord.js": "catalog:",
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
+    "jsonwebtoken": "9.0.3",
     "presentation-bot": "workspace:*",
     "repo-memory": "workspace:*"
   }
