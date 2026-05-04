@@ -16,7 +16,9 @@
 <main>
   <div class="contents">
     <p class="contents-title">{page.status}</p>
-    <p>{page.error?.message}</p>
+    {#if page.error?.message}
+      <p>{page.error.message}</p>
+    {/if}
   </div>
 </main>
 <Footer fixed={true}></Footer>
