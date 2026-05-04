@@ -1,10 +1,17 @@
 <script lang="ts">
-  const { children } = $props();
+  import type { Snippet } from "svelte";
+
+  type Props = {
+    children?: Snippet;
+  };
+  const { children }: Props = $props();
 </script>
 
 <div class="content">
   <div class="main">
-    {@render children()}
+    {#if children}
+      {@render children()}
+    {/if}
   </div>
 </div>
 

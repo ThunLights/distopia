@@ -1,3 +1,5 @@
+@import url("./title-h1.css");
+
 p,
 h1,
 h2,
@@ -23,25 +25,6 @@ h1 {
 h2,
 h3 {
   margin: 15px 0 5px 0;
-}
-
-h1 {
-  position: relative;
-  margin-bottom: 25px;
-  padding: 1rem 0;
-  border-bottom: 5px solid;
-  color: #696969;
-  font-size: 26px;
-  font-weight: bold;
-}
-
-h1:before {
-  position: absolute;
-  bottom: -0.6rem;
-  left: 0rem;
-  right: 0rem;
-  border-bottom: 1px solid;
-  content: "";
 }
 
 p {

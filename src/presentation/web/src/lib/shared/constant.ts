@@ -3,13 +3,23 @@ import tiktokIcon from "$lib/assets/service/tiktok.webp";
 import twitterIcon from "$lib/assets/service/twitter.webp";
 import robotIcon from "$lib/assets/staff/robot.webp";
 import sumireIcon from "$lib/assets/staff/sumire.webp";
-import { staffs as baseStaff } from "app-core/constant";
+import { staffsKeyValue as baseStaff } from "app-core/constant";
 
 export * from "app-core/constant";
 
+export type Staff = {
+  name: string;
+  description: string;
+  icon: string;
+  link: {
+    icon: string;
+    url: string;
+  }[];
+};
+
 export const staffs = [
   {
-    ...baseStaff[0],
+    ...baseStaff.robot,
     icon: robotIcon,
     link: [
       {
@@ -23,7 +33,7 @@ export const staffs = [
     ],
   },
   {
-    ...baseStaff[1],
+    ...baseStaff.sumire,
     icon: sumireIcon,
     link: [
       {
@@ -36,4 +46,4 @@ export const staffs = [
       },
     ],
   },
-];
+] satisfies Staff[];
