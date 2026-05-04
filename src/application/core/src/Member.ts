@@ -30,9 +30,9 @@ export class Member extends Base {
         date,
         newMembers: Array.from(new Set([...(record?.vcMembers ?? []), ...value.memberIds])),
       });
-
-      this.state.memory.guildMemberAdd.delete(guildId);
     }
+
+    this.state.memory.guildMemberAdd.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
   }

@@ -59,9 +59,9 @@ export class Message extends Base {
         date,
         newMessages: (record?.newMessages ?? 0) + value.messageLens.length,
       });
-
-      this.state.memory.messageCreate.delete(guildId);
     }
+
+    this.state.memory.messageCreate.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
   }
