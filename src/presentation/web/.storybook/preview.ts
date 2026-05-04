@@ -2,6 +2,11 @@ import type { Preview } from "@storybook/sveltekit";
 
 const preview: Preview = {
   parameters: {
+    backgrounds: {
+      options: {
+        gray: { name: "Dark", value: "#313338" },
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,

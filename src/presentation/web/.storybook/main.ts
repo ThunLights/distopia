@@ -1,6 +1,7 @@
 import type { StorybookConfig } from "@storybook/sveltekit";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import { defineConfig } from "vite";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -19,5 +20,18 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-docs"),
   ],
   framework: getAbsolutePath("@storybook/sveltekit"),
+  viteFinal: async (config) => {
+    return defineConfig({
+      ...config,
+      server: {
+        ...config.server,
+        watch: {
+          usePolling: true,
+          interval: 1500,
+          binaryInterval: 5000,
+        },
+      },
+    });
+  },
 };
 export default config;
