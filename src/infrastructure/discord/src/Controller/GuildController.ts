@@ -28,4 +28,8 @@ export class GuildController extends Base {
   public async fetchBoostCount(guildId: string) {
     return this.client.guilds.cache.get(guildId)?.premiumSubscriptionCount;
   }
+
+  public async isJoined(guildId: string) {
+    return this.client.guilds.cache.get(guildId) !== undefined;
+  }
 }

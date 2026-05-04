@@ -10,6 +10,22 @@ import type { Value } from "repo-memory/GuildEdit";
 import { Base } from "./Base";
 
 export class Guild extends Base {
+  public async removeUnJoinedGuildData() {
+    for (const { guildId } of await this.state.database.guild.findAll()) {
+      if (!(await this.state.discord.guild.isJoined(guildId))) {
+        const limit = this.state.memory.unJoinedGuild.get(guildId);
+        if (limit) {
+          if (Date.now() > limit.getTime()) {
+            await this.state.database.guild.delete(guildId);
+            this.state.memory.unJoinedGuild.delete(guildId);
+          }
+        } else {
+          this.state.memory.unJoinedGuild.set(guildId, new Date(Date.now() + 8 * 60 * 60 * 1000));
+        }
+      }
+    }
+  }
+
   public async getDraft(guildId: string) {
     const dbData = await this.state.database.guild.find(guildId);
     const memoryData = await useAsync(this.state.memory.guildEdit.get)(guildId);
