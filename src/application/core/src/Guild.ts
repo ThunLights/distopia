@@ -1,7 +1,6 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
-import { levelUp, useAsync } from "domain-service";
+import { useAsync } from "domain-service";
 import type {
-  GuildRecordUpsertInput,
   GuildReviewUpsertInput,
   GuildSettingUpsertInput,
   GuildUpsertInput,
@@ -9,7 +8,6 @@ import type {
 import type { Value } from "repo-memory/GuildEdit";
 
 import { Base } from "./Base";
-import { formatYMD } from "./utils/date";
 
 export class Guild extends Base {
   public async getDraft(guildId: string) {
@@ -80,37 +78,6 @@ export class Guild extends Base {
 
   public async saveSetting(input: GuildSettingUpsertInput) {
     return await this.state.database.guildSetting.upsert(input);
-  }
-
-  public async saveRecord(input: GuildRecordUpsertInput) {
-    return await this.state.database.guildRecord.upsert(input);
-  }
-
-  public async levelUp(guildId: string, plusPoint: number) {
-    const data = await this.state.database.guildRecord.find(guildId);
-    const { level, point } = await levelUp(
-      data?.level ?? 0n,
-      data?.point ?? 0n,
-      BigInt(Math.ceil(Math.sqrt(plusPoint))),
-    );
-
-    return await this.state.database.guildRecord.upsert({ guildId, level, point });
-  }
-
-  public async addRecordNewMembers(guildId: string, newMember: string) {
-    return await this.state.database.guildRecordOneDay.upsertNewMembers(
-      guildId,
-      await formatYMD(new Date()),
-      newMember,
-    );
-  }
-
-  public async increaseNewMessage(guildId: string, num: number = 1) {
-    return await this.state.database.guildRecordOneDay.upsertNewMessages(
-      guildId,
-      await formatYMD(new Date()),
-      num,
-    );
   }
 
   public async saveReview(input: GuildReviewUpsertInput) {
