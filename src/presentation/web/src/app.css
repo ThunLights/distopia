@@ -13,3 +13,7 @@ body {
 pre {
   white-space: pre-wrap;
 }
+
+p {
+  color: white;
+}
