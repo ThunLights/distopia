@@ -1,7 +1,7 @@
 <script lang="ts">
   import Footer from "$lib/components/Footer.svelte";
+  import Terms from "$lib/components/Main/Terms.svelte";
   import Meta from "$lib/components/Meta.svelte";
-  import Terms from "$lib/components/Terms.svelte";
 </script>
 
 <Meta

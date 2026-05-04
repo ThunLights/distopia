@@ -1,7 +1,7 @@
 <script lang="ts">
   import Footer from "$lib/components/Footer.svelte";
+  import Privacy from "$lib/components/Main/Privacy.svelte";
   import Meta from "$lib/components/Meta.svelte";
-  import Privacy from "$lib/components/Privacy.svelte";
 </script>
 
 <Meta
