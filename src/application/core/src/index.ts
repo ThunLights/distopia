@@ -2,6 +2,7 @@ import { ActiveRate } from "./ActiveRate";
 import { Base } from "./Base";
 import { Friend } from "./Friend";
 import { Guild } from "./Guild";
+import { Member } from "./Member";
 import { Memory } from "./Memory";
 import { Message } from "./Message";
 import { Panel } from "./Panel";
@@ -13,6 +14,7 @@ export class AppCore extends Base {
   public readonly activeRate = new ActiveRate(this.state);
   public readonly guild = new Guild(this.state);
   public readonly friend = new Friend(this.state);
+  public readonly member = new Member(this.state);
   public readonly memory = new Memory(this.state);
   public readonly message = new Message(this.state);
   public readonly panel = new Panel(this.state);

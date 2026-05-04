@@ -24,6 +24,7 @@ async function start() {
 
   schedule.add("*/5 * * * *", async () => {
     await core.message.syncDB();
+    await core.member.syncDB();
   });
 
   schedule.add("*/20 * * * *", async () => {
