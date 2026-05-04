@@ -12,7 +12,7 @@
 
 ## 第3条 登録サーバーの削除
 
-登録サーバー等の削除依頼に関しては、Distopiaの[公式Discord](https://discord.gg/QWUxsxWyYv)にて応じるものとします。
+登録サーバー等の削除依頼に関しては、Distopiaの[公式Discord](DISCORD_INVITE_LINK)にて応じるものとします。
 
 ## 第4条 プライバシーポリシーの変更
 

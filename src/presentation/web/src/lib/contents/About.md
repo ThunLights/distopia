@@ -20,7 +20,7 @@ Discordのサーバーのための掲示板です。
 
 ## 掲示サーバーの削除依頼
 
-削除依頼は[公式Discordサーバー](https://discord.gg/QWUxsxWyYv)の問い合わせにて受け付けています。
+削除依頼は[公式Discordサーバー](DISCORD_INVITE_LINK)の問い合わせにて受け付けています。
 
 上記以外の場所に削除依頼をしないようにお願いします。
 
@@ -39,6 +39,6 @@ Discordのサーバーのための掲示板です。
 
 ソースコードに関する修正案はGitHubにてお願いいたします。
 
-それ以外の問い合わせは[公式Discordサーバー](https://discord.gg/QWUxsxWyYv)にて可能です。
+それ以外の問い合わせは[公式Discordサーバー](DISCORD_INVITE_LINK)にて可能です。
 
 上記以外の連絡先への問い合わせはやめてください。
