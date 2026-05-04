@@ -1,6 +1,7 @@
 <script lang="ts">
   import "$lib/assets/a-tag.css";
   import "$lib/assets/md.css";
+  import Block from "$lib/components/Block.svelte";
   import Footer from "$lib/components/Footer.svelte";
   import About from "$lib/components/Main/About.svelte";
   import Meta from "$lib/components/Meta.svelte";
@@ -15,15 +16,8 @@
 />
 
 <main>
-  <div class="contents">
+  <Block>
     <About />
-  </div>
+  </Block>
 </main>
 <Footer />
-
-<style>
-  .contents {
-    margin: 20px auto;
-    width: 90%;
-  }
-</style>

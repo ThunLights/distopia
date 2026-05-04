@@ -16,10 +16,13 @@ li::marker {
   color: rgb(207, 207, 207);
 }
 
-h1,
+h1 {
+  margin: 3px 5px 5px;
+}
+
 h2,
 h3 {
-  margin: 20px 0 5px 0;
+  margin: 15px 0 5px 0;
 }
 
 h1 {
