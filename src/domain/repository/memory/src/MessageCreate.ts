@@ -8,7 +8,7 @@ export type Value = {
 export class MessageCreate extends MapWithGC<string, Value> {
   public override gc(): void {
     for (const [key, value] of this.entries()) {
-      if (Date.now() - 10 * 60 * 1000 > value.updatedAt.getTime()) {
+      if (Date.now() - 15 * 60 * 1000 > value.updatedAt.getTime()) {
         this.delete(key);
       }
     }
