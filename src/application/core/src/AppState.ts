@@ -3,6 +3,7 @@ import type { Controller } from "infra-discord";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import type { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
+import type { MessageCreate } from "repo-memory/MessageCreate";
 import type { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
 
 export type AppState = {
@@ -16,6 +17,7 @@ export type AppState = {
       bump: GuildBumpLateLimit;
     };
     guildEdit: GuildEdit;
+    messageCreate: MessageCreate;
     voiceChannelMember: VoiceChannelMember;
   };
   discord: Controller;
