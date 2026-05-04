@@ -4,6 +4,7 @@ export class Memory extends Base {
   public async gc() {
     const mems = [
       this.state.memory.guildEdit,
+      this.state.memory.guildMemberAdd,
       this.state.memory.messageCreate,
       this.state.memory.voiceChannelMember,
       this.state.memory.latelimit.bump,
