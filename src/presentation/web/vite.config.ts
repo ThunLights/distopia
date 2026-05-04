@@ -12,6 +12,23 @@ const dirname =
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [sveltekit(), enhancedImages()],
+  server: {
+    watch: {
+      ignored: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/.git/**",
+        "**/vendor/**",
+        "**/.turbo/**",
+        "**/build/**",
+        "**/storybook-static/**",
+        "**/test-results/**",
+      ],
+      usePolling: true,
+      interval: 1500,
+      binaryInterval: 5000,
+    },
+  },
   test: {
     expect: {
       requireAssertions: true,
