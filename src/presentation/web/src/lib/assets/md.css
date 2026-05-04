@@ -8,6 +8,14 @@ h6 {
   color: rgb(207, 207, 207) !important;
 }
 
+ul {
+  padding-left: 30px;
+}
+
+li::marker {
+  color: rgb(207, 207, 207);
+}
+
 h1,
 h2,
 h3 {
@@ -31,4 +39,8 @@ h1:before {
   right: 0rem;
   border-bottom: 1px solid;
   content: "";
+}
+
+p {
+  margin-top: 3px;
 }
