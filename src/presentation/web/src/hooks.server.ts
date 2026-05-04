@@ -22,6 +22,10 @@ async function start() {
   await client.login(BOT_TOKEN);
   console.log("BOT logined.");
 
+  schedule.add("*/5 * * * *", async () => {
+    await core.message.syncDB();
+  });
+
   schedule.add("*/20 * * * *", async () => {
     await core.memory.gc();
     await core.voice.update();

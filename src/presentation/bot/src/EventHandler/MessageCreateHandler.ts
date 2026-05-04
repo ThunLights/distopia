@@ -8,19 +8,8 @@ export class MessageCreateHandler extends BaseHandler<
   public override async handle(
     message: OmitPartialGroupDMChannel<Message<boolean>>,
   ): Promise<void> {
-    const { messageCreate } = this.core.state.memory.latelimit;
-    const limit = message.member?.id && messageCreate.get(message.member.id);
-
-    if (message.guildId && limit && Date.now() > limit.getTime()) {
-      const minute = 60 * 1000;
-
-      messageCreate.set(message.member.id, new Date(Date.now() + minute));
-
-      await this.core.guild.increaseNewMessage(message.guildId);
-
-      if (message.content.length) {
-        await this.core.guild.levelUp(message.guildId, message.content.length);
-      }
+    if (message.guildId && message.member?.id) {
+      await this.core.message.increase(message.guildId, message.member.id, message.content);
     }
   }
 }
