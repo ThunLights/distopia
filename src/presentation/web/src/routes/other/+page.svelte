@@ -15,11 +15,11 @@
   <Title content="Others" />
   <div>
     <SubTitle content="ガイドライン" />
-    <a href={resolve("/guidelines")}>https://distopia.top/guidelines</a>
+    <a href={resolve("/guideline")}>https://distopia.top/guideline</a>
   </div>
   <div>
     <SubTitle content="支援団体" />
-    <a href={resolve("/supporters")}>https://distopia.top/supporters</a>
+    <a href={resolve("/supporter")}>https://distopia.top/supporter</a>
   </div>
   <div>
     <SubTitle content="Distopiaについて" />
