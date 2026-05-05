@@ -5,5 +5,13 @@
   let { children } = $props();
 </script>
 
-{@render children()}
+<main>
+  {@render children()}
+</main>
 <Footer />
+
+<style>
+  main {
+    min-height: 90vh;
+  }
+</style>

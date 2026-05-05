@@ -12,8 +12,6 @@
   ].join("")}
 />
 
-<main>
-  <Block>
-    <Privacy />
-  </Block>
-</main>
+<Block>
+  <Privacy />
+</Block>

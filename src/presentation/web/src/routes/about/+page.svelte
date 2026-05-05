@@ -14,8 +14,6 @@
   ].join("")}
 />
 
-<main>
-  <Block>
-    <About />
-  </Block>
-</main>
+<Block>
+  <About />
+</Block>

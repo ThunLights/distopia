@@ -9,8 +9,6 @@
   description={["Distopiaの利用規約です。", "サービス利用時に一度ご確認ください。"].join("")}
 />
 
-<main>
-  <Block>
-    <Terms />
-  </Block>
-</main>
+<Block>
+  <Terms />
+</Block>

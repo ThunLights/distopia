@@ -15,19 +15,17 @@
   ].join("")}
 />
 
-<main>
-  <Block>
-    <div class="staffs">
-      <h1 class="title">現在のスタッフ一覧</h1>
-      {#each staffs as staff (staff)}
-        <Profile {staff} />
-      {/each}
-    </div>
-  </Block>
-  <Block>
-    <Recruitment />
-  </Block>
-</main>
+<Block>
+  <div class="staffs">
+    <h1 class="title">現在のスタッフ一覧</h1>
+    {#each staffs as staff (staff)}
+      <Profile {staff} />
+    {/each}
+  </div>
+</Block>
+<Block>
+  <Recruitment />
+</Block>
 
 <style>
   .staffs {
