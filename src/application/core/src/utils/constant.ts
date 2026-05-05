@@ -12,27 +12,35 @@ export type Staff = {
   }[];
 };
 
-export const supporters = [
-  {
+export const supportersKeyValue = {
+  bread: {
     name: "クリームパンと愉快な仲間たち",
     invite: "https://discord.gg/De8T2NS74X",
   },
-  {
+  mikan: {
     name: "Mikan Soba Club",
     invite: "https://discord.gg/HaFhCWS2Kk",
   },
-  {
+  cappuccino: {
     name: "Cappuccino",
     invite: "https://discord.gg/cappuccino",
   },
-  {
+  hima: {
     name: "暇人鯖",
     invite: "https://discord.gg/hima",
   },
-  {
+  lemon: {
     name: "大檸檬帝国",
     invite: "https://discord.gg/BgZddsVPMH",
   },
+};
+
+export const supporters = [
+  supportersKeyValue.bread,
+  supportersKeyValue.mikan,
+  supportersKeyValue.cappuccino,
+  supportersKeyValue.hima,
+  supportersKeyValue.lemon,
 ] as const satisfies Array<SupporterServer>;
 
 export const staffsKeyValue = {
