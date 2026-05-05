@@ -4,6 +4,7 @@ import { sveltekit } from "@sveltejs/kit/vite";
 import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import devtoolsJson from "vite-plugin-devtools-json";
 import { defineConfig } from "vitest/config";
 
 const dirname =
@@ -11,7 +12,7 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [sveltekit(), enhancedImages()],
+  plugins: [sveltekit(), enhancedImages(), devtoolsJson()],
   server: {
     watch: {
       ignored: [
