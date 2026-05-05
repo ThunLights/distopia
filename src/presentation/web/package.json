@@ -56,6 +56,8 @@
     "vitest-browser-svelte": "2.1.0"
   },
   "dependencies": {
+    "@fontsource/inter": "5.2.8",
+    "@fontsource/open-sans": "5.2.7",
     "app-core": "workspace:*",
     "app-schedule": "workspace:*",
     "discord.js": "catalog:",
@@ -64,6 +66,7 @@
     "jsonwebtoken": "9.0.3",
     "presentation-bot": "workspace:*",
     "repo-memory": "workspace:*",
-    "svelte-exmarkdown": "5.0.2"
+    "svelte-exmarkdown": "5.0.2",
+    "zod": "catalog:"
   }
 }

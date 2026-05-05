@@ -24,7 +24,7 @@
     "@prisma/client": "7.7.0",
     "@prisma/client-runtime-utils": "7.7.0",
     "prisma": "7.7.0",
-    "zod": "4.3.6"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",
