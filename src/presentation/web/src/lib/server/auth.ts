@@ -23,7 +23,7 @@ export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
         token: auth,
         id: user.id,
         username: user.name,
-        avatar: user.avatarUrl,
+        avatarUrl: user.avatarUrl,
       }
     : null;
 }

@@ -1,8 +1,8 @@
 <script lang="ts">
   import Footer from "$lib/components/Footer.svelte";
   import Header from "$lib/components/Header.svelte";
-  import { onMount } from "svelte";
   import "../app.css";
+  import { onMount } from "svelte";
 
   let { children, data } = $props();
 

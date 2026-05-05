@@ -82,14 +82,9 @@
           </a>
         </div>
       {:else}
-        <a href={resolve("/account")}>
+        <a href={resolve("/user")}>
           <div class="discord-profile">
-            <img
-              src={userData.avatar
-                ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp`
-                : "/discord.webp"}
-              alt=""
-            />
+            <img src={userData.avatarUrl ?? "/discord.webp"} alt="" />
             <p class="discord-logined-content">{userData.username}</p>
           </div>
         </a>
