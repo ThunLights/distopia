@@ -1,4 +1,4 @@
-import { JWTClient } from "./jwt";
+import { JWTClient } from "./JWTClient";
 import { randomUUID } from "crypto";
 import { describe, expect, test } from "vitest";
 
