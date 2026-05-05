@@ -7,7 +7,7 @@
 </script>
 
 <Meta
-  title="Distopiaについて / Distopia.top"
+  title="Distopiaについて"
   description={[
     "Distopiaの大まかな解説です。",
     "細かい技術等の質問は公式Discordサーバーにてお願いします。",

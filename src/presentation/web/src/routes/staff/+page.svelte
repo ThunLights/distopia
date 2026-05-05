@@ -5,12 +5,10 @@
   import Profile from "$lib/components/Staff/Profile.svelte";
   import Recruitment from "$lib/components/Staff/Recruitment.svelte";
   import { staffs } from "$lib/shared/constant";
-
-  const title = "スタッフ情報";
 </script>
 
 <Meta
-  {title}
+  title="スタッフ情報"
   description={[
     "Distopiaのスタッフ一覧です。",
     "このページに乗っている人以外はスタッフではありません。",
