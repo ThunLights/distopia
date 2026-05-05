@@ -1,5 +1,6 @@
 :root {
   --body-background-color: #313338;
+  --a-tag-color: #6969d5;
 }
 
 * {
@@ -22,4 +23,8 @@ h4,
 h5,
 h6 {
   color: rgb(207, 207, 207) !important;
+}
+
+a {
+  color: var(--a-tag-color);
 }

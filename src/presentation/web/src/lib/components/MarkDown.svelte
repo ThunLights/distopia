@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "$lib/assets/a-tag.css";
   import "$lib/assets/md.css";
   import { DISCORD_INVITE_LINK } from "app-core/constant";
   import MarkDown from "svelte-exmarkdown";

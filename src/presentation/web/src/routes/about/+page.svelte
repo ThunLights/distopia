@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "$lib/assets/a-tag.css";
   import "$lib/assets/md.css";
   import Block from "$lib/components/Block.svelte";
   import About from "$lib/components/Main/About.svelte";

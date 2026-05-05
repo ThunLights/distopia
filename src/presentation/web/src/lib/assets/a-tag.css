@@ -1,7 +1,0 @@
-:root {
-  --a-tag-color: #6969d5;
-}
-
-a {
-  color: var(--a-tag-color);
-}

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import "$lib/assets/a-tag.css";
   import Block from "$lib/components/Block.svelte";
   import Meta from "$lib/components/Meta.svelte";
   import SubTitle from "$lib/components/SubTitle.svelte";
