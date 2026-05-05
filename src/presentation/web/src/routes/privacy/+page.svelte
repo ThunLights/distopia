@@ -1,6 +1,5 @@
 <script lang="ts">
   import Block from "$lib/components/Block.svelte";
-  import Footer from "$lib/components/Footer.svelte";
   import Privacy from "$lib/components/Main/Privacy.svelte";
   import Meta from "$lib/components/Meta.svelte";
 </script>
@@ -18,4 +17,3 @@
     <Privacy />
   </Block>
 </main>
-<Footer />

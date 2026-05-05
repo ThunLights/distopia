@@ -2,7 +2,6 @@
   import "$lib/assets/a-tag.css";
   import "$lib/assets/md.css";
   import Block from "$lib/components/Block.svelte";
-  import Footer from "$lib/components/Footer.svelte";
   import About from "$lib/components/Main/About.svelte";
   import Meta from "$lib/components/Meta.svelte";
 </script>
@@ -20,4 +19,3 @@
     <About />
   </Block>
 </main>
-<Footer />

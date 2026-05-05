@@ -1,7 +1,6 @@
 <script lang="ts">
   import "$lib/assets/title-h1.css";
   import Block from "$lib/components/Block.svelte";
-  import Footer from "$lib/components/Footer.svelte";
   import Meta from "$lib/components/Meta.svelte";
   import Profile from "$lib/components/Staff/Profile.svelte";
   import Recruitment from "$lib/components/Staff/Recruitment.svelte";
@@ -31,7 +30,6 @@
     <Recruitment />
   </Block>
 </main>
-<Footer />
 
 <style>
   .staffs {
