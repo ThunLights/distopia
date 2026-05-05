@@ -1,9 +1,9 @@
 <script lang="ts">
-  import "$lib/assets/title-h1.css";
   import Block from "$lib/components/Block.svelte";
   import Meta from "$lib/components/Meta.svelte";
   import Profile from "$lib/components/Staff/Profile.svelte";
   import Recruitment from "$lib/components/Staff/Recruitment.svelte";
+  import Title from "$lib/components/Title.svelte";
   import { staffs } from "$lib/shared/constant";
 </script>
 
@@ -17,7 +17,7 @@
 
 <Block>
   <div class="staffs">
-    <h1 class="title">現在のスタッフ一覧</h1>
+    <Title content="現在のスタッフ一覧" />
     {#each staffs as staff (staff)}
       <Profile {staff} />
     {/each}

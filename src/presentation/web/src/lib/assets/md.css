@@ -1,14 +1,5 @@
 @import url("./title-h1.css");
-
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: rgb(207, 207, 207) !important;
-}
+@import url("./a-tag.css");
 
 ul {
   padding-left: 30px;
