@@ -4,8 +4,8 @@ import { describe, expect, suite, test } from "vitest";
 
 describe("jwt", async () => {
   const jwt = new JWTClient();
-  jwt.setKey(1, { key: randomBytes(32), alg: "HS256" });
-  jwt.setKey(2, { key: randomBytes(32), alg: "HS256" });
+  jwt.setKey(1, { key: randomBytes(32), alg: "HS256", createdAt: new Date() });
+  jwt.setKey(2, { key: randomBytes(32), alg: "HS256", createdAt: new Date() });
 
   test("jwt sign", async () => {
     const token = await jwt.sign({ userId: "123" });

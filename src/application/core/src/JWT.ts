@@ -10,4 +10,8 @@ export class JWT extends Base {
   public async createNewKey() {
     return await this.state.database.jwtKey.createNewKey();
   }
+
+  public async delete(id: number) {
+    return await this.state.database.jwtKey.delete(id);
+  }
 }

@@ -24,4 +24,8 @@ export class JWTKeyTable extends Base {
       },
     });
   }
+
+  public async delete(id: number) {
+    return await this.prisma.jWTKey.delete({ where: { id } });
+  }
 }

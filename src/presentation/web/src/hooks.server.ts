@@ -7,6 +7,7 @@ import {
 } from "$env/static/public";
 import { core } from "$lib/server/core";
 import { client, updatePanels } from "$lib/server/discord";
+import { importJwtKeys, updateJWTKeys } from "$lib/server/jwt";
 import { schedule } from "$lib/server/schedule";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 
@@ -19,10 +20,14 @@ process.on("unhandledRejection", async (reason) => {
 });
 
 async function start() {
+  await importJwtKeys();
+  console.log("JWT keys is imported.");
+
   await client.login(BOT_TOKEN);
   console.log("BOT logined.");
 
   schedule.add("*/5 * * * *", async () => {
+    await updateJWTKeys();
     await core.message.syncDB();
     await core.member.syncDB();
   });

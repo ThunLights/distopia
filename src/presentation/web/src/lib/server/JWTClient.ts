@@ -5,6 +5,7 @@ import { z } from "zod";
 export type Value = {
   alg: JWTAlg;
   key: Buffer;
+  createdAt: Date;
 };
 
 export const JWTPayloadSchema = z.object({
