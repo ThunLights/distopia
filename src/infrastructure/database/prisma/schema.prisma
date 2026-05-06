@@ -107,3 +107,14 @@ enum PanelType {
   LevelRanking
   UserBumpRanking
 }
+
+model JWTKey {
+  id        Int      @id @default(autoincrement())
+  key       Bytes    @unique
+  alg       JWTAlg
+  createdAt DateTime @default(now())
+}
+
+enum JWTAlg {
+  HS256
+}

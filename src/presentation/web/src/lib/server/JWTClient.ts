@@ -1,5 +1,11 @@
+import type { JWTAlg } from "infra-database/types";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+
+export type Value = {
+  alg: JWTAlg;
+  key: Buffer;
+};
 
 export const JWTPayloadSchema = z.object({
   userId: z.string(),
@@ -8,10 +14,10 @@ export const JWTPayloadSchema = z.object({
 export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
 
 export class JWTClient {
-  public readonly keys = new Map<number, string>();
+  public readonly keys = new Map<number, Value>();
 
-  public async setKey(id: number, key: string) {
-    return this.keys.set(id, key);
+  public async setKey(id: number, value: Value) {
+    return this.keys.set(id, value);
   }
 
   public async deleteKey(id: number) {
@@ -21,7 +27,7 @@ export class JWTClient {
   public async getCurrKey() {
     let curr: {
       id: number;
-      value: string;
+      value: Value;
     } | null = null;
 
     for (const [id, value] of this.keys.entries()) {
@@ -40,8 +46,8 @@ export class JWTClient {
       return null;
     }
 
-    return jwt.sign(payload, currKey.value, {
-      algorithm: "HS256",
+    return jwt.sign(payload, currKey.value.key, {
+      algorithm: currKey.value.alg,
       keyid: currKey.id.toString(),
       expiresIn: "8Weeks",
     });
@@ -56,14 +62,14 @@ export class JWTClient {
         return null;
       }
 
-      const key = this.keys.get(keyId);
+      const value = this.keys.get(keyId);
 
-      if (!key) {
+      if (!value) {
         return null;
       }
 
       const payload = await JWTPayloadSchema.safeParseAsync(
-        jwt.verify(token, key, { algorithms: ["HS256"], complete: true }).payload,
+        jwt.verify(token, value.key, { algorithms: [value.alg], complete: true }).payload,
       );
 
       return payload.success ? payload.data : null;
