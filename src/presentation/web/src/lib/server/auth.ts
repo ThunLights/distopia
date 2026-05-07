@@ -10,17 +10,17 @@ export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
     return null;
   }
 
-  const payload = await jwt.verify(auth);
+  const verified = await jwt.verify(auth);
 
-  if (!payload) {
+  if (!verified) {
     return null;
   }
 
-  const user = await controller.user.find(payload.userId);
+  const user = await controller.user.find(verified.payload.userId);
 
   return user
     ? {
-        token: auth,
+        token: verified.newToken ?? auth,
         id: user.id,
         username: user.name,
         avatarUrl: user.avatarUrl,

@@ -38,9 +38,17 @@ export class JWTClient {
     try {
       const decodedToken = jwt.decode(token, { complete: true });
       const keyId = Number(decodedToken?.header.kid);
+      const unParsedPayload = decodedToken?.payload;
+      let nearExp = false;
 
       if (isNaN(keyId)) {
         return null;
+      }
+      if (typeof unParsedPayload !== "string" && unParsedPayload?.exp) {
+        const exp = unParsedPayload.exp;
+        if (exp > Date.now() - 14 * 24 * 60 * 60 * 1000) {
+          nearExp = true;
+        }
       }
 
       const value = await core.jwt.findJwtKey(keyId);
@@ -57,7 +65,16 @@ export class JWTClient {
       const payload = await JWTPayloadSchema.safeParseAsync(verified.payload);
 
       if (payload.success) {
-        return payload.data;
+        if (nearExp) {
+          const newToken = await this.sign(payload.data);
+          return {
+            payload: payload.data,
+            newToken,
+          };
+        }
+        return {
+          payload: payload.data,
+        };
       }
 
       return null;
