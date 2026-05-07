@@ -69,11 +69,18 @@ export class JWTClient {
         return null;
       }
 
-      const payload = await JWTPayloadSchema.safeParseAsync(
-        jwt.verify(token, value.key, { algorithms: [value.alg], complete: true }).payload,
-      );
+      const verified = jwt.verify(token, value.key, {
+        algorithms: [value.alg],
+        complete: true,
+      });
 
-      return payload.success ? payload.data : null;
+      const payload = await JWTPayloadSchema.safeParseAsync(verified.payload);
+
+      if (payload.success) {
+        return payload.data;
+      }
+
+      return null;
     } catch {
       return null;
     }
