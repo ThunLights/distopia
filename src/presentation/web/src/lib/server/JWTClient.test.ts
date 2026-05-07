@@ -1,11 +1,11 @@
 import { JWTClient } from "./JWTClient";
-import { randomBytes } from "crypto";
+import { core } from "./core";
 import { describe, expect, suite, test } from "vitest";
 
 describe("jwt", async () => {
   const jwt = new JWTClient();
-  jwt.setKey(1, { key: randomBytes(32), alg: "HS256", createdAt: new Date() });
-  jwt.setKey(2, { key: randomBytes(32), alg: "HS256", createdAt: new Date() });
+  await core.jwt.genNewKey();
+  await core.jwt.genNewKey();
 
   test("jwt sign", async () => {
     const token = await jwt.sign({ userId: "123" });

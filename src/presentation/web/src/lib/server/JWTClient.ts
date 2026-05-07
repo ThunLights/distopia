@@ -1,3 +1,4 @@
+import { core } from "./core";
 import type { JWTAlg } from "infra-database/types";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -15,33 +16,12 @@ export const JWTPayloadSchema = z.object({
 export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
 
 export class JWTClient {
-  public readonly keys = new Map<number, Value>();
-
-  public async setKey(id: number, value: Value) {
-    return this.keys.set(id, value);
-  }
-
-  public async deleteKey(id: number) {
-    return this.keys.delete(id);
-  }
-
-  public async getCurrKey() {
-    let curr: {
-      id: number;
-      value: Value;
-    } | null = null;
-
-    for (const [id, value] of this.keys.entries()) {
-      if (!curr || id > curr.id) {
-        curr = { id, value };
-      }
-    }
-
-    return curr;
+  constructor() {
+    core.jwt.importDB();
   }
 
   public async sign(payload: JWTPayload) {
-    const currKey = await this.getCurrKey();
+    const currKey = await core.jwt.getCurrKey();
 
     if (!currKey) {
       return null;
@@ -63,7 +43,7 @@ export class JWTClient {
         return null;
       }
 
-      const value = this.keys.get(keyId);
+      const value = await core.jwt.findJwtKey(keyId);
 
       if (!value) {
         return null;

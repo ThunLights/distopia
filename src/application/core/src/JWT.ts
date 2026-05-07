@@ -1,30 +1,87 @@
-import type { JWTKey } from "infra-database/types";
+import type { Value } from "repo-memory/JWTKey";
 
-import type { AppState } from "./AppState";
 import { Base } from "./Base";
 
 export class JWT extends Base {
-  constructor(state: AppState) {
-    (async () => {
-      for (const { id, jwtVerifyId } of await this.state.database.userWeb.findAll()) {
-        this.state.memory.userJWTVerifyKey.set(id, jwtVerifyId);
+  public async genNewKey() {
+    const newKey = await this.state.database.jwtKey.createNewKey();
+
+    this.state.memory.jwtKey.set(newKey.id, {
+      key: Buffer.from(newKey.key),
+      alg: newKey.alg,
+      createdAt: newKey.createdAt,
+    });
+
+    return newKey;
+  }
+
+  public async updateNewUserVerifyKey(userId: string) {
+    const newKey = await this.state.database.userWeb.updateNewJwtVerifyKey(userId);
+
+    this.state.memory.userJWTVerifyKey.set(newKey.id, newKey.jwtVerifyId);
+
+    return newKey;
+  }
+
+  public async getUserVerifyKey(userId: string) {
+    return this.state.memory.userJWTVerifyKey.get(userId);
+  }
+
+  public async getCurrKey() {
+    let curr: {
+      id: number;
+      value: Value;
+    } | null = null;
+
+    for (const [id, value] of this.state.memory.jwtKey.entries()) {
+      if (!curr || id > curr.id) {
+        curr = { id, value };
       }
-      for (const { id, key } of await this.state.database.jwtKey.findAll()) {
-        this.state.memory.jwtKey.set(id.toString(), Buffer.from(key));
+    }
+
+    return curr;
+  }
+
+  public async findJwtKey(id: number) {
+    return this.state.memory.jwtKey.get(id);
+  }
+
+  public async findJwtKeyAll() {
+    return this.state.memory.jwtKey
+      .entries()
+      .map(([id, { key, alg, createdAt }]) => ({ id, key, alg, createdAt }));
+  }
+
+  public async deleteJwtKey(id: number) {
+    await this.state.database.jwtKey.delete(id);
+    this.state.memory.jwtKey.delete(id);
+  }
+
+  public async importDB() {
+    for (const { id, jwtVerifyId } of await this.state.database.userWeb.findAll()) {
+      this.state.memory.userJWTVerifyKey.set(id, jwtVerifyId);
+    }
+    for (const { id, key, alg, createdAt } of await this.state.database.jwtKey.findAll()) {
+      this.state.memory.jwtKey.set(id, { key: Buffer.from(key), alg, createdAt });
+    }
+    if ((await this.getCurrKey()) === null) {
+      await this.genNewKey();
+    }
+  }
+
+  public async update() {
+    for (const { id, createdAt } of await this.findJwtKeyAll()) {
+      if (Date.now() > createdAt.getTime() + 365 * 24 * 60 * 60 * 1000) {
+        await this.deleteJwtKey(id);
       }
-    })();
-    super(state);
-  }
-
-  public async findAll(): Promise<JWTKey[]> {
-    return await this.state.database.jwtKey.findAll();
-  }
-
-  public async createNewKey() {
-    return await this.state.database.jwtKey.createNewKey();
-  }
-
-  public async delete(id: number) {
-    return await this.state.database.jwtKey.delete(id);
+    }
+    const currKey = await this.getCurrKey();
+    if (currKey) {
+      if (Date.now() > currKey.value.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000) {
+        await this.genNewKey();
+      }
+    } else {
+      await this.genNewKey();
+    }
   }
 }
