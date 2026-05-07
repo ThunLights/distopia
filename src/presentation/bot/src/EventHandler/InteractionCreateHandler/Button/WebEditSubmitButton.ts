@@ -51,7 +51,6 @@ export class WebEditSubmitButton extends ButtonInteractionBase {
       description: guild.description,
       public: pub,
       nsfw,
-      updatedAt: new Date(),
       tags: tag ?? [],
     });
     await this.core.guild.deleteDraft(guild.id);

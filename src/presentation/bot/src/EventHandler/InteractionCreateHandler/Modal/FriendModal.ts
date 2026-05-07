@@ -68,7 +68,6 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
       username: user.name,
       description: options.profile,
       nsfw: options.nsfw,
-      updatedAt: new Date(),
       tags: options.tags,
     });
 

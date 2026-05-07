@@ -35,7 +35,7 @@ model Friend {
   description String
   nsfw        Boolean  @default(false)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   tags        String[] @default([])
 }
 
@@ -47,7 +47,7 @@ model Guild {
   banner       String?
   description  String?
   registeredAt DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   nsfw         Boolean  @default(false)
   public       Boolean  @default(true)
   bumpTime     DateTime @default(now())
