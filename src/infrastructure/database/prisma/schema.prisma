@@ -19,14 +19,16 @@ model User {
   bumpCounter Int?
 }
 
+model UserWeb {
+  id          String @id
+  jwtVerifyId String @default(uuid(4))
+}
+
 model UserDiscord {
-  id           String   @id
-  username     String
+  id           String  @id
   accessToken  String
   refreshToken String
-  time         DateTime
   email        String?
-  avatar       String?
 }
 
 model Friend {
