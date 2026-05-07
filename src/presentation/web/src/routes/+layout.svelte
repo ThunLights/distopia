@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { deleteAuth, setAuth } from "$lib/client/auth";
   import Footer from "$lib/components/Footer.svelte";
   import Header from "$lib/components/Header.svelte";
   import "../app.css";
@@ -6,7 +7,13 @@
 
   let { children, data } = $props();
 
-  onMount(async () => {});
+  onMount(async () => {
+    if (data.user) {
+      await setAuth(data.user.token);
+    } else {
+      await deleteAuth();
+    }
+  });
 </script>
 
 <Header userData={data.user} />
