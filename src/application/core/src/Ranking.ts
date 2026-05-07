@@ -1,9 +1,16 @@
-import type { User } from "domain-model";
-import type { User as DBUser, GuildRecordRanking } from "infra-database/types";
+import type { GuildRecordRanking } from "infra-database/types";
 
 import { Base } from "./Base";
 
-export type UserBumpRanking = (User & DBUser)[];
+export type UserBumpRanking = {
+  readonly id: string;
+  name: string;
+  displayName: string;
+  globalName?: string;
+  avatarUrl?: string;
+  bannerUrl?: string;
+  bumpCounter: number | null;
+}[];
 
 export type FetchOptions = {
   num?: number;
@@ -55,7 +62,16 @@ export class Ranking extends Base {
     for (const user of dbUsers) {
       const discordUserData = await this.state.discord.user.find(user.id);
       if (discordUserData) {
-        users.push({ ...discordUserData, ...user });
+        const { id, name, displayName, globalName, avatarUrl, bannerUrl } = discordUserData;
+        users.push({
+          id,
+          name,
+          displayName,
+          globalName,
+          avatarUrl,
+          bannerUrl,
+          bumpCounter: user.bumpCounter,
+        });
       }
     }
 
