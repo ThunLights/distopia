@@ -1,1 +1,1 @@
-export class JWTKey extends Map<string, string> {}
+export class JWTKey extends Map<string, Buffer> {}
