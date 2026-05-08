@@ -18,7 +18,7 @@ export class JWT extends Base {
   public async updateNewUserVerifyKey(userId: string) {
     const newKey = await this.state.database.userWeb.updateNewJwtVerifyKey(userId);
 
-    this.state.memory.userJWTVerifyKey.set(newKey.id, newKey.jwtVerifykey);
+    this.state.memory.userJWTVerifyKey.set(newKey.id, newKey.jwtVerifyKey);
 
     return newKey;
   }
@@ -58,8 +58,8 @@ export class JWT extends Base {
   }
 
   public async importDB() {
-    for (const { id, jwtVerifykey } of await this.state.database.userWeb.findAll()) {
-      this.state.memory.userJWTVerifyKey.set(id, jwtVerifykey);
+    for (const { id, jwtVerifyKey } of await this.state.database.userWeb.findAll()) {
+      this.state.memory.userJWTVerifyKey.set(id, jwtVerifyKey);
     }
     for (const { id, key, alg, createdAt } of await this.state.database.jwtKey.findAll()) {
       this.state.memory.jwtKey.set(id, { key: Buffer.from(key), alg, createdAt });

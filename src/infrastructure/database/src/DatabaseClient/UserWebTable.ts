@@ -15,7 +15,7 @@ export class UserWebTable extends Base {
   public async updateNewJwtVerifyKey(id: string) {
     return await this.prisma.userWeb.upsert({
       where: { id },
-      update: { jwtVerifyId: randomUUID() },
+      update: { jwtVerifyKey: randomUUID() },
       create: { id },
     });
   }

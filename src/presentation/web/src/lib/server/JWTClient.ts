@@ -21,6 +21,11 @@ export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
 
 export type JWTPayloadWithUserVerifyKey = z.infer<typeof JWTPayloadWithUserVerifyKeySchema>;
 
+export type VerifyResult = {
+  payload: JWTPayload | null;
+  newToken?: string;
+};
+
 export class JWTClient {
   constructor() {
     core.jwt.importDB();
@@ -29,7 +34,7 @@ export class JWTClient {
   public async sign(payload: JWTPayload) {
     const userVerifyKey =
       (await core.jwt.getUserVerifyKey(payload.userId)) ??
-      (await core.jwt.updateNewUserVerifyKey(payload.userId)).jwtVerifykey;
+      (await core.jwt.updateNewUserVerifyKey(payload.userId)).jwtVerifyKey;
     const currKey = await core.jwt.getCurrKey();
 
     if (!currKey) {
@@ -50,7 +55,7 @@ export class JWTClient {
     );
   }
 
-  public async verify(token: string) {
+  public async verify(token: string): Promise<VerifyResult> {
     try {
       const decodedToken = jwt.decode(token, { complete: true });
       const keyId = Number(decodedToken?.header.kid);
@@ -58,7 +63,7 @@ export class JWTClient {
       let nearExp = false;
 
       if (isNaN(keyId)) {
-        return null;
+        return { payload: null };
       }
       if (typeof unParsedPayload !== "string" && unParsedPayload?.exp) {
         const exp = unParsedPayload.exp;
@@ -70,7 +75,7 @@ export class JWTClient {
       const value = await core.jwt.findJwtKey(keyId);
 
       if (!value) {
-        return null;
+        return { payload: null };
       }
 
       const verified = jwt.verify(token, value.key, {
@@ -83,7 +88,7 @@ export class JWTClient {
       if (payload.success) {
         const userVerifyKey = await core.jwt.getUserVerifyKey(payload.data.userId);
         if (payload.data.userVerifyKey !== userVerifyKey) {
-          return null;
+          return { payload: null };
         }
 
         const data = {
@@ -94,17 +99,18 @@ export class JWTClient {
           const newToken = await this.sign(data);
           return {
             payload: data,
-            newToken,
+            newToken: newToken ?? undefined,
           };
         }
         return {
           payload: data,
+          newToken: undefined,
         };
       }
 
-      return null;
+      return { payload: null };
     } catch {
-      return null;
+      return { payload: null };
     }
   }
 }

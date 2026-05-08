@@ -14,7 +14,7 @@ describe("jwt", async () => {
 
     if (token) {
       const verified = await jwt.verify(token);
-      expect(verified).toEqual({ userId: "123" });
+      expect(verified.payload).toEqual({ userId: "123" });
     }
   });
 
@@ -37,7 +37,7 @@ describe("jwt", async () => {
         console.log("generated token:", genedToken);
 
         const verified = await jwt.verify(genedToken);
-        expect(verified).toBe(null);
+        expect(verified.payload).toBe(null);
       }
     });
 
@@ -59,7 +59,7 @@ describe("jwt", async () => {
         console.log("generated token:", genedToken);
 
         const verified = await jwt.verify(genedToken);
-        expect(verified).toBe(null);
+        expect(verified.payload).toBe(null);
       }
     });
 
@@ -81,7 +81,7 @@ describe("jwt", async () => {
         console.log("generated token:", genedToken);
 
         const verified = await jwt.verify(genedToken);
-        expect(verified).toBe(null);
+        expect(verified.payload).toBe(null);
       }
     });
   });

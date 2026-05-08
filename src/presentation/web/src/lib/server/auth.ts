@@ -12,7 +12,7 @@ export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
 
   const verified = await jwt.verify(auth);
 
-  if (!verified) {
+  if (!verified.payload) {
     return null;
   }
 
