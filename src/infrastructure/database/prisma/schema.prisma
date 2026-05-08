@@ -20,8 +20,8 @@ model User {
 }
 
 model UserWeb {
-  id          String @id
-  jwtVerifyId String @default(uuid(4))
+  id           String @id
+  jwtVerifykey String @default(uuid(4))
 }
 
 model UserDiscord {
