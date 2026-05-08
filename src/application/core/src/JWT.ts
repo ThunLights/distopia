@@ -70,18 +70,20 @@ export class JWT extends Base {
   }
 
   public async update() {
-    for (const { id, createdAt } of await this.findJwtKeyAll()) {
-      if (Date.now() > createdAt.getTime() + 365 * 24 * 60 * 60 * 1000) {
-        await this.deleteJwtKey(id);
-      }
-    }
     const currKey = await this.getCurrKey();
+
     if (currKey) {
       if (Date.now() > currKey.value.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000) {
         await this.genNewKey();
       }
     } else {
       await this.genNewKey();
+    }
+
+    for (const { id, createdAt } of await this.findJwtKeyAll()) {
+      if (Date.now() > createdAt.getTime() + 365 * 24 * 60 * 60 * 1000) {
+        await this.deleteJwtKey(id);
+      }
     }
   }
 }
