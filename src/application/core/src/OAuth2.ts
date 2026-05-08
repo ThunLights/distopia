@@ -16,8 +16,48 @@ export class OAuth2 extends Base {
       return null;
     }
 
-    await this.state.database.userDiscord.upsert({ id: user.id, accessToken, refreshToken });
+    const { id, email, username, avatarUrl, bannerUrl } = user;
+
+    await this.state.database.userDiscord.upsert({
+      id: user.id,
+      accessToken,
+      refreshToken,
+      email: user.email,
+    });
+    this.state.memory.userOAuth2.set(id, {
+      email: email ?? undefined,
+      username,
+      avatarUrl: avatarUrl ?? undefined,
+      bannerUrl: bannerUrl ?? undefined,
+      updatedAt: new Date(),
+    });
 
     return user;
+  }
+
+  public async findUser(userId: string) {
+    const user = await this.state.database.userDiscord.find(userId);
+
+    if (!user) {
+      return null;
+    }
+
+    const userOAuth2Data = await this.state.discord.oauth2.fetchUserInfo(user.accessToken);
+
+    if (!userOAuth2Data) {
+      return null;
+    }
+
+    const { id, email, username, avatarUrl, bannerUrl } = userOAuth2Data;
+
+    this.state.memory.userOAuth2.set(id, {
+      email: email ?? undefined,
+      username,
+      avatarUrl: avatarUrl ?? undefined,
+      bannerUrl: bannerUrl ?? undefined,
+      updatedAt: new Date(),
+    });
+
+    return userOAuth2Data;
   }
 }

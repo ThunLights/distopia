@@ -5,6 +5,7 @@ import { JWTKey } from "repo-memory/JWTKey";
 import { MessageCreate } from "repo-memory/MessageCreate";
 import { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
 import { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
+import { UserOAuth2 } from "repo-memory/UserOAuth2";
 import { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
 import { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
@@ -20,5 +21,6 @@ export const memory: AppState["memory"] = {
   messageCreate: new MessageCreate(),
   unJoinedGuild: new UnJoinedGuild(),
   userJWTVerifyKey: new UserJWTVerifyKey(),
+  userOAuth2: new UserOAuth2(),
   voiceChannelMember: new VoiceChannelMember(),
 };

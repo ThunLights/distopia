@@ -15,6 +15,7 @@ export type FetchUserInfoResult = {
   avatar: string | null;
   email?: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
 };
 
 export type FetchTokenResult = {
@@ -56,13 +57,14 @@ export class OAuth2Controller extends Base {
     });
 
     if (response.status === 200) {
-      const { id, username, email, avatar } = (await response.json()) as APIUser;
+      const { id, username, email, avatar, banner } = (await response.json()) as APIUser;
       return {
         id,
         username,
         email,
         avatar,
         avatarUrl: avatar && this.client.rest.cdn.avatar(id, avatar),
+        bannerUrl: (banner && this.client.rest.cdn.banner(id, banner)) ?? null,
       };
     } else if (response.status === 429) {
       await sleep(1000);

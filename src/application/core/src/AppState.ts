@@ -8,6 +8,7 @@ import type { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreate
 import type { MessageCreate } from "repo-memory/MessageCreate";
 import type { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
 import type { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
+import type { UserOAuth2 } from "repo-memory/UserOAuth2";
 import type { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
 
 export type AppState = {
@@ -26,6 +27,7 @@ export type AppState = {
     messageCreate: MessageCreate;
     unJoinedGuild: UnJoinedGuild;
     userJWTVerifyKey: UserJWTVerifyKey;
+    userOAuth2: UserOAuth2;
     voiceChannelMember: VoiceChannelMember;
   };
   discord: Controller;
