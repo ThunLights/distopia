@@ -24,7 +24,15 @@ export class JWT extends Base {
   }
 
   public async getUserVerifyKey(userId: string) {
-    return this.state.memory.userJWTVerifyKey.get(userId);
+    const cache = this.state.memory.userJWTVerifyKey.get(userId);
+    if (cache) {
+      return cache;
+    }
+    const dbData = (await this.state.database.userWeb.find(userId))?.jwtVerifyKey;
+    if (dbData) {
+      this.state.memory.userJWTVerifyKey.set(userId, dbData);
+    }
+    return dbData;
   }
 
   public async getCurrKey() {
