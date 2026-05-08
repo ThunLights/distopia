@@ -23,6 +23,32 @@ export class User extends Base {
     return await this.state.discord.user.find(userId);
   }
 
+  public async findOAuth2(userId: string) {
+    const user = await this.state.database.userDiscord.find(userId);
+
+    if (!user) {
+      return null;
+    }
+
+    const userOAuth2Data = await this.state.discord.oauth2.fetchUserInfo(user.accessToken);
+
+    if (!userOAuth2Data) {
+      return null;
+    }
+
+    const { id, email, username, avatarUrl, bannerUrl } = userOAuth2Data;
+
+    this.state.memory.userOAuth2.set(id, {
+      email: email ?? undefined,
+      username,
+      avatarUrl: avatarUrl ?? undefined,
+      bannerUrl: bannerUrl ?? undefined,
+      updatedAt: new Date(),
+    });
+
+    return userOAuth2Data;
+  }
+
   public async findWithOAuth2(userId: string): Promise<UserOAuth2Profile | null> {
     const djsCache = await this.find(userId);
     if (djsCache) {
@@ -46,7 +72,7 @@ export class User extends Base {
       };
     }
 
-    const oauth2Data = await this.oauth2.findUser(userId);
+    const oauth2Data = await this.findOAuth2(userId);
 
     if (oauth2Data) {
       const { id, username, avatarUrl, bannerUrl } = oauth2Data;
