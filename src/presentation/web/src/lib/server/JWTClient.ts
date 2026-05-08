@@ -13,7 +13,13 @@ export const JWTPayloadSchema = z.object({
   userId: z.string(),
 });
 
+export const JWTPayloadWithUserVerifyKeySchema = JWTPayloadSchema.extend({
+  userVerifyKey: z.string(),
+});
+
 export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
+
+export type JWTPayloadWithUserVerifyKey = z.infer<typeof JWTPayloadWithUserVerifyKeySchema>;
 
 export class JWTClient {
   constructor() {
@@ -21,17 +27,27 @@ export class JWTClient {
   }
 
   public async sign(payload: JWTPayload) {
+    const userVerifyKey =
+      (await core.jwt.getUserVerifyKey(payload.userId)) ??
+      (await core.jwt.updateNewUserVerifyKey(payload.userId)).jwtVerifykey;
     const currKey = await core.jwt.getCurrKey();
 
     if (!currKey) {
       return null;
     }
 
-    return jwt.sign(payload, currKey.value.key, {
-      algorithm: currKey.value.alg,
-      keyid: currKey.id.toString(),
-      expiresIn: "8Weeks",
-    });
+    return jwt.sign(
+      {
+        ...payload,
+        userVerifyKey,
+      } satisfies JWTPayloadWithUserVerifyKey,
+      currKey.value.key,
+      {
+        algorithm: currKey.value.alg,
+        keyid: currKey.id.toString(),
+        expiresIn: "8Weeks",
+      },
+    );
   }
 
   public async verify(token: string) {
@@ -62,18 +78,27 @@ export class JWTClient {
         complete: true,
       });
 
-      const payload = await JWTPayloadSchema.safeParseAsync(verified.payload);
+      const payload = await JWTPayloadWithUserVerifyKeySchema.safeParseAsync(verified.payload);
 
       if (payload.success) {
+        const userVerifyKey = await core.jwt.getUserVerifyKey(payload.data.userId);
+        if (payload.data.userVerifyKey !== userVerifyKey) {
+          return null;
+        }
+
+        const data = {
+          userId: payload.data.userId,
+        } satisfies JWTPayload;
+
         if (nearExp) {
-          const newToken = await this.sign(payload.data);
+          const newToken = await this.sign(data);
           return {
-            payload: payload.data,
+            payload: data,
             newToken,
           };
         }
         return {
-          payload: payload.data,
+          payload: data,
         };
       }
 
