@@ -7,6 +7,7 @@ import { GuildSettingTable } from "./GuildSettingTable";
 import { GuildTable } from "./GuildTable";
 import { JWTKeyTable } from "./JWTKeyTable";
 import { PanelTable } from "./PanelTable";
+import { UserDiscordTable } from "./UserDiscordTable";
 import { UserTable } from "./UserTable";
 import { UserWebTable } from "./UserWebTable";
 
@@ -19,6 +20,7 @@ export class DatabaseClient extends Base {
   public readonly guildSetting = new GuildSettingTable(this.prisma);
   public readonly jwtKey = new JWTKeyTable(this.prisma);
   public readonly panel = new PanelTable(this.prisma);
+  public readonly userDiscord = new UserDiscordTable(this.prisma);
   public readonly user = new UserTable(this.prisma);
   public readonly userWeb = new UserWebTable(this.prisma);
 }

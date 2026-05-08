@@ -6,6 +6,7 @@ import { JWT } from "./JWT";
 import { Member } from "./Member";
 import { Memory } from "./Memory";
 import { Message } from "./Message";
+import { OAuth2 } from "./OAuth2";
 import { Panel } from "./Panel";
 import { Ranking } from "./Ranking";
 import { Record } from "./Record";
@@ -19,6 +20,7 @@ export class AppCore extends Base {
   public readonly member = new Member(this.state);
   public readonly memory = new Memory(this.state);
   public readonly message = new Message(this.state);
+  public readonly oauth2 = new OAuth2(this.state);
   public readonly panel = new Panel(this.state);
   public readonly ranking = new Ranking(this.state);
   public readonly record = new Record(this.state);

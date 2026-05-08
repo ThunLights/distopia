@@ -25,10 +25,11 @@ model UserWeb {
 }
 
 model UserDiscord {
-  id           String  @id
+  id           String   @id
   accessToken  String
   refreshToken String
   email        String?
+  updatedAt    DateTime @updatedAt
 }
 
 model Friend {
