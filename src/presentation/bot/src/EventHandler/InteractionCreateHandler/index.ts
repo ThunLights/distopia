@@ -47,7 +47,7 @@ export class InteractionCreateHandler extends BaseHandler<
       for (const command of this.commands.chatInput) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
-          if (res instanceof InteractionCallbackResponse) {
+          if (res instanceof InteractionCallbackResponse || res instanceof ModalSended) {
             return;
           } else {
             return void (await interaction.reply(res));
@@ -112,6 +112,7 @@ export class InteractionCreateHandler extends BaseHandler<
     }
 
     if (interaction.isRepliable()) {
+      console.log("Hello");
       return void (await interaction.reply({
         content: "コマンドが見つかりませんでした",
         flags: [MessageFlags.Ephemeral],
