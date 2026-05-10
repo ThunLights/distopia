@@ -1,4 +1,5 @@
 import { isBlankSync } from "app-core/blank";
+import { CHARACTER_LIMIT, NUM_TAG_LIMIT } from "app-core/constant";
 import {
   type ModalSubmitInteraction,
   type CacheType,
@@ -19,11 +20,7 @@ type Options = {
   nsfw: boolean;
   pub: boolean;
   invite: TextChannel | undefined;
-  tag1: string;
-  tag2: string;
-  tag3: string;
-  tag4: string;
-  tag5: string;
+  tags: string[];
 };
 
 export class WebEditModal extends ModalSubmitInteractionBase<Options> {
@@ -34,6 +31,11 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
   ): Promise<Options> {
+    const tags = interaction.fields
+      .getTextInputValue("tags")
+      .split("\n")
+      .filter((value) => !isBlankSync(value));
+
     return {
       description: interaction.fields.getTextInputValue("description"),
       nsfw: interaction.fields.getCheckbox("nsfw"),
@@ -42,11 +44,7 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
         .getSelectedChannels("invite", true, [ChannelType.GuildText])
         .values()
         .toArray()[0],
-      tag1: interaction.fields.getTextInputValue("tag1"),
-      tag2: interaction.fields.getTextInputValue("tag2"),
-      tag3: interaction.fields.getTextInputValue("tag3"),
-      tag4: interaction.fields.getTextInputValue("tag4"),
-      tag5: interaction.fields.getTextInputValue("tag5"),
+      tags,
     };
   }
 
@@ -54,7 +52,7 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
     interaction: ModalSubmitInteraction<CacheType>,
     options: Options,
   ): Promise<InteractionReplyOptions | InteractionResponse<boolean>> {
-    const { description, nsfw, pub, invite, tag1, tag2, tag3, tag4, tag5 } = options;
+    const { description, nsfw, pub, invite, tags } = options;
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -66,6 +64,19 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
         content: "招待リンク作成用のチャンネルを選択してください。",
         flags: [MessageFlags.Ephemeral],
       };
+    }
+
+    if (tags.length > NUM_TAG_LIMIT) {
+      return { content: `タグは${NUM_TAG_LIMIT}つまでです`, flags: [MessageFlags.Ephemeral] };
+    }
+
+    for (const tag of tags) {
+      if (tag.length > CHARACTER_LIMIT.tag) {
+        return {
+          content: `タグの文字数は${CHARACTER_LIMIT.tag}文字までです`,
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
     }
 
     const channel = interaction.guild?.channels.cache.get(invite.id);
@@ -84,7 +95,7 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
       nsfw,
       pub,
       invite: code,
-      tags: [tag1, tag2, tag3, tag4, tag5].filter((value) => !isBlankSync(value)),
+      tags,
       updated: new Date(),
     });
 
