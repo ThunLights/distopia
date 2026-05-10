@@ -8,6 +8,18 @@ export class FriendTable extends Base {
     });
   }
 
+  public async findAll() {
+    return await this.prisma.friend.findMany();
+  }
+
+  public async findAllSortDate() {
+    return await this.prisma.friend.findMany({
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+  }
+
   public async upsert(input: FriendUpsertInput): Promise<Friend> {
     return await this.prisma.friend.upsert({
       where: { userId: input.userId },
