@@ -1,5 +1,5 @@
 import type { UserAuth } from "$lib/shared/types/UserAuth";
-import { djsController } from "./bot";
+import { core } from "./core";
 import { jwt } from "./jwt";
 import type { Cookies } from "@sveltejs/kit";
 
@@ -16,13 +16,13 @@ export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
     return null;
   }
 
-  const user = await djsController.user.find(verified.payload.userId);
+  const user = await core.user.findWithOAuth2(verified.payload.userId);
 
   return user
     ? {
         token: verified.newToken ?? auth,
         id: user.id,
-        username: user.name,
+        username: user.username,
         avatarUrl: user.avatarUrl,
       }
     : null;
