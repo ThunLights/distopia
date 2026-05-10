@@ -1,20 +1,12 @@
 import type { FriendUpsertInput } from "infra-database/types";
 import type { Value as FriendModel } from "repo-memory/Friend";
 
-import type { AppState } from "./AppState";
 import { Base } from "./Base";
 
 export class Friend extends Base {
   public sortedDatas: FriendModel[] = [];
 
-  constructor(state: AppState) {
-    super(state);
-    (async () => {
-      await this.updateRanking();
-    })();
-  }
-
-  public async updateRanking() {
+  public async updateCache() {
     this.sortedDatas = await Promise.all(
       (await this.state.database.friend.findAllSortDate()).map(async (value) => {
         const avatarUrl = await this.state.discord.user.getAvatarUrl(value.userId);
@@ -29,14 +21,14 @@ export class Friend extends Base {
   public async delete(userId: string) {
     this.state.memory.friend.delete(userId);
     await this.state.database.friend.delete(userId);
-    await this.updateRanking();
+    await this.updateCache();
   }
 
   public async save(input: FriendUpsertInput) {
     const data = await this.state.database.friend.upsert(input);
     const avatarUrl = await this.state.discord.user.getAvatarUrl(input.userId);
     this.state.memory.friend.set(input.userId, { ...data, avatarUrl });
-    await this.updateRanking();
+    await this.updateCache();
     return data;
   }
 

@@ -5,10 +5,11 @@ import {
   PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
 } from "$env/static/public";
-import { client, updatePanels } from "$lib/server/bot";
-import { core } from "$lib/server/core";
+import { client } from "$lib/server/bot";
+import { core, updatePanels } from "$lib/server/core";
 import { schedule } from "$lib/server/schedule";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
+import { handleClient } from "presentation-bot";
 
 process.on("uncaughtException", async (error) => {
   console.error(error);
@@ -22,8 +23,11 @@ async function start() {
   await core.jwt.importDB();
   console.log("JWT keys is imported.");
 
-  await client.login(BOT_TOKEN);
+  await handleClient(client, core).login(BOT_TOKEN);
   console.log("BOT logined.");
+
+  await core.friend.updateCache();
+  console.log("Updated friend cache.");
 
   schedule.add("*/5 * * * *", async () => {
     await core.jwt.update();
