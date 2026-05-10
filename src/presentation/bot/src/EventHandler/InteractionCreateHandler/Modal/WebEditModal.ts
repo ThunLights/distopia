@@ -111,7 +111,7 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
       });
     } else {
       return {
-        content: "元のメッセージが消されています。",
+        content: "変更完了しました。",
         flags: [MessageFlags.Ephemeral],
       };
     }

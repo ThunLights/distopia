@@ -54,7 +54,7 @@ export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> 
       return res;
     } else {
       return {
-        content: "元のメッセージが削除されたため元のページに戻れませんでした",
+        content: "変更完了しました。",
         flags: [MessageFlags.Ephemeral],
       };
     }
