@@ -3,6 +3,7 @@
   import Footer from "$lib/components/Footer.svelte";
   import Header from "$lib/components/Header.svelte";
   import "../app.css";
+  import { SvelteToast } from "@zerodevx/svelte-toast";
   import { onMount } from "svelte";
 
   let { children, data } = $props();
@@ -15,6 +16,8 @@
     }
   });
 </script>
+
+<SvelteToast />
 
 <Header userData={data.user} />
 <main>

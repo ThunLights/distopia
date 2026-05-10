@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Toast } from "$lib/client/toast";
   import type { Snippet } from "svelte";
 
   type Props = {
@@ -11,7 +12,7 @@
   function copy(txt: string) {
     return async () => {
       await navigator.clipboard.writeText(txt);
-      //			Toast.success("コピーしました。");
+      Toast.success("コピーしました。");
     };
   }
 </script>
