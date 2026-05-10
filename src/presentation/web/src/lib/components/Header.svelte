@@ -216,6 +216,9 @@
     text-decoration: none;
     color: white;
   }
+  p {
+    color: white !important;
+  }
   @media (max-width: 840px) {
     .bager {
       display: block;
