@@ -11,7 +11,7 @@ import { Panel } from "./Panel";
 import { Ranking } from "./Ranking";
 import { Record } from "./Record";
 import { User } from "./User";
-import { Voice } from "./Voice";
+import { VoiceChannel } from "./VoiceChannel";
 
 export class AppCore extends Base {
   public readonly activeRate = new ActiveRate(this.state);
@@ -26,7 +26,7 @@ export class AppCore extends Base {
   public readonly ranking = new Ranking(this.state);
   public readonly record = new Record(this.state);
   public readonly user = new User(this.state, this.oauth2);
-  public readonly voice = new Voice(this.state);
+  public readonly voice = new VoiceChannel(this.state);
 
   private async updateHomeGuildSpecialDirectorsRole(
     homeGuildId: string,

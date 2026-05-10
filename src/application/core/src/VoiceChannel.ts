@@ -13,7 +13,7 @@ export type UpsertQuery = {
   plusPoint: number;
 }[];
 
-export class Voice extends Base {
+export class VoiceChannel extends Base {
   public async update() {
     const upsertVcMemberUpperTwoQuery: string[] = [];
     const upsertVcMembersQuery: UpsertVcMembersQuery = [];
