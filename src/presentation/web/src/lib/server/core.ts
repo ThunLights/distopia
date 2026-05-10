@@ -1,6 +1,6 @@
 import { PUBLIC_OWNER_ID, PUBLIC_URL } from "$env/static/public";
+import { djsController } from "./bot";
 import { database } from "./database";
-import { djsController } from "./discord";
 import { memory } from "./memory";
 import { AppCore } from "app-core";
 

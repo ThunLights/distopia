@@ -5,8 +5,8 @@ import {
   PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
 } from "$env/static/public";
+import { client, updatePanels } from "$lib/server/bot";
 import { core } from "$lib/server/core";
-import { client, updatePanels } from "$lib/server/discord";
 import { schedule } from "$lib/server/schedule";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 
