@@ -1,5 +1,6 @@
 import type { DatabaseClient } from "infra-database/types";
 import type { Controller } from "infra-discord";
+import type { Friend } from "repo-memory/Friend";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import type { JWTKey } from "repo-memory/JWTKey";
@@ -21,6 +22,7 @@ export type AppState = {
       messageCreate: MessageCreateLateLimit;
       bump: GuildBumpLateLimit;
     };
+    friend: Friend;
     guildEdit: GuildEdit;
     guildMemberAdd: GuildMemberAdd;
     jwtKey: JWTKey;

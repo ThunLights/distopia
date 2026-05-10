@@ -1,4 +1,5 @@
 import type { AppState } from "app-core/AppState";
+import { Friend } from "repo-memory/Friend";
 import { GuildEdit } from "repo-memory/GuildEdit";
 import { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import { JWTKey } from "repo-memory/JWTKey";
@@ -15,6 +16,7 @@ export const memory: AppState["memory"] = {
     messageCreate: new MessageCreateLateLimit(),
     bump: new GuildBumpLateLimit(),
   },
+  friend: new Friend(),
   guildEdit: new GuildEdit(),
   guildMemberAdd: new GuildMemberAdd(),
   jwtKey: new JWTKey(),
