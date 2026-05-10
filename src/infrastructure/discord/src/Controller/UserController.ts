@@ -20,4 +20,9 @@ export class UserController extends Base {
       bannerUrl: user.bannerURL() ?? undefined,
     };
   }
+
+  public async getAvatarUrl(userId: string) {
+    const avatarUrl = this.client.users.cache.get(userId)?.avatarURL() ?? null;
+    return avatarUrl;
+  }
 }
