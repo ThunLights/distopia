@@ -16,10 +16,10 @@
   onMount(async () => {
     if (user) {
       await setAuth(user.token);
-      setTimeout(async () => {
-        location.href = "/";
-      }, 3000);
     }
+    setTimeout(async () => {
+      location.href = "/";
+    }, 3000);
   });
 </script>
 
