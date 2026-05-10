@@ -26,15 +26,14 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
   ): Promise<Options> {
+    const tags = interaction.fields
+      .getTextInputValue("tags")
+      .split("\n")
+      .filter((value) => !isBlankSync(value));
+
     return {
       nsfw: interaction.fields.getCheckbox("nsfw"),
-      tags: [
-        interaction.fields.getTextInputValue("tag1"),
-        interaction.fields.getTextInputValue("tag2"),
-        interaction.fields.getTextInputValue("tag3"),
-        interaction.fields.getTextInputValue("tag4"),
-        interaction.fields.getTextInputValue("tag5"),
-      ].filter((value) => !isBlankSync(value)),
+      tags,
       profile: interaction.fields.getTextInputValue("profile"),
     };
   }

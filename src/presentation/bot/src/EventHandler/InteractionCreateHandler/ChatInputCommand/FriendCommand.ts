@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT } from "app-core/constant";
+import { CHARACTER_LIMIT, NUM_TAG_LIMIT } from "app-core/constant";
 import {
   CheckboxBuilder,
   InteractionCallbackResponse,
@@ -14,6 +14,7 @@ import {
 } from "discord.js";
 
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { ModalSended } from "../Base/Modal/ModalSended";
 
 type Options = {};
 
@@ -51,47 +52,14 @@ export class FriendCommand extends ChatInputCommandBase<Options> {
               .setMaxLength(CHARACTER_LIMIT.description),
           ),
         new LabelBuilder()
-          .setLabel("タグ1")
+          .setLabel(`タグ (最大${NUM_TAG_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`)
           .setTextInputComponent(
-            new TextInputBuilder()
-              .setCustomId("tag1")
-              .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.tag),
-          ),
-        new LabelBuilder()
-          .setLabel("タグ2")
-          .setTextInputComponent(
-            new TextInputBuilder()
-              .setCustomId("tag2")
-              .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.tag),
-          ),
-        new LabelBuilder()
-          .setLabel("タグ3")
-          .setTextInputComponent(
-            new TextInputBuilder()
-              .setCustomId("tag3")
-              .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.tag),
-          ),
-        new LabelBuilder()
-          .setLabel("タグ4")
-          .setTextInputComponent(
-            new TextInputBuilder()
-              .setCustomId("tag4")
-              .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.tag),
-          ),
-        new LabelBuilder()
-          .setLabel("タグ5")
-          .setTextInputComponent(
-            new TextInputBuilder()
-              .setCustomId("tag5")
-              .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.tag),
+            new TextInputBuilder().setCustomId("tags").setStyle(TextInputStyle.Paragraph),
           ),
       );
 
-    return await interaction.showModal(modal);
+    await interaction.showModal(modal);
+
+    return new ModalSended();
   }
 }
