@@ -37,6 +37,7 @@ async function start() {
 
   schedule.add("*/20 * * * *", async () => {
     await core.oauth2.updateTokens();
+    await core.friend.updateCache();
 
     await core.memory.gc();
     await core.guild.removeUnJoinedGuildData();
