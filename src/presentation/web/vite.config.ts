@@ -12,7 +12,7 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [sveltekit(), enhancedImages(), devtoolsJson()],
+  plugins: [enhancedImages(), sveltekit(), devtoolsJson()],
   server: {
     watch: {
       ignored: [

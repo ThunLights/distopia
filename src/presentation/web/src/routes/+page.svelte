@@ -1,8 +1,8 @@
 <script lang="ts">
+  import Banner from "$lib/components/Banner.svelte";
   import Meta from "$lib/components/Meta.svelte";
 </script>
 
 <Meta />
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<Banner />
