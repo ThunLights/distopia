@@ -8,7 +8,7 @@ import { page as userBumpPage } from "presentation-bot/page/Ranking/UserBump";
 
 export const client = handleClient(genClient(), core);
 
-export const controller = new Controller(client, {
+export const djsController = new Controller(client, {
   id: BOT_ID,
   secret: BOT_SECRET,
   url: BOT_REDIRECT_URL,
@@ -23,6 +23,6 @@ export async function updatePanels() {
         : panel.type === "LevelRanking"
           ? await levelRatePage(core)
           : await userBumpPage(core);
-    await controller.message.edit(panel.channelId, panel.messageId, { embeds: content.embeds });
+    await djsController.message.edit(panel.channelId, panel.messageId, { embeds: content.embeds });
   }
 }

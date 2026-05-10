@@ -15,6 +15,10 @@ export type UpsertQuery = {
 
 export class VoiceChannel extends Base {
   public async update() {
+    console.log(this.state);
+    console.log(this.state && this.state.discord);
+    console.log(this.state && this.state.discord && this.state.discord.channel);
+
     const upsertVcMemberUpperTwoQuery: string[] = [];
     const upsertVcMembersQuery: UpsertVcMembersQuery = [];
     const upsertQuery: UpsertQuery = [];
