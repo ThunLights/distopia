@@ -3,8 +3,10 @@ import { core } from "./core";
 import { jwt } from "./jwt";
 import type { Cookies } from "@sveltejs/kit";
 
+const twoMonth = 2 * 30 * 24 * 60 * 60 * 1000;
+
 export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
-  const auth = cookies.get("auth");
+  const auth = cookies.get("authorization");
 
   if (!auth) {
     return null;
@@ -26,4 +28,11 @@ export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
         avatarUrl: user.avatarUrl,
       }
     : null;
+}
+
+export async function setToken(cookies: Cookies, token: string) {
+  cookies.set("authorization", token, {
+    path: "/",
+    expires: new Date(Date.now() + twoMonth),
+  });
 }

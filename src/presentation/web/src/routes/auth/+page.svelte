@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { setAuth } from "$lib/client/auth";
   import Block from "$lib/components/Block.svelte";
   import Meta from "$lib/components/Meta.svelte";
   import Title from "$lib/components/Title.svelte";
@@ -14,9 +13,6 @@
   );
 
   onMount(async () => {
-    if (user) {
-      await setAuth(user.token);
-    }
     setTimeout(async () => {
       location.href = "/";
     }, 3000);
