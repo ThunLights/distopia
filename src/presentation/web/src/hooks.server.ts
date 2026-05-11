@@ -5,6 +5,7 @@ import {
   PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
 } from "$env/static/public";
+import { verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
 import { schedule } from "$lib/server/schedule";
@@ -57,9 +58,15 @@ async function start() {
 }
 
 export const handle = (async ({ event, resolve }) => {
+  const user = await verifyToken(event.cookies);
+
+  event.locals = { user };
+
   const response = await resolve(event);
+
   response.headers.set("Cache-Control", "no-store");
   response.headers.set("Pragma", "no-cache");
+
   return response;
 }) satisfies Handle;
 
