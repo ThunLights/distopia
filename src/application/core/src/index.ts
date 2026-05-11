@@ -21,7 +21,7 @@ export class AppCore extends Base {
   public readonly member = new Member(this.state);
   public readonly memory = new Memory(this.state);
   public readonly message = new Message(this.state);
-  public readonly oauth2 = new OAuth2(this.state);
+  public readonly oauth2 = new OAuth2(this.state, this.guild);
   public readonly panel = new Panel(this.state);
   public readonly ranking = new Ranking(this.state);
   public readonly record = new Record(this.state);
