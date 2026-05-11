@@ -3,6 +3,14 @@ import type { MapWithGC } from "repo-memory/MapWithGC";
 import { Base } from "./Base";
 
 export class Memory extends Base {
+  public async gcForShortInterval() {
+    const mems: MapWithGC<any, any>[] = [this.state.memory.oauth2Guilds];
+
+    for (const mem of mems) {
+      mem.gc();
+    }
+  }
+
   public async gc() {
     const mems: MapWithGC<any, any>[] = [
       this.state.memory.guildEdit,

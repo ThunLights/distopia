@@ -1,4 +1,5 @@
 import type { UserDiscordUpsertInput } from "infra-database/types";
+import type { Guilds } from "repo-memory/OAuth2Guilds";
 
 import { Base } from "./Base";
 
@@ -59,5 +60,46 @@ export class OAuth2 extends Base {
     });
 
     return user;
+  }
+
+  public async getGuilds(userId: string): Promise<Guilds | null> {
+    const cache = this.state.memory.oauth2Guilds.get(userId);
+    if (cache) {
+      return cache;
+    }
+
+    const token = await this.state.database.userDiscord.find(userId);
+    if (!token) {
+      return null;
+    }
+
+    const { accessToken } = token;
+    const data = await this.state.discord.oauth2.fetchGuilds(accessToken);
+
+    if (data) {
+      const guilds = data.map(
+        ({
+          id,
+          name,
+          icon,
+          banner,
+          owner,
+          approximate_member_count,
+          approximate_presence_count,
+        }) => ({
+          id,
+          name,
+          icon,
+          banner,
+          owner,
+          approximate_member_count,
+          approximate_presence_count,
+        }),
+      );
+      this.state.memory.oauth2Guilds.set(userId, guilds);
+      return guilds;
+    }
+
+    return null;
   }
 }

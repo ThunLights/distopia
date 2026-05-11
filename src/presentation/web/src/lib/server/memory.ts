@@ -4,6 +4,7 @@ import { GuildEdit } from "repo-memory/GuildEdit";
 import { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import { JWTKey } from "repo-memory/JWTKey";
 import { MessageCreate } from "repo-memory/MessageCreate";
+import { OAuth2Guilds } from "repo-memory/OAuth2Guilds";
 import { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
 import { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
 import { UserOAuth2 } from "repo-memory/UserOAuth2";
@@ -21,6 +22,7 @@ export const memory: AppState["memory"] = {
   guildMemberAdd: new GuildMemberAdd(),
   jwtKey: new JWTKey(),
   messageCreate: new MessageCreate(),
+  oauth2Guilds: new OAuth2Guilds(),
   unJoinedGuild: new UnJoinedGuild(),
   userJWTVerifyKey: new UserJWTVerifyKey(),
   userOAuth2: new UserOAuth2(),

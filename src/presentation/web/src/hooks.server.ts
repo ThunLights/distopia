@@ -33,6 +33,7 @@ async function start() {
     await core.jwt.update();
     await core.message.syncDB();
     await core.member.syncDB();
+    await core.memory.gcForShortInterval();
   });
 
   schedule.add("*/20 * * * *", async () => {

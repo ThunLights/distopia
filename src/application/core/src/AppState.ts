@@ -7,6 +7,7 @@ import type { JWTKey } from "repo-memory/JWTKey";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import type { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
 import type { MessageCreate } from "repo-memory/MessageCreate";
+import type { OAuth2Guilds } from "repo-memory/OAuth2Guilds";
 import type { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
 import type { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
 import type { UserOAuth2 } from "repo-memory/UserOAuth2";
@@ -27,6 +28,7 @@ export type AppState = {
     guildMemberAdd: GuildMemberAdd;
     jwtKey: JWTKey;
     messageCreate: MessageCreate;
+    oauth2Guilds: OAuth2Guilds;
     unJoinedGuild: UnJoinedGuild;
     userJWTVerifyKey: UserJWTVerifyKey;
     userOAuth2: UserOAuth2;

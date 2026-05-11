@@ -3,7 +3,7 @@ import type {
   RESTAPIPartialCurrentUserGuild,
   RESTPostOAuth2AccessTokenResult,
 } from "discord-api-types/v10";
-import type { Client } from "discord.js";
+import type { Client, GuildFeature } from "discord.js";
 
 import type { Config } from ".";
 import { sleep } from "../sleep";
@@ -23,6 +23,22 @@ export type FetchTokenResult = {
   refreshToken: string;
 };
 
+export type Snowflake = string;
+
+export type Permissions = string;
+
+export type Guilds = {
+  id: Snowflake;
+  name: string;
+  icon: string | null;
+  banner: string | null;
+  owner: boolean;
+  features: GuildFeature[];
+  permissions: Permissions;
+  approximate_member_count?: number;
+  approximate_presence_count?: number;
+}[];
+
 export class OAuth2Controller extends Base {
   constructor(
     client: Client,
@@ -31,7 +47,7 @@ export class OAuth2Controller extends Base {
     super(client);
   }
 
-  public async fetchGuilds(accessToken: string): Promise<RESTAPIPartialCurrentUserGuild[] | null> {
+  public async fetchGuilds(accessToken: string): Promise<Guilds | null> {
     const response = await fetch("https://discord.com/api/v10/users/@me/guilds?with_counts=true", {
       method: "GET",
       headers: {

@@ -50,6 +50,10 @@ export class Guild extends Base {
     return await useAsync(this.state.memory.guildEdit.delete)(guildId);
   }
 
+  public async isBotJoined(guildId: string) {
+    return await this.state.discord.guild.isJoined(guildId);
+  }
+
   public async bump(user: User, guild: GuildModel) {
     const twoHours = 2 * 60 * 60 * 1000;
     const { database, memory } = this.state;
@@ -86,6 +90,10 @@ export class Guild extends Base {
 
   public async find(guildId: string) {
     return await this.state.database.guild.find(guildId);
+  }
+
+  public async isPublic(guildId: string) {
+    return Boolean((await this.find(guildId))?.public);
   }
 
   public async getSetting(guildId: string) {
