@@ -4,6 +4,30 @@ import type { UserAuth } from "$lib/shared/types/UserAuth";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { json, type RequestEvent } from "@sveltejs/kit";
 
+export async function authHandler<
+  RouteParams extends LayoutParams<RouteId>,
+  RouteId extends ReturnType<AppTypes["RouteId"]>,
+>(
+  handler: (
+    event: RequestEvent<RouteParams, RouteId> & { locals: { user: UserAuth } },
+  ) => MaybePromise<Response>,
+): Promise<(event: RequestEvent<RouteParams, RouteId>) => MaybePromise<Response>> {
+  return async (e) => {
+    const { user } = e.locals;
+
+    if (!user) {
+      return json(
+        {
+          content: "Invalid User",
+        },
+        { status: 400 },
+      );
+    }
+
+    return await handler({ ...e, locals: { ...e.locals, user } });
+  };
+}
+
 export async function authAndValidateHandler<
   SchemaInput,
   SchemaOutput,
