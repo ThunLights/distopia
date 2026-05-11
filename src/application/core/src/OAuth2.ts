@@ -62,12 +62,7 @@ export class OAuth2 extends Base {
     return user;
   }
 
-  public async getGuilds(userId: string): Promise<Guilds | null> {
-    const cache = this.state.memory.oauth2Guilds.get(userId);
-    if (cache) {
-      return cache;
-    }
-
+  public async getGuildsWithUpdateCache(userId: string) {
     const token = await this.state.database.userDiscord.find(userId);
     if (!token) {
       return null;
@@ -101,5 +96,14 @@ export class OAuth2 extends Base {
     }
 
     return null;
+  }
+
+  public async getGuilds(userId: string): Promise<Guilds | null> {
+    const cache = this.state.memory.oauth2Guilds.get(userId);
+    if (cache) {
+      return cache;
+    }
+
+    return await this.getGuildsWithUpdateCache(userId);
   }
 }

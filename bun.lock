@@ -162,6 +162,7 @@
       "dependencies": {
         "@fontsource/inter": "5.2.8",
         "@fontsource/open-sans": "5.2.7",
+        "@standard-schema/spec": "1.1.0",
         "app-core": "workspace:*",
         "app-schedule": "workspace:*",
         "discord.js": "catalog:",
