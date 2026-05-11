@@ -1,6 +1,7 @@
 import type { AppTypes, LayoutParams } from "$app/types";
 import type { MaybePromise } from "$lib/shared/types/Promise";
 import type { UserAuth } from "$lib/shared/types/UserAuth";
+import { errorJson } from "./res";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { json, type RequestEvent } from "@sveltejs/kit";
 
@@ -45,21 +46,11 @@ export async function authAndValidateHandler<
     const body = await schema["~standard"].validate(await e.request.json());
 
     if (!user) {
-      return json(
-        {
-          content: "Invalid User",
-        },
-        { status: 400 },
-      );
+      return errorJson("Invalid User");
     }
 
     if (body.issues) {
-      return json(
-        {
-          content: "Invalid Body: " + body.issues.join(", "),
-        },
-        { status: 400 },
-      );
+      return errorJson("Invalid Body: " + body.issues.join(", "));
     }
 
     return await handler({ ...e, locals: { ...e.locals, user } }, body.value);
