@@ -1,5 +1,6 @@
 <script lang="ts">
   import { deleteAuth } from "$lib/client/auth";
+  import { parseErrRes } from "$lib/client/error";
   import { Toast } from "$lib/client/toast";
   import Block from "$lib/components/Block.svelte";
   import LinkButton from "$lib/components/Button/LinkButton.svelte";
@@ -37,8 +38,7 @@
 
       Toast.success("アップデートされました");
     } else if (response.status === 400) {
-      const { content } = await response.json();
-      Toast.error(`エラー「${content}」`);
+      await parseErrRes(response);
     }
   }
 

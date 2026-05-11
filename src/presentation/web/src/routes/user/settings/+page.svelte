@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Toast } from "$lib/client/toast";
+  import { parseErrRes } from "$lib/client/error.js";
   import Block from "$lib/components/Block.svelte";
   import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
   import Meta from "$lib/components/Meta.svelte";
@@ -18,8 +18,7 @@
     if (response.status === 200) {
       location.href = "/";
     } else if (response.status === 400) {
-      const { content } = await response.json();
-      Toast.error(`エラー「${content}」`);
+      await parseErrRes(response);
     }
   }
 </script>
