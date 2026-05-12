@@ -5,7 +5,7 @@ import {
   PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
 } from "$env/static/public";
-import { verifyToken } from "$lib/server/auth";
+import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
 import { schedule } from "$lib/server/schedule";
@@ -68,11 +68,11 @@ export const handle = (async ({ event, resolve }) => {
 
   if (user?.token) {
     if (user.token !== oldToken) {
-      event.cookies.set("authorization", user.token, { path: "/" });
+      await setToken(event.cookies, user.token);
     }
   } else {
     if (oldToken !== undefined) {
-      event.cookies.delete("authorization", { path: "/" });
+      await deleteToken(event.cookies);
     }
   }
 

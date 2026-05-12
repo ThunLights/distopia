@@ -36,3 +36,7 @@ export async function setToken(cookies: Cookies, token: string) {
     expires: new Date(Date.now() + twoMonth),
   });
 }
+
+export async function deleteToken(cookies: Cookies) {
+  cookies.delete("authorization", { path: "/" });
+}
