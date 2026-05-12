@@ -61,9 +61,20 @@ async function start() {
 }
 
 export const handle = (async ({ event, resolve }) => {
+  const oldToken = event.cookies.get("authorization");
   const user = await verifyToken(event.cookies);
 
   event.locals = { user };
+
+  if (user?.token) {
+    if (user.token !== oldToken) {
+      event.cookies.set("authorization", user.token, { path: "/" });
+    }
+  } else {
+    if (oldToken !== undefined) {
+      event.cookies.delete("authorization", { path: "/" });
+    }
+  }
 
   const response = await resolve(event);
 

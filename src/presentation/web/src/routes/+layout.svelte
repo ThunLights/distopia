@@ -1,18 +1,10 @@
 <script lang="ts">
-  import { deleteAuth } from "$lib/client/auth";
   import Footer from "$lib/components/Footer.svelte";
   import Header from "$lib/components/Header.svelte";
   import "../app.css";
   import { SvelteToast } from "@zerodevx/svelte-toast";
-  import { onMount } from "svelte";
 
   let { children, data } = $props();
-
-  onMount(async () => {
-    if (!data.user) {
-      await deleteAuth();
-    }
-  });
 </script>
 
 <SvelteToast />
