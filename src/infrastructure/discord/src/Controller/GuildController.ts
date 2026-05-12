@@ -1,5 +1,6 @@
 import type { PermissionResolvable, PresenceStatus } from "discord.js";
 
+import type { Guild } from "../types/Guild";
 import { Base } from "./Base";
 
 export class GuildController extends Base {
@@ -31,5 +32,23 @@ export class GuildController extends Base {
 
   public async isJoined(guildId: string) {
     return this.client.guilds.cache.get(guildId) !== undefined;
+  }
+
+  public async fetch(guildId: string): Promise<Guild | null> {
+    const guild = this.client.guilds.cache.get(guildId);
+    return guild
+      ? {
+          id: guildId,
+          name: guild.name,
+          ownerId: guild.ownerId,
+          description: guild.description ?? undefined,
+          icon: guild.icon ?? undefined,
+          banner: guild.banner ?? undefined,
+        }
+      : null;
+  }
+
+  public iconUrl(guildId: string, iconHash: string) {
+    return this.client.rest.cdn.icon(guildId, iconHash);
   }
 }

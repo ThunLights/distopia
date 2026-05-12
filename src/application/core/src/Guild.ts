@@ -1,5 +1,4 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
-import { useAsync } from "domain-service";
 import type {
   GuildReviewUpsertInput,
   GuildSettingUpsertInput,
@@ -7,9 +6,18 @@ import type {
 } from "infra-database/types";
 import type { Value } from "repo-memory/GuildEdit";
 
+import type { AppState } from "./AppState";
 import { Base } from "./Base";
+import type { Record } from "./Record";
 
 export class Guild extends Base {
+  constructor(
+    state: AppState,
+    private readonly record: Record,
+  ) {
+    super(state);
+  }
+
   public async removeUnJoinedGuildData() {
     for (const { guildId } of await this.state.database.guild.findAll()) {
       if (!(await this.state.discord.guild.isJoined(guildId))) {
@@ -28,7 +36,7 @@ export class Guild extends Base {
 
   public async getDraft(guildId: string) {
     const dbData = await this.state.database.guild.find(guildId);
-    const memoryData = await useAsync(this.state.memory.guildEdit.get)(guildId);
+    const memoryData = this.state.memory.guildEdit.get(guildId);
     return {
       description: memoryData?.description ?? dbData?.description ?? undefined,
       nsfw: memoryData?.nsfw ?? dbData?.nsfw,
@@ -39,15 +47,15 @@ export class Guild extends Base {
   }
 
   public async saveDraft(guildId: string, value: Value, updateAll: boolean = true) {
-    const memoryData = await useAsync(this.state.memory.guildEdit.get)(guildId);
-    return await useAsync(this.state.memory.guildEdit.set)(
+    const memoryData = this.state.memory.guildEdit.get(guildId);
+    return this.state.memory.guildEdit.set(
       guildId,
       updateAll ? { ...memoryData, ...value } : value,
     );
   }
 
   public async deleteDraft(guildId: string) {
-    return await useAsync(this.state.memory.guildEdit.delete)(guildId);
+    return this.state.memory.guildEdit.delete(guildId);
   }
 
   public async isBotJoined(guildId: string) {
@@ -59,13 +67,13 @@ export class Guild extends Base {
     const { database, memory } = this.state;
     const latelimit = memory.latelimit.bump;
     const nowDate = new Date();
-    const limit = await useAsync(latelimit.get)(guild.id);
+    const limit = latelimit.get(guild.id);
 
     if (limit && limit.getTime() > Date.now()) {
       return new LateLimitError(limit);
     }
 
-    await useAsync(latelimit.set)(guild.id, new Date(nowDate.getTime() + twoHours));
+    latelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
 
     await database.guild.update({
       guildId: guild.id,
@@ -92,6 +100,24 @@ export class Guild extends Base {
     return await this.state.database.guild.find(guildId);
   }
 
+  public async findWithRecord(guildId: string) {
+    const { guild, record } = await this.state.database.guild.findWithRecord(guildId);
+    const guildMetaData = await this.state.discord.guild.fetch(guildId);
+    return {
+      meta: guildMetaData,
+      guild,
+      record: record
+        ? {
+            ...record,
+            rank: {
+              activeRate: this.record.getActiveRateRanking(guildId),
+              level: this.record.getLevelRank(guildId),
+            },
+          }
+        : null,
+    };
+  }
+
   public async isPublic(guildId: string) {
     return Boolean((await this.find(guildId))?.public);
   }
@@ -110,5 +136,9 @@ export class Guild extends Base {
 
   public async deleteReview(guildId: string, userId: string) {
     return await this.state.database.guildReview.delete(guildId, userId);
+  }
+
+  public iconUrl(guildId: string, iconHash: string) {
+    return this.state.discord.guild.iconUrl(guildId, iconHash);
   }
 }
