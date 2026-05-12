@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import { onMount } from "svelte";
   import { v4 } from "uuid";
 
@@ -18,7 +19,7 @@
   const image2Id = uuid + "Image2Id";
   const clipId = uuid + "clipId";
 
-  let imgPath = $state("/discord.webp");
+  let imgPath = $state(DiscordIcon);
 
   onMount(async () => {
     const reponse = await fetch(iconPath);

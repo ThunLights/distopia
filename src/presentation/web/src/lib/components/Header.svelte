@@ -2,6 +2,7 @@
   import { resolve } from "$app/paths";
   import type { Pathname } from "$app/types";
   import { PUBLIC_OAUTH_URL } from "$env/static/public";
+  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import type { UserAuth } from "$lib/shared/types/UserAuth";
   import "@fontsource/inter/900.css";
   import "@fontsource/open-sans/800-italic.css";
@@ -84,7 +85,7 @@
       {:else}
         <a href={resolve("/user")}>
           <div class="discord-profile">
-            <img src={userData.avatarUrl ?? "/discord.webp"} alt="" />
+            <img src={userData.avatarUrl ?? DiscordIcon} alt="" />
             <p class="discord-logined-content">{userData.username}</p>
           </div>
         </a>

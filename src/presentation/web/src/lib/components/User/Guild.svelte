@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import type { Snippet } from "svelte";
 
   type Props = {
@@ -19,7 +20,7 @@
     <a href={resolve(`/user/guilds/${id}`)}>
       <img
         class="icon"
-        src={icon ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp` : "/discord.webp"}
+        src={icon ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp` : DiscordIcon}
         alt=""
       />
     </a>

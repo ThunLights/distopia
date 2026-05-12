@@ -1,5 +1,6 @@
 <script lang="ts">
   import BlackStar from "$lib/assets/icon/blackstar.webp";
+  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import Star from "$lib/assets/icon/star.webp";
 
   type Props = {
@@ -16,7 +17,7 @@
   <div class="context">
     <div class="user">
       <div>
-        <img class="icon" src={avatarUrl ?? "/discord.webp"} alt="" />
+        <img class="icon" src={avatarUrl ?? DiscordIcon} alt="" />
       </div>
       <div>
         <p class="name">{username ?? "unknown user"}</p>

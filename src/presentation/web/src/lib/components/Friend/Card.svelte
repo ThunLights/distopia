@@ -1,5 +1,6 @@
 <script lang="ts">
   import CopyIcon from "$lib/assets/icon/copy.webp";
+  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import Block from "$lib/components/Block.svelte";
   import Copy from "../Button/Copy.svelte";
   import TagsLayout from "../Layout/TagsLayout.svelte";
@@ -16,7 +17,7 @@
   <div class="friend-content">
     <div class="profile">
       <div>
-        <img class="icon" src={friend.avatarUrl ?? "/discord.webp"} alt="" />
+        <img class="icon" src={friend.avatarUrl ?? DiscordIcon} alt="" />
       </div>
       <div>
         <p class="username">
