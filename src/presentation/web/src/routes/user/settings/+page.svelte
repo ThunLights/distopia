@@ -12,7 +12,7 @@
   const title = $derived(`「${user.username}」の設定`);
 
   async function logoutAllDevices() {
-    const response = await fetch("/api/user/logout", {
+    const response = await fetch("/api/user/logout/all", {
       method: "DELETE",
     });
     if (response.status === 200) {
