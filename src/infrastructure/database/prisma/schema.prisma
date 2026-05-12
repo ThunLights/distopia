@@ -58,10 +58,11 @@ model Guild {
 }
 
 model GuildReview {
-  userId  String
-  guildId String
-  star    Int
-  content String?
+  userId    String
+  guildId   String
+  star      Int
+  content   String?
+  updatedAt DateTime @updatedAt
 
   @@id([userId, guildId])
 }

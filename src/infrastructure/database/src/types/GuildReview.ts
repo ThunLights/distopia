@@ -3,8 +3,10 @@ export type GuildReview = {
   guildId: string;
   star: number;
   content: string | null;
+  updatedAt: Date;
 };
 
 export type GuildReviewUpdateInput = Pick<GuildReview, "guildId" | "userId"> & Partial<GuildReview>;
 
-export type GuildReviewUpsertInput = GuildReview & Partial<Pick<GuildReview, "content">>;
+export type GuildReviewUpsertInput = Omit<GuildReview, "content" | "updatedAt"> &
+  Partial<Pick<GuildReview, "content" | "updatedAt">>;
