@@ -16,7 +16,7 @@
 
 <div class="guild">
   <div>
-    <a href={resolve(`/user/guild/${id}`)}>
+    <a href={resolve(`/user/guilds/${id}`)}>
       <img
         class="icon"
         src={icon ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp` : "/discord.webp"}
@@ -25,7 +25,7 @@
     </a>
   </div>
   <div>
-    <p class="name"><a href={resolve(`/user/guild/${id}`)}>{name}</a></p>
+    <p class="name"><a href={resolve(`/user/guilds/${id}`)}>{name}</a></p>
     <div class="informations">
       <p>ID: {id}</p>
       <p>
