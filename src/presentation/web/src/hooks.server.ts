@@ -30,6 +30,9 @@ async function start() {
   await core.friend.updateCache();
   console.log("Updated friend cache.");
 
+  await core.record.update();
+  console.log("Updated guild records.");
+
   schedule.add("*/5 * * * *", async () => {
     await core.jwt.update();
     await core.message.syncDB();
