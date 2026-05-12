@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { deleteAuth } from "$lib/client/auth";
   import { parseErrRes } from "$lib/client/error";
   import { Toast } from "$lib/client/toast";
   import Block from "$lib/components/Block.svelte";
@@ -43,8 +42,14 @@
   }
 
   async function logout() {
-    await deleteAuth();
-    location.href = "/";
+    const response = await fetch("/api/user/logout", {
+      method: "DELETE",
+    });
+    if (response.status === 200) {
+      location.href = "/";
+    } else if (response.status === 400) {
+      await parseErrRes(response);
+    }
   }
 </script>
 

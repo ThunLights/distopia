@@ -1,11 +1,9 @@
-import { core } from "$lib/server/core";
+import { deleteToken } from "$lib/server/auth";
 import { authHandler } from "$lib/server/handler";
 import type { RequestHandler } from "./$types";
 
 export const DELETE: RequestHandler = await authHandler(async (e) => {
-  const { user } = e.locals;
-
-  await core.jwt.updateNewUserVerifyKey(user.id);
+  await deleteToken(e.cookies);
 
   return new Response(null, { status: 200 });
 });
