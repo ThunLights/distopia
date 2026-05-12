@@ -100,9 +100,22 @@ export class Guild extends Base {
     return await this.state.database.guild.find(guildId);
   }
 
+  public async fetchMetaData(guildId: string) {
+    const guildMetaData = await this.state.discord.guild.fetch(guildId);
+    const serverBoostCount = await this.state.discord.guild.fetchBoostCount(guildId);
+
+    return guildMetaData
+      ? {
+          ...guildMetaData,
+          serverBoostCount: serverBoostCount ?? 0,
+        }
+      : null;
+  }
+
   public async findWithRecord(guildId: string) {
     const { guild, record } = await this.state.database.guild.findWithRecord(guildId);
-    const guildMetaData = await this.state.discord.guild.fetch(guildId);
+    const guildMetaData = await this.fetchMetaData(guildId);
+
     return {
       meta: guildMetaData,
       guild,
@@ -115,6 +128,41 @@ export class Guild extends Base {
             },
           }
         : null,
+    };
+  }
+
+  public async findWithAllRefData(guildId: string) {
+    const { guild, record, settings, recordOneDays, reviews } =
+      await this.state.database.guild.findWithAllRefData(guildId);
+    const guildMetaData = await this.fetchMetaData(guildId);
+
+    return {
+      meta: guildMetaData,
+      guild,
+      record: record
+        ? {
+            ...record,
+            rank: {
+              activeRate: this.record.getActiveRateRanking(guildId),
+              level: this.record.getLevelRank(guildId),
+            },
+          }
+        : null,
+      settings,
+      recordOneDays,
+      reviews: await Promise.all(
+        reviews.map(async ({ userId, star, content }) => {
+          const user = await this.state.discord.user.find(userId);
+
+          return {
+            userId,
+            username: user?.name ?? null,
+            avatarUrl: user?.avatarUrl ?? null,
+            star,
+            content,
+          };
+        }),
+      ),
     };
   }
 
