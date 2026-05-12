@@ -40,15 +40,6 @@ export class WebCommand extends ChatInputCommandBase<Options> {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    const guildData = await this.core.guild.find(guild.id);
-
-    if (guildData) {
-      return {
-        content: "登録が済んでいます。",
-        flags: [MessageFlags.Ephemeral],
-      };
-    }
-
     return await page(this.core, guild);
   }
 }

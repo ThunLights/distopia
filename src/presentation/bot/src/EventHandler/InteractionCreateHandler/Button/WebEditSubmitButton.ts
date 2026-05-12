@@ -48,7 +48,7 @@ export class WebEditSubmitButton extends ButtonInteractionBase {
       icon: guild.icon,
       banner: guild.banner,
       invite,
-      description: guild.description,
+      description,
       public: pub,
       nsfw,
       tags: tag ?? [],
