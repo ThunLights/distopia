@@ -151,7 +151,7 @@ export class Guild extends Base {
       settings,
       recordOneDays,
       reviews: await Promise.all(
-        reviews.map(async ({ userId, star, content }) => {
+        reviews.map(async ({ userId, star, content, updatedAt }) => {
           const user = await this.state.discord.user.find(userId);
 
           return {
@@ -160,6 +160,7 @@ export class Guild extends Base {
             avatarUrl: user?.avatarUrl ?? null,
             star,
             content,
+            updatedAt,
           };
         }),
       ),
