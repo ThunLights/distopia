@@ -1,10 +1,10 @@
 export type UserDiscord = {
-  id: string;
+  userId: string;
   accessToken: string;
   refreshToken: string;
   email: string | null;
   updatedAt: Date;
 };
 
-export type UserDiscordUpsertInput = Pick<UserDiscord, "id" | "accessToken" | "refreshToken"> &
+export type UserDiscordUpsertInput = Pick<UserDiscord, "userId" | "accessToken" | "refreshToken"> &
   Partial<UserDiscord>;

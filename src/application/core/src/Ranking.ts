@@ -60,7 +60,7 @@ export class Ranking extends Base {
     const dbUsers = await this.state.database.user.ranking("userBump", num);
 
     for (const user of dbUsers) {
-      const discordUserData = await this.state.discord.user.find(user.id);
+      const discordUserData = await this.state.discord.user.find(user.userId);
       if (discordUserData) {
         const { id, name, displayName, globalName, avatarUrl, bannerUrl } = discordUserData;
         users.push({

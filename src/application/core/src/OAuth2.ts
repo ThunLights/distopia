@@ -17,17 +17,21 @@ export class OAuth2 extends Base {
     const upsertQuery: UserDiscordUpsertInput[] = [];
     const deleteQuery: string[] = [];
 
-    for (const { id, refreshToken, updatedAt } of await this.state.database.userDiscord.findAll()) {
+    for (const {
+      userId,
+      refreshToken,
+      updatedAt,
+    } of await this.state.database.userDiscord.findAll()) {
       if (Date.now() > updatedAt.getTime() + 6 * 24 * 60 * 60 * 1000) {
         const updatedData = await this.state.discord.oauth2.resetAccessToken(refreshToken);
         if (updatedData) {
           upsertQuery.push({
-            id: id,
+            userId,
             refreshToken: updatedData.refreshToken,
             accessToken: updatedData.accessToken,
           });
         } else {
-          deleteQuery.push(id);
+          deleteQuery.push(userId);
         }
       }
     }
@@ -52,7 +56,7 @@ export class OAuth2 extends Base {
     }
 
     await this.state.database.userDiscord.upsert({
-      id: user.id,
+      userId: user.id,
       accessToken,
       refreshToken,
       email: user.email,

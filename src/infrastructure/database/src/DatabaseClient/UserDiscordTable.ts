@@ -2,8 +2,8 @@ import type { UserDiscordUpsertInput } from "../types";
 import { Base } from "./Base";
 
 export class UserDiscordTable extends Base {
-  public async find(id: string) {
-    return await this.prisma.userDiscord.findUnique({ where: { id } });
+  public async find(userId: string) {
+    return await this.prisma.userDiscord.findUnique({ where: { userId } });
   }
 
   public async findAll() {
@@ -12,7 +12,7 @@ export class UserDiscordTable extends Base {
 
   public async upsert(input: UserDiscordUpsertInput) {
     return await this.prisma.userDiscord.upsert({
-      where: { id: input.id },
+      where: { userId: input.userId },
       update: input,
       create: input,
     });
@@ -22,7 +22,7 @@ export class UserDiscordTable extends Base {
     return await this.prisma.$transaction(
       inputs.map((value) =>
         this.prisma.userDiscord.upsert({
-          where: { id: value.id },
+          where: { userId: value.userId },
           update: value,
           create: value,
         }),
@@ -30,13 +30,13 @@ export class UserDiscordTable extends Base {
     );
   }
 
-  public async delete(id: string) {
-    return await this.prisma.userDiscord.delete({ where: { id } });
+  public async delete(userId: string) {
+    return await this.prisma.userDiscord.delete({ where: { userId } });
   }
 
-  public async deleteAll(ids: string[]) {
+  public async deleteAll(userIds: string[]) {
     return await this.prisma.$transaction(
-      ids.map((id) => this.prisma.userDiscord.delete({ where: { id } })),
+      userIds.map((userId) => this.prisma.userDiscord.delete({ where: { userId } })),
     );
   }
 }

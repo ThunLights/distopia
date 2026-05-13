@@ -1,6 +1,6 @@
 export type UserWeb = {
-  id: string;
+  userId: string;
   jwtVerifyKey: string;
 };
 
-export type UserWebUpsertInput = Pick<UserWeb, "id"> & Partial<UserWeb>;
+export type UserWebUpsertInput = Pick<UserWeb, "userId"> & Partial<UserWeb>;

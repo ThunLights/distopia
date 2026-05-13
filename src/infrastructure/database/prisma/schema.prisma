@@ -15,17 +15,17 @@ datasource db {
 }
 
 model User {
-  id          String @id
+  userId      String @id
   bumpCounter Int?
 }
 
 model UserWeb {
-  id           String @id
+  userId       String @id
   jwtVerifyKey String @default(uuid(4))
 }
 
 model UserDiscord {
-  id           String   @id
+  userId       String   @id
   accessToken  String
   refreshToken String
   email        String?
