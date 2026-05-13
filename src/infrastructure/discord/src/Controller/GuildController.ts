@@ -44,6 +44,8 @@ export class GuildController extends Base {
           description: guild.description ?? undefined,
           icon: guild.icon ?? undefined,
           banner: guild.banner ?? undefined,
+          iconUrl: guild.iconURL() ?? undefined,
+          bannerUrl: guild.bannerURL() ?? undefined,
         }
       : null;
   }

@@ -10,7 +10,7 @@
   type Props = {
     height: number | string;
     width: number | string;
-    rank: number;
+    rank?: number;
     iconPath: string;
     imgStyle?: string;
   };
@@ -25,12 +25,10 @@
     if (rank < 30) return No30Frame;
     return No50Frame;
   }
-
-  const edgePath = $derived(genFrame(rank));
 </script>
 
-{#if rank < 50}
-  <IconWithFrame {height} {width} {edgePath} {iconPath} {imgStyle} />
+{#if rank && rank < 50}
+  <IconWithFrame {height} {width} {iconPath} {imgStyle} edgePath={genFrame(rank)} />
 {:else}
   <img {height} {width} style={imgStyle} src={iconPath} alt="guild icon" />
 {/if}

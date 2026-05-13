@@ -62,4 +62,10 @@
     font-size: 16px;
     font-weight: 500;
   }
+  .section-title {
+    font-weight: 700;
+  }
+  .inline-block {
+    display: inline-block;
+  }
 </style>

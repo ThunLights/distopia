@@ -5,7 +5,7 @@ import { error } from "@sveltejs/kit";
 export const load: PageServerLoad = async (e) => {
   const { guildId } = await e.parent();
 
-  const { meta, guild, reviews } = await core.guild.findWithAllRefData(guildId);
+  const { meta, guild, record, reviews } = await core.guild.findWithAllRefData(guildId);
 
   if (!meta || !guild) {
     return error(404);
@@ -15,5 +15,6 @@ export const load: PageServerLoad = async (e) => {
     meta,
     guild,
     reviews,
+    record,
   };
 };
