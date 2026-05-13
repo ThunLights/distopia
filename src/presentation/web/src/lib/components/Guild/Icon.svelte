@@ -18,11 +18,11 @@
   const { imgStyle, iconPath, rank, height, width }: Props = $props();
 
   function genFrame(rank: number) {
-    if (rank < 1) return No1Frame;
-    if (rank < 2) return No2Frame;
-    if (rank < 3) return No3Frame;
-    if (rank < 10) return No10Frame;
-    if (rank < 30) return No30Frame;
+    if (rank <= 1) return No1Frame;
+    if (rank <= 2) return No2Frame;
+    if (rank <= 3) return No3Frame;
+    if (rank <= 10) return No10Frame;
+    if (rank <= 30) return No30Frame;
     return No50Frame;
   }
 </script>
