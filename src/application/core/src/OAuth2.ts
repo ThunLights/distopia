@@ -125,4 +125,16 @@ export class OAuth2 extends Base {
 
     return null;
   }
+
+  public async joinGuild(userId: string, guildId: string) {
+    const token = await this.state.database.userDiscord.find(userId);
+
+    if (!token) {
+      return null;
+    }
+
+    const { accessToken } = token;
+
+    return await this.state.discord.oauth2.joinGuild(userId, guildId, accessToken);
+  }
 }

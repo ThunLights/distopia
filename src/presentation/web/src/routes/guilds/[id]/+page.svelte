@@ -7,9 +7,9 @@
   import Meta from "$lib/components/Meta.svelte";
 
   const { data } = $props();
-  const { meta, guild, record } = $derived(data);
+  const { meta, guild, record, user } = $derived(data);
   const { serverBoostCount: boostCount, iconUrl } = $derived(meta);
-  const { guildId, name, nsfw, description, tags } = $derived(guild);
+  const { guildId, name, nsfw, description, tags, invite } = $derived(guild);
 
   const activeRate = $derived(Number(record?.activeRate ?? 0n));
   const activeRateRank = $derived(record?.rank.activeRate);
@@ -44,6 +44,8 @@
   {maxActiveRateRank}
   {maxActiveRate}
   {maxLevelRank}
+  {user}
+  {invite}
 />
 <Evaluation reviews={reviewStars} />
 <Block>

@@ -2,6 +2,7 @@
   import { resolve } from "$app/paths";
   import DiscordIcon from "$lib/assets/icon/discord.webp";
   import Block from "$lib/components/Block.svelte";
+  import type { UserAuth } from "$lib/shared/types/UserAuth";
   import BlockTitle from "./BlockTitle.svelte";
   import Icon from "./Icon.svelte";
   import JoinButton from "./JoinButton.svelte";
@@ -22,6 +23,8 @@
     maxActiveRateRank?: bigint;
     maxActiveRate?: bigint;
     maxLevelRank?: bigint;
+    user: UserAuth | null;
+    invite: string;
   };
 
   const {
@@ -40,6 +43,8 @@
     maxActiveRateRank,
     maxActiveRate,
     maxLevelRank,
+    user,
+    invite,
   }: Props = $props();
 </script>
 
@@ -106,7 +111,7 @@
     </div>
   </div>
   <div>
-    <JoinButton {name} {guildId} />
+    <JoinButton {name} {guildId} {user} {invite} />
   </div>
 </Block>
 

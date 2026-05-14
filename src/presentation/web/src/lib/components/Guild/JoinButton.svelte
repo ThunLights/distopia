@@ -1,12 +1,19 @@
 <script lang="ts">
+  import { joinGuild } from "$lib/client/join";
+  import type { UserAuth } from "$lib/shared/types/UserAuth";
+
   type Props = {
     guildId: string;
     name: string;
+    invite: string;
+    user: UserAuth | null;
   };
 
-  const { name }: Props = $props();
+  const { user, name, guildId, invite }: Props = $props();
 
-  async function join() {}
+  async function join() {
+    await joinGuild(guildId, name, invite, user !== null);
+  }
 </script>
 
 <button onclick={join} class="join-button">「{name}」に参加</button>
