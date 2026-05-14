@@ -12,6 +12,7 @@ import type { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
 import type { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
 import type { UserOAuth2 } from "repo-memory/UserOAuth2";
 import type { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
+import type { SearchEngine } from "repo-search";
 
 export type AppState = {
   owner: {
@@ -34,6 +35,7 @@ export type AppState = {
     userOAuth2: UserOAuth2;
     voiceChannelMember: VoiceChannelMember;
   };
+  searchEngine: SearchEngine;
   discord: Controller;
   database: DatabaseClient;
 };

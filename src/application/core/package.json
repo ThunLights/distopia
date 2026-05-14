@@ -39,7 +39,8 @@
     "domain-service": "workspace:*",
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
-    "repo-memory": "workspace:*"
+    "repo-memory": "workspace:*",
+    "repo-search": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

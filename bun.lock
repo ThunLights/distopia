@@ -36,6 +36,7 @@
         "infra-database": "workspace:*",
         "infra-discord": "workspace:*",
         "repo-memory": "workspace:*",
+        "repo-search": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -191,6 +192,7 @@
         "jsonwebtoken": "9.0.3",
         "presentation-bot": "workspace:*",
         "repo-memory": "workspace:*",
+        "repo-search": "workspace:*",
         "svelte-exmarkdown": "5.0.2",
         "uuid": "14.0.0",
         "zod": "catalog:",

@@ -2,6 +2,7 @@ import { PUBLIC_OWNER_ID, PUBLIC_URL } from "$env/static/public";
 import { djsController } from "./bot";
 import { database } from "./database";
 import { memory } from "./memory";
+import { searchEngine } from "./search";
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
 import { page as levelRatePage } from "presentation-bot/page/Ranking/Level";
@@ -16,6 +17,7 @@ export const core = genCore({
   owner: { id: PUBLIC_OWNER_ID },
   url: PUBLIC_URL,
   memory,
+  searchEngine,
   discord: djsController,
   database,
 });
