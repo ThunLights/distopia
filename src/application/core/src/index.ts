@@ -118,3 +118,5 @@ export class AppCore extends Base {
     await this.updateHomeGuildSubDirectorsRole(homeGuildId, subDirectorsRoleId);
   }
 }
+
+export * from "./Ranking";

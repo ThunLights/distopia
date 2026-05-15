@@ -10,7 +10,7 @@ export type UserBumpRanking = {
   avatarUrl?: string;
   bannerUrl?: string;
   bumpCounter: number | null;
-}[];
+};
 
 export type FetchOptions = {
   num?: number;
@@ -19,7 +19,19 @@ export type FetchOptions = {
 export class Ranking extends Base {
   private guildLevel = new Map<number, GuildRecordRanking[]>();
   private guildActiveRate = new Map<number, GuildRecordRanking[]>();
-  private userBump = new Map<number, UserBumpRanking>();
+  private userBump = new Map<number, UserBumpRanking[]>();
+
+  public async fetchAll(num: number) {
+    return {
+      guild: {
+        level: await this.fetchGuild("level", { num }),
+        activeRate: await this.fetchGuild("activeRate", { num }),
+      },
+      user: {
+        bump: await this.fetchUser("userBump", { num }),
+      },
+    };
+  }
 
   public async fetchGuild(rankingType: "level" | "activeRate", options?: FetchOptions) {
     const num = options?.num ?? 20;
@@ -47,7 +59,7 @@ export class Ranking extends Base {
   public async fetchUser(
     _rankingType: "userBump",
     options?: FetchOptions,
-  ): Promise<UserBumpRanking> {
+  ): Promise<UserBumpRanking[]> {
     const num = options?.num ?? 20;
     const cache = this.userBump.get(num);
 
@@ -55,7 +67,7 @@ export class Ranking extends Base {
       return cache;
     }
 
-    const users: UserBumpRanking = [];
+    const users: UserBumpRanking[] = [];
 
     const dbUsers = await this.state.database.user.ranking("userBump", num);
 

@@ -1,5 +1,6 @@
 import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
 import type {
+  GuildRecordRanking,
   GuildReviewUpsertInput,
   GuildSettingUpsertInput,
   GuildUpsertInput,
@@ -185,6 +186,28 @@ export class Guild extends Base {
 
   public async deleteReview(guildId: string, userId: string) {
     return await this.state.database.guildReview.delete(guildId, userId);
+  }
+
+  public async rankingToGuildWithMeta({
+    guildId,
+    name,
+    activeRate,
+    level,
+    point,
+    icon,
+  }: GuildRecordRanking) {
+    const memberCount = await this.state.discord.guild.fetchMemberCount(guildId);
+    const onlineMemberCount = await this.state.discord.guild.fetchMemberCount(guildId, ["online"]);
+    return {
+      guildId,
+      name,
+      activeRate,
+      level,
+      point,
+      memberCount: memberCount ?? null,
+      onlineMemberCount: onlineMemberCount ?? null,
+      iconUrl: icon ? this.iconUrl(guildId, icon) : null,
+    };
   }
 
   public iconUrl(guildId: string, iconHash: string) {
