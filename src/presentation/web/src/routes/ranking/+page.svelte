@@ -1,6 +1,7 @@
 <script lang="ts">
   import { parseErrRes } from "$lib/client/error.js";
   import Block from "$lib/components/Block.svelte";
+  import Meta from "$lib/components/Meta.svelte";
   import Guild from "$lib/components/Ranking/Guild.svelte";
   import User from "$lib/components/Ranking/User.svelte";
   import type {
@@ -42,6 +43,8 @@
     rankingType = parseRankingType(e.currentTarget.value);
   }
 </script>
+
+<Meta title="サーバーランキング" />
 
 <Block>
   <div class="menu">
