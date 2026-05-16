@@ -64,11 +64,12 @@ export const handle = (async ({ event, resolve }) => {
   const oldToken = event.cookies.get("authorization");
   const user = await verifyToken(event.cookies);
 
-  event.locals = { user };
+  event.locals = { user: user?.public ?? null };
 
-  if (user?.token) {
-    if (user.token !== oldToken) {
-      await setToken(event.cookies, user.token);
+  if (user?.private.token) {
+    const newToken = user.private.token;
+    if (newToken !== oldToken) {
+      await setToken(event.cookies, newToken);
     }
   } else {
     if (oldToken !== undefined) {

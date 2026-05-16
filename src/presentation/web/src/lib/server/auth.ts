@@ -5,7 +5,9 @@ import type { Cookies } from "@sveltejs/kit";
 
 const twoMonth = 2 * 30 * 24 * 60 * 60 * 1000;
 
-export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
+export async function verifyToken(
+  cookies: Cookies,
+): Promise<{ private: { token: string }; public: UserAuth } | null> {
   const auth = cookies.get("authorization");
 
   if (!auth) {
@@ -22,10 +24,14 @@ export async function verifyToken(cookies: Cookies): Promise<UserAuth | null> {
 
   return user
     ? {
-        token: verified.newToken ?? auth,
-        id: user.id,
-        username: user.username,
-        avatarUrl: user.avatarUrl,
+        private: {
+          token: verified.newToken ?? auth,
+        },
+        public: {
+          id: user.id,
+          username: user.username,
+          avatarUrl: user.avatarUrl,
+        },
       }
     : null;
 }

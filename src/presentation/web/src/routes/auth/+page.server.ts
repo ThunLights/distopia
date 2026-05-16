@@ -21,7 +21,6 @@ export const load: PageServerLoad = async (e) => {
           id,
           username,
           avatarUrl: avatarUrl ?? undefined,
-          token,
         };
       }
     }
