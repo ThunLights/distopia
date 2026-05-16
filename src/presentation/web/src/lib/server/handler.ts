@@ -29,6 +29,29 @@ export async function authHandler<
   };
 }
 
+export async function validateHandler<
+  SchemaInput,
+  SchemaOutput,
+  RouteParams extends LayoutParams<RouteId>,
+  RouteId extends ReturnType<AppTypes["RouteId"]>,
+>(
+  schema: StandardSchemaV1<SchemaInput, SchemaOutput>,
+  handler: (
+    event: RequestEvent<RouteParams, RouteId>,
+    body: SchemaOutput,
+  ) => MaybePromise<Response>,
+): Promise<(event: RequestEvent<RouteParams, RouteId>) => MaybePromise<Response>> {
+  return async (e) => {
+    const body = await schema["~standard"].validate(await e.request.json());
+
+    if (body.issues) {
+      return errorJson("Invalid Body: " + body.issues.join(", "));
+    }
+
+    return await handler(e, body.value);
+  };
+}
+
 export async function authAndValidateHandler<
   SchemaInput,
   SchemaOutput,
