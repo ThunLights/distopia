@@ -27,7 +27,7 @@
   }
 </script>
 
-{#if rank && rank < 50}
+{#if rank && rank <= 50}
   <IconWithFrame {height} {width} {iconPath} {imgStyle} edgePath={genFrame(rank)} />
 {:else}
   <img {height} {width} style={imgStyle} src={iconPath} alt="guild icon" />
