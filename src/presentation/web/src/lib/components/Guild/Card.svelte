@@ -14,13 +14,14 @@
     invite: string;
     description: string | null;
     tags: string[];
+    nsfw: boolean;
     boostCount: number;
     iconUrl: string | null;
     rank: number;
     user: UserAuth;
   };
 
-  const { guildId, name, invite, description, tags, iconUrl, user, rank, boostCount }: Props =
+  const { guildId, name, invite, description, tags, iconUrl, user, rank, boostCount, nsfw }: Props =
     $props();
 
   async function join() {
@@ -36,7 +37,12 @@
           <Icon height={60} width={60} iconPath={iconUrl ?? DiscordIcon} {rank} />
         </div>
         <div>
-          <p class="guild-name">{name}</p>
+          <p class="guild-name">
+            {name}
+            {#if nsfw}
+              <small class="nsfw">NSFW!!</small>
+            {/if}
+          </p>
           <p>ブースト: {boostCount}</p>
         </div>
       </div>
@@ -64,6 +70,9 @@
 </div>
 
 <style>
+  .nsfw {
+    color: red;
+  }
   .btns {
     display: grid;
     grid-template-columns: 49% 2% 49%;
