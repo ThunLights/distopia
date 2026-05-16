@@ -1,5 +1,6 @@
 <script lang="ts">
   import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
+  import { CHARACTER_LIMIT } from "app-core/constant";
 
   type Props = {
     searchWord: string;
@@ -25,6 +26,7 @@
     type="text"
     spellcheck="false"
     autocomplete="off"
+    maxlength={CHARACTER_LIMIT.searchTerm}
     onkeyup={inputSearchCommand}
     bind:value={searchWord}
   />

@@ -80,6 +80,7 @@ export const CHARACTER_LIMIT = {
   description: 400,
   tag: 25,
   review: 150,
+  searchTerm: 500,
 } as const;
 
 export const NUM_TAG_LIMIT = 5;
