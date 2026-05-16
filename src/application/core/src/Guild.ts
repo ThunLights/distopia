@@ -191,7 +191,7 @@ export class Guild extends Base {
     };
   }
 
-  public async search(term: string, options: SearchOptions) {
+  public async search(term: string, options?: SearchOptions) {
     const { time, hits } = await this.state.searchEngine.search(term, options);
 
     const guilds = await this.findAllWithMetaData(hits.map(({ guildId }) => guildId));

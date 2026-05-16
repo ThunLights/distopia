@@ -18,14 +18,14 @@
     boostCount: number;
     iconUrl: string | null;
     rank: number;
-    user: UserAuth;
+    user: UserAuth | null;
   };
 
   const { guildId, name, invite, description, tags, iconUrl, user, rank, boostCount, nsfw }: Props =
     $props();
 
   async function join() {
-    await joinGuild(guildId, name, invite, user !== undefined);
+    await joinGuild(guildId, name, invite, user !== null);
   }
 </script>
 
