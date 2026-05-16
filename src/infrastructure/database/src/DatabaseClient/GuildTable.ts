@@ -36,10 +36,6 @@ export class GuildTable extends Base {
     };
   }
 
-  public async hoge() {
-    await this.prisma.guildRecord.findMany({});
-  }
-
   public async findAll(): Promise<Guild[]> {
     return await this.prisma.guild.findMany();
   }
