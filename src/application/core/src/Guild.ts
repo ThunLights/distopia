@@ -12,13 +12,24 @@ import type { AppState } from "./AppState";
 import { Base } from "./Base";
 import type { Record } from "./Record";
 import type { GuildMetaData } from "./types/GuildMetaData";
+import type { RootPage } from "./types/RootPage";
 
 export class Guild extends Base {
+  public readonly rootPage: RootPage = {
+    latestGuilds: [],
+    activeGuilds: [],
+  };
+
   constructor(
     state: AppState,
     private readonly record: Record,
   ) {
     super(state);
+  }
+
+  public async updateRootPage() {
+    this.rootPage.latestGuilds = await this.findManySortedBumpTime(40);
+    this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
   }
 
   public async removeUnJoinedGuildData() {
@@ -101,6 +112,45 @@ export class Guild extends Base {
 
   public async find(guildId: string) {
     return await this.state.database.guild.find(guildId);
+  }
+
+  public async findManySortedBumpTime(take: number) {
+    const guilds = await this.state.database.guild.findAllSortedBumpTime(take);
+    const guildsWithMeta = (
+      await Promise.all(
+        guilds.map(async (guild) => {
+          const guildMetaData = await this.fetchMetaData(guild.guildId);
+          return {
+            meta: guildMetaData,
+            guild,
+          };
+        }),
+      )
+    )
+      .filter(({ meta }) => meta !== null)
+      .map((guild) => ({ ...guild, meta: guild.meta as GuildMetaData }));
+
+    return guildsWithMeta;
+  }
+
+  public async findManySortedActiveRate(take: number) {
+    const guilds = await this.state.database.guildRecord.ranking("activeRate", take);
+    const guildsWithMeta = (
+      await Promise.all(
+        guilds.map(async (guild) => {
+          const guildMetaData = await this.fetchMetaData(guild.guildId);
+          return {
+            meta: guildMetaData,
+            guild,
+          };
+        }),
+      )
+    )
+      .filter(({ meta }) => meta !== null)
+      .map((guild) => ({ ...guild, meta: guild.meta as GuildMetaData }))
+      .map(({ guild, meta }) => ({ guild: { ...guild, tags: guild.tags ?? [] }, meta }));
+
+    return guildsWithMeta;
   }
 
   public async fetchMetaData(guildId: string): Promise<GuildMetaData | null> {

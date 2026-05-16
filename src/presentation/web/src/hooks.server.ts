@@ -33,6 +33,13 @@ async function start() {
   await core.record.update();
   console.log("Updated guild records.");
 
+  await core.guild.updateRootPage();
+  console.log("Updated root page guilds.");
+
+  schedule.add("*/30 * * * * *", async () => {
+    await core.guild.updateRootPage();
+  });
+
   schedule.add("*/5 * * * *", async () => {
     await core.jwt.update();
     await core.message.syncDB();

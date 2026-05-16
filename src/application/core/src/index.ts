@@ -121,3 +121,4 @@ export class AppCore extends Base {
 
 export * from "./types/UserBumpRanking";
 export * from "./types/GuildMetaData";
+export * from "./types/RootPage";
