@@ -6,10 +6,12 @@ import type {
   GuildUpsertInput,
 } from "infra-database/types";
 import type { Value } from "repo-memory/GuildEdit";
+import type { SearchOptions } from "repo-search";
 
 import type { AppState } from "./AppState";
 import { Base } from "./Base";
 import type { Record } from "./Record";
+import type { GuildMetaData } from "./types/GuildMetaData";
 
 export class Guild extends Base {
   constructor(
@@ -101,7 +103,7 @@ export class Guild extends Base {
     return await this.state.database.guild.find(guildId);
   }
 
-  public async fetchMetaData(guildId: string) {
+  public async fetchMetaData(guildId: string): Promise<GuildMetaData | null> {
     const guildMetaData = await this.state.discord.guild.fetch(guildId);
     const serverBoostCount = await this.state.discord.guild.fetchBoostCount(guildId);
 
@@ -130,6 +132,27 @@ export class Guild extends Base {
           }
         : null,
     };
+  }
+
+  public async findAllWithMetaData(guildIds: string[]) {
+    const guilds = (await this.state.database.guild.findMany(guildIds))
+      .filter((guild) => guild !== null)
+      .filter((guild) => guild.public);
+    const guildsWithMeta = (
+      await Promise.all(
+        guilds.map(async (guild) => {
+          const guildMetaData = await this.fetchMetaData(guild.guildId);
+          return {
+            meta: guildMetaData,
+            guild,
+          };
+        }),
+      )
+    )
+      .filter(({ meta }) => meta !== null)
+      .map((guild) => ({ ...guild, meta: guild.meta as GuildMetaData }));
+
+    return guildsWithMeta;
   }
 
   public async findWithAllRefData(guildId: string) {
@@ -165,6 +188,18 @@ export class Guild extends Base {
           };
         }),
       ),
+    };
+  }
+
+  public async search(term: string, options: SearchOptions) {
+    const { time, hits } = await this.state.searchEngine.search(term, options);
+
+    const guilds = await this.findAllWithMetaData(hits.map(({ guildId }) => guildId));
+
+    return {
+      guilds,
+      time,
+      count: guilds.length,
     };
   }
 
