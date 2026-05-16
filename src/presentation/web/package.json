@@ -70,6 +70,7 @@
     "presentation-bot": "workspace:*",
     "repo-memory": "workspace:*",
     "repo-search": "workspace:*",
+    "super-sitemap": "1.0.12",
     "svelte-exmarkdown": "5.0.2",
     "uuid": "14.0.0",
     "zod": "catalog:"
