@@ -1,20 +1,8 @@
 import type { GuildRecordRanking } from "infra-database/types";
 
 import { Base } from "./Base";
-
-export type UserBumpRanking = {
-  readonly id: string;
-  name: string;
-  displayName: string;
-  globalName?: string;
-  avatarUrl?: string;
-  bannerUrl?: string;
-  bumpCounter: number | null;
-};
-
-export type FetchOptions = {
-  num?: number;
-};
+import type { RankingFetchOptions } from "./types/RankingFetchOptions";
+import type { UserBumpRanking } from "./types/UserBumpRanking";
 
 export class Ranking extends Base {
   private guildLevel = new Map<number, GuildRecordRanking[]>();
@@ -33,7 +21,7 @@ export class Ranking extends Base {
     };
   }
 
-  public async fetchGuild(rankingType: "level" | "activeRate", options?: FetchOptions) {
+  public async fetchGuild(rankingType: "level" | "activeRate", options?: RankingFetchOptions) {
     const num = options?.num ?? 20;
     const cache =
       rankingType === "level" ? this.guildLevel.get(num) : this.guildActiveRate.get(num);
@@ -58,7 +46,7 @@ export class Ranking extends Base {
 
   public async fetchUser(
     _rankingType: "userBump",
-    options?: FetchOptions,
+    options?: RankingFetchOptions,
   ): Promise<UserBumpRanking[]> {
     const num = options?.num ?? 20;
     const cache = this.userBump.get(num);

@@ -119,5 +119,5 @@ export class AppCore extends Base {
   }
 }
 
-export * from "./Ranking";
+export * from "./types/UserBumpRanking";
 export * from "./types/GuildMetaData";
