@@ -17,7 +17,7 @@
     nsfw: boolean;
     boostCount: number;
     iconUrl: string | null;
-    rank: number;
+    rank: number | null;
     user: UserAuth | null;
   };
 
@@ -34,7 +34,7 @@
     <div>
       <div class="guild-info">
         <div>
-          <Icon height={60} width={60} iconPath={iconUrl ?? DiscordIcon} {rank} />
+          <Icon height={60} width={60} iconPath={iconUrl ?? DiscordIcon} rank={rank ?? undefined} />
         </div>
         <div>
           <p class="guild-name">

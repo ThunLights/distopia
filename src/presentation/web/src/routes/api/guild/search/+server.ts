@@ -20,6 +20,7 @@ export const POST: RequestHandler = await validateHandler(PostBodySchema, async 
         nsfw: guild.nsfw,
         boostCount: meta.serverBoostCount,
         iconUrl: meta.iconUrl ?? null,
+        rank: core.record.getActiveRateRanking(guild.guildId) ?? null,
       })),
       count,
       time,

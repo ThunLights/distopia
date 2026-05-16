@@ -17,6 +17,7 @@ export type Guild = {
   nsfw: boolean;
   boostCount: number;
   iconUrl: string | null;
+  rank: number | null;
 };
 
 export type ResponseMethodPost = {
