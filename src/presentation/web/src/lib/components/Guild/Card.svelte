@@ -55,14 +55,19 @@
         {/if}
       </div>
     </div>
-    <div>
+    <div class="btns">
       <LinkButton rel="internal" link={`/guilds/${guildId}`} label="詳細" />
+      <div></div>
       <PrimaryButton onclick={join}>サーバーに参加</PrimaryButton>
     </div>
   </div>
 </div>
 
 <style>
+  .btns {
+    display: grid;
+    grid-template-columns: 49% 2% 49%;
+  }
   .guild-info p {
     font-size: 8px;
   }
