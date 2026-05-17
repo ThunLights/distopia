@@ -1,9 +1,9 @@
 export type GuildRanking = {
   guildId: string;
   name: string;
-  activeRate: bigint | null;
-  level: bigint;
-  point: bigint;
+  activeRate: number | null;
+  level: number;
+  point: number;
   memberCount: number | null;
   onlineMemberCount: number | null;
   iconUrl: string | null;

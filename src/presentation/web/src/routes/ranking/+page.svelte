@@ -11,10 +11,6 @@
   } from "$lib/shared/types/routes/api/ranking";
   import { onMount } from "svelte";
 
-  type OnChangeEvent = Event & {
-    currentTarget: EventTarget & HTMLSelectElement;
-  };
-
   const { data } = $props();
   let rankingType = $derived<"userbump" | "level" | "rate">(parseRankingType(data.rankingType));
   let userBump = $state<UserRanking[]>([]);
@@ -38,10 +34,6 @@
   function parseRankingType(ty: string | null) {
     return ty === "userbump" ? "userbump" : ty === "level" ? "level" : "rate";
   }
-
-  function moveOtherType(e: OnChangeEvent) {
-    rankingType = parseRankingType(e.currentTarget.value);
-  }
 </script>
 
 <Meta title="サーバーランキング" />
@@ -50,7 +42,7 @@
   <div class="menu">
     <p class="title">ランキング</p>
     <div class="search-type-changer">
-      <select value={rankingType} onchange={moveOtherType}>
+      <select bind:value={rankingType}>
         <option value="level">レベル</option>
         <option value="activeRate">アクティブレート</option>
         <option value="userBump">ユーザーBumpランキング</option>

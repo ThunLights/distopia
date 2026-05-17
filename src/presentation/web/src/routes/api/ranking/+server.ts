@@ -1,18 +1,29 @@
 import { core } from "$lib/server/core";
 import type { ResponseMethodGet } from "$lib/shared/types/routes/api/ranking";
+import type { RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 
-export const GET = async () => {
+export const GET: RequestHandler = async () => {
   const { guild, user } = await core.ranking.fetchAll(100);
   return json(
     {
       guild: {
-        level: await Promise.all(
-          guild.level.map((guild) => core.guild.rankingToGuildWithMeta(guild)),
-        ),
-        activeRate: await Promise.all(
-          guild.activeRate.map((guild) => core.guild.rankingToGuildWithMeta(guild)),
-        ),
+        level: (
+          await Promise.all(guild.level.map((g) => core.guild.rankingToGuildWithMeta(g)))
+        ).map((g) => ({
+          ...g,
+          activeRate: g.activeRate ? Number(g.activeRate) : null,
+          level: Number(g.level),
+          point: Number(g.point),
+        })),
+        activeRate: (
+          await Promise.all(guild.activeRate.map((g) => core.guild.rankingToGuildWithMeta(g)))
+        ).map((g) => ({
+          ...g,
+          activeRate: g.activeRate ? Number(g.activeRate) : null,
+          level: Number(g.level),
+          point: Number(g.point),
+        })),
       },
       user: {
         bump: user.bump.map(({ id, displayName, name, avatarUrl, bumpCounter }) => ({
