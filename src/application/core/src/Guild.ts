@@ -32,12 +32,26 @@ export class Guild extends Base {
     this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
   }
 
+  public async loadSearchEngine() {
+    const guilds = await this.state.database.guild.findAll();
+    await this.state.searchEngine.upsertAll(
+      guilds.map(({ guildId, name, description, nsfw, tags }) => ({
+        guildId,
+        name,
+        description: description ?? "",
+        nsfw,
+        tags,
+      })),
+    );
+  }
+
   public async removeUnJoinedGuildData() {
     for (const { guildId } of await this.state.database.guild.findAll()) {
       if (!(await this.state.discord.guild.isJoined(guildId))) {
         const limit = this.state.memory.unJoinedGuild.get(guildId);
         if (limit) {
           if (Date.now() > limit.getTime()) {
+            await this.state.searchEngine.delete(guildId);
             await this.state.database.guild.delete(guildId);
             this.state.memory.unJoinedGuild.delete(guildId);
           }

@@ -36,6 +36,9 @@ async function start() {
   await core.guild.updateRootPage();
   console.log("Updated root page guilds.");
 
+  await core.guild.loadSearchEngine();
+  console.log("Loaded SearchEngine.");
+
   schedule.add("*/30 * * * * *", async () => {
     await core.guild.updateRootPage();
   });

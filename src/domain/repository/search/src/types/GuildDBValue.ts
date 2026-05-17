@@ -4,5 +4,4 @@ export type GuildDBValue = {
   description: string;
   nsfw: boolean;
   tags: string[];
-  bumpTime: number;
 };

@@ -1,5 +1,4 @@
 import { create, remove, search, upsert, upsertMultiple, getByID } from "@orama/orama";
-import { pluginQPS } from "@orama/plugin-qps";
 import { stopwords as japaneseStopwords } from "@orama/stopwords/japanese";
 import { createTokenizer } from "@orama/tokenizers/japanese";
 
@@ -16,7 +15,6 @@ export class SearchEngine {
       description: "string",
       nsfw: "boolean",
       tags: "string[]",
-      bumpTime: "number",
     },
     components: {
       tokenizer: createTokenizer({
@@ -24,7 +22,6 @@ export class SearchEngine {
         stopWords: japaneseStopwords,
       }),
     },
-    plugins: [pluginQPS()],
   });
 
   public async upsertAll(values: GuildDBValue[]) {
@@ -54,12 +51,12 @@ export class SearchEngine {
     const nsfw = options?.filter.nsfw;
     const alg = options?.alg;
     const { hits, count, elapsed } = await search(this.guildDb, {
-      mode: "fulltext",
       term,
       properties: "*",
       where: { nsfw },
-      exact: alg?.includes("exact") ?? false,
-      preflight: alg?.includes("preflight") ?? false,
+      exact: alg?.includes("exact") ?? undefined,
+      preflight: alg?.includes("preflight") ?? undefined,
+      tolerance: 1,
     });
 
     return {
