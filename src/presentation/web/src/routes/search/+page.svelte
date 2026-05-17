@@ -17,33 +17,35 @@
   let word = $derived(data.word ?? "");
   let guilds = $state<Guild[]>([]);
 
-  async function search() {
-    if (!word.length) {
-      guilds = [];
-      return;
-    }
+  function search(term: string) {
+    return async () => {
+      if (!word.length) {
+        guilds = [];
+        return;
+      }
 
-    const response = await fetch("/api/guild/search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        term: word,
-        type: "all",
-      } satisfies PostBody),
-    });
+      const response = await fetch("/api/guild/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          term: term,
+          type: "all",
+        } satisfies PostBody),
+      });
 
-    if (response.status === 200) {
-      const res = (await response.json()) as ResponseMethodPost;
-      guilds = res.guilds;
-    } else if (response.status === 400) {
-      await parseErrRes(response);
-    }
+      if (response.status === 200) {
+        const res = (await response.json()) as ResponseMethodPost;
+        guilds = res.guilds;
+      } else if (response.status === 400) {
+        await parseErrRes(response);
+      }
+    };
   }
 
   onMount(async () => {
-    await search();
+    await search(word)();
   });
 </script>
 

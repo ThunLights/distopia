@@ -5,15 +5,16 @@
 
   type Props = {
     searchWord: string;
-    func: () => MaybePromise<void>;
+    func: (term: string) => () => MaybePromise<void>;
   };
 
   let { searchWord, func }: Props = $props();
+  let term = $derived(searchWord);
 
   async function inputSearchCommand(e: KeyboardEvent) {
     if (e.key === "Enter") {
       e.preventDefault();
-      await func();
+      await func(term)();
     }
   }
 </script>
@@ -26,9 +27,9 @@
     autocomplete="off"
     maxlength={CHARACTER_LIMIT.searchTerm}
     onkeyup={inputSearchCommand}
-    bind:value={searchWord}
+    bind:value={term}
   />
-  <PrimaryButton onclick={func}>検索</PrimaryButton>
+  <PrimaryButton onclick={func(term)}>検索</PrimaryButton>
 </div>
 
 <style>

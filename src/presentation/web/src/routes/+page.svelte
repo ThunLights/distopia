@@ -9,8 +9,10 @@
   const { latestGuilds, activeGuilds, user } = $derived(data);
   let searchWord = $state("");
 
-  function search() {
-    location.href = `/search?w=${searchWord}`;
+  function search(term: string) {
+    return () => {
+      location.href = `/search?w=${term}`;
+    };
   }
 </script>
 
