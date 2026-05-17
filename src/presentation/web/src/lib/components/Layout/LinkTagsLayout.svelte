@@ -37,6 +37,7 @@
     margin: 3px 5px;
   }
   a {
+    color: white;
     text-decoration: none;
   }
 </style>
