@@ -1,6 +1,7 @@
 <script lang="ts">
+  /* eslint svelte/no-navigation-without-resolve: "off" */
   import { resolve } from "$app/paths";
-  import type { Pathname } from "$app/types";
+  import type { ResolvedPathname } from "$app/types";
   import { PUBLIC_OAUTH_URL } from "$env/static/public";
   import DiscordIcon from "$lib/assets/icon/discord.webp";
   import type { UserAuth } from "$lib/shared/types/UserAuth";
@@ -9,7 +10,7 @@
 
   type Props = {
     title?: string;
-    titleLink?: Pathname;
+    titleLink?: ResolvedPathname;
     loginBlock?: boolean;
     userData?: UserAuth | null;
   };
@@ -41,7 +42,7 @@
     </div>
     <nav class="bager-content">
       <div class="header-title">
-        <a href={resolve(titleLink)}>
+        <a href={titleLink}>
           <p>{title}</p>
         </a>
       </div>

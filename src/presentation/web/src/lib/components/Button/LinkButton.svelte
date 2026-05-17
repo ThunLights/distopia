@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { resolve } from "$app/paths";
-  import type { Pathname } from "$app/types";
+  /* eslint svelte/no-navigation-without-resolve: "off" */
+  import type { ResolvedPathname } from "$app/types";
   import { createRedirectEvent } from "$lib/client/redirect";
   import PrimaryButton from "./PrimaryButton.svelte";
 
@@ -9,7 +9,7 @@
   } & (
     | {
         rel: "internal";
-        link: Pathname;
+        link: ResolvedPathname;
       }
     | {
         rel: "external";
@@ -24,7 +24,7 @@
   {#if rel === "external"}
     <a href={link} rel="external">{label}</a>
   {:else}
-    <a href={resolve(link)}>{label}</a>
+    <a href={link}>{label}</a>
   {/if}
 </PrimaryButton>
 
