@@ -17,28 +17,35 @@
 <Meta title="Home" />
 
 <Banner />
-<div>
-  <p class="title">あなたにピッタリなDiscordサーバーを見つける</p>
-  <Search {searchWord} func={search} />
-</div>
-<div>
-  <p class="title">最近更新されたサーバー</p>
-  <CardLayout>
-    {#each latestGuilds as guild (guild.guildId)}
-      <Card {...guild} {user} iconUrl={guild.iconUrl ?? null} />
-    {/each}
-  </CardLayout>
-</div>
-<div>
-  <p class="title">アクティブなサーバー</p>
-  <CardLayout>
-    {#each activeGuilds as guild (guild.guildId)}
-      <Card {...guild} {user} iconUrl={guild.iconUrl ?? null} />
-    {/each}
-  </CardLayout>
+<div class="content">
+  <div>
+    <p class="title">あなたにピッタリなDiscordサーバーを見つける</p>
+    <Search {searchWord} func={search} />
+  </div>
+  <div>
+    <p class="title">最近更新されたサーバー</p>
+    <CardLayout>
+      {#each latestGuilds as guild (guild.guildId)}
+        <Card {...guild} {user} iconUrl={guild.iconUrl ?? null} />
+      {/each}
+    </CardLayout>
+  </div>
+  <div>
+    <p class="title">アクティブなサーバー</p>
+    <CardLayout>
+      {#each activeGuilds as guild (guild.guildId)}
+        <Card {...guild} {user} iconUrl={guild.iconUrl ?? null} />
+      {/each}
+    </CardLayout>
+  </div>
 </div>
 
 <style>
+  .content {
+    overflow: hidden;
+    width: 95%;
+    margin: 30px auto;
+  }
   .title {
     margin-top: 14px;
     font-size: 30px;
