@@ -14,6 +14,7 @@ RUN apt-get update \
     curl \
     git \
     gnupg \
+    golang \
     htop \
     nodejs \
     npm \
@@ -36,5 +37,12 @@ RUN npm i -g n \
 RUN npm i -g \
     bun \
     @antfu/ni
+
+# Install scanning secrets tools
+RUN curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+RUN git clone https://github.com/gitleaks/gitleaks.git \
+  && cd gitleaks \
+  && make build
+ENV PATH="${PATH}:/gitleaks"
 
 USER ubuntu
