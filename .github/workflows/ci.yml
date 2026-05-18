@@ -34,11 +34,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Checkout Container
-        working-directory: ./docker/
-        run: |
-          docker volume create distopia-db-store
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+      - name: Setup Container
+        uses: ./.github/workflows/setup
 
   typecheck:
     name: Typecheck
@@ -49,14 +46,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate .env
-        run: printenv > .env
-
-      - name: Checkout Container
-        working-directory: ./docker/
-        run: |
-          docker volume create distopia-db-store
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+      - name: Setup Container
+        uses: ./.github/workflows/setup
 
       - name: Typecheck
         working-directory: ./docker/
@@ -73,14 +64,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate .env
-        run: printenv > .env
-
-      - name: Checkout Container
-        working-directory: ./docker/
-        run: |
-          docker volume create distopia-db-store
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+      - name: Setup Container
+        uses: ./.github/workflows/setup
 
       - name: Build
         working-directory: ./docker/
@@ -97,14 +82,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate .env
-        run: printenv > .env
-
-      - name: Checkout Container
-        working-directory: ./docker/
-        run: |
-          docker volume create distopia-db-store
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+      - name: Setup Container
+        uses: ./.github/workflows/setup
 
       - name: Lint
         working-directory: ./docker/
@@ -121,14 +100,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate .env
-        run: printenv > .env
-
-      - name: Checkout Container
-        working-directory: ./docker/
-        run: |
-          docker volume create distopia-db-store
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+      - name: Setup Container
+        uses: ./.github/workflows/setup
 
       - name: Test
         working-directory: ./docker/
