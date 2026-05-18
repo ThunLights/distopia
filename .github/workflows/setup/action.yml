@@ -12,12 +12,17 @@ runs:
       shell: bash
       run: printenv > .env
 
-    - name: Cache
-      uses: actions/cache@v4
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+
+    - name: Build with GHA cache
+      uses: docker/build-push-action@v7
       with:
-        path: |
-          /var/lib/docker
-        key: ${{ runner.os }}-docker-${{ hashFiles('**/dockefile') }}-${{ hashFiles('**/docker-compose*.yml') }}
+        context: .
+        push: false
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Checkout Container
       working-directory: ./docker/
