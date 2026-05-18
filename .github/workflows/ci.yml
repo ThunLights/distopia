@@ -109,6 +109,9 @@ jobs:
   devcontainer:
     name: Dev Container
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
