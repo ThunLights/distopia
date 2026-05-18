@@ -14,6 +14,8 @@ type Options = {
   content: string;
 };
 
+const threeMonthAgo = 90 * 24 * 60 * 60 * 1000;
+
 export class ReviewModal extends ModalSubmitInteractionBase<Options> {
   public override customId: string = "review";
 
@@ -40,9 +42,8 @@ export class ReviewModal extends ModalSubmitInteractionBase<Options> {
     }
 
     const userJoinedDate = interaction.guild?.members.cache.get(interaction.user.id)?.joinedAt;
-    const threeMonthAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
 
-    if (!userJoinedDate || threeMonthAgo > userJoinedDate.getTime()) {
+    if (!userJoinedDate || userJoinedDate.getTime() + threeMonthAgo > Date.now()) {
       return {
         content: "参加後90日経っていないアカウントでレビューは投稿できません。",
         flags: [MessageFlags.Ephemeral],
