@@ -20,7 +20,7 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   trufflehog:
-    name: Git Leaks
+    name: Trufflehog
     runs-on: ubuntu-latest
 
     steps:
