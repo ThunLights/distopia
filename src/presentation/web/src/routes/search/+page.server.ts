@@ -4,6 +4,6 @@ export const load: PageServerLoad = async (e) => {
   const word = e.url.searchParams.get("w");
 
   return {
-    word,
+    word: word ? decodeURIComponent(word) : null,
   };
 };

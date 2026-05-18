@@ -19,6 +19,10 @@
 
   function search(term: string) {
     return async () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("w", encodeURIComponent(word));
+      window.history.pushState({}, "", url);
+
       if (!word.length) {
         guilds = [];
         return;

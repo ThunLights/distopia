@@ -11,7 +11,7 @@
 
   function search(term: string) {
     return () => {
-      location.href = `/search?w=${term}`;
+      location.href = `/search?w=${encodeURIComponent(term)}`;
     };
   }
 </script>
