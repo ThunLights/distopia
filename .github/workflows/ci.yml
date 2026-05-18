@@ -3,6 +3,9 @@ name: CI
 on:
   pull_request:
   push:
+    branches:
+      - main
+      - release-*
 
 env:
   PUBLIC_URL: http://localhost:3000
@@ -23,7 +26,7 @@ env:
   BOT_SECRET: ${{ secrets.BOT_SECRET }}
   BOT_REDIRECT_URL: http://localhost:3000/auth
 
-  DATABASE_URL: postgresql://user:0000@distopia-db:5432/distopia
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
   container:
