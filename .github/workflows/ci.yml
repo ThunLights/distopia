@@ -134,8 +134,8 @@ jobs:
         working-directory: ./docker/
         run: |
           docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun build
-          docker compose exec app sudo bun test
+          docker compose exec app sudo bun run build
+          docker compose exec app sudo bun run test
 
   devcontainer:
     name: Dev Container
