@@ -134,6 +134,7 @@ jobs:
         working-directory: ./docker/
         run: |
           docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun build
           docker compose exec app sudo bun test
 
   devcontainer:
@@ -156,7 +157,7 @@ jobs:
           cacheFrom: ghcr.io/${{ github.repository }}
           push: never
           runCmd: |
-            sudo scripts/setup.sh
+            sudo ./scripts/setup.sh
             sudo bun run typecheck
             sudo bun run build
             sudo bun run lint
