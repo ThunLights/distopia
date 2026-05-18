@@ -1,0 +1,22 @@
+@import url("./title-h1.css");
+
+ul {
+  padding-left: 30px;
+}
+
+li::marker {
+  color: rgb(207, 207, 207);
+}
+
+h1 {
+  margin: 3px 5px 15px;
+}
+
+h2,
+h3 {
+  margin: 15px 0 5px 0;
+}
+
+p {
+  margin-top: 3px;
+}

@@ -1,0 +1,40 @@
+FROM ubuntu:24.04
+
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+ENV LANG=C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update \
+    && apt-get install -y \
+    ca-certificates \
+    curl \
+    git \
+    gnupg \
+    htop \
+    nodejs \
+    npm \
+    postgresql-client \
+    sudo \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN [[ $(id -u ubuntu) = $USER_UID ]] || usermod -u $USER_UID ubuntu \
+    && [[ $(id -u ubuntu) = $USER_GID ]] || groupmod -g $USER_GID ubuntu \
+    && echo "ubuntu ALL=NOPASSWD: ALL" > /etc/sudoers.d/ubuntu \
+    && chmod 0440 /etc/sudoers.d/ubuntu
+
+# Update node and npm version
+RUN npm i -g n \
+    && yes | n 24.15.0 \
+    && apt purge -y nodejs npm
+
+# Install npm packages
+RUN npm i -g \
+    bun \
+    @antfu/ni
+
+USER ubuntu

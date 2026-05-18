@@ -1,0 +1,27 @@
+name: Setup
+
+description: Setup for distopia
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Generate .env
+      shell: bash
+      run: printenv > .env
+
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          /var/lib/docker
+        key: ${{ runner.os }}-docker-${{ hashFiles('**/dockefile') }}-${{ hashFiles('**/docker-compose*.yml') }}
+
+    - name: Checkout Container
+      working-directory: ./docker/
+      shell: bash
+      run: |
+        docker volume create distopia-db-store
+        docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d

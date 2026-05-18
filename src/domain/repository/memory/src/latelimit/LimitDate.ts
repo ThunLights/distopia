@@ -1,0 +1,1 @@
+export type LimitDate = Date;

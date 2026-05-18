@@ -2,8 +2,13 @@
 root = true
 
 [*]
+charset = utf-8
 end_of_line = lf
 
-[*.{js,ts,css,svelte,json}]
-charset = utf-8
-indent_style = tab
+[*.{js,ts}]
+indent_style = space
+indent_size = 4
+
+[*.{css,svelte,json,md}]
+indent_style = space
+indent_size = 2

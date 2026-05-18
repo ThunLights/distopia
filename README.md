@@ -1,19 +1,6 @@
-# Distopia計画用リポジトリ
+# Distopia
 
-https://distopia.top/ 用のやつです。
+## Development
 
-## セットアップ関係
-
-### 1: Configファイルを作ろう
-
-**.envを作らないと動かないよ**
-
-.env.exampleを元に.envを作成しよう!じゃないと動かないよ!
-
-### 2: setupコマンドを打とう
-
-```console
-npm run setup
-```
-
-上記のコマンドを使ってセットアップしよう!!!
+- `.env` - for code
+- `docker/.env` - for container port forwarding

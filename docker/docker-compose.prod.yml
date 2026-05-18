@@ -1,0 +1,11 @@
+services:
+  app:
+    extends:
+      file: docker-compose.yml
+      service: app
+    hostname: thunlights
+    container_name: distopia
+    working_dir: /workspaces/distopia
+    command: sudo /workspaces/distopia/scripts/prod.sh
+    ports:
+      - "127.0.0.1:${PROD_PORT:-3000}:3000"

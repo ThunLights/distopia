@@ -1,0 +1,26 @@
+{
+  "name": "infra-discord",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
+    "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "discord-api-types": "0.38.47",
+    "discord.js": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
+  }
+}

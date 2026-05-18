@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+env:
+  PUBLIC_URL: http://localhost:3000
+  PUBLIC_OAUTH_URL: https://discord.com/oauth2/authorize?client_id=1505544379639660745&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth&scope=identify+email+guilds.join+guilds
+  PUBLIC_OWNER_ID: "1261634733037719593"
+  PUBLIC_BOT_INVITE_LINK: https://discord.com/oauth2/authorize?client_id=1505544379639660745&permissions=8&integration_type=0&scope=bot
+
+  PUBLIC_HOME_SERVER_ID: "1505540430110920764"
+  PUBLIC_STAFF_ROLE_ID: "1505546268020310117"
+  PUBLIC_HONORARY_MEMBER_ROLE_ID: "1505546306721026068"
+  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "1505546372726788126"
+  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "1505546412484726804"
+  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "1505546443392422010"
+
+  PORT: 3000
+  BOT_ID: "1505544379639660745"
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+  BOT_SECRET: ${{ secrets.BOT_SECRET }}
+  BOT_REDIRECT_URL: http://localhost:3000/auth
+
+  DATABASE_URL: postgresql://user:0000@distopia-db:5432/distopia
+
+jobs:
+  container:
+    name: Container
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    needs: ["container"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+      - name: Typecheck
+        working-directory: ./docker/
+        run: |
+          docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun run typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: ["typecheck"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+      - name: Build
+        working-directory: ./docker/
+        run: |
+          docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun run build
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: ["typecheck"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+      - name: Lint
+        working-directory: ./docker/
+        run: |
+          docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: ["typecheck"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+      - name: Test
+        working-directory: ./docker/
+        run: |
+          docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun run build
+          docker compose exec app sudo bun run test
+
+  devcontainer:
+    name: Dev Container
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate .env
+        run: printenv > .env
+
+      - name: Create distopia-db-store
+        run: |
+          docker volume create distopia-db-store
+
+      - name: Build
+        uses: devcontainers/ci@v0.3
+        with:
+          cacheFrom: ghcr.io/${{ github.repository }}
+          push: never
+          runCmd: |
+            sudo ./scripts/setup.sh
+            sudo bun run typecheck
+            sudo bun run build
+            sudo bun run lint
+            sudo bun run test
