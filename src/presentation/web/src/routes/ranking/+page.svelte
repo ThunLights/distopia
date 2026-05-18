@@ -44,8 +44,8 @@
     <div class="search-type-changer">
       <select bind:value={rankingType}>
         <option value="level">レベル</option>
-        <option value="activeRate">アクティブレート</option>
-        <option value="userBump">ユーザーBumpランキング</option>
+        <option value="rate">アクティブレート</option>
+        <option value="userbump">ユーザーBumpランキング</option>
       </select>
     </div>
   </div>
