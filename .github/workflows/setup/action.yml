@@ -18,7 +18,7 @@ runs:
     - name: Build with GHA cache
       uses: docker/build-push-action@v7
       with:
-        context: .
+        context: ./docker
         push: false
         load: true
         cache-from: type=gha
