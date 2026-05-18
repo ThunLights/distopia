@@ -73,6 +73,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Generate .env
+        run: printenv > .env
+
       - name: Build
         working-directory: ./docker/
         run: |
@@ -88,6 +91,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Generate .env
+        run: printenv > .env
+
       - name: Lint
         working-directory: ./docker/
         run: |
@@ -102,6 +108,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Generate .env
+        run: printenv > .env
 
       - name: Test
         working-directory: ./docker/
@@ -119,6 +128,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Generate .env
+        run: printenv > .env
 
       - name: Build
         uses: devcontainers/ci@v0.3
