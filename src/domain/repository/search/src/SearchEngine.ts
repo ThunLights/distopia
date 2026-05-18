@@ -48,6 +48,14 @@ export class SearchEngine {
   }
 
   public async search(term: string, options?: SearchOptions): Promise<SearchResult> {
+    if (!this.guildIdToDbId.size) {
+      return {
+        hits: [],
+        count: 0,
+        time: "0ms",
+      };
+    }
+
     const nsfw = options?.filter.nsfw;
     const alg = options?.alg;
     const { hits, count, elapsed } = await search(this.guildDb, {
@@ -56,7 +64,6 @@ export class SearchEngine {
       where: { nsfw },
       exact: alg?.includes("exact") ?? undefined,
       preflight: alg?.includes("preflight") ?? undefined,
-      tolerance: 1,
     });
 
     return {

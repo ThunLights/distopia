@@ -6,7 +6,9 @@ import { json } from "@sveltejs/kit";
 
 export const POST: RequestHandler = await validateHandler(PostBodySchema, async (e, body) => {
   const { guilds, count, time } = await core.guild.search(body.term, {
-    filter: { nsfw: body.type === "all" || body.type === "nsfw" },
+    filter: {
+      nsfw: body.type === "all" ? undefined : body.type === "nsfw",
+    },
   });
 
   return json(
