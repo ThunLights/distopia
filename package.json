@@ -7,13 +7,15 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "setup": "turbo run setup",
+    "setup": "bun run prepare && turbo run setup",
     "typecheck": "turbo run typecheck",
-    "deploy-db": "turbo run deploy-db"
+    "deploy-db": "turbo run deploy-db",
+    "prepare": "husky"
   },
   "packageManager": "bun@1.3.13",
   "devDependencies": {
     "bun": "catalog:",
+    "husky": "9.1.7",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "turbo": "2.9.6"

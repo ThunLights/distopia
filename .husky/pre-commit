@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail --trust-local-git-config
+
+gitleaks detect --source . --verbose
