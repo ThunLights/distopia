@@ -121,6 +121,13 @@ export class Guild extends Base {
   }
 
   public async save(input: GuildUpsertInput) {
+    await this.state.searchEngine.upsert({
+      guildId: input.guildId,
+      name: input.name,
+      description: input.description ?? "",
+      tags: input.tags ?? [],
+      nsfw: input.nsfw ?? false,
+    });
     return await this.state.database.guild.upsert(input);
   }
 
