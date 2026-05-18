@@ -14,7 +14,7 @@
 </script>
 
 <div class="review">
-  <div class="context">
+  <div class="content">
     <div class="user">
       <div>
         <img class="icon" src={avatarUrl ?? DiscordIcon} alt="" />
@@ -43,6 +43,13 @@
 </div>
 
 <style>
+  .star img {
+    width: 20px;
+  }
+  .content {
+    overflow: hidden;
+    margin: 10px 20px;
+  }
   .review {
     overflow: hidden;
     border-radius: 20px;
@@ -54,7 +61,8 @@
   }
   .review .user .icon {
     margin: 0;
-    height: 18px;
+    height: 22px;
+    border-radius: 25%;
   }
   .review .user .name {
     margin: 0;

@@ -34,6 +34,7 @@
     width: 20px;
   }
   .star p {
+    font-size: 15px;
     display: inline-block;
   }
 </style>
