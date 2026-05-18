@@ -97,6 +97,7 @@ export class ReviewCommand extends ChatInputCommandBase<Options> {
             .setTextInputComponent(
               new TextInputBuilder()
                 .setCustomId("content")
+                .setRequired(false)
                 .setStyle(TextInputStyle.Paragraph)
                 .setMaxLength(CHARACTER_LIMIT.review),
             ),

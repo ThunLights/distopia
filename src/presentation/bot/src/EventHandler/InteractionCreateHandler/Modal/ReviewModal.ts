@@ -1,3 +1,4 @@
+import { isBlank } from "app-core/blank";
 import {
   type ModalSubmitInteraction,
   type CacheType,
@@ -69,7 +70,7 @@ export class ReviewModal extends ModalSubmitInteractionBase<Options> {
       guildId: guild.id,
       userId: interaction.user.id,
       star,
-      content,
+      content: (await isBlank(content)) ? null : content,
     });
 
     return {
