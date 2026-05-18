@@ -25,7 +25,7 @@ export abstract class Base<T extends BaseInteraction, R = void> {
       );
     }
     if (
-      interaction.channelId &&
+      !interaction.channelId ||
       !interaction.guild?.members.me
         ?.permissionsIn(interaction.channelId)
         .has(this.requireBotChannelPermissions)
