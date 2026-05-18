@@ -24,6 +24,10 @@
     "deploy-db": {
       "dependsOn": ["^deploy-db"],
       "cache": false
+    },
+    "build-storybook": {
+      "dependsOn": ["^build-storybook"],
+      "cache": false
     }
   }
 }
