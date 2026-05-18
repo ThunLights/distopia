@@ -36,7 +36,9 @@ jobs:
 
       - name: Checkout Container
         working-directory: ./docker/
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+        run: |
+          docker volume create distopia-db-store
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
   typecheck:
     name: typecheck
@@ -49,13 +51,15 @@ jobs:
 
       - name: Checkout Container
         working-directory: ./docker/
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+        run: |
+          docker volume create distopia-db-store
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
       - name: Typecheck
         working-directory: ./docker/
         run: |
-          docker compose exec app scripts/install.sh
-          docker compose exec app npm run typecheck
+          docker compose exec app sudo scripts/install.sh
+          docker compose exec app sudo npm run typecheck
 
   build:
     name: Build
