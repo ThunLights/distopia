@@ -20,10 +20,10 @@
   function search(term: string) {
     return async () => {
       const url = new URL(window.location.href);
-      url.searchParams.set("w", encodeURIComponent(word));
+      url.searchParams.set("w", encodeURIComponent(term));
       window.history.pushState({}, "", url);
 
-      if (!word.length) {
+      if (!term.length) {
         guilds = [];
         return;
       }
@@ -34,7 +34,7 @@
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          term: term,
+          term,
           type: "all",
         } satisfies PostBody),
       });
