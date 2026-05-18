@@ -49,6 +49,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Generate .env
+        run: printenv > .env
+
       - name: Checkout Container
         working-directory: ./docker/
         run: |
