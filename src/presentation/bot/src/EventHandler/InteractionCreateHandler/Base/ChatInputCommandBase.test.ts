@@ -70,6 +70,7 @@ describe("ChatInputCommandBase", () => {
       await command.run({
         id: "123456",
         commandName: "huga",
+        channelId: "123456",
         options: {
           getString: (name) => (name === "data" ? "foo" : "Error"),
         },
