@@ -32,7 +32,7 @@ export abstract class Base<T extends BaseInteraction, R = void> {
     ) {
       return new PermissionError(
         [
-          "このコマンドの実行にはボットに以下の権限が必要です。",
+          "このコマンドの実行にはボットに以下のチャンネル権限が必要です。",
           await codeBlock(this.requireBotChannelPermissions.join(" ")),
           "チャンネル権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
         ].join("\n"),
