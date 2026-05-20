@@ -13,11 +13,29 @@ export const load: LayoutServerLoad = async (e) => {
 
   return {
     guildId,
-    meta: {
-      ...meta,
-      avatarUrl: meta.icon ? core.guild.iconUrl(guildId, meta.icon) : null,
+    guild: guild && {
+      name: guild.name,
+      public: guild.public,
+      description: guild.description,
+      invite: guild.invite,
+      tags: guild.tags,
+      nsfw: guild.nsfw,
     },
-    guild,
-    record,
+    meta: {
+      id: meta.id,
+      name: meta.name,
+      avatarUrl: meta.icon && core.guild.iconUrl(guildId, meta.icon),
+    },
+    record: record && {
+      bumpCounter: record.bumpCounter,
+      activeRate: record.activeRate,
+      maxRate: record.maxRate,
+      maxRateRank: record.maxRateRank,
+      maxlevelRank: record.maxlevelRank,
+      levelRank: record.rank.level,
+      rateRank: record.rank.activeRate,
+      level: record.level,
+      point: record.point,
+    },
   };
 };
