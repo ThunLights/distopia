@@ -19,6 +19,28 @@ describe("jwt", async () => {
   });
 
   suite("vulnerability", async () => {
+    test("forgery userId", async () => {
+      const token = await jwt.sign({ userId: "123" });
+
+      expect(token).not.toBeNull();
+
+      if (token) {
+        const [baseHeader, payload, signature] = token.split(".") as [string, string, string];
+        const header = btoa(
+          JSON.stringify({
+            ...JSON.parse(atob(baseHeader)),
+            userId: "456",
+          }),
+        );
+        const genedToken = [header, payload, signature].join(".");
+
+        console.log("generated token:", genedToken);
+
+        const verified = await jwt.verify(genedToken);
+        expect(verified.payload).toBe(null);
+      }
+    });
+
     test("alg: none", async () => {
       const token = await jwt.sign({ userId: "123" });
 
