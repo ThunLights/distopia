@@ -6,7 +6,7 @@
   import SubTitle from "$lib/components/SubTitle.svelte";
 
   const { data } = $props();
-  const { meta, guild, record } = $derived(data);
+  const { guildId, meta, guild, record } = $derived(data);
   const title = $derived(meta.name);
 </script>
 
@@ -33,7 +33,7 @@
       </div>
       <div>
         <h3>操作</h3>
-        <LinkButton label="サーバーページを見る" link={`/guilds/${guild.guildId}`} rel="internal" />
+        <LinkButton label="サーバーページを見る" link={`/guilds/${guildId}`} rel="internal" />
       </div>
     {:else}
       <p>見つかりませんでした。</p>
@@ -47,10 +47,10 @@
       <p>Bumpカウンター: {record.bumpCounter ?? "未測定"}</p>
       <p>アクティブレート: {record.activeRate ?? "未測定"} (最高: {record.maxRate ?? "未測定"})</p>
       <p>
-        順位 アクティブレート: {record.rank.activeRate ?? "未測定"} (最高: {record.maxRateRank ??
+        順位 アクティブレート: {record.rateRank ?? "未測定"} (最高: {record.maxRateRank ??
           "未測定"})
       </p>
-      <p>順位 レベル: {record.rank.level ?? "未測定"} (最高: {record.level ?? "未測定"})</p>
+      <p>順位 レベル: {record.levelRank ?? "未測定"} (最高: {record.maxlevelRank ?? "未測定"})</p>
       <p>レベル: Lv.{record.level ?? 0} {record.point ?? 0}pt</p>
     {:else}
       <p>見つかりませんでした。</p>

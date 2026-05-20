@@ -5,6 +5,13 @@ export const load: PageServerLoad = async () => {
   const friends = core.friend.sortedDatas;
 
   return {
-    friends,
+    friends: friends.map(({ userId, username, description, nsfw, avatarUrl, tags }) => ({
+      userId,
+      username,
+      description,
+      nsfw,
+      avatarUrl,
+      tags,
+    })),
   };
 };

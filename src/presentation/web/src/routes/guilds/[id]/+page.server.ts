@@ -12,9 +12,32 @@ export const load: PageServerLoad = async (e) => {
   }
 
   return {
-    meta,
-    guild,
-    reviews,
-    record,
+    guild: {
+      guildId,
+      name: guild.name,
+      nsfw: guild.nsfw,
+      description: guild.description,
+      boostCount: meta.serverBoostCount,
+      tags: guild.tags,
+      iconUrl: meta.iconUrl,
+      activeRate: Number(record?.activeRate ?? 0n),
+      activeRateRank: record?.rank.activeRate ?? undefined,
+      level: record?.level ?? undefined,
+      point: record?.point ?? undefined,
+      levelRank: record?.rank.level ?? undefined,
+      maxActiveRateRank: record?.maxRateRank ?? undefined,
+      maxActiveRate: record?.maxRate ?? undefined,
+      maxLevelRank: record?.maxlevelRank ?? undefined,
+      invite: guild.invite,
+    },
+    reviews: reviews
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      .map(({ userId, username, avatarUrl, star, content }) => ({
+        userId,
+        username,
+        avatarUrl,
+        star,
+        content,
+      })),
   };
 };
