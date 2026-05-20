@@ -7,18 +7,25 @@
   import Meta from "$lib/components/Meta.svelte";
 
   const { data } = $props();
-  const { meta, guild, record, user } = $derived(data);
-  const { serverBoostCount: boostCount, iconUrl } = $derived(meta);
-  const { guildId, name, nsfw, description, tags, invite } = $derived(guild);
-
-  const activeRate = $derived(Number(record?.activeRate ?? 0n));
-  const activeRateRank = $derived(record?.rank.activeRate);
-  const level = $derived(record?.level);
-  const point = $derived(record?.point);
-  const levelRank = $derived(record?.rank.level);
-  const maxActiveRateRank = $derived(record?.maxRateRank ?? undefined);
-  const maxActiveRate = $derived(record?.maxRate ?? undefined);
-  const maxLevelRank = $derived(record?.maxlevelRank ?? undefined);
+  const { guild, user } = $derived(data);
+  const {
+    guildId,
+    name,
+    nsfw,
+    description,
+    tags,
+    invite,
+    boostCount,
+    iconUrl,
+    activeRate,
+    activeRateRank,
+    level,
+    point,
+    levelRank,
+    maxLevelRank,
+    maxActiveRate,
+    maxActiveRateRank,
+  } = $derived(guild);
 
   const reviewStars = $derived(data.reviews.map(({ star }) => star));
   const { reviews } = $derived(data);
