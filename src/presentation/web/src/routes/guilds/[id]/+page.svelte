@@ -21,9 +21,7 @@
   const maxLevelRank = $derived(record?.maxlevelRank ?? undefined);
 
   const reviewStars = $derived(data.reviews.map(({ star }) => star));
-  const reviews = $derived(
-    data.reviews.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()),
-  );
+  const { reviews } = $derived(data);
 </script>
 
 <Meta title={name} />

@@ -14,7 +14,15 @@ export const load: PageServerLoad = async (e) => {
   return {
     meta,
     guild,
-    reviews,
+    reviews: reviews
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      .map(({ userId, username, avatarUrl, star, content }) => ({
+        userId,
+        username,
+        avatarUrl,
+        star,
+        content,
+      })),
     record,
   };
 };
