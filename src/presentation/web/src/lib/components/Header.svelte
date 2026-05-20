@@ -2,8 +2,8 @@
   /* eslint svelte/no-navigation-without-resolve: "off" */
   import { resolve } from "$app/paths";
   import type { ResolvedPathname } from "$app/types";
-  import { PUBLIC_OAUTH_URL } from "$env/static/public";
   import DiscordIcon from "$lib/assets/icon/discord.webp";
+  import { PUBLIC_OAUTH_URL } from "$lib/shared/constant";
   import type { UserAuth } from "$lib/shared/types/UserAuth";
   import "@fontsource/inter/900.css";
   import "@fontsource/open-sans/800-italic.css";
