@@ -316,6 +316,17 @@ export class Guild extends Base {
     };
   }
 
+  public async isOwnerOrAdmin(guildId: string, userId: string) {
+    const ownerId = (await this.state.discord.guild.fetchOwner(guildId))?.id;
+    const adminUserIds =
+      (await this.state.discord.guild.fetchHasPermissionUsers(guildId, ["Administrator"]))
+        ?.values()
+        .toArray()
+        .map(({ id }) => id) ?? [];
+
+    return ownerId === userId || adminUserIds.includes(userId);
+  }
+
   public iconUrl(guildId: string, iconHash: string) {
     return this.state.discord.guild.iconUrl(guildId, iconHash);
   }

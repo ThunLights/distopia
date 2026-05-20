@@ -1,14 +1,19 @@
 import { core } from "$lib/server/core";
 import type { LayoutServerLoad } from "./$types";
-import { redirect } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 
 export const load: LayoutServerLoad = async (e) => {
+  const { user } = await e.parent();
   const guildId = e.params.id;
 
   const { guild, record, meta } = await core.guild.findWithRecord(guildId);
 
   if (!meta) {
     return redirect(302, "/user");
+  }
+
+  if (!(await core.guild.isOwnerOrAdmin(meta.id, user.id))) {
+    return error(404, { message: "Guild not found" });
   }
 
   return {
