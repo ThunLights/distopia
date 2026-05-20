@@ -75,6 +75,16 @@ export class OAuth2 extends Base {
     return user;
   }
 
+  public async getGuildsHasOwnerOrAdmin(userId: string, useCache: boolean = true) {
+    const guilds = await this.getGuilds(userId, useCache);
+
+    return await Promise.all(
+      (guilds ?? []).filter(
+        async ({ id, owner }) => owner || (await this.state.discord.guild.isAdmin(id, userId)),
+      ),
+    );
+  }
+
   public async getGuilds(userId: string, useCache: boolean = true): Promise<Guilds | null> {
     if (useCache) {
       const cache = this.state.memory.oauth2Guilds.get(userId);

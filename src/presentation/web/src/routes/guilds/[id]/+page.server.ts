@@ -7,8 +7,8 @@ export const load: PageServerLoad = async (e) => {
 
   const { meta, guild, record, reviews } = await core.guild.findWithAllRefData(guildId);
 
-  if (!meta || !guild) {
-    return error(404);
+  if (!meta || !guild || !guild.public) {
+    return error(404, { message: "Guild not found" });
   }
 
   return {

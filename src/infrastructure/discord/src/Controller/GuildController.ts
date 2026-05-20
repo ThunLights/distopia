@@ -10,6 +10,15 @@ export class GuildController extends Base {
       ?.members.cache.filter((member) => member.permissions.has(permissions));
   }
 
+  public async isAdmin(guildId: string, userId: string) {
+    return (
+      (await this.fetchHasPermissionUsers(guildId, ["Administrator"]))
+        ?.values()
+        .toArray()
+        .map(({ id }) => id) ?? []
+    ).includes(userId);
+  }
+
   public async fetchOwner(guildId: string) {
     return await this.client.guilds.cache.get(guildId)?.fetchOwner({ cache: true });
   }
