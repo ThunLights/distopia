@@ -26,6 +26,8 @@ export type VerifyResult = {
   newToken?: string;
 };
 
+const fourteenDays = 14 * 24 * 60 * 60;
+
 export class JWTClient {
   constructor() {
     core.jwt.importDB();
@@ -67,7 +69,7 @@ export class JWTClient {
       }
       if (typeof unParsedPayload !== "string" && unParsedPayload?.exp) {
         const exp = unParsedPayload.exp;
-        if (exp > Date.now() - 14 * 24 * 60 * 60 * 1000) {
+        if (exp > Date.now() - fourteenDays) {
           nearExp = true;
         }
       }
