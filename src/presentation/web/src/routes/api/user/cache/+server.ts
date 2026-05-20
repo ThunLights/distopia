@@ -17,7 +17,7 @@ export const DELETE: RequestHandler = await authAndValidateHandler(
     if (body.type === "guild") {
       return json(
         {
-          guilds: (await core.oauth2.getGuilds(e.locals.user.id, false)) ?? [],
+          guilds: (await core.oauth2.getGuildsHasOwnerOrAdmin(e.locals.user.id, false)) ?? [],
         } satisfies ResponseBodyTypeGuild,
         { status: 200 },
       );
