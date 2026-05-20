@@ -14,28 +14,28 @@
 
 アクティブレートに応じて枠がサーバーアイコンの周りに付くようになります。
 
-### 1位
+## 1位
 
-<img src="/help/1.webp" alt="" />
+![image](/help/1.webp)
 
-### 2位
+## 2位
 
-<img src="/help/2.webp" alt="" />
+![image](/help/2.webp)
 
-### 3位
+## 3位
 
-<img src="/help/3.webp" alt="" />
+![image](/help/3.webp)
 
-### 4～10位
+## 4～10位
 
-<img src="/help/10.webp" alt="" />
+![image](/help/10.webp)
 
-### 11～30位
+## 11～30位
 
-<img src="/help/30.webp" alt="" />
+![image](/help/30.webp)
 
-### 31～50位
+## 31～50位
 
-<img src="/help/50.webp" alt="" />
+![image](/help/50.webp)
 
 ※50位より下には枠は付きません
