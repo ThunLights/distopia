@@ -6,7 +6,7 @@ export const load: PageServerLoad = async (e) => {
   const { user } = await e.parent();
 
   return {
-    guilds: ((await core.oauth2.getGuilds(user.id, false)) ?? []).map(
+    guilds: ((await core.oauth2.getGuilds(user.id, true)) ?? []).map(
       ({
         id,
         name,
