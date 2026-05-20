@@ -1,6 +1,6 @@
 export type UserWeb = {
   userId: string;
-  jwtVerifyKey: string;
+  jwtVerifyKey: Uint8Array<ArrayBuffer>;
 };
 
 export type UserWebUpsertInput = Pick<UserWeb, "userId"> & Partial<UserWeb>;

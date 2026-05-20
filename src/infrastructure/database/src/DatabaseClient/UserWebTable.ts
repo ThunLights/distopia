@@ -1,9 +1,19 @@
-import { randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 
 import type { UserWebUpsertInput } from "../types/UserWeb";
 import { Base } from "./Base";
 
 export class UserWebTable extends Base {
+  public async genKey() {
+    let key = randomBytes(32);
+
+    while (await this.prisma.userWeb.findUnique({ where: { jwtVerifyKey: key } })) {
+      key = randomBytes(32);
+    }
+
+    return key;
+  }
+
   public async find(userId: string) {
     return await this.prisma.userWeb.findUnique({ where: { userId } });
   }
@@ -15,8 +25,8 @@ export class UserWebTable extends Base {
   public async updateNewJwtVerifyKey(userId: string) {
     return await this.prisma.userWeb.upsert({
       where: { userId },
-      update: { jwtVerifyKey: randomUUID() },
-      create: { userId },
+      update: { jwtVerifyKey: await this.genKey() },
+      create: { userId, jwtVerifyKey: await this.genKey() },
     });
   }
 
@@ -24,7 +34,10 @@ export class UserWebTable extends Base {
     return await this.prisma.userWeb.upsert({
       where: { userId: input.userId },
       update: input,
-      create: input,
+      create: {
+        ...input,
+        jwtVerifyKey: input.jwtVerifyKey ?? (await this.genKey()),
+      },
     });
   }
 

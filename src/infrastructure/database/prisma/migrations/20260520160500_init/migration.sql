@@ -15,7 +15,7 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "UserWeb" (
     "userId" TEXT NOT NULL,
-    "jwtVerifyKey" TEXT NOT NULL,
+    "jwtVerifyKey" BYTEA NOT NULL,
 
     CONSTRAINT "UserWeb_pkey" PRIMARY KEY ("userId")
 );
@@ -129,6 +129,9 @@ CREATE TABLE "JWTKey" (
 
     CONSTRAINT "JWTKey_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserWeb_jwtVerifyKey_key" ON "UserWeb"("jwtVerifyKey");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "JWTKey_key_key" ON "JWTKey"("key");

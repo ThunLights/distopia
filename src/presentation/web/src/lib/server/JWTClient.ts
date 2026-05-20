@@ -13,18 +13,14 @@ export const JWTPayloadSchema = z.object({
   userId: z.string(),
 });
 
-export const JWTPayloadWithUserVerifyKeySchema = JWTPayloadSchema.extend({
-  userVerifyKey: z.string(),
-});
-
 export type JWTPayload = z.infer<typeof JWTPayloadSchema>;
-
-export type JWTPayloadWithUserVerifyKey = z.infer<typeof JWTPayloadWithUserVerifyKeySchema>;
 
 export type VerifyResult = {
   payload: JWTPayload | null;
   newToken?: string;
 };
+
+const fourteenDays = 14 * 24 * 60 * 60;
 
 export class JWTClient {
   constructor() {
@@ -42,11 +38,8 @@ export class JWTClient {
     }
 
     return jwt.sign(
-      {
-        ...payload,
-        userVerifyKey,
-      } satisfies JWTPayloadWithUserVerifyKey,
-      currKey.value.key,
+      payload satisfies JWTPayload,
+      Buffer.concat([currKey.value.key, userVerifyKey]),
       {
         algorithm: currKey.value.alg,
         keyid: currKey.id.toString(),
@@ -58,39 +51,44 @@ export class JWTClient {
   public async verify(token: string): Promise<VerifyResult> {
     try {
       const decodedToken = jwt.decode(token, { complete: true });
+      const unVerifiedPayload = decodedToken?.payload;
       const keyId = Number(decodedToken?.header.kid);
-      const unParsedPayload = decodedToken?.payload;
       let nearExp = false;
 
       if (isNaN(keyId)) {
         return { payload: null };
       }
-      if (typeof unParsedPayload !== "string" && unParsedPayload?.exp) {
-        const exp = unParsedPayload.exp;
-        if (exp > Date.now() - 14 * 24 * 60 * 60 * 1000) {
+      if (typeof unVerifiedPayload !== "string" && typeof unVerifiedPayload?.exp === "number") {
+        const exp = unVerifiedPayload.exp;
+        if (exp > Date.now() - fourteenDays) {
           nearExp = true;
         }
       }
 
-      const value = await core.jwt.findJwtKey(keyId);
-
-      if (!value) {
+      if (
+        !unVerifiedPayload ||
+        typeof unVerifiedPayload === "string" ||
+        !("userId" in unVerifiedPayload) ||
+        typeof unVerifiedPayload.userId !== "string"
+      ) {
         return { payload: null };
       }
 
-      const verified = jwt.verify(token, value.key, {
+      const value = await core.jwt.findJwtKey(keyId);
+      const userKey = await core.jwt.getUserVerifyKey(unVerifiedPayload.userId);
+
+      if (!value || !userKey) {
+        return { payload: null };
+      }
+
+      const verified = jwt.verify(token, Buffer.concat([value.key, userKey]), {
         algorithms: [value.alg],
         complete: true,
       });
 
-      const payload = await JWTPayloadWithUserVerifyKeySchema.safeParseAsync(verified.payload);
+      const payload = await JWTPayloadSchema.safeParseAsync(verified.payload);
 
       if (payload.success) {
-        const userVerifyKey = await core.jwt.getUserVerifyKey(payload.data.userId);
-        if (payload.data.userVerifyKey !== userVerifyKey) {
-          return { payload: null };
-        }
-
         const data = {
           userId: payload.data.userId,
         } satisfies JWTPayload;
