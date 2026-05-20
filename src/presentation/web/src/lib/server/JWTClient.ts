@@ -58,7 +58,7 @@ export class JWTClient {
       if (isNaN(keyId)) {
         return { payload: null };
       }
-      if (typeof unVerifiedPayload !== "string" && unVerifiedPayload?.exp) {
+      if (typeof unVerifiedPayload !== "string" && typeof unVerifiedPayload?.exp === "number") {
         const exp = unVerifiedPayload.exp;
         if (exp > Date.now() - fourteenDays) {
           nearExp = true;
