@@ -8,12 +8,16 @@
   import SubTitle from "$lib/components/SubTitle.svelte";
   import Guild from "$lib/components/User/Guild.svelte";
   import Profile from "$lib/components/User/Profile.svelte";
-  import type { DeleteBody, ResponseBodyTypeGuild } from "$lib/shared/types/routes/api/user/cache";
+  import type {
+    DeleteBody,
+    Guilds,
+    ResponseBodyTypeGuild,
+  } from "$lib/shared/types/routes/api/user/cache";
 
   const { data } = $props();
   const { user } = $derived(data);
 
-  let guilds = $derived(data.guilds);
+  let guilds = $derived<Guilds>(data.guilds);
 
   const title = $derived(`「${user.username}」の詳細情報`);
   const publicGuilds = $derived(guilds.filter(({ isPublic }) => isPublic));
