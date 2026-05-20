@@ -4,10 +4,16 @@
   import Block from "$lib/components/Block.svelte";
   import Copy from "../Button/Copy.svelte";
   import TagsLayout from "../Layout/TagsLayout.svelte";
-  import type { Value as Friend } from "repo-memory/Friend";
 
   type Props = {
-    friend: Friend;
+    friend: {
+      userId: string;
+      username: string;
+      description: string;
+      nsfw: boolean;
+      avatarUrl: string | null;
+      tags: string[];
+    };
   };
 
   const { friend }: Props = $props();
