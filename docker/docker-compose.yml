@@ -1,3 +1,5 @@
+name: distopia
+
 services:
   db:
     container_name: distopia-db
