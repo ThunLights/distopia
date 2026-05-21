@@ -27,7 +27,7 @@ export const load: PageServerLoad = async (e) => {
       levelRank: record?.rank.level ?? undefined,
       maxActiveRateRank: record?.maxRateRank ?? undefined,
       maxActiveRate: record?.maxRate ?? undefined,
-      maxLevelRank: record?.maxlevelRank ?? undefined,
+      maxLevelRank: record?.maxLevelRank ?? undefined,
       invite: guild.invite,
     },
     reviews: reviews

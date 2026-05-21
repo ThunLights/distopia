@@ -50,7 +50,7 @@
         順位 アクティブレート: {record.rateRank ?? "未測定"} (最高: {record.maxRateRank ??
           "未測定"})
       </p>
-      <p>順位 レベル: {record.levelRank ?? "未測定"} (最高: {record.maxlevelRank ?? "未測定"})</p>
+      <p>順位 レベル: {record.levelRank ?? "未測定"} (最高: {record.maxLevelRank ?? "未測定"})</p>
       <p>レベル: Lv.{record.level ?? 0} {record.point ?? 0}pt</p>
     {:else}
       <p>見つかりませんでした。</p>

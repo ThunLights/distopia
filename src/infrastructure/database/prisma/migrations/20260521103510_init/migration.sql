@@ -88,7 +88,7 @@ CREATE TABLE "GuildRecordOneDay" (
 -- CreateTable
 CREATE TABLE "GuildRecord" (
     "guildId" TEXT NOT NULL,
-    "maxlevelRank" BIGINT,
+    "maxLevelRank" BIGINT,
     "maxRateRank" BIGINT,
     "maxRate" BIGINT,
     "bumpCounter" INTEGER NOT NULL DEFAULT 0,

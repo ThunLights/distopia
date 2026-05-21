@@ -2,7 +2,7 @@ import { Base } from "./Base";
 
 export type SaveGuildInput = {
   guildId: string;
-  maxlevelRank: bigint | null;
+  maxLevelRank: bigint | null;
   maxRateRank: bigint | null;
   maxRate: bigint | null;
 };
@@ -14,7 +14,7 @@ export class Record extends Base {
   private isNewRecord(
     guildId: string,
     record: bigint,
-    recordType: "maxlevelRank" | "maxRateRank" | "maxRate",
+    recordType: "maxLevelRank" | "maxRateRank" | "maxRate",
     nowRecords: Map<string, SaveGuildInput>,
   ) {
     const nowRecord = nowRecords.get(guildId);
@@ -49,20 +49,20 @@ export class Record extends Base {
   public async saveGuilds(inputs: SaveGuildInput[]) {
     const guilds = new Map(
       (await this.state.database.guildRecord.findAll()).map(
-        ({ guildId, maxlevelRank, maxRateRank, maxRate }) => [
+        ({ guildId, maxLevelRank, maxRateRank, maxRate }) => [
           guildId,
-          { guildId, maxlevelRank, maxRateRank, maxRate },
+          { guildId, maxLevelRank, maxRateRank, maxRate },
         ],
       ),
     );
 
     return await this.state.database.guildRecord.upsertAll(
-      inputs.map(({ guildId, maxlevelRank, maxRateRank, maxRate }) => {
+      inputs.map(({ guildId, maxLevelRank, maxRateRank, maxRate }) => {
         return {
           guildId,
-          maxlevelRank: maxlevelRank
-            ? this.isNewRecord(guildId, maxlevelRank, "maxlevelRank", guilds)
-              ? maxlevelRank
+          maxLevelRank: maxLevelRank
+            ? this.isNewRecord(guildId, maxLevelRank, "maxLevelRank", guilds)
+              ? maxLevelRank
               : undefined
             : undefined,
           maxRateRank: maxRateRank
@@ -101,7 +101,7 @@ export class Record extends Base {
 
       query.push({
         guildId: record.guildId,
-        maxlevelRank: newLevelRank ? BigInt(newLevelRank) : null,
+        maxLevelRank: newLevelRank ? BigInt(newLevelRank) : null,
         maxRateRank: newActiveRateRank ? BigInt(newActiveRateRank) : null,
         maxRate: record.maxRate,
       });

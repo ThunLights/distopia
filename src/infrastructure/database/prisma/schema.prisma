@@ -80,7 +80,7 @@ model GuildRecordOneDay {
 
 model GuildRecord {
   guildId      String  @id
-  maxlevelRank BigInt?
+  maxLevelRank BigInt?
   maxRateRank  BigInt?
   maxRate      BigInt?
   bumpCounter  Int     @default(0)
