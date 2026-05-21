@@ -2,7 +2,7 @@ import type { Guild } from "./Guild";
 
 export type GuildRecord = {
   guildId: string;
-  maxlevelRank: bigint | null;
+  maxLevelRank: bigint | null;
   maxRateRank: bigint | null;
   maxRate: bigint | null;
   bumpCounter: number;

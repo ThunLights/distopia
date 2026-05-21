@@ -36,7 +36,7 @@ export const load: LayoutServerLoad = async (e) => {
       activeRate: record.activeRate,
       maxRate: record.maxRate,
       maxRateRank: record.maxRateRank,
-      maxlevelRank: record.maxlevelRank,
+      maxLevelRank: record.maxLevelRank,
       levelRank: record.rank.level,
       rateRank: record.rank.activeRate,
       level: record.level,
