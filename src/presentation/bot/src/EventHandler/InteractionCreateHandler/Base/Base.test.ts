@@ -114,5 +114,21 @@ describe("Base.ts", () => {
         ).toBe(false);
       });
     });
+
+    suite("requireUserGuildPermissions", async () => {
+      test("invalid permission", async () => {
+        expect(
+          await testCommand.test(
+            merge<BaseInteraction>(interactionForPermissionCheck, {
+              memberPermissions: {
+                has(_permission, _checkAdmin) {
+                  return false;
+                },
+              } as PermissionsBitField,
+            } as BaseInteraction),
+          ),
+        ).toBe(false);
+      });
+    });
   });
 });
