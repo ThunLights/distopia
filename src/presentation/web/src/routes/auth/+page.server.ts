@@ -6,9 +6,21 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async (e) => {
   const code = e.url.searchParams.get("code");
+  const sessionId = e.url.searchParams.get("state");
+  const sessionKey = e.cookies.get("session_key");
+
   let user: UserAuth | null = null;
 
-  if (code) {
+  if (code && sessionId && sessionKey) {
+    const session = await core.oauth2.getPKCE(sessionId);
+
+    if (!session || session.sessionKey !== sessionKey) {
+      return { user: null };
+    }
+
+    e.cookies.delete("session_key", { path: "/" });
+    await core.oauth2.deletePKCE(sessionId);
+
     const apiResult = await core.oauth2.codeToUser(code);
 
     if (apiResult) {

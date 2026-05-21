@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 import type { UserDiscordUpsertInput } from "infra-database/types";
 import type { Guilds } from "repo-memory/OAuth2Guilds";
 
@@ -11,6 +13,24 @@ export class OAuth2 extends Base {
     private readonly guild: Guild,
   ) {
     super(state);
+  }
+
+  public async savePKCE() {
+    const sessionId = randomUUID();
+    const sessionKey = randomUUID();
+    this.state.memory.oauth2PKCE.set(sessionId, {
+      sessionKey,
+      createdAt: new Date(),
+    });
+    return { sessionId, sessionKey };
+  }
+
+  public async getPKCE(sessionId: string) {
+    return this.state.memory.oauth2PKCE.get(sessionId);
+  }
+
+  public async deletePKCE(sessionId: string) {
+    return this.state.memory.oauth2PKCE.delete(sessionId);
   }
 
   public async updateTokens() {

@@ -3,7 +3,6 @@
   import { resolve } from "$app/paths";
   import type { ResolvedPathname } from "$app/types";
   import DiscordIcon from "$lib/assets/icon/discord.webp";
-  import { PUBLIC_OAUTH_URL } from "$lib/shared/constant";
   import type { UserAuth } from "$lib/shared/types/UserAuth";
   import "@fontsource/inter/900.css";
   import "@fontsource/open-sans/800-italic.css";
@@ -77,7 +76,7 @@
     <div>
       {#if userData === null}
         <div class="discord-login">
-          <a href={PUBLIC_OAUTH_URL} rel="external">
+          <a href={resolve("/login")} rel="external">
             <div class="login-block">
               <p class="discord-login-content inline">Login</p>
             </div>
