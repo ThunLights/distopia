@@ -52,6 +52,15 @@ export class BumpCommand extends ChatInputCommandBase<Options> {
       return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
     }
 
+    if (!bumped) {
+      const embed = new EmbedBuilder()
+        .setColor("Red")
+        .setTitle("Distopia: Discordサーバー掲示板")
+        .setURL(`https://distopia.top/`)
+        .setDescription("Bumpは公開サーバーでのみ実行可能です。");
+      return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
+    }
+
     const settings = await this.core.guild.getSetting(guild.id);
 
     if (settings && settings.bumpNotice && channel?.isSendable()) {
