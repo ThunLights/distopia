@@ -44,6 +44,9 @@ export class GuildTable extends Base {
 
   public async findAllSortedBumpTime(take?: number) {
     return await this.prisma.guild.findMany({
+      where: {
+        public: true,
+      },
       orderBy: {
         bumpTime: "desc",
       },

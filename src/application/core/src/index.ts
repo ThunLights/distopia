@@ -17,7 +17,8 @@ import { VoiceChannel } from "./VoiceChannel";
 export class AppCore extends Base {
   public readonly record = new Record(this.state);
   public readonly activeRate = new ActiveRate(this.state);
-  public readonly guild = new Guild(this.state, this.record);
+  public readonly ranking = new Ranking(this.state);
+  public readonly guild = new Guild(this.state, this.record, this.ranking);
   public readonly jwt = new JWT(this.state);
   public readonly latelimit = new LateLimit(this.state);
   public readonly friend = new Friend(this.state);
@@ -26,7 +27,6 @@ export class AppCore extends Base {
   public readonly message = new Message(this.state);
   public readonly oauth2 = new OAuth2(this.state, this.guild);
   public readonly panel = new Panel(this.state);
-  public readonly ranking = new Ranking(this.state);
   public readonly user = new User(this.state, this.oauth2);
   public readonly voice = new VoiceChannel(this.state);
 
