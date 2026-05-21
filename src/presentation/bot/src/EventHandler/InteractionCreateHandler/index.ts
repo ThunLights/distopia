@@ -1,4 +1,5 @@
 import {
+  EmbedBuilder,
   InteractionCallbackResponse,
   InteractionResponse,
   MessageFlags,
@@ -30,6 +31,11 @@ type Commands = {
   userSelectMenu: UserSelectMenuInteractionBase[];
 };
 
+const lateLimitEmbed = new EmbedBuilder()
+  .setTitle("レートリミット")
+  .setColor("Red")
+  .setDescription("連続で実行しすぎです。数秒待ってから実行してください。");
+
 export class InteractionCreateHandler extends BaseHandler<
   (interaction: Interaction<CacheType>) => void
 > {
@@ -44,9 +50,21 @@ export class InteractionCreateHandler extends BaseHandler<
 
   public override async handle(interaction: Interaction<CacheType>): Promise<void> {
     if (interaction.isChatInputCommand()) {
+      const limit = await this.core.latelimit.getChatInputCommand(interaction.user.id);
+
       for (const command of this.commands.chatInput) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
+
+          if (limit) {
+            return void (await interaction.reply({
+              embeds: [lateLimitEmbed],
+              flags: [MessageFlags.Ephemeral],
+            }));
+          }
+
+          await this.core.latelimit.saveChatInputCommand(interaction.user.id);
+
           if (res instanceof InteractionCallbackResponse || res instanceof ModalSended) {
             return;
           } else {
@@ -55,9 +73,21 @@ export class InteractionCreateHandler extends BaseHandler<
         }
       }
     } else if (interaction.isButton()) {
+      const limit = await this.core.latelimit.getButton(interaction.user.id);
+
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
           const res = await command.run(interaction);
+
+          if (limit) {
+            return void (await interaction.reply({
+              embeds: [lateLimitEmbed],
+              flags: [MessageFlags.Ephemeral],
+            }));
+          }
+
+          await this.core.latelimit.saveButton(interaction.user.id);
+
           if (res instanceof InteractionResponse || res instanceof ModalSended) {
             return;
           } else {

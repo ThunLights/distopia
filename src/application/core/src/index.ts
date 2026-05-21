@@ -3,6 +3,7 @@ import { Base } from "./Base";
 import { Friend } from "./Friend";
 import { Guild } from "./Guild";
 import { JWT } from "./JWT";
+import { LateLimit } from "./LateLimit";
 import { Member } from "./Member";
 import { Memory } from "./Memory";
 import { Message } from "./Message";
@@ -18,6 +19,7 @@ export class AppCore extends Base {
   public readonly activeRate = new ActiveRate(this.state);
   public readonly guild = new Guild(this.state, this.record);
   public readonly jwt = new JWT(this.state);
+  public readonly latelimit = new LateLimit(this.state);
   public readonly friend = new Friend(this.state);
   public readonly member = new Member(this.state);
   public readonly memory = new Memory(this.state);

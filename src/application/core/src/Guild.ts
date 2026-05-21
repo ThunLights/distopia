@@ -103,6 +103,12 @@ export class Guild extends Base {
 
     latelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
 
+    const dbGuildData = await this.state.database.guild.find(guild.id);
+
+    if (!dbGuildData || !dbGuildData.public) {
+      return null;
+    }
+
     await database.guild.update({
       guildId: guild.id,
       bumpTime: nowDate,

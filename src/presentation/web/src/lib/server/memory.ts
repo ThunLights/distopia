@@ -9,6 +9,8 @@ import { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
 import { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
 import { UserOAuth2 } from "repo-memory/UserOAuth2";
 import { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
+import { ButtonLateLimit } from "repo-memory/latelimit/ButtonLateLimit";
+import { ChatInputCommandLateLimit } from "repo-memory/latelimit/ChatInputCommandLateLimit";
 import { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
 
@@ -16,6 +18,8 @@ export const memory: AppState["memory"] = {
   latelimit: {
     messageCreate: new MessageCreateLateLimit(),
     bump: new GuildBumpLateLimit(),
+    button: new ButtonLateLimit(),
+    chatInputCommand: new ChatInputCommandLateLimit(),
   },
   friend: new Friend(),
   guildEdit: new GuildEdit(),
