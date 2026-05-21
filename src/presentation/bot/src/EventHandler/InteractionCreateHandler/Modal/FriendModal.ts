@@ -6,7 +6,6 @@ import {
   type CacheType,
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
-  type PermissionResolvable,
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -20,7 +19,6 @@ type Options = {
 };
 
 export class FriendModal extends ModalSubmitInteractionBase<Options> {
-  public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override customId: string = "friend";
 
   public override async parseOptions(
