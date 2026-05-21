@@ -18,4 +18,20 @@ describe("Search Engine", async () => {
 
     expect(result.count).toBe(1);
   });
+
+  test("delete", async () => {
+    await searchEngine.upsert({
+      guildId: "22222222222",
+      name: "削除するサーバー",
+      description: "temporary server",
+      nsfw: false,
+      tags: ["temporary"],
+    });
+
+    await searchEngine.delete("22222222222");
+
+    const result = await searchEngine.search("temporary");
+
+    expect(result.count).toBe(0);
+  });
 });
