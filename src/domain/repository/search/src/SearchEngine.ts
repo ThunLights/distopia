@@ -43,7 +43,7 @@ export class SearchEngine {
     const dbId = this.guildIdToDbId.get(guildId);
     if (dbId) {
       await remove(this.guildDb, dbId);
-      this.guildIdToDbId.delete(dbId);
+      this.guildIdToDbId.delete(guildId);
     }
   }
 
