@@ -29,6 +29,10 @@ export class OAuth2 extends Base {
     return this.state.memory.oauth2PKCE.get(sessionId);
   }
 
+  public async deletePKCE(sessionId: string) {
+    return this.state.memory.oauth2PKCE.delete(sessionId);
+  }
+
   public async updateTokens() {
     const upsertQuery: UserDiscordUpsertInput[] = [];
     const deleteQuery: string[] = [];

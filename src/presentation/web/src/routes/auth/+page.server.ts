@@ -18,6 +18,9 @@ export const load: PageServerLoad = async (e) => {
       return { user: null };
     }
 
+    e.cookies.delete("session_key", { path: "/" });
+    await core.oauth2.deletePKCE(sessionId);
+
     const apiResult = await core.oauth2.codeToUser(code);
 
     if (apiResult) {
