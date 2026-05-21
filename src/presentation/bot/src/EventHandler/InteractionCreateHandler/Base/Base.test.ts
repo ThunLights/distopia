@@ -1,5 +1,6 @@
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
+import merge from "deepmerge";
 import type {
   BaseInteraction,
   CacheType,
@@ -62,20 +63,21 @@ describe("Base.ts", () => {
     suite("requireBotGuildPermissions", async () => {
       test("invalid permission", async () => {
         expect(
-          await testCommand.test({
-            ...interactionForPermissionCheck,
-            guild: {
-              members: {
-                me: {
-                  permissions: {
-                    has(_permission, _checkAdmin) {
-                      return false;
+          await testCommand.test(
+            merge<BaseInteraction>(interactionForPermissionCheck, {
+              guild: {
+                members: {
+                  me: {
+                    permissions: {
+                      has(_permission, _checkAdmin) {
+                        return false;
+                      },
                     },
                   },
                 },
-              },
-            } as Guild,
-          } as BaseInteraction),
+              } as Guild,
+            } as BaseInteraction),
+          ),
         ).toBe(false);
       });
     });
@@ -83,10 +85,32 @@ describe("Base.ts", () => {
     suite("requireBotChannelPermissions", async () => {
       test("channelId: null", async () => {
         expect(
-          await testCommand.test({
-            ...interactionForPermissionCheck,
-            channelId: null,
-          } as BaseInteraction),
+          await testCommand.test(
+            merge<BaseInteraction>(interactionForPermissionCheck, {
+              channelId: null,
+            } as BaseInteraction),
+          ),
+        ).toBe(false);
+      });
+      test("invalid permission", async () => {
+        expect(
+          await testCommand.test(
+            merge<BaseInteraction>(interactionForPermissionCheck, {
+              guild: {
+                members: {
+                  me: {
+                    permissionsIn(_channel: GuildChannelResolvable) {
+                      return {
+                        has(_permission, _checkAdmin) {
+                          return false;
+                        },
+                      };
+                    },
+                  },
+                },
+              } as Guild,
+            } as BaseInteraction),
+          ),
         ).toBe(false);
       });
     });

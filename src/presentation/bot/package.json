@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "app-core": "workspace:*",
+    "deepmerge": "4.3.1",
     "discord.js": "catalog:",
     "domain-model": "workspace:*"
   },
