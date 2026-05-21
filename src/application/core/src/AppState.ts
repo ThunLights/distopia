@@ -4,6 +4,8 @@ import type { Friend } from "repo-memory/Friend";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import type { JWTKey } from "repo-memory/JWTKey";
+import type { ButtonLateLimit } from "repo-memory/latelimit/ButtonLateLimit";
+import type { ChatInputCommandLateLimit } from "repo-memory/latelimit/ChatInputCommandLateLimit";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import type { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
 import type { MessageCreate } from "repo-memory/MessageCreate";
@@ -21,6 +23,8 @@ export type AppState = {
   url: string;
   memory: {
     latelimit: {
+      button: ButtonLateLimit;
+      chatInputCommand: ChatInputCommandLateLimit;
       messageCreate: MessageCreateLateLimit;
       bump: GuildBumpLateLimit;
     };
