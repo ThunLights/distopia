@@ -63,6 +63,8 @@ export class InteractionCreateHandler extends BaseHandler<
             }));
           }
 
+          await this.core.latelimit.saveChatInputCommand(interaction.user.id);
+
           if (res instanceof InteractionCallbackResponse || res instanceof ModalSended) {
             return;
           } else {
@@ -83,6 +85,8 @@ export class InteractionCreateHandler extends BaseHandler<
               flags: [MessageFlags.Ephemeral],
             }));
           }
+
+          await this.core.latelimit.saveButton(interaction.user.id);
 
           if (res instanceof InteractionResponse || res instanceof ModalSended) {
             return;
