@@ -86,6 +86,4 @@ export const supporters = [
   },
 ] satisfies Supporter[];
 
-export const PUBLIC_OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_BOT_ID}&response_type=code&redirect_uri=${encodeURIComponent(`${PUBLIC_URL}/auth`)}&scope=identify+guilds+email+guilds.join`;
-
 export const PUBLIC_BOT_INVITE_LINK = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_BOT_ID}&permissions=8&integration_type=0&scope=bot`;

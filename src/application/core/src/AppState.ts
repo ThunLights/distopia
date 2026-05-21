@@ -6,6 +6,7 @@ import type { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import type { JWTKey } from "repo-memory/JWTKey";
 import type { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import type { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
+import type { UserBumpLateLimit } from "repo-memory/latelimit/UserBumpLateLimit";
 import type { MessageCreate } from "repo-memory/MessageCreate";
 import type { OAuth2Guilds } from "repo-memory/OAuth2Guilds";
 import type { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
@@ -23,6 +24,7 @@ export type AppState = {
     latelimit: {
       messageCreate: MessageCreateLateLimit;
       bump: GuildBumpLateLimit;
+      userBump: UserBumpLateLimit;
     };
     friend: Friend;
     guildEdit: GuildEdit;

@@ -35,7 +35,7 @@ export class ReviewModal extends ModalSubmitInteractionBase<Options> {
   ): Promise<InteractionReplyOptions | InteractionResponse<boolean>> {
     const { star, content } = options;
 
-    if (isNaN(star) || star > 5) {
+    if (isNaN(star) || star < 1 || star > 5) {
       return {
         content: `${star}は無効な値です。`,
         flags: [MessageFlags.Ephemeral],

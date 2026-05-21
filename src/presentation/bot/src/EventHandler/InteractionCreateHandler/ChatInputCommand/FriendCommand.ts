@@ -10,6 +10,7 @@ import {
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
   type MessagePayload,
+  type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 
@@ -19,6 +20,7 @@ import { ModalSended } from "../Base/Modal/ModalSended";
 type Options = {};
 
 export class FriendCommand extends ChatInputCommandBase<Options> {
+  public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "friend",
     description: "フレンド募集用のコマンドです。",

@@ -20,6 +20,7 @@ export class Memory extends Base {
       this.state.memory.voiceChannelMember,
       this.state.memory.latelimit.bump,
       this.state.memory.latelimit.messageCreate,
+      this.state.memory.latelimit.userBump,
     ];
 
     for (const mem of mems) {

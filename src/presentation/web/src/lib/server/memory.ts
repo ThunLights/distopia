@@ -11,11 +11,13 @@ import { UserOAuth2 } from "repo-memory/UserOAuth2";
 import { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
 import { GuildBumpLateLimit } from "repo-memory/latelimit/GuildBumpLateLimit";
 import { MessageCreateLateLimit } from "repo-memory/latelimit/MessageCreateLateLimit";
+import { UserBumpLateLimit } from "repo-memory/latelimit/UserBumpLateLimit";
 
 export const memory: AppState["memory"] = {
   latelimit: {
     messageCreate: new MessageCreateLateLimit(),
     bump: new GuildBumpLateLimit(),
+    userBump: new UserBumpLateLimit(),
   },
   friend: new Friend(),
   guildEdit: new GuildEdit(),

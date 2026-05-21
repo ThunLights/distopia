@@ -92,16 +92,26 @@ export class Guild extends Base {
 
   public async bump(user: User, guild: GuildModel) {
     const twoHours = 2 * 60 * 60 * 1000;
+    const oneHour = 1 * 60 * 60 * 1000;
     const { database, memory } = this.state;
-    const latelimit = memory.latelimit.bump;
+    const guildLimit = memory.latelimit.bump;
+    const userLimit = memory.latelimit.userBump;
     const nowDate = new Date();
-    const limit = latelimit.get(guild.id);
 
-    if (limit && limit.getTime() > Date.now()) {
-      return new LateLimitError(limit);
+    // Check guild-level rate limit
+    const guildLimitEntry = guildLimit.get(guild.id);
+    if (guildLimitEntry && guildLimitEntry.getTime() > Date.now()) {
+      return new LateLimitError(guildLimitEntry);
     }
 
-    latelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
+    // Check user-level rate limit (prevent a single user from spam-bumping across guilds)
+    const userLimitEntry = userLimit.get(user.id);
+    if (userLimitEntry && userLimitEntry.getTime() > Date.now()) {
+      return new LateLimitError(userLimitEntry);
+    }
+
+    guildLimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
+    userLimit.set(user.id, new Date(nowDate.getTime() + oneHour));
 
     await database.guild.update({
       guildId: guild.id,
