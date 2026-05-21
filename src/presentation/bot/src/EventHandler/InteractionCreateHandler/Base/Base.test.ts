@@ -7,7 +7,7 @@ import type {
   GuildChannelResolvable,
   PermissionsBitField,
 } from "discord.js";
-import { describe, expect, test } from "vitest";
+import { describe, expect, suite, test } from "vitest";
 
 import { Base } from "./Base";
 import { PermissionSuccess } from "./Permission/PermissionSuccess";
@@ -26,36 +26,69 @@ class TestCommand extends Base<BaseInteraction> {
 
 const testCommand = new TestCommand(new AppCore({} as AppState));
 
-describe("Base.ts", () => {
-  describe("PermissionCheck", () => {
-    test("requireBotGuildPermissions", async () => {
-      expect(
-        await testCommand.test({
-          guild: {
-            members: {
-              me: {
-                permissions: {
-                  has(_permission, _checkAdmin) {
-                    return true;
-                  },
-                },
-                permissionsIn(_channel: GuildChannelResolvable) {
-                  return {
-                    has(_permission, _checkAdmin) {
-                      return true;
-                    },
-                  };
-                },
-              },
-            },
-          } as Guild,
-          memberPermissions: {
+const interactionForPermissionCheck = {
+  channelId: "123",
+  guild: {
+    members: {
+      me: {
+        permissions: {
+          has(_permission, _checkAdmin) {
+            return true;
+          },
+        },
+        permissionsIn(_channel: GuildChannelResolvable) {
+          return {
             has(_permission, _checkAdmin) {
               return true;
             },
-          } as PermissionsBitField,
-        } as unknown as BaseInteraction),
-      ).toBe(false);
+          };
+        },
+      },
+    },
+  } as Guild,
+  memberPermissions: {
+    has(_permission, _checkAdmin) {
+      return true;
+    },
+  } as PermissionsBitField,
+} as unknown as BaseInteraction;
+
+describe("Base.ts", () => {
+  describe("PermissionCheck", () => {
+    test("valid permissions", async () => {
+      expect(await testCommand.test(interactionForPermissionCheck)).toBe(true);
+    });
+
+    suite("requireBotGuildPermissions", async () => {
+      test("invalid permission", async () => {
+        expect(
+          await testCommand.test({
+            ...interactionForPermissionCheck,
+            guild: {
+              members: {
+                me: {
+                  permissions: {
+                    has(_permission, _checkAdmin) {
+                      return false;
+                    },
+                  },
+                },
+              },
+            } as Guild,
+          } as BaseInteraction),
+        ).toBe(false);
+      });
+    });
+
+    suite("requireBotChannelPermissions", async () => {
+      test("channelId: null", async () => {
+        expect(
+          await testCommand.test({
+            ...interactionForPermissionCheck,
+            channelId: null,
+          } as BaseInteraction),
+        ).toBe(false);
+      });
     });
   });
 });
