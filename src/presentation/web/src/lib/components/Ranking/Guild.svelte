@@ -7,7 +7,7 @@
     guildId: string;
     name: string;
     useFrameIcon: boolean;
-    rank: number;
+    index: number;
     activeRate: number | null;
     level: number;
     point: number;
@@ -20,7 +20,7 @@
     guildId,
     name,
     useFrameIcon,
-    rank,
+    index,
     activeRate,
     level,
     point,
@@ -34,14 +34,14 @@
   <div>
     <a class="white" href={resolve(`/guilds/${guildId}`)}>
       {#if useFrameIcon}
-        <Icon width="10vw" height="10vw" iconPath={iconUrl ?? DiscordIcon} {rank} />
+        <Icon width="10vw" height="10vw" iconPath={iconUrl ?? DiscordIcon} rank={index + 1} />
       {:else}
         <img class="icon" src={iconUrl ?? DiscordIcon} alt="" />
       {/if}
     </a>
   </div>
   <div>
-    <p><a class="name white" href={resolve(`/guilds/${guildId}`)}>{rank + 1}: {name}</a></p>
+    <p><a class="name white" href={resolve(`/guilds/${guildId}`)}>{index + 1}: {name}</a></p>
     <div class="informations">
       <p>
         Rate {Number(activeRate ?? 0n)} Lv.{Number(level ?? 0n)}
