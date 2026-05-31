@@ -66,7 +66,7 @@ export class WebEditChangeButton extends ButtonInteractionBase {
             new CheckboxBuilder().setCustomId("pub").setDefault(draft.pub ?? true),
           ),
         new LabelBuilder()
-          .setLabel(`タグ (最大${NUM_TAG_LIMIT}}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`)
+          .setLabel(`タグ (最大${NUM_TAG_LIMIT}個, 最大${CHARACTER_LIMIT.tag}文字, Enterで区切り)`)
           .setTextInputComponent(
             new TextInputBuilder()
               .setCustomId("tags")
