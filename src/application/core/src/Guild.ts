@@ -10,6 +10,7 @@ import type { SearchOptions } from "repo-search";
 
 import type { AppState } from "./AppState";
 import { Base } from "./Base";
+import type { Ranking } from "./Ranking";
 import type { Record } from "./Record";
 import type { GuildMetaData } from "./types/GuildMetaData";
 import type { RootPage } from "./types/RootPage";
@@ -23,8 +24,19 @@ export class Guild extends Base {
   constructor(
     state: AppState,
     private readonly record: Record,
+    private readonly ranking: Ranking,
   ) {
     super(state);
+  }
+
+  private async removeFromPublicCaches(guildId: string) {
+    this.rootPage.latestGuilds = this.rootPage.latestGuilds.filter(
+      ({ guild }) => guild.guildId !== guildId,
+    );
+    this.rootPage.activeGuilds = this.rootPage.activeGuilds.filter(
+      ({ guild }) => guild.guildId !== guildId,
+    );
+    await this.ranking.cleanCache();
   }
 
   public async updateRootPage() {
@@ -35,13 +47,15 @@ export class Guild extends Base {
   public async loadSearchEngine() {
     const guilds = await this.state.database.guild.findAll();
     await this.state.searchEngine.upsertAll(
-      guilds.map(({ guildId, name, description, nsfw, tags }) => ({
-        guildId,
-        name,
-        description: description ?? "",
-        nsfw,
-        tags,
-      })),
+      guilds
+        .filter((guild) => guild.public)
+        .map(({ guildId, name, description, nsfw, tags }) => ({
+          guildId,
+          name,
+          description: description ?? "",
+          nsfw,
+          tags,
+        })),
     );
   }
 
@@ -127,6 +141,13 @@ export class Guild extends Base {
   }
 
   public async save(input: GuildUpsertInput) {
+    if (input.public === false) {
+      const guild = await this.state.database.guild.upsert(input);
+      await this.state.searchEngine.delete(input.guildId);
+      await this.removeFromPublicCaches(input.guildId);
+      return guild;
+    }
+
     await this.state.searchEngine.upsert({
       guildId: input.guildId,
       name: input.name,
