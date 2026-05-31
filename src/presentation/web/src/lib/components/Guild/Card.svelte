@@ -51,7 +51,7 @@
           <LinkTagsLayout
             tags={tags.map((label) => ({
               label,
-              link: resolve(`/search?w=${decodeURIComponent(label)}`),
+              link: resolve(`/search?w=${encodeURIComponent(label)}`),
             }))}
           />
         {/if}
