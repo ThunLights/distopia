@@ -52,17 +52,17 @@
   <div class="ranking">
     {#if rankingType === "userbump"}
       {#each userBump as user, index (user.id)}
-        <User {...user} rank={index + 1}>
+        <User {...user} {index}>
           <p>合計: {user.bumpCounter ?? 0}回</p>
         </User>
       {/each}
     {:else if rankingType === "level"}
       {#each guildLevel as guild, index (guild.guildId)}
-        <Guild {...guild} useFrameIcon={false} rank={index + 1} />
+        <Guild {...guild} useFrameIcon={false} {index} />
       {/each}
     {:else}
       {#each guildActiveRate as guild, index (guild.guildId)}
-        <Guild {...guild} useFrameIcon={true} rank={index + 1} />
+        <Guild {...guild} useFrameIcon={true} {index} />
       {/each}
     {/if}
   </div>

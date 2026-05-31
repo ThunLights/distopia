@@ -6,12 +6,12 @@
     id: string;
     displayName: string;
     username: string;
-    rank: number;
+    index: number;
     avatarUrl?: string;
     children?: Snippet;
   };
 
-  const { id, avatarUrl, displayName, username, rank, children }: Props = $props();
+  const { id, avatarUrl, displayName, username, index, children }: Props = $props();
 </script>
 
 <div class="user">
@@ -19,7 +19,7 @@
     <img class="icon" src={avatarUrl ?? DiscordIcon} alt="" />
   </div>
   <div>
-    <p class="name white">{rank}: {displayName}</p>
+    <p class="name white">{index + 1}: {displayName}</p>
     <div class="informations">
       {#if children}
         {@render children()}
