@@ -109,6 +109,13 @@ export class Guild extends Base {
     const { database, memory } = this.state;
     const latelimit = memory.latelimit.bump;
     const nowDate = new Date();
+
+    const dbGuildData = await this.state.database.guild.find(guild.id);
+
+    if (!dbGuildData || !dbGuildData.public) {
+      return null;
+    }
+
     const limit = latelimit.get(guild.id);
 
     if (limit && limit.getTime() > Date.now()) {
@@ -116,12 +123,6 @@ export class Guild extends Base {
     }
 
     latelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
-
-    const dbGuildData = await this.state.database.guild.find(guild.id);
-
-    if (!dbGuildData || !dbGuildData.public) {
-      return null;
-    }
 
     await database.guild.update({
       guildId: guild.id,
