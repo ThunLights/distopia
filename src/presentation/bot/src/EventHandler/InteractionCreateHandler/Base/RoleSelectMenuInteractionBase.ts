@@ -5,13 +5,19 @@ import {
   type MessagePayload,
   type RoleSelectMenuInteraction,
 } from "discord.js";
+import { z } from "zod";
 
-import { ParseOptionsError } from "./Error/ParseOptionsError";
+import { ValidateError, validator, type ValidateResult } from "../../../utils/validator";
 import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
+export const OptionsSchema = z.object({
+  roleId: z.string().regex(/^\d+$/),
+});
+
 export abstract class RoleSelectMenuInteractionBase<
-  O extends { roleId: string } = { roleId: string },
+  Schema extends typeof OptionsSchema = typeof OptionsSchema,
+  O = z.infer<Schema>,
   T extends RoleSelectMenuInteraction = RoleSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | InteractionResponse,
 > extends MessageComponentInteractionBase<T, R> {
@@ -24,24 +30,17 @@ export abstract class RoleSelectMenuInteractionBase<
 
     const options = await this.parseOptions(interaction);
 
-    if (options instanceof ParseOptionsError) {
-      return {
-        content: options.message,
-        flags: [MessageFlags.Ephemeral],
-      } as R;
+    if (options instanceof ValidateError) {
+      return options.content as R;
     }
 
     return await this.exec(interaction, options);
   }
 
-  public async parseOptions(interaction: T): Promise<O | ParseOptionsError> {
+  public async parseOptions(interaction: T): Promise<ValidateResult<O>> {
     const [roleId] = interaction.values;
 
-    if (!roleId) {
-      return new ParseOptionsError("ロールが選択されていません");
-    }
-
-    return { roleId } as O;
+    return (await validator({ roleId }, OptionsSchema)) as O;
   }
 
   protected abstract exec(interaction: T, options: O): Promise<R>;
