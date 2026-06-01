@@ -7,6 +7,7 @@
   import PrimaryButton from "../Button/PrimaryButton.svelte";
   import LinkTagsLayout from "../Layout/LinkTagsLayout.svelte";
   import Icon from "./Icon.svelte";
+  import { omitLineSync } from "app-core/omit";
 
   type Props = {
     guildId: string;
@@ -57,7 +58,7 @@
         {/if}
         {#if description}
           <p>説明</p>
-          <pre>{description}</pre>
+          <pre>{omitLineSync(description, 25)}</pre>
         {/if}
       </div>
     </div>
