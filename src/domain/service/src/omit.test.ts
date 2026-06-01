@@ -5,11 +5,11 @@ import { omitLine, omitLineSync, omitTxt, omitTxtSync } from "./omit";
 describe("omitTxt", async () => {
   test("sync", async () => {
     expect(omitTxtSync("hogehoge", 4)).toBe("hoge...(省略)");
-    expect(omitTxtSync("foo", 4)).toBe("foo");
+    expect(omitTxtSync("hoge", 4)).toBe("hoge");
   });
   test("async", async () => {
     expect(await omitTxt("hogehoge", 4)).toBe("hoge...(省略)");
-    expect(await omitTxt("foo", 4)).toBe("foo");
+    expect(await omitTxt("hoge", 4)).toBe("hoge");
   });
 });
 
