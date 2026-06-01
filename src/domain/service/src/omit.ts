@@ -8,3 +8,13 @@ export function omitTxtSync(content: string, maxLength: number): string {
 }
 
 export const omitTxt = useAsync(omitTxtSync);
+
+export function omitLineSync(content: string, maxLine: number): string {
+  const lines = content.split("\n");
+  if (lines.length <= maxLine) {
+    return content;
+  }
+  return [...lines.slice(0, maxLine), "(以下省略)"].join("\n");
+}
+
+export const omitLine = useAsync(omitLineSync);
