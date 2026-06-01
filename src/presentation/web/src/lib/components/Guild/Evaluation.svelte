@@ -8,8 +8,11 @@
   };
 
   const { reviews }: Props = $props();
-
-  let title = $state("評価:");
+  const title = $derived(
+    reviews.length
+      ? "評価: " + (reviews.reduce((sum, e) => sum + e, 0) / reviews.length).toFixed(2)
+      : "評価なし",
+  );
 </script>
 
 <Block>
