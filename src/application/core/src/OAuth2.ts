@@ -96,15 +96,16 @@ export class OAuth2 extends Base {
   }
 
   public async getGuildsHasOwnerOrAdmin(userId: string, useCache: boolean = true): Promise<Guilds> {
-    const guilds: Guilds = [];
+    const allGuilds = (await this.getGuilds(userId, useCache)) ?? [];
 
-    for (const guild of (await this.getGuilds(userId, useCache)) ?? []) {
-      if (guild.owner || (await this.state.discord.guild.isAdmin(guild.id, userId))) {
-        guilds.push(guild);
-      }
-    }
+    const results = await Promise.all(
+      allGuilds.map(async (guild) => ({
+        guild,
+        isAdminOrOwner: guild.owner || (await this.state.discord.guild.isAdmin(guild.id, userId)),
+      })),
+    );
 
-    return guilds;
+    return results.filter(({ isAdminOrOwner }) => isAdminOrOwner).map(({ guild }) => guild);
   }
 
   public async getGuilds(userId: string, useCache: boolean = true): Promise<Guilds | null> {
