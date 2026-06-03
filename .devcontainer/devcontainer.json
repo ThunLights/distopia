@@ -22,7 +22,8 @@
         "oxc.oxc-vscode",
         "ms-vscode.vscode-typescript-next",
         "prisma.prisma",
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        "me-dutour-mathieu.vscode-github-actions"
       ]
     }
   }
