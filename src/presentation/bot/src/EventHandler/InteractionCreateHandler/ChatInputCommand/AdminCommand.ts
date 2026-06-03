@@ -11,12 +11,16 @@ import {
   type InteractionReplyOptions,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
+import z from "zod";
 
+import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 
-type Options = {
-  subCommand: string;
-};
+const OptionsSchema = z.object({
+  subCommand: z.string(),
+});
+
+type Options = z.infer<typeof OptionsSchema>;
 
 export class AdminCommand extends ChatInputCommandBase<Options> {
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
@@ -38,9 +42,9 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
 
   public override async parseOptions(
     interaction: ChatInputCommandInteraction<CacheType>,
-  ): Promise<Options> {
-    const subCommand = interaction.options.getSubcommand(true);
-    return { subCommand };
+  ): Promise<ValidateResult<Options>> {
+    const subCommand = interaction.options.getSubcommand();
+    return await validator({ subCommand }, OptionsSchema);
   }
 
   public override async exec(
