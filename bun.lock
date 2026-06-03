@@ -164,10 +164,12 @@
     "src/presentation/bot": {
       "name": "presentation-bot",
       "dependencies": {
+        "@standard-schema/spec": "catalog:",
         "app-core": "workspace:*",
         "deepmerge": "4.3.1",
         "discord.js": "catalog:",
         "domain-model": "workspace:*",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -185,7 +187,7 @@
       "dependencies": {
         "@fontsource/inter": "5.2.8",
         "@fontsource/open-sans": "5.2.7",
-        "@standard-schema/spec": "1.1.0",
+        "@standard-schema/spec": "catalog:",
         "app-core": "workspace:*",
         "app-schedule": "workspace:*",
         "discord.js": "catalog:",
@@ -242,6 +244,7 @@
     },
   },
   "catalog": {
+    "@standard-schema/spec": "1.1.0",
     "@types/node": "24",
     "bun": "1.3.13",
     "discord.js": "14.26.2",

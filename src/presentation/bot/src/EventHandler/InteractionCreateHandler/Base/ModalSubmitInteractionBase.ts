@@ -5,6 +5,7 @@ import {
   type ModalSubmitInteraction,
 } from "discord.js";
 
+import { ValidateError, type ValidateResult } from "../../../utils/validator";
 import { Base } from "./Base";
 import { PermissionError } from "./Error/PermissionError";
 
@@ -28,10 +29,14 @@ export abstract class ModalSubmitInteractionBase<
 
     const options = await this.parseOptions(interaction);
 
+    if (options instanceof ValidateError) {
+      return options.content as R;
+    }
+
     return await this.exec(interaction, options);
   }
 
-  public abstract parseOptions(interaction: T): Promise<O>;
+  public abstract parseOptions(interaction: T): Promise<ValidateResult<O>>;
 
   protected abstract exec(interaction: T, options: O): Promise<R>;
 }

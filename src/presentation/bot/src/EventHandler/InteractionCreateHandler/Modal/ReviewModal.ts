@@ -1,4 +1,5 @@
 import { isBlank } from "app-core/blank";
+import { CHARACTER_LIMIT } from "app-core/constant";
 import {
   type ModalSubmitInteraction,
   type CacheType,
@@ -6,14 +7,20 @@ import {
   type InteractionResponse,
   MessageFlags,
 } from "discord.js";
+import z from "zod";
 
+import { validator, type ValidateResult } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 
-type Options = {
-  star: number;
-  content: string;
-};
+const OptionsSchema = z.object({
+  star: z
+    .union([z.literal("1"), z.literal("2"), z.literal("3"), z.literal("4"), z.literal("5")])
+    .transform(Number),
+  content: z.string().max(CHARACTER_LIMIT.review),
+});
+
+type Options = z.infer<typeof OptionsSchema>;
 
 const threeMonthAgo = 90 * 24 * 60 * 60 * 1000;
 
@@ -22,11 +29,14 @@ export class ReviewModal extends ModalSubmitInteractionBase<Options> {
 
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
-  ): Promise<Options> {
-    return {
-      star: Number(interaction.fields.getStringSelectValues("star")[0]),
-      content: interaction.fields.getTextInputValue("content"),
-    };
+  ): Promise<ValidateResult<Options>> {
+    return await validator(
+      {
+        star: interaction.fields.getStringSelectValues("star")[0],
+        content: interaction.fields.getTextInputValue("content"),
+      },
+      OptionsSchema,
+    );
   }
 
   protected override async exec(

@@ -1,3 +1,4 @@
+import { CHARACTER_LIMIT } from "app-core/constant";
 import {
   type ModalSubmitInteraction,
   type CacheType,
@@ -6,14 +7,18 @@ import {
   MessageFlags,
   InteractionResponse,
 } from "discord.js";
+import z from "zod";
 
+import { validator, type ValidateResult } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { page } from "../Page/Settings";
 
-type Options = {
-  content: string;
-};
+const OptionsSchema = z.object({
+  content: z.string().max(CHARACTER_LIMIT.description),
+});
+
+type Options = z.infer<typeof OptionsSchema>;
 
 export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -21,10 +26,13 @@ export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> 
 
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
-  ): Promise<Options> {
-    return {
-      content: interaction.fields.getTextInputValue("content"),
-    };
+  ): Promise<ValidateResult<Options>> {
+    return await validator(
+      {
+        content: interaction.fields.getTextInputValue("content"),
+      },
+      OptionsSchema,
+    );
   }
 
   protected override async exec(

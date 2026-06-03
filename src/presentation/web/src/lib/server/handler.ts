@@ -45,7 +45,7 @@ export async function validateHandler<
     const body = await schema["~standard"].validate(await e.request.json());
 
     if (body.issues) {
-      return errorJson("Invalid Body: " + body.issues.join(", "));
+      return errorJson("Invalid Body: " + body.issues.map(({ message }) => message).join("; "));
     }
 
     return await handler(e, body.value);
@@ -73,7 +73,7 @@ export async function authAndValidateHandler<
     }
 
     if (body.issues) {
-      return errorJson("Invalid Body: " + body.issues.join(", "));
+      return errorJson("Invalid Body: " + body.issues.map(({ message }) => message).join("; "));
     }
 
     return await handler({ ...e, locals: { ...e.locals, user } }, body.value);

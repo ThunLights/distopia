@@ -5,13 +5,19 @@ import {
   type MessagePayload,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import z from "zod";
 
-import { ParseOptionsError } from "./Error/ParseOptionsError";
+import { ValidateError, validator, type ValidateResult } from "../../../utils/validator";
 import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
+export const OptionsSchema = z.object({
+  value: z.string(),
+});
+
 export abstract class StringSelectMenuInteractionBase<
-  O extends { value: string } = { value: string },
+  Schema extends typeof OptionsSchema = typeof OptionsSchema,
+  O = z.infer<Schema>,
   T extends StringSelectMenuInteraction = StringSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | InteractionResponse,
 > extends MessageComponentInteractionBase<T, R> {
@@ -24,24 +30,17 @@ export abstract class StringSelectMenuInteractionBase<
 
     const options = await this.parseOptions(interaction);
 
-    if (options instanceof ParseOptionsError) {
-      return {
-        content: options.message,
-        flags: [MessageFlags.Ephemeral],
-      } as R;
+    if (options instanceof ValidateError) {
+      return options.content as R;
     }
 
     return await this.exec(interaction, options);
   }
 
-  public async parseOptions(interaction: T): Promise<O | ParseOptionsError> {
+  public async parseOptions(interaction: T): Promise<ValidateResult<O>> {
     const [value] = interaction.values;
 
-    if (!value) {
-      return new ParseOptionsError("選択されていません");
-    }
-
-    return { value } as O;
+    return (await validator({ value }, OptionsSchema)) as O;
   }
 
   protected abstract exec(interaction: T, options: O): Promise<R>;

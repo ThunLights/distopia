@@ -10,17 +10,22 @@ import {
   TextChannel,
   type PermissionResolvable,
 } from "discord.js";
+import z from "zod";
 
+import { ValidateError, validator, type ValidateResult } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { page } from "../Page/WebEdit";
 
-type Options = {
-  description: string;
-  nsfw: boolean;
-  pub: boolean;
-  invite: TextChannel | undefined;
-  tags: string[];
+const OptionsSchema = z.object({
+  description: z.string().max(CHARACTER_LIMIT.description),
+  nsfw: z.boolean(),
+  pub: z.boolean(),
+  tags: z.string().max(CHARACTER_LIMIT.tag).array().max(NUM_TAG_LIMIT),
+});
+
+type Options = z.infer<typeof OptionsSchema> & {
+  invite: TextChannel;
 };
 
 export class WebEditModal extends ModalSubmitInteractionBase<Options> {
@@ -30,22 +35,39 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
 
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
-  ): Promise<Options> {
+  ): Promise<ValidateResult<Options>> {
     const tags = interaction.fields
       .getTextInputValue("tags")
       .split("\n")
       .filter((value) => !isBlankSync(value));
+    const invite = interaction.fields
+      .getSelectedChannels("invite", true, [ChannelType.GuildText])
+      .values()
+      .toArray()[0];
 
-    return {
-      description: interaction.fields.getTextInputValue("description"),
-      nsfw: interaction.fields.getCheckbox("nsfw"),
-      pub: interaction.fields.getCheckbox("pub"),
-      invite: interaction.fields
-        .getSelectedChannels("invite", true, [ChannelType.GuildText])
-        .values()
-        .toArray()[0],
-      tags,
-    };
+    if (!invite) {
+      return new ValidateError({
+        content: "招待リンク作成用のチャンネルを選択してください。",
+        flags: [MessageFlags.Ephemeral],
+      });
+    }
+
+    const body = await validator(
+      {
+        description: interaction.fields.getTextInputValue("description"),
+        nsfw: interaction.fields.getCheckbox("nsfw"),
+        pub: interaction.fields.getCheckbox("pub"),
+        tags,
+      },
+      OptionsSchema,
+    );
+
+    return body instanceof ValidateError
+      ? body
+      : {
+          ...body,
+          invite,
+        };
   }
 
   protected override async exec(
@@ -57,26 +79,6 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
 
     if (guild instanceof GuildParseError) {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
-    }
-
-    if (!invite) {
-      return {
-        content: "招待リンク作成用のチャンネルを選択してください。",
-        flags: [MessageFlags.Ephemeral],
-      };
-    }
-
-    if (tags.length > NUM_TAG_LIMIT) {
-      return { content: `タグは${NUM_TAG_LIMIT}つまでです`, flags: [MessageFlags.Ephemeral] };
-    }
-
-    for (const tag of tags) {
-      if (tag.length > CHARACTER_LIMIT.tag) {
-        return {
-          content: `タグの文字数は${CHARACTER_LIMIT.tag}文字までです`,
-          flags: [MessageFlags.Ephemeral],
-        };
-      }
     }
 
     const channel = interaction.guild?.channels.cache.get(invite.id);
