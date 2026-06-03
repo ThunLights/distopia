@@ -7,33 +7,40 @@ import {
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
 } from "discord.js";
+import z from "zod";
 
+import { validator, type ValidateResult } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { page } from "../Page/Settings";
 
-type Options = {
-  nsfw: boolean;
-  tags: string[];
-  profile: string;
-};
+const OptionsSchema = z.object({
+  nsfw: z.boolean(),
+  tags: z.string().max(CHARACTER_LIMIT.tag).array().max(NUM_TAG_LIMIT),
+  profile: z.string().max(CHARACTER_LIMIT.description),
+});
+
+type Options = z.infer<typeof OptionsSchema>;
 
 export class FriendModal extends ModalSubmitInteractionBase<Options> {
   public override customId: string = "friend";
 
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
-  ): Promise<Options> {
+  ): Promise<ValidateResult<Options>> {
     const tags = interaction.fields
       .getTextInputValue("tags")
       .split("\n")
       .filter((value) => !isBlankSync(value));
 
-    return {
-      nsfw: interaction.fields.getCheckbox("nsfw"),
-      tags,
-      profile: interaction.fields.getTextInputValue("profile"),
-    };
+    return await validator(
+      {
+        nsfw: interaction.fields.getCheckbox("nsfw"),
+        tags,
+        profile: interaction.fields.getTextInputValue("profile"),
+      },
+      OptionsSchema,
+    );
   }
 
   protected override async exec(
@@ -45,19 +52,6 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
 
     if (guild instanceof GuildParseError) {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
-    }
-
-    if (options.tags.length > NUM_TAG_LIMIT) {
-      return { content: `タグは${NUM_TAG_LIMIT}つまでです`, flags: [MessageFlags.Ephemeral] };
-    }
-
-    for (const tag of options.tags) {
-      if (tag.length > CHARACTER_LIMIT.tag) {
-        return {
-          content: `タグの文字数は${CHARACTER_LIMIT.tag}文字までです`,
-          flags: [MessageFlags.Ephemeral],
-        };
-      }
     }
 
     await this.core.friend.save({
