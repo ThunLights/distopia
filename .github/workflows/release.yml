@@ -33,7 +33,7 @@ jobs:
   npm:
     name: npmjs.com
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' ||  (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
 
     steps:
       - name: Checkout repository
@@ -66,4 +66,4 @@ jobs:
         run: |
           docker compose exec app sudo scripts/setup.sh
           docker compose exec app sudo bun run build
-          docker compose exec app sudo bash -c "cd lib/distopia && sudo bunx jsr publish --provenance ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+          docker compose exec app sudo bash -c "cd lib/distopia && sudo bunx jsr publish --provenance ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}"
