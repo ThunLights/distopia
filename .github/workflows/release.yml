@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  npm:
+    name: npmjs.com
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+      - name: Publish
+        working-directory: ./docker/
+        run: |
+          docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun run build
+          docker compose exec app sudo cd lib/distopia && sudo bun publish --tolerate-republish
+
+  jsr:
+    name: jsr.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Container
+        uses: ./.github/workflows/setup
+
+      - name: Publish
+        working-directory: ./docker/
+        run: |
+          docker compose exec app sudo scripts/setup.sh
+          docker compose exec app sudo bun run build
+          docker compose exec app sudo cd lib/distopia && sudo bunx jsr publish --provenance
