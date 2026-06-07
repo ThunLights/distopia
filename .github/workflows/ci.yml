@@ -30,7 +30,7 @@ jobs:
   container:
     name: Container
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
 
     steps:
       - name: Checkout repository
@@ -115,7 +115,7 @@ jobs:
   devcontainer:
     name: Dev Container
     runs-on: ubuntu-latest
-    if: (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
     permissions:
       contents: read
       packages: write
