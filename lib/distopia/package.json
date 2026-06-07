@@ -1,0 +1,25 @@
+{
+  "name": "distopia",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "lint": "oxfmt --check && oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "distopia-template": "workspace:*",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "tsdown": "0.22.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "bun": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
+  }
+}
