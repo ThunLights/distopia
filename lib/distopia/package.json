@@ -25,9 +25,9 @@
   },
   "scripts": {
     "build": "tsdown",
-    "lint": "oxfmt --check && oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt",
+    "lint": "oxfmt --check --config ../template/oxfmt.config.ts && oxlint --config ../template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../template/oxlint.config.ts",
+    "format": "oxfmt --config ../template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run build"
   },
