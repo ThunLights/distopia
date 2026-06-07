@@ -1,7 +1,13 @@
 {
   "name": "distopia",
   "version": "0.0.0",
+  "description": "Library for Distopia.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thunlights/distopia.git",
+    "directory": "lib/distopia"
+  },
   "files": [
     "dist"
   ],
@@ -12,6 +18,10 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "tsdown",
