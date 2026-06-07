@@ -32,7 +32,6 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "distopia-template": "workspace:*",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "tsdown": "0.22.2"
