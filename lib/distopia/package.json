@@ -1,6 +1,10 @@
 {
   "name": "distopia",
   "version": "0.0.0",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
