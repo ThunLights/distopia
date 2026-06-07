@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+  pull_request_target:
   push:
     branches:
       - main
@@ -10,10 +11,29 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  PUBLIC_URL: http://localhost:3000
+  PUBLIC_OWNER_ID: "1261634733037719593"
+
+  PUBLIC_HOME_SERVER_ID: "1505540430110920764"
+  PUBLIC_STAFF_ROLE_ID: "1505546268020310117"
+  PUBLIC_HONORARY_MEMBER_ROLE_ID: "1505546306721026068"
+  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "1505546372726788126"
+  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "1505546412484726804"
+  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "1505546443392422010"
+
+  PUBLIC_BOT_ID: "1505544379639660745"
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+  BOT_SECRET: ${{ secrets.BOT_SECRET }}
+  BOT_REDIRECT_URL: http://localhost:3000/auth
+
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
 jobs:
   npm:
     name: npmjs.com
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
 
     steps:
       - name: Checkout repository
@@ -32,6 +52,7 @@ jobs:
   jsr:
     name: jsr.io
     runs-on: ubuntu-latest
+    if: (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
 
     steps:
       - name: Checkout repository
