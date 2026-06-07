@@ -2,6 +2,7 @@ name: Security
 
 on:
   pull_request:
+  pull_request_target:
   push:
     branches:
       - main
@@ -11,6 +12,7 @@ jobs:
   gitleaks:
     name: Git Leaks
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
 
     steps:
       - name: Checkout repository
@@ -27,6 +29,7 @@ jobs:
   trufflehog:
     name: Trufflehog
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
 
     steps:
       - name: Checkout repository
