@@ -93,8 +93,7 @@ jobs:
         run: bun ci
 
       - name: Publish
-        if: github.event_name == 'push'
-        run: scripts/npm-publish.sh
+        run: scripts/npm-publish.sh ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
 
   jsr:
     name: jsr.io
