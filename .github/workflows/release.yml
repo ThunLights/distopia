@@ -73,11 +73,12 @@ jobs:
           docker volume create distopia-db-store
           docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
+      - name: Install Deps
+        run:  docker compose exec app sudo bun ci
+
       - name: Publish
         working-directory: ./docker/
-        run: |
-          docker compose exec app sudo bun ci
-          docker compose exec app \
+        run: docker compose exec app \
             -e ACTIONS_ID_TOKEN_REQUEST_URL \
             -e ACTIONS_ID_TOKEN_REQUEST_TOKEN \
             sudo bash -c "cd lib/distopia && sudo npx jsr publish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}"
