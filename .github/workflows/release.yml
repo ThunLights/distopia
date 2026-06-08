@@ -38,21 +38,25 @@ jobs:
       - name: Install Deps
         run: bun ci
 
-      - name: Install scanning secrets tools
+      - name: Install tools
         run: |
           curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
           git clone https://github.com/gitleaks/gitleaks.git "$RUNNER_TEMP/gitleaks"
           cd "$RUNNER_TEMP/gitleaks" && make build
           sudo mv gitleaks /usr/local/bin
+          sudo curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.8.1/jq-linux64 && sudo chmod +x /usr/local/bin/jq
 
       - name: Check tools
         run: |
           which trufflehog
           which gitleaks
+          which jq
 
       - name: Create Release Pull Request
         if: github.event_name == 'push'
         uses: changesets/action@v1
+        with:
+          version: npm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
