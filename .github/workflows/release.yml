@@ -12,7 +12,6 @@ jobs:
   changesets:
     name: Changesets
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     permissions:
       pull-requests: write
       contents: write
@@ -39,7 +38,14 @@ jobs:
       - name: Install Deps
         run: bun ci
 
+      - name: Install scanning secrets tools
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+          git clone https://github.com/gitleaks/gitleaks.git && cd gitleaks && make build
+          PATH="${PATH}:/gitleaks"
+
       - name: Create Release Pull Request
+        if: github.event_name == 'push'
         uses: changesets/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
