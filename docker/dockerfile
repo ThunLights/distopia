@@ -36,6 +36,7 @@ RUN npm i -g n \
 # Install npm packages
 RUN npm i -g \
     bun \
+    npm@11.16.0 \
     @antfu/ni
 
 # Install scanning secrets tools
