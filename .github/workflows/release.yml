@@ -42,7 +42,12 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
           git clone https://github.com/gitleaks/gitleaks.git && cd gitleaks && make build
-          PATH="${PATH}:/gitleaks"
+          echo "/gitleaks" >> $GITHUB_PATH
+
+      - name: Check tools
+        run: |
+          which trufflehog
+          which gitleaks
 
       - name: Create Release Pull Request
         if: github.event_name == 'push'
