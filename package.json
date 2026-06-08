@@ -40,5 +40,8 @@
       "oxlint": "1.60.0",
       "zod": "4.4.3"
     }
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.31.0"
   }
 }
