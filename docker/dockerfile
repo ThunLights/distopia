@@ -46,4 +46,6 @@ RUN git clone https://github.com/gitleaks/gitleaks.git \
   && make build
 ENV PATH="${PATH}:/gitleaks"
 
+RUN sudo curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.8.1/jq-linux64 && sudo chmod +x /usr/local/bin/jq
+
 USER ubuntu
