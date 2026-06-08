@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true
+    "composite": true,
+    "paths": {
+      "$distopia-template/*": ["../template/src/*"]
+    }
   },
-  "include": ["${configDir}/src"]
+  "include": ["${configDir}/src", "../template/src/*"]
 }
