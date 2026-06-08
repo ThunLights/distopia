@@ -6,7 +6,4 @@ export default defineConfig({
   format: ["esm", "cjs"],
   tsconfig: "tsconfig.json",
   clean: true,
-  deps: {
-    alwaysBundle: ["distopia-template"],
-  },
 });
