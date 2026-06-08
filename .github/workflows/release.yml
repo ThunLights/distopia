@@ -2,68 +2,77 @@ name: CI
 
 on:
   pull_request:
-  pull_request_target:
   push:
     branches:
       - main
-
-permissions:
-  contents: read
-  id-token: write
-
-env:
-  PUBLIC_URL: http://localhost:3000
-  PUBLIC_OWNER_ID: "1261634733037719593"
-
-  PUBLIC_HOME_SERVER_ID: "1505540430110920764"
-  PUBLIC_STAFF_ROLE_ID: "1505546268020310117"
-  PUBLIC_HONORARY_MEMBER_ROLE_ID: "1505546306721026068"
-  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "1505546372726788126"
-  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "1505546412484726804"
-  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "1505546443392422010"
-
-  PUBLIC_BOT_ID: "1505544379639660745"
-  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-  BOT_SECRET: ${{ secrets.BOT_SECRET }}
-  BOT_REDIRECT_URL: http://localhost:3000/auth
-
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
   npm:
     name: npmjs.com
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup Container
-        uses: ./.github/workflows/setup
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build with GHA cache
+        uses: docker/build-push-action@v7
+        with:
+            context: ./docker
+            push: false
+            load: true
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+
+      - name: Checkout Container
+        working-directory: ./docker/
+        shell: bash
+        run: |
+          docker volume create distopia-db-store
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
       - name: Publish
         working-directory: ./docker/
         run: |
-          docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun run build
           docker compose exec app sudo bash -c "cd lib/distopia && sudo bun publish --tolerate-republish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}"
 
   jsr:
     name: jsr.io
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup Container
-        uses: ./.github/workflows/setup
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build with GHA cache
+        uses: docker/build-push-action@v7
+        with:
+            context: ./docker
+            push: false
+            load: true
+            cache-from: type=gha
+            cache-to: type=gha,mode=max
+
+      - name: Checkout Container
+        working-directory: ./docker/
+        shell: bash
+        run: |
+          docker volume create distopia-db-store
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
       - name: Publish
         working-directory: ./docker/
         run: |
-          docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun run build
           docker compose exec app sudo bash -c "cd lib/distopia && sudo npx jsr publish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}"
