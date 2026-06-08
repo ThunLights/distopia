@@ -40,6 +40,7 @@ jobs:
       - name: Publish
         working-directory: ./docker/
         run: |
+          docker compose exec app sudo bun ci
           docker compose exec app sudo bash -c "cd lib/distopia && sudo bun publish --tolerate-republish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}"
 
   jsr:
@@ -75,4 +76,5 @@ jobs:
       - name: Publish
         working-directory: ./docker/
         run: |
+          docker compose exec app sudo bun ci
           docker compose exec app sudo bash -c "cd lib/distopia && sudo npx jsr publish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}"
