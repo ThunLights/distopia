@@ -28,6 +28,10 @@
     "build-storybook": {
       "dependsOn": ["^build-storybook"],
       "cache": false
+    },
+    "version:jsr": {
+      "dependsOn": ["^version:jsr"],
+      "outputs": ["jsr.json"]
     }
   }
 }

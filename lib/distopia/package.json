@@ -29,6 +29,7 @@
     "lint:fix": "oxlint --fix --config ../template/oxlint.config.ts",
     "format": "oxfmt --config ../template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit",
+    "version:jsr": "../../scripts/jsr-version.sh $npm_package_version",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
