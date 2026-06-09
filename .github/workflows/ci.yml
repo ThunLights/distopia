@@ -124,6 +124,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Lowercase image name
+        id: img
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Generate .env
         run: printenv > .env
 
@@ -134,7 +138,7 @@ jobs:
       - name: Build
         uses: devcontainers/ci@v0.3
         with:
-          cacheFrom: ghcr.io/${{ github.repository }}
+          cacheFrom: ${{ steps.img.outputs.name }}
           push: never
           runCmd: |
             sudo ./scripts/setup.sh
