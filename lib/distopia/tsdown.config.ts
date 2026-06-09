@@ -6,4 +6,7 @@ export default defineConfig({
   format: ["esm", "cjs"],
   tsconfig: "tsconfig.json",
   clean: true,
+  banner: {
+    js: '/* @ts-self-types="./index.d.mts" */',
+  },
 });
