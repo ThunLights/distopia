@@ -30,6 +30,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24.15.0'
+          registry-url: 'https://registry.npmjs.org'
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -81,6 +82,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24.15.0'
+          registry-url: 'https://registry.npmjs.org'
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -116,6 +118,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24.15.0'
+          registry-url: 'https://registry.npmjs.org'
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -126,6 +129,10 @@ jobs:
 
       - name: Install Deps
         run: bun ci
+
+      - name: Build
+        working-directory: ./lib/distopia
+        run: bun run build
 
       - name: Publish
         working-directory: ./lib/distopia
