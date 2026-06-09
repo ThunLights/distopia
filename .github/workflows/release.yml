@@ -175,4 +175,4 @@ jobs:
 
       - name: Publish
         working-directory: ./lib/distopia
-        run: npx jsr publish --provenance ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+        run: npx jsr publish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
