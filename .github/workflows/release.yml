@@ -132,9 +132,15 @@ jobs:
         run: bun ci
 
       - name: Publish
+        continue-on-error: true
+        id: publish
         run: scripts/npm-publish.sh ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
         env:
           NPM_TOKEN: ''
+
+      - name: Dump npm debug log
+        if: steps.publish.outcome == 'failure'
+        run: cat /home/runner/.npm/_logs/*-debug-0.log || true
 
   jsr:
     name: jsr.io
