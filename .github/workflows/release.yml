@@ -53,19 +53,19 @@ jobs:
           which gitleaks
           which jq
 
-      - name: Create Release Pull Request
-        if: github.event_name == 'push'
-        uses: changesets/action@v1
-        with:
-          version: npm run version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create Tag
         if: github.event_name == 'push'
         run: |
           npx changeset tag
           git push --follow-tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release Pull Request
+        if: github.event_name == 'push'
+        uses: changesets/action@v1
+        with:
+          version: sudo npm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
