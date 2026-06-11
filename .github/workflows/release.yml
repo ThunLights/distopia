@@ -140,7 +140,9 @@ jobs:
 
       - name: Dump npm debug log
         if: steps.publish.outcome == 'failure'
-        run: cat /home/runner/.npm/_logs/*-debug-0.log || true
+        run: |
+          cat /home/runner/.npm/_logs/*-debug-0.log || true
+          exit 1
 
   jsr:
     name: jsr.io
