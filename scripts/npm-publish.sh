@@ -12,6 +12,5 @@ if npm view "${PKG_NAME}@${PKG_VER}" version > /dev/null 2>&1; then
   echo "already published: ${PKG_NAME}@${PKG_VER} — skipping"
 else
   bun pm pack
-  cd $project_dir
-  npm publish $project_dir/lib/distopia/$PKG_NAME-$PKG_VER.tgz --verbose --provenance --access public $flags
+  npm publish ./$PKG_NAME-$PKG_VER.tgz --verbose --provenance --access public $flags
 fi
