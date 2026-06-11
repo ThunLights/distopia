@@ -42,7 +42,9 @@ jobs:
 
       - name: Create Tag
         if: github.event_name == 'push'
-        run: npx @changesets/cli tag
+        run: |
+          npx changeset tag
+          git push --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
