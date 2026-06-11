@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "discord-api-types": "0.38.47",
+    "discord-api-types": "0.38.48",
     "discord.js": "catalog:"
   },
   "devDependencies": {
