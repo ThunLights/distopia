@@ -1,5 +1,0 @@
----
-"distopia": minor
----
-
-fix: readme
