@@ -54,6 +54,7 @@ jobs:
           which jq
 
       - name: Version script
+        if: github.event_name == 'pull_request'
         run: sudo npm run version
 
       - name: Create Tag
