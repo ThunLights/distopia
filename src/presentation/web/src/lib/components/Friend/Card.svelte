@@ -30,7 +30,12 @@
           {friend.username}
           <Copy copyTxt={friend.username}><img src={CopyIcon} alt="" /></Copy>
         </p>
-        <p>ID: {friend.userId}</p>
+        <p>
+          ID: {friend.userId}
+          {#if friend.nsfw}
+            <small style="color: red;">nsfw!</small>
+          {/if}
+        </p>
       </div>
     </div>
     {#if friend.tags.length}

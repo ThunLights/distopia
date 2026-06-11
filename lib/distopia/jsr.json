@@ -6,7 +6,7 @@
   "imports": {
     "@types/node": "npm:@types/node@24",
     "jsr": "npm:jsr@0.14.3",
-    "oxfmt": "npm:oxfmt@0.45.0",
+    "oxfmt": "npm:oxfmt@0.54.0",
     "oxlint": "npm:oxlint@1.60.0",
     "tsdown": "npm:tsdown@0.22.2"
   },

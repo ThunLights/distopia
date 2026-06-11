@@ -23,7 +23,8 @@
         "ms-vscode.vscode-typescript-next",
         "prisma.prisma",
         "github.vscode-github-actions",
-        "me-dutour-mathieu.vscode-github-actions"
+        "me-dutour-mathieu.vscode-github-actions",
+        "fill-labs.dependi"
       ]
     }
   }
