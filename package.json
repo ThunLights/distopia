@@ -21,7 +21,7 @@
     "husky": "9.1.7",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "turbo": "2.9.6"
+    "turbo": "2.9.18"
   },
   "peerDependencies": {
     "typescript": "catalog:"
