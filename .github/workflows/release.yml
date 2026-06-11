@@ -55,7 +55,7 @@ jobs:
 
       - name: Version script
         if: github.event_name == 'pull_request'
-        run: sudo npm run version
+        run: npm run version
 
       - name: Create Tag
         if: github.event_name == 'push'
@@ -69,7 +69,7 @@ jobs:
         if: github.event_name == 'push'
         uses: changesets/action@v1
         with:
-          version: sudo npm run version
+          version: npm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
