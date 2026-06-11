@@ -53,6 +53,9 @@ jobs:
           which gitleaks
           which jq
 
+      - name: Version script
+        run: sudo npm run version
+
       - name: Create Tag
         if: github.event_name == 'push'
         run: |
