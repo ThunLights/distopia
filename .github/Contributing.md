@@ -13,6 +13,9 @@ docker volume create distopia-db-store
 
 ## Setup
 
+- `.env` - for code
+- `docker/.env` - for container port forwarding
+
 ```
 sudo scripts/setup.sh
 ```

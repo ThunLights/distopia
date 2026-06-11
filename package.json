@@ -10,7 +10,7 @@
     "setup": "bun run prepare && turbo run setup",
     "typecheck": "turbo run typecheck",
     "deploy-db": "turbo run deploy-db",
-    "version": "npx @changesets/cli version && turbo run version:jsr",
+    "version": "npx changeset version && turbo run version:jsr",
     "prepare": "husky",
     "build-storybook": "turbo run build-storybook"
   },
