@@ -21,7 +21,7 @@ model User {
 
 model UserWeb {
   userId       String @id
-  jwtVerifyKey Bytes  @unique
+  jwtVerifyKey Bytes? @unique
 }
 
 model UserDiscord {

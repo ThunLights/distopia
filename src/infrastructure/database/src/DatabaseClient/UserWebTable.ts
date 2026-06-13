@@ -4,7 +4,7 @@ import type { UserWebUpsertInput } from "../types/UserWeb";
 import { Base } from "./Base";
 
 export class UserWebTable extends Base {
-  public async genKey() {
+  public async genKey(): Promise<Uint8Array<ArrayBuffer>> {
     let key = randomBytes(32);
 
     while (await this.prisma.userWeb.findUnique({ where: { jwtVerifyKey: key } })) {
@@ -23,17 +23,22 @@ export class UserWebTable extends Base {
   }
 
   public async updateNewJwtVerifyKey(userId: string) {
-    return await this.prisma.userWeb.upsert({
+    const newKey = await this.genKey();
+    await this.prisma.userWeb.upsert({
       where: { userId },
-      update: { jwtVerifyKey: await this.genKey() },
-      create: { userId, jwtVerifyKey: await this.genKey() },
+      update: { jwtVerifyKey: newKey },
+      create: { userId, jwtVerifyKey: newKey },
     });
+    return {
+      userId,
+      jwtVerifyKey: newKey,
+    };
   }
 
   public async upsert(input: UserWebUpsertInput) {
     return await this.prisma.userWeb.upsert({
       where: { userId: input.userId },
-      update: input,
+      update: { userId: input.userId, jwtVerifyKey: input.jwtVerifyKey ?? undefined },
       create: {
         ...input,
         jwtVerifyKey: input.jwtVerifyKey ?? (await this.genKey()),
