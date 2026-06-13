@@ -67,7 +67,9 @@ export class JWT extends Base {
 
   public async importDB() {
     for (const { userId, jwtVerifyKey } of await this.state.database.userWeb.findAll()) {
-      this.state.memory.userJWTVerifyKey.set(userId, jwtVerifyKey);
+      if (jwtVerifyKey) {
+        this.state.memory.userJWTVerifyKey.set(userId, jwtVerifyKey);
+      }
     }
     for (const { id, key, alg, createdAt } of await this.state.database.jwtKey.findAll()) {
       this.state.memory.jwtKey.set(id, { key: Buffer.from(key), alg, createdAt });
