@@ -106,6 +106,10 @@ jobs:
       - name: Install Deps
         run: bun ci
 
+      - name: Build
+        working-directory: ./lib/distopia
+        run: bun run build
+
       - name: Publish
         continue-on-error: true
         id: publish
