@@ -19,7 +19,7 @@ export const load: LayoutServerLoad = async (e) => {
   return {
     guildId,
     guild: guild && {
-      name: guild.name,
+      name: meta.name,
       public: guild.public,
       description: guild.description,
       invite: guild.invite,

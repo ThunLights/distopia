@@ -5,8 +5,8 @@ import type { RankingFetchOptions } from "./types/RankingFetchOptions";
 import type { UserBumpRanking } from "./types/UserBumpRanking";
 
 export class Ranking extends Base {
-  private guildLevel = new Map<number, GuildRecordRanking[]>();
-  private guildActiveRate = new Map<number, GuildRecordRanking[]>();
+  private guildLevel = new Map<number, (GuildRecordRanking & { name: string })[]>();
+  private guildActiveRate = new Map<number, (GuildRecordRanking & { name: string })[]>();
   private userBump = new Map<number, UserBumpRanking[]>();
 
   public async fetchAll(num: number) {
@@ -30,10 +30,17 @@ export class Ranking extends Base {
       return cache;
     }
 
-    const data =
-      rankingType === "level"
-        ? await this.state.database.guildRecord.ranking("level", num)
-        : await this.state.database.guildRecord.ranking("activeRate", num);
+    const data = (
+      await Promise.all(
+        (rankingType === "level"
+          ? await this.state.database.guildRecord.ranking("level", num)
+          : await this.state.database.guildRecord.ranking("activeRate", num)
+        ).map(async (guild) => {
+          const meta = await this.state.discord.guild.fetch(guild.guildId);
+          return meta ? { ...guild, name: meta.name } : null;
+        }),
+      )
+    ).filter((guild) => guild !== null);
 
     if (rankingType === "level") {
       this.guildLevel.set(num, data);

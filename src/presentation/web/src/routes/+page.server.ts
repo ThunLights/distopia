@@ -7,7 +7,7 @@ export const load: PageServerLoad = async () => {
   return {
     latestGuilds: latestGuilds.map(({ guild, meta }) => ({
       guildId: guild.guildId,
-      name: guild.name,
+      name: meta.name,
       description: guild.description,
       invite: guild.invite,
       nsfw: guild.nsfw,
@@ -18,7 +18,7 @@ export const load: PageServerLoad = async () => {
     })),
     activeGuilds: activeGuilds.map(({ guild, meta }) => ({
       guildId: guild.guildId,
-      name: guild.name,
+      name: meta.name,
       description: guild.description,
       invite: guild.invite,
       nsfw: guild.nsfw,

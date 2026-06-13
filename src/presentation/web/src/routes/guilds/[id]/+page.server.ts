@@ -14,7 +14,7 @@ export const load: PageServerLoad = async (e) => {
   return {
     guild: {
       guildId,
-      name: guild.name,
+      name: meta.name,
       nsfw: guild.nsfw,
       description: guild.description,
       boostCount: meta.serverBoostCount,
