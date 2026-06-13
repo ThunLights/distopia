@@ -12,7 +12,7 @@ export const GET: RequestHandler = async () => {
           .filter((guild) => guild !== null)
           .map((g) => ({
             ...g,
-            activeRate: g.activeRate ? Number(g.activeRate) : null,
+            activeRate: g.activeRate == null ? null : Number(g.activeRate),
             level: Number(g.level),
             point: Number(g.point),
           })),
@@ -22,7 +22,7 @@ export const GET: RequestHandler = async () => {
           .filter((guild) => guild !== null)
           .map((g) => ({
             ...g,
-            activeRate: g.activeRate ? Number(g.activeRate) : null,
+            activeRate: g.activeRate == null ? null : Number(g.activeRate),
             level: Number(g.level),
             point: Number(g.point),
           })),
