@@ -15,7 +15,7 @@ export const POST: RequestHandler = await validateHandler(PostBodySchema, async 
     {
       guilds: guilds.map(({ guild, meta }) => ({
         guildId: guild.guildId,
-        name: guild.name,
+        name: meta.name,
         invite: guild.invite,
         description: guild.description,
         tags: guild.tags,

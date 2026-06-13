@@ -8,22 +8,24 @@ export const GET: RequestHandler = async () => {
   return json(
     {
       guild: {
-        level: (
-          await Promise.all(guild.level.map((g) => core.guild.rankingToGuildWithMeta(g)))
-        ).map((g) => ({
-          ...g,
-          activeRate: g.activeRate ? Number(g.activeRate) : null,
-          level: Number(g.level),
-          point: Number(g.point),
-        })),
+        level: (await Promise.all(guild.level.map((g) => core.guild.rankingToGuildWithMeta(g))))
+          .filter((guild) => guild !== null)
+          .map((g) => ({
+            ...g,
+            activeRate: g.activeRate ? Number(g.activeRate) : null,
+            level: Number(g.level),
+            point: Number(g.point),
+          })),
         activeRate: (
           await Promise.all(guild.activeRate.map((g) => core.guild.rankingToGuildWithMeta(g)))
-        ).map((g) => ({
-          ...g,
-          activeRate: g.activeRate ? Number(g.activeRate) : null,
-          level: Number(g.level),
-          point: Number(g.point),
-        })),
+        )
+          .filter((guild) => guild !== null)
+          .map((g) => ({
+            ...g,
+            activeRate: g.activeRate ? Number(g.activeRate) : null,
+            level: Number(g.level),
+            point: Number(g.point),
+          })),
       },
       user: {
         bump: user.bump.map(({ id, displayName, name, avatarUrl, bumpCounter }) => ({

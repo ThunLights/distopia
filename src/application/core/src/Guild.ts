@@ -6,7 +6,7 @@ import type {
   GuildUpsertInput,
 } from "infra-database/types";
 import type { Value } from "repo-memory/GuildEdit";
-import type { SearchOptions } from "repo-search";
+import type { GuildDBValue, SearchOptions } from "repo-search";
 
 import type { AppState } from "./AppState";
 import { Base } from "./Base";
@@ -45,18 +45,24 @@ export class Guild extends Base {
   }
 
   public async loadSearchEngine() {
-    const guilds = await this.state.database.guild.findAll();
-    await this.state.searchEngine.upsertAll(
-      guilds
-        .filter((guild) => guild.public)
-        .map(({ guildId, name, description, nsfw, tags }) => ({
-          guildId,
-          name,
-          description: description ?? "",
-          nsfw,
-          tags,
-        })),
-    );
+    const insertQuery: GuildDBValue[] = [];
+    const guilds = (await this.state.database.guild.findAll())
+      .filter((guild) => guild.public)
+      .map(({ guildId, description, nsfw, tags }) => ({
+        guildId,
+        description: description ?? "",
+        nsfw,
+        tags,
+      }));
+
+    for (const guild of guilds) {
+      const meta = await this.fetchMetaData(guild.guildId);
+      if (meta) {
+        insertQuery.push({ ...guild, name: meta.name });
+      }
+    }
+
+    await this.state.searchEngine.upsertAll(insertQuery);
   }
 
   public async removeUnJoinedGuildData() {
@@ -149,13 +155,18 @@ export class Guild extends Base {
       return guild;
     }
 
-    await this.state.searchEngine.upsert({
-      guildId: input.guildId,
-      name: input.name,
-      description: input.description ?? "",
-      tags: input.tags ?? [],
-      nsfw: input.nsfw ?? false,
-    });
+    const meta = await this.fetchMetaData(input.guildId);
+
+    if (meta) {
+      await this.state.searchEngine.upsert({
+        guildId: input.guildId,
+        name: meta.name,
+        description: input.description ?? "",
+        tags: input.tags ?? [],
+        nsfw: input.nsfw ?? false,
+      });
+    }
+
     return await this.state.database.guild.upsert(input);
   }
 
@@ -322,25 +333,24 @@ export class Guild extends Base {
     return await this.state.database.guildReview.delete(guildId, userId);
   }
 
-  public async rankingToGuildWithMeta({
-    guildId,
-    name,
-    activeRate,
-    level,
-    point,
-    icon,
-  }: GuildRecordRanking) {
+  public async rankingToGuildWithMeta({ guildId, activeRate, level, point }: GuildRecordRanking) {
+    const meta = await this.fetchMetaData(guildId);
     const memberCount = await this.state.discord.guild.fetchMemberCount(guildId);
     const onlineMemberCount = await this.state.discord.guild.fetchMemberCount(guildId, ["online"]);
+
+    if (!meta) {
+      return null;
+    }
+
     return {
       guildId,
-      name,
+      name: meta.name,
       activeRate,
       level,
       point,
       memberCount: memberCount ?? null,
       onlineMemberCount: onlineMemberCount ?? null,
-      iconUrl: icon ? this.iconUrl(guildId, icon) : null,
+      iconUrl: meta.icon ? this.iconUrl(guildId, meta.icon) : null,
     };
   }
 
