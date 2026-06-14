@@ -1,5 +1,11 @@
 # distopia
 
+## 0.3.0
+
+### Minor Changes
+
+- 882d61b: feat: add http module exports and update tsconfig paths
+
 ## 0.2.1
 
 ### Patch Changes
