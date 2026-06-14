@@ -4,6 +4,7 @@ import type {
   RESTPostOAuth2AccessTokenResult,
 } from "discord-api-types/v10";
 import type { Client, GuildFeature } from "discord.js";
+import { safeFetch, safeUrl } from "infra-http";
 
 import type { Config } from ".";
 import { sleep } from "../sleep";
@@ -48,12 +49,15 @@ export class OAuth2Controller extends Base {
   }
 
   public async fetchGuilds(accessToken: string): Promise<Guilds | null> {
-    const response = await fetch("https://discord.com/api/v10/users/@me/guilds?with_counts=true", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await safeFetch(
+      safeUrl`https://discord.com/api/v10/users/@me/guilds?with_counts=true`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
     if (response.status === 200) {
       return (await response.json()) as RESTAPIPartialCurrentUserGuild[];
     } else if (response.status === 429) {
@@ -65,7 +69,7 @@ export class OAuth2Controller extends Base {
   }
 
   public async fetchUserInfo(accessToken: string): Promise<FetchUserInfoResult | null> {
-    const response = await fetch("https://discord.com/api/users/@me", {
+    const response = await safeFetch(safeUrl`https://discord.com/api/users/@me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -98,7 +102,7 @@ export class OAuth2Controller extends Base {
     params.append("redirect_uri", encodeURI(this.config.url));
     params.append("code", code);
 
-    const response = await fetch("https://discord.com/api/v10/oauth2/token", {
+    const response = await safeFetch(safeUrl`https://discord.com/api/v10/oauth2/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -128,7 +132,7 @@ export class OAuth2Controller extends Base {
     params.append("grant_type", "refresh_token");
     params.append("refresh_token", refreshToken);
 
-    const response = await fetch("https://discord.com/api/oauth2/token", {
+    const response = await safeFetch(safeUrl`https://discord.com/api/oauth2/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -156,8 +160,8 @@ export class OAuth2Controller extends Base {
     guildId: string,
     accessToken: string,
   ): Promise<"join" | "joined" | null> {
-    const response = await fetch(
-      `https://discord.com/api/v10/guilds/${guildId}/members/${userId}`,
+    const response = await safeFetch(
+      safeUrl`https://discord.com/api/v10/guilds/${guildId}/members/${userId}`,
       {
         method: "PUT",
         headers: {

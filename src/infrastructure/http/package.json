@@ -1,5 +1,5 @@
 {
-  "name": "infra-discord",
+  "name": "infra-http",
   "private": true,
   "type": "module",
   "exports": {
@@ -8,18 +8,15 @@
     }
   },
   "scripts": {
+    "test": "vitest run",
     "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "discord-api-types": "0.38.48",
-    "discord.js": "catalog:",
-    "infra-http": "workspace:*"
-  },
   "devDependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "typescript": "catalog:"
