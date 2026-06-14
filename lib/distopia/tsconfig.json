@@ -3,8 +3,9 @@
   "compilerOptions": {
     "composite": true,
     "paths": {
-      "$distopia-template/*": ["../template/src/*"]
+      "$distopia-template/*": ["../template/src/*"],
+      "$infra-http/*": ["../../src/infrastructure/http/src/*"]
     }
   },
-  "include": ["${configDir}/src", "../template/src/*"]
+  "include": ["${configDir}/src", "../template/src/*", "../../src/infrastructure/http/src/*"]
 }
