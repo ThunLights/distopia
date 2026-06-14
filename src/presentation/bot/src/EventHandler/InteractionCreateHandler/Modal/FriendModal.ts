@@ -56,7 +56,6 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
 
     await this.core.friend.save({
       userId: user.id,
-      username: user.name,
       description: options.profile,
       nsfw: options.nsfw,
       tags: options.tags,

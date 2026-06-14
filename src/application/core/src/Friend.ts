@@ -7,15 +7,23 @@ export class Friend extends Base {
   public sortedDatas: FriendModel[] = [];
 
   public async updateCache() {
-    this.sortedDatas = await Promise.all(
-      (await this.state.database.friend.findAllSortDate()).map(async (value) => {
-        const avatarUrl = await this.state.discord.user.getAvatarUrl(value.userId);
-        return {
-          ...value,
-          avatarUrl,
-        };
-      }),
-    );
+    this.sortedDatas = (
+      await Promise.all(
+        (
+          await this.state.database.friend.findAllSortDate()
+        ).map(async (value) => {
+          const user = await this.state.discord.user.find(value.userId);
+          if (!user) {
+            return null;
+          }
+          return {
+            ...value,
+            username: user.name,
+            avatarUrl: user.avatarUrl ?? null,
+          };
+        }),
+      )
+    ).filter((guild) => guild !== null);
   }
 
   public async delete(userId: string) {
@@ -25,11 +33,19 @@ export class Friend extends Base {
   }
 
   public async save(input: FriendUpsertInput) {
-    const data = await this.state.database.friend.upsert(input);
-    const avatarUrl = await this.state.discord.user.getAvatarUrl(input.userId);
-    this.state.memory.friend.set(input.userId, { ...data, avatarUrl });
-    await this.updateCache();
-    return data;
+    const user = await this.state.discord.user.find(input.userId);
+    if (user) {
+      const data = await this.state.database.friend.upsert(input);
+      this.state.memory.friend.set(input.userId, {
+        ...data,
+        avatarUrl: user.avatarUrl ?? null,
+        username: user.name,
+      });
+      await this.updateCache();
+      return data;
+    } else {
+      return null;
+    }
   }
 
   public async find(userId: string) {
@@ -42,8 +58,15 @@ export class Friend extends Base {
     const dbData = await this.state.database.friend.find(userId);
 
     if (dbData) {
-      const avatarUrl = await this.state.discord.user.getAvatarUrl(userId);
-      this.state.memory.friend.set(dbData.userId, { ...dbData, avatarUrl });
+      const user = await this.state.discord.user.find(dbData.userId);
+      if (!user) {
+        return null;
+      }
+      this.state.memory.friend.set(dbData.userId, {
+        ...dbData,
+        avatarUrl: user.avatarUrl ?? null,
+        username: user.name,
+      });
     }
 
     return dbData;
