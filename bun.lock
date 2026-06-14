@@ -171,6 +171,7 @@
       "dependencies": {
         "discord-api-types": "0.38.48",
         "discord.js": "catalog:",
+        "infra-http": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "catalog:",
