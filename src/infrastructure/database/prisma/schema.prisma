@@ -65,7 +65,7 @@ model GuildReview {
 
 model GuildRecordOneDay {
   guildId          String
-  date             DateTime
+  date             DateTime @db.Date
   vcMembers        String[] @default([])
   newMembers       String[] @default([])
   newMessages      Int      @default(0)
