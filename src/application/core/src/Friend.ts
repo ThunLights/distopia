@@ -23,7 +23,7 @@ export class Friend extends Base {
           };
         }),
       )
-    ).filter((guild) => guild !== null);
+    ).filter((friend) => friend !== null);
   }
 
   public async delete(userId: string) {
