@@ -14,7 +14,7 @@
     ".": "./dist/index.mjs"
   },
   "publish": {
-    "include": ["jsr.json", "README.md", "CHANGELOG.md", "dist"],
+    "include": ["jsr.json", "README.md", "dist"],
     "exclude": ["!dist"]
   }
 }
