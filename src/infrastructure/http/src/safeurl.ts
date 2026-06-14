@@ -8,7 +8,7 @@ export function safeUrl(strings: TemplateStringsArray, ...values: (string | numb
   for (const [index, str] of strings.entries()) {
     result += str;
     const value = values[index];
-    if (value) {
+    if (value !== undefined) {
       result += encodeURIComponent(value);
     }
   }
