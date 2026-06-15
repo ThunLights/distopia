@@ -60,7 +60,8 @@ export class JWTClient {
       }
       if (typeof unVerifiedPayload !== "string" && typeof unVerifiedPayload?.exp === "number") {
         const exp = unVerifiedPayload.exp;
-        if (exp * 1000 > Date.now() - fourteenDays) {
+        const expMs = exp * 1000;
+        if (expMs > Date.now() - fourteenDays) {
           nearExp = true;
         }
       }
