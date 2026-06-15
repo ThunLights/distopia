@@ -30,5 +30,16 @@
 {#if rank && rank <= 50}
   <IconWithFrame {height} {width} {iconPath} {imgStyle} edgePath={genFrame(rank)} />
 {:else}
-  <img {height} {width} style={imgStyle} src={iconPath} alt="guild icon" />
+  <img
+    class="guild-icon"
+    style={[imgStyle, `height: ${height}`, `width: ${width}`].join("; ")}
+    src={iconPath}
+    alt="guild icon"
+  />
 {/if}
+
+<style>
+  .guild-icon {
+    border-radius: 50%;
+  }
+</style>

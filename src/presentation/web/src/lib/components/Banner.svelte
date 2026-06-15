@@ -3,7 +3,7 @@
 </script>
 
 <div>
-  <enhanced:img class="banner" src={Banner} alt="loading" />
+  <enhanced:img class="banner" src={Banner} alt="loading" fetchpriority="high" />
 </div>
 
 <style>
