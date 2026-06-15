@@ -21,6 +21,7 @@
 
 <div>
   <input
+    id="search-input"
     class="search-input"
     type="text"
     spellcheck="false"
@@ -29,7 +30,7 @@
     onkeyup={inputSearchCommand}
     bind:value={term}
   />
-  <PrimaryButton onclick={func(term)}>検索</PrimaryButton>
+  <PrimaryButton onclick={func(term)}><label for="search-input">検索</label></PrimaryButton>
 </div>
 
 <style>
