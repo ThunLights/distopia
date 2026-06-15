@@ -20,7 +20,7 @@ export type VerifyResult = {
   newToken?: string;
 };
 
-const fourteenDays = 14 * 24 * 60 * 60;
+const fourteenDays = 14 * 24 * 60 * 60 * 1000;
 
 export class JWTClient {
   constructor() {
@@ -60,7 +60,7 @@ export class JWTClient {
       }
       if (typeof unVerifiedPayload !== "string" && typeof unVerifiedPayload?.exp === "number") {
         const exp = unVerifiedPayload.exp;
-        if (exp > Date.now() - fourteenDays) {
+        if (exp * 1000 > Date.now() - fourteenDays) {
           nearExp = true;
         }
       }
