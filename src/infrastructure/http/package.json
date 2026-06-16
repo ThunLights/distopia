@@ -14,7 +14,11 @@
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "jsdom": "29.1.1"
+  },
   "devDependencies": {
+    "@types/jsdom": "28.0.3",
     "@types/node": "catalog:",
     "vitest": "catalog:"
   },
