@@ -31,8 +31,10 @@ export class MessageCreateHandler extends BaseHandler<
         const messages = (await message.channel.messages.fetch({ limit: 30 })).values().toArray();
 
         for (const msg of messages) {
-          if (msg.deletable) {
-            await msg.delete();
+          for (const inviteLink of embedInviteLinks) {
+            if (msg.content.includes(inviteLink) && msg.deletable) {
+              await msg.delete();
+            }
           }
         }
 
