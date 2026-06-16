@@ -54,6 +54,7 @@
         "domain-service": "workspace:*",
         "infra-database": "workspace:*",
         "infra-discord": "workspace:*",
+        "infra-http": "workspace:*",
         "repo-memory": "workspace:*",
         "repo-search": "workspace:*",
       },

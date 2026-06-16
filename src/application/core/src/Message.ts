@@ -1,5 +1,6 @@
-import { levelUp } from "domain-service";
+import { findUrls, levelUp } from "domain-service";
 import type { GuildRecordOneDayUpsertInput } from "infra-database/types";
+import { isInviteLink } from "infra-http";
 
 import { Base } from "./Base";
 import { formatYMD } from "./utils/date";
@@ -64,5 +65,24 @@ export class Message extends Base {
     this.state.memory.messageCreate.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
+  }
+
+  public async includeInviteLink(content: string) {
+    const { inviteLinks, normalUrls } = await findUrls(content);
+
+    for (const url of normalUrls) {
+      const cache = await this.state.database.urlCache.find(url);
+      if (cache) {
+        if (cache.isInviteLink) {
+          inviteLinks.push(url);
+        }
+        continue;
+      }
+
+      const { content } = await isInviteLink(url);
+      await this.state.database.urlCache.upsert({ url, isInviteLink: content });
+    }
+
+    return inviteLinks;
   }
 }
