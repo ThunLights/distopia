@@ -74,7 +74,7 @@ export class Message extends Base {
       const memoryCache = this.state.memory.urlCacheInMemory.get(url);
       const dbCache = await this.state.database.urlCache.find(url);
       if (memoryCache || dbCache) {
-        if (dbCache && dbCache.isInviteLink) {
+        if (dbCache && dbCache.isInviteLink !== null) {
           this.state.memory.urlCacheInMemory.set(url, {
             isInviteLink: dbCache.isInviteLink,
             createdAt: new Date(),
