@@ -142,7 +142,6 @@ export class InteractionCreateHandler extends BaseHandler<
     }
 
     if (interaction.isRepliable()) {
-      console.log("Hello");
       return void (await interaction.reply({
         content: "コマンドが見つかりませんでした",
         flags: [MessageFlags.Ephemeral],
