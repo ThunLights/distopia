@@ -81,12 +81,17 @@ export class Message extends Base {
         continue;
       }
 
-      const { content } = await isInviteLink(url);
-      this.state.memory.urlCacheInMemory.set(url, {
-        isInviteLink: content,
-        createdAt: new Date(),
-      });
-      await this.state.database.urlCache.upsert({ url, isInviteLink: content });
+      const { content, isUsedCf } = await isInviteLink(url);
+      if (!isUsedCf) {
+        this.state.memory.urlCacheInMemory.set(url, {
+          isInviteLink: content,
+          createdAt: new Date(),
+        });
+        await this.state.database.urlCache.upsert({ url, isInviteLink: content });
+        if (content) {
+          inviteLinks.push(url);
+        }
+      }
     }
 
     return inviteLinks;
