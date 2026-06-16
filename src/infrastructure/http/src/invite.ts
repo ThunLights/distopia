@@ -1,7 +1,6 @@
-import { JSDOM } from "jsdom";
-
 export async function isUsedCf(response: Response) {
   try {
+    const { JSDOM } = await import("jsdom");
     const html = await response.text();
     const jsdom = new JSDOM(html);
     const title = jsdom.window.document.querySelector("title");
