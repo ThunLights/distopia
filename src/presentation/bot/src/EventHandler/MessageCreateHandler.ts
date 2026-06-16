@@ -8,12 +8,13 @@ export class MessageCreateHandler extends BaseHandler<
   public override async handle(
     message: OmitPartialGroupDMChannel<Message<boolean>>,
   ): Promise<void> {
+    const content = message.content;
     if (message.guildId && message.member?.id) {
-      await this.core.message.increase(message.guildId, message.member.id, message.content);
+      await this.core.message.increase(message.guildId, message.member.id, content);
     }
 
     if (!message.member?.permissions.has("Administrator")) {
-      const inviteLinks = await this.core.message.includeInviteLink(message.content);
+      const inviteLinks = await this.core.message.includeInviteLink(content);
       if (inviteLinks.length) {
         if (message.deletable) {
           await message.delete();
