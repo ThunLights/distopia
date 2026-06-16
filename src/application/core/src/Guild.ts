@@ -326,16 +326,9 @@ export class Guild extends Base {
   }
 
   public async saveSetting(input: GuildSettingUpsertInput) {
-    this.state.memory.guildSetting.set(input.guildId, {
-      guildId: input.guildId,
-      actingOwner: input.actingOwner ?? null,
-      bumpNotice: input.bumpNotice ?? false,
-      bumpNoticeRole: input.bumpNoticeRole ?? null,
-      bumpNoticeContent: input.bumpNoticeContent ?? null,
-      inviteLinkBlock: input.inviteLinkBlock ?? null,
-      createdAt: new Date(),
-    });
-    return await this.state.database.guildSetting.upsert(input);
+    const setting = await this.state.database.guildSetting.upsert(input);
+    this.state.memory.guildSetting.set(input.guildId, { ...setting, createdAt: new Date() });
+    return setting;
   }
 
   public async saveReview(input: GuildReviewUpsertInput) {

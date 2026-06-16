@@ -86,12 +86,12 @@ model GuildRecord {
 }
 
 model GuildSetting {
-  guildId           String   @id
+  guildId           String  @id
   actingOwner       String?
-  bumpNotice        Boolean  @default(false)
+  bumpNotice        Boolean @default(false)
   bumpNoticeRole    String?
   bumpNoticeContent String?
-  inviteLinkBlock   Boolean?
+  inviteLinkBlock   Boolean @default(false)
 }
 
 model Panel {

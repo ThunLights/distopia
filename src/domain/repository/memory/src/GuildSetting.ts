@@ -6,7 +6,7 @@ export type Value = {
   bumpNotice: boolean;
   bumpNoticeRole: string | null;
   bumpNoticeContent: string | null;
-  inviteLinkBlock: boolean | null;
+  inviteLinkBlock: boolean;
   createdAt: Date;
 };
 
