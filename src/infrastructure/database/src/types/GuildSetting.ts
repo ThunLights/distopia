@@ -4,6 +4,7 @@ export type GuildSetting = {
   bumpNotice: boolean;
   bumpNoticeRole: string | null;
   bumpNoticeContent: string | null;
+  inviteLinkBlock: boolean | null;
 };
 
 export type GuildSettingUpdateInput = Pick<GuildSetting, "guildId"> & Partial<GuildSetting>;
