@@ -9,11 +9,13 @@ export class MessageCreateHandler extends BaseHandler<
     message: OmitPartialGroupDMChannel<Message<boolean>>,
   ): Promise<void> {
     const content = message.content;
+    const settings = message.guildId ? await this.core.guild.getSetting(message.guildId) : null;
+
     if (message.guildId && message.member?.id) {
       await this.core.message.increase(message.guildId, message.member.id, content);
     }
 
-    if (!message.member?.permissions.has("Administrator")) {
+    if (settings?.inviteLinkBlock && !message.member?.permissions.has("Administrator")) {
       const inviteLinks = await this.core.message.includeInviteLink(content);
       if (inviteLinks.length) {
         if (message.deletable) {
