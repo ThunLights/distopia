@@ -7,6 +7,7 @@ import { MessageCreate } from "repo-memory/MessageCreate";
 import { OAuth2Guilds } from "repo-memory/OAuth2Guilds";
 import { OAuth2PKCE } from "repo-memory/OAuth2PKCE";
 import { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
+import { UrlCacheInMemory } from "repo-memory/UrlCacheInMemory";
 import { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
 import { UserOAuth2 } from "repo-memory/UserOAuth2";
 import { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
@@ -30,6 +31,7 @@ export const memory: AppState["memory"] = {
   oauth2PKCE: new OAuth2PKCE(),
   oauth2Guilds: new OAuth2Guilds(),
   unJoinedGuild: new UnJoinedGuild(),
+  urlCacheInMemory: new UrlCacheInMemory(),
   userJWTVerifyKey: new UserJWTVerifyKey(),
   userOAuth2: new UserOAuth2(),
   voiceChannelMember: new VoiceChannelMember(),

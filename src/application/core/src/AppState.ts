@@ -12,6 +12,7 @@ import type { MessageCreate } from "repo-memory/MessageCreate";
 import type { OAuth2Guilds } from "repo-memory/OAuth2Guilds";
 import type { OAuth2PKCE } from "repo-memory/OAuth2PKCE";
 import type { UnJoinedGuild } from "repo-memory/UnJoinedGuild";
+import type { UrlCacheInMemory } from "repo-memory/UrlCacheInMemory";
 import type { UserJWTVerifyKey } from "repo-memory/UserJWTVerifyKey";
 import type { UserOAuth2 } from "repo-memory/UserOAuth2";
 import type { VoiceChannelMember } from "repo-memory/VoiceChannelMember";
@@ -37,6 +38,7 @@ export type AppState = {
     oauth2PKCE: OAuth2PKCE;
     oauth2Guilds: OAuth2Guilds;
     unJoinedGuild: UnJoinedGuild;
+    urlCacheInMemory: UrlCacheInMemory;
     userJWTVerifyKey: UserJWTVerifyKey;
     userOAuth2: UserOAuth2;
     voiceChannelMember: VoiceChannelMember;

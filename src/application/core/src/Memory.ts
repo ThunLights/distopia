@@ -17,6 +17,7 @@ export class Memory extends Base {
       this.state.memory.guildMemberAdd,
       this.state.memory.messageCreate,
       this.state.memory.oauth2PKCE,
+      this.state.memory.urlCacheInMemory,
       this.state.memory.userOAuth2,
       this.state.memory.voiceChannelMember,
       this.state.memory.latelimit.button,
