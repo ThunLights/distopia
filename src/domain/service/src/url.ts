@@ -19,27 +19,31 @@ export const regExp = new RegExp(
 );
 
 export function findUrlsSync(content: string): FindUrls {
-  const result: FindUrls = {
-    inviteLinks: [],
-    normalUrls: [],
-  };
+  const inviteLinks: string[] = [];
+  const normalUrls: string[] = [];
   const lines = content.split("\n");
 
   for (const line of lines) {
     const urls = line.split(regExp);
     for (const url of urls.map((value) => SpecialChar.specialChars2ASCII(value))) {
-      if (URL_REGEXP_NO_HTTP.test(url) || URL_REGEXP_INVITE_NO_HTTP.test(url)) {
-        result.inviteLinks.push(url);
-        continue;
-      }
-      if (URL_REGEXP.test(url)) {
-        result.normalUrls.push(url);
-        continue;
+      const isInviteLink = new RegExp(
+        URL_REGEXP_NO_HTTP.source + URL_REGEXP_INVITE_NO_HTTP.source,
+        "gmi",
+      ).test(url);
+      const isUrl = new RegExp(URL_REGEXP, "gmi").test(url);
+
+      if (isInviteLink) {
+        inviteLinks.push(url);
+      } else if (isUrl) {
+        normalUrls.push(url);
       }
     }
   }
 
-  return result;
+  return {
+    inviteLinks,
+    normalUrls,
+  };
 }
 
 export const findUrls = useAsync(findUrlsSync);
