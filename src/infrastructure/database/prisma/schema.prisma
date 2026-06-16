@@ -123,4 +123,6 @@ enum JWTAlg {
 model UrlCache {
   url          String   @id
   isInviteLink Boolean?
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
 }

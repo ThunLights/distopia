@@ -7,6 +7,7 @@ export * from "./GuildReview";
 export * from "./GuildSetting";
 export * from "./JWTKey";
 export * from "./Panel";
+export * from "./UrlCache";
 export * from "./UserDiscord";
 export * from "./User";
 export * from "./UserWeb";
