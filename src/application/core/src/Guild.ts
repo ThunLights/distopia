@@ -2,6 +2,7 @@ import { type User, type Guild as GuildModel, LateLimitError } from "domain-mode
 import type {
   GuildRecordRanking,
   GuildReviewUpsertInput,
+  GuildSetting,
   GuildSettingUpsertInput,
   GuildUpsertInput,
 } from "infra-database/types";
@@ -317,11 +318,23 @@ export class Guild extends Base {
     return Boolean((await this.find(guildId))?.public);
   }
 
-  public async getSetting(guildId: string) {
-    return await this.state.database.guildSetting.find(guildId);
+  public async getSetting(guildId: string): Promise<GuildSetting | null> {
+    return (
+      this.state.memory.guildSetting.get(guildId) ??
+      (await this.state.database.guildSetting.find(guildId))
+    );
   }
 
   public async saveSetting(input: GuildSettingUpsertInput) {
+    this.state.memory.guildSetting.set(input.guildId, {
+      guildId: input.guildId,
+      actingOwner: input.actingOwner ?? null,
+      bumpNotice: input.bumpNotice ?? false,
+      bumpNoticeRole: input.bumpNoticeRole ?? null,
+      bumpNoticeContent: input.bumpNoticeContent ?? null,
+      inviteLinkBlock: input.inviteLinkBlock ?? null,
+      createdAt: new Date(),
+    });
     return await this.state.database.guildSetting.upsert(input);
   }
 
