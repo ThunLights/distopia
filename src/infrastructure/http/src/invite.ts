@@ -10,7 +10,7 @@ export async function isUsedCf(response: Response) {
   }
 }
 
-export async function inviteLinkChecker(url: string) {
+export async function isInviteLink(url: string) {
   const response = await fetch(url, {
     method: "GET",
     redirect: "follow",
