@@ -14,6 +14,9 @@ export async function isInviteLink(url: string) {
   const response = await fetch(url, {
     method: "GET",
     redirect: "follow",
+    headers: {
+      "User-Agent": "Mozilla/5.0",
+    },
   });
 
   return {
