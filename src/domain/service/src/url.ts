@@ -32,7 +32,7 @@ export function findUrlsSync(content: string): FindUrls {
       ).test(url);
       const isUrl = new RegExp(URL_REGEXP, "gmi").test(url);
 
-      if (isInviteLink) {
+      if (isInviteLink || URL_REGEXP_NO_HTTP.test(url) || URL_REGEXP_INVITE_NO_HTTP.test(url)) {
         inviteLinks.push(url);
       } else if (isUrl) {
         normalUrls.push(url);
