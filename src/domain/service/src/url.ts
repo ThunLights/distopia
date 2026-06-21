@@ -8,13 +8,13 @@ export type FindUrls = {
 
 export const URL_REGEXP = /^https?:\/\/[\w/:%#$&?()~.=+-]+$/gim;
 
-export const URL_REGEXP_NO_HTTP = /(?:https?:\/\/)?(?:discord).*gg.*([a-zA-Z0-9_-]+)/gim;
+export const URL_REGEXP_DISCORD_GG = /(?:https?:\/\/)?(?:discord).*gg.*([a-zA-Z0-9_-]+)/gim;
 
-export const URL_REGEXP_INVITE_NO_HTTP =
+export const URL_REGEXP_DISCORD_COM =
   /(?:https?:\/\/)?(?:discord)\.(?:[a-z]{2,6})\/?.*invite.*([a-zA-Z0-9_-]+)\b|(?:https?:\/\/)?(?:discordapp)\.(?:[a-z]{2,6})\/?.*invite.*([a-zA-Z0-9_-]+)/gim;
 
 export const regExp = new RegExp(
-  URL_REGEXP.source + URL_REGEXP_NO_HTTP.source + URL_REGEXP_INVITE_NO_HTTP.source,
+  URL_REGEXP.source + URL_REGEXP_DISCORD_GG.source + URL_REGEXP_DISCORD_COM.source,
   "gmi",
 );
 
@@ -27,12 +27,12 @@ export function findUrlsSync(content: string): FindUrls {
     const urls = line.split(regExp);
     for (const url of urls.map((value) => SpecialChar.specialChars2ASCII(value))) {
       const isInviteLink = new RegExp(
-        URL_REGEXP_NO_HTTP.source + URL_REGEXP_INVITE_NO_HTTP.source,
+        URL_REGEXP_DISCORD_GG.source + URL_REGEXP_DISCORD_COM.source,
         "gmi",
       ).test(url);
       const isUrl = new RegExp(URL_REGEXP, "gmi").test(url);
 
-      if (isInviteLink || URL_REGEXP_NO_HTTP.test(url) || URL_REGEXP_INVITE_NO_HTTP.test(url)) {
+      if (isInviteLink || URL_REGEXP_DISCORD_GG.test(url) || URL_REGEXP_DISCORD_COM.test(url)) {
         inviteLinks.push(url);
       } else if (isUrl) {
         normalUrls.push(url);
