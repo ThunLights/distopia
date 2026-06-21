@@ -71,18 +71,26 @@ export class Message extends Base {
     const { inviteLinks, normalUrls } = await findUrls(content);
 
     for (const url of normalUrls) {
-      const memoryCache = this.state.memory.urlCacheInMemory.get(url);
-      const dbCache = await this.state.database.urlCache.find(url);
-      if (memoryCache || dbCache) {
-        if (dbCache && dbCache.isInviteLink !== null) {
-          this.state.memory.urlCacheInMemory.set(url, {
-            isInviteLink: dbCache.isInviteLink,
-            createdAt: new Date(),
-          });
-        }
-        if (memoryCache?.isInviteLink || dbCache?.isInviteLink) {
+      const memoryCache = this.state.memory.urlCacheInMemory.get(url)?.isInviteLink;
+      if (memoryCache !== undefined) {
+        if (memoryCache) {
           inviteLinks.push(url);
         }
+        continue;
+      }
+
+      const dbCache = (await this.state.database.urlCache.find(url))?.isInviteLink;
+
+      if (dbCache !== null && dbCache !== undefined) {
+        this.state.memory.urlCacheInMemory.set(url, {
+          isInviteLink: dbCache,
+          createdAt: new Date(),
+        });
+
+        if (dbCache) {
+          inviteLinks.push(url);
+        }
+
         continue;
       }
 
