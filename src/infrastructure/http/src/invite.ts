@@ -2,7 +2,6 @@ import type { BodySizeError, HeaderError, RedirectError } from "./Error";
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { safeFetch } from "./safefetch";
 import type { SafeUrl } from "./safeurl";
-import { isLocalUrl } from "./url";
 
 export type IsInviteLink = {
   content: boolean;
