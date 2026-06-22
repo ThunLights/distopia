@@ -1,4 +1,5 @@
 export * from "./Error/index";
+export * from "./dns";
 export * from "./invite";
 export * from "./redirect";
 export * from "./safefetch";
