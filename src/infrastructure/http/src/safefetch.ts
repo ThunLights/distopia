@@ -78,7 +78,7 @@ export async function safeFetch(
       return response;
     }
 
-    if (redirectCount >= DEFAULT_MAX_REDIRECT) {
+    if (redirectCount > DEFAULT_MAX_REDIRECT) {
       return new RedirectError(`Redirect count is over ${DEFAULT_MAX_REDIRECT}`);
     }
   }
