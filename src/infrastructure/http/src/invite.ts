@@ -5,13 +5,17 @@ import { isLocalUrl } from "./url";
 // I will fix it someday.
 export async function isUsedCf(response: Response) {
   try {
+    if (response.status !== 403) {
+      return false;
+    }
+
     const { JSDOM } = await import("jsdom");
 
     const html = await response.text();
     const jsdom = new JSDOM(html);
     const title = jsdom.window.document.querySelector("title");
 
-    return response.status === 403 && title?.textContent === "Just a moment...";
+    return title?.textContent === "Just a moment...";
   } catch {
     return false;
   }
