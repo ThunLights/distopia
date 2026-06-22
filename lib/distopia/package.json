@@ -38,7 +38,9 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
+    "@types/jsdom": "catalog:",
     "@types/node": "catalog:",
+    "jsdom": "catalog:",
     "jsr": "0.14.3",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",

@@ -15,14 +15,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "jsdom": "29.1.1"
+    "jsdom": "catalog:"
   },
   "devDependencies": {
-    "@types/jsdom": "28.0.3",
+    "@types/jsdom": "catalog:",
     "@types/node": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
     "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
