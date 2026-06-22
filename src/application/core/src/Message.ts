@@ -95,8 +95,9 @@ export class Message extends Base {
       }
 
       const response = await isInviteLink(url);
-      if (response instanceof LocalAddressError) {
-        return [];
+
+      if (response instanceof Error) {
+        continue;
       }
 
       if (!response.isUsedCf) {
