@@ -23,6 +23,10 @@ describe("url.ts", () => {
         "http://\\ｃaｎaｒｙ.𝑑𝓲Ｓ𝐜𝑜ｒᵈＡpＰ.𝐜𝑜ｍ\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../hoge",
         "https://\\ｃaｎaｒｙ.𝑑𝓲Ｓ𝐜𝑜ｒᵈＡpＰ.𝐜𝑜ｍ\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../hoge",
         "hogefuga https://discord.com/ https://discord.com/terms https://discord.com/terms/terms-of-service-april-2024 discord.gg/fuga discord.com/invite/fuga discordapp.com/invite/fuga http://discord.gg/fuga http://discord.com/invite/fuga https://discord.gg/fuga https://discord.com/invite/fuga http://\\ｃaｎaｒｙ.𝑑𝓲Ｓ𝐜𝑜ｒᵈＡpＰ.𝐜𝑜ｍ\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../fuga https://\\ｃaｎaｒｙ.𝑑𝓲Ｓ𝐜𝑜ｒᵈＡpＰ.𝐜𝑜ｍ\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../fuga",
+
+        // normal urls
+        "https://google.com",
+        "https://www.youtube.com/watch?v=AICOs2mNTrw",
       ].join("\n"),
     );
 
@@ -51,6 +55,17 @@ describe("url.ts", () => {
       "https://discord.com/invite/fuga",
       "http://\\canary.diScordApP.com\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../fuga",
       "https://\\canary.diScordApP.com\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../fuga",
+    ]);
+
+    expect(urls.normalUrls).toEqual([
+      "https://discord.com/",
+      "https://discord.com/terms",
+      "https://discord.com/terms/terms-of-service-april-2024",
+      "https://discord.com/",
+      "https://discord.com/terms",
+      "https://discord.com/terms/terms-of-service-april-2024",
+      "https://google.com",
+      "https://www.youtube.com/watch?v=AICOs2mNTrw",
     ]);
   });
 });
