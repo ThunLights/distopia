@@ -1,6 +1,7 @@
 export * from "./Error/InvalidDomainError";
 export * from "./Error/LocalAddressError";
 export * from "./invite";
+export * from "./redirect";
 export * from "./safefetch";
 export * from "./safeurl";
 export * from "./size";
