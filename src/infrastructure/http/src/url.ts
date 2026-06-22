@@ -1,3 +1,5 @@
+import { isLocalHostname } from "./dns";
+
 export function isLocalIPv4(host: string): boolean {
   const parts = host.split(".");
   if (parts.length !== 4) return false;
@@ -47,15 +49,16 @@ export function isLocalIPv6(addr: string): boolean {
   return false;
 }
 
-export function isLocalUrl(url: string): boolean {
+export async function isLocalUrl(url: string): Promise<boolean> {
   let s = url.replace(/\\/g, "/");
   if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) s = "http://" + s;
 
-  const host = URL.parse(s)?.hostname.toLowerCase();
-  if (host === undefined) return false;
+  const hostname = URL.parse(s)?.hostname.toLowerCase();
+  if (hostname === undefined) return false;
 
-  if (host === "localhost" || host.endsWith(".localhost")) return true;
-  if (host.startsWith("[") && host.endsWith("]")) return isLocalIPv6(host.slice(1, -1));
-  if (/^\d/.test(host)) return isLocalIPv4(host);
-  return false;
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) return true;
+  if (hostname.startsWith("[") && hostname.endsWith("]")) return isLocalIPv6(hostname.slice(1, -1));
+  if (/^\d/.test(hostname)) return isLocalIPv4(hostname);
+
+  return await isLocalHostname(hostname);
 }

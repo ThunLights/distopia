@@ -15,7 +15,7 @@ export async function safeFetchForDiscord(
   input: SafeUrl,
   init?: RequestInit,
 ): Promise<Response | LocalAddressError | InvalidDomainError> {
-  if (isLocalUrl(input)) return new LocalAddressError(`${input} is local address.`);
+  if (await isLocalUrl(input)) return new LocalAddressError(`${input} is local address.`);
   const hostname = new URL(input).hostname;
 
   if (!DISCORD_DOMAINS.includes(hostname)) {
@@ -35,7 +35,7 @@ export async function safeFetch(
   let response: Response;
 
   while (true) {
-    if (isLocalUrl(reqUrl)) return new LocalAddressError(`${reqUrl} is local address.`);
+    if (await isLocalUrl(reqUrl)) return new LocalAddressError(`${reqUrl} is local address.`);
     response = await fetch(reqUrl, {
       ...currentInit,
       signal: AbortSignal.timeout(DEFAULT_TIMEOUT),
