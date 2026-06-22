@@ -1,6 +1,6 @@
 import { findUrls, levelUp } from "domain-service";
 import type { GuildRecordOneDayUpsertInput } from "infra-database/types";
-import { isInviteLink, LocalAddressError } from "infra-http";
+import { isInviteLink } from "infra-http";
 
 import { Base } from "./Base";
 import { formatYMD } from "./utils/date";
@@ -79,21 +79,6 @@ export class Message extends Base {
         continue;
       }
 
-      const dbCache = (await this.state.database.urlCache.find(url))?.isInviteLink;
-
-      if (dbCache !== null && dbCache !== undefined) {
-        this.state.memory.urlCacheInMemory.set(url, {
-          isInviteLink: dbCache,
-          createdAt: new Date(),
-        });
-
-        if (dbCache) {
-          inviteLinks.push(url);
-        }
-
-        continue;
-      }
-
       const response = await isInviteLink(url);
 
       if (response instanceof Error) {
@@ -105,7 +90,6 @@ export class Message extends Base {
           isInviteLink: response.content,
           createdAt: new Date(),
         });
-        await this.state.database.urlCache.upsert({ url, isInviteLink: response.content });
         if (content) {
           inviteLinks.push(url);
         }
