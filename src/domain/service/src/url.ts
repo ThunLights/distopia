@@ -6,17 +6,12 @@ export type FindUrls = {
   normalUrls: string[];
 };
 
-export const URL_REGEXP = /^https?:\/\/[\w/:%#$&?()~.=+-]+$/gim;
+export const URL_REGEXP = /https?:\/\/[\w/:%#$&?()~.=+-]+/im;
 
-export const URL_REGEXP_DISCORD_GG = /(?:https?:\/\/)?(?:discord).*gg.*([a-zA-Z0-9_-]+)/gim;
+export const URL_REGEXP_DISCORD_GG = /(?:https?:\/\/)?discord\.gg\/[a-zA-Z0-9_-]+/im;
 
 export const URL_REGEXP_DISCORD_COM =
-  /(?:https?:\/\/)?(?:discord)\.(?:[a-z]{2,6})\/?.*invite.*([a-zA-Z0-9_-]+)\b|(?:https?:\/\/)?(?:discordapp)\.(?:[a-z]{2,6})\/?.*invite.*([a-zA-Z0-9_-]+)/gim;
-
-export const regExp = new RegExp(
-  URL_REGEXP.source + URL_REGEXP_DISCORD_GG.source + URL_REGEXP_DISCORD_COM.source,
-  "gmi",
-);
+  /(?:https?:\/\/)?(?:(discord\.com)|(discordapp\.com))\/?.*invite.*([a-zA-Z0-9_-]+)\b/im;
 
 export function findUrlsSync(content: string): FindUrls {
   const inviteLinks: string[] = [];
@@ -24,13 +19,20 @@ export function findUrlsSync(content: string): FindUrls {
   const lines = content.split("\n");
 
   for (const line of lines) {
-    const urls = line.split(regExp);
-    for (const url of urls.map((value) => SpecialChar.specialChars2ASCII(value))) {
+    const ALL_URL_REGEXP = new RegExp(
+      URL_REGEXP.source + URL_REGEXP_DISCORD_GG.source + URL_REGEXP_DISCORD_COM.source,
+      "gmi",
+    );
+    const urls = line.split(ALL_URL_REGEXP);
+
+    for (const url of urls
+      .filter((url) => url)
+      .map((value) => SpecialChar.specialChars2ASCII(value))) {
       const isInviteLink = new RegExp(
         URL_REGEXP_DISCORD_GG.source + URL_REGEXP_DISCORD_COM.source,
         "gmi",
       ).test(url);
-      const isUrl = new RegExp(URL_REGEXP, "gmi").test(url);
+      const isUrl = new RegExp(URL_REGEXP.source, "gmi").test(url);
 
       if (isInviteLink || URL_REGEXP_DISCORD_GG.test(url) || URL_REGEXP_DISCORD_COM.test(url)) {
         inviteLinks.push(url);
