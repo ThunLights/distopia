@@ -1,6 +1,11 @@
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { isLocalUrl } from "./url";
 
+export type IsInviteLink = {
+  content: boolean;
+  isUsedCf: boolean;
+};
+
 // this function is fucking shit.
 // I will fix it someday.
 export async function isUsedCf(response: Response) {
@@ -21,7 +26,7 @@ export async function isUsedCf(response: Response) {
   }
 }
 
-export async function isInviteLink(url: string) {
+export async function isInviteLink(url: string): Promise<IsInviteLink | LocalAddressError> {
   if (isLocalUrl(url)) return new LocalAddressError(`${url} is local address`);
 
   const response = await fetch(url, {
