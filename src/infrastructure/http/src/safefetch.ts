@@ -1,7 +1,7 @@
 import { InvalidDomainError } from "./Error/InvalidDomainError";
 import { LocalAddressError } from "./Error/LocalAddressError";
 import type { SafeUrl } from "./safeurl";
-import { DISCORD_TIMEOUT } from "./timeout";
+import { DEFAULT_TIMEOUT, DISCORD_TIMEOUT } from "./timeout";
 import { isLocalUrl } from "./url";
 
 export const DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
@@ -26,5 +26,5 @@ export async function safeFetch(
 ): Promise<Response | LocalAddressError> {
   if (isLocalUrl(input)) return new LocalAddressError(`${input} is local address.`);
 
-  return await fetch(input, init);
+  return await fetch(input, { ...init, signal: DEFAULT_TIMEOUT });
 }
