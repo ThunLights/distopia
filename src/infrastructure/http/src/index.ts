@@ -1,3 +1,4 @@
+export * from "./Error/HeaderError";
 export * from "./Error/InvalidDomainError";
 export * from "./Error/LocalAddressError";
 export * from "./invite";
