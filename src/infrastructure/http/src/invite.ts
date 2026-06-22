@@ -10,8 +10,10 @@ export type IsInviteLink = {
 
 // this function is fucking shit.
 // I will fix it someday.
-export async function isUsedCf(response: Response) {
+export async function isUsedCf(res: Response) {
   try {
+    const response = res.clone();
+
     if (response.status !== 403) {
       return false;
     }
