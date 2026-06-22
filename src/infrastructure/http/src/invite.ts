@@ -1,13 +1,17 @@
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { isLocalUrl } from "./url";
 
+// this function is fucking shit.
+// I will fix it someday.
 export async function isUsedCf(response: Response) {
   try {
     const { JSDOM } = await import("jsdom");
+
     const html = await response.text();
     const jsdom = new JSDOM(html);
     const title = jsdom.window.document.querySelector("title");
-    return title ? title.textContent === "Just a moment..." : false;
+
+    return response.status === 403 && title?.textContent === "Just a moment...";
   } catch {
     return false;
   }
