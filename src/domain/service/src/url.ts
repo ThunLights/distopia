@@ -6,7 +6,7 @@ export type FindUrls = {
   normalUrls: string[];
 };
 
-export const URL_REGEXP = /https?:\/\/[\w/:%#$&?()~.=+-]+/im;
+export const URL_REGEXP = /https?:\/\/[\w!\?\/\+\-_~=;\.,\*&@#$%\(\)'\[\]]+/im;
 
 export const URL_REGEXP_DISCORD_GG = /(?:https?:\/\/)?discord\.gg\/[a-zA-Z0-9_-]+/im;
 
