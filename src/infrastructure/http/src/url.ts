@@ -48,17 +48,11 @@ export function isLocalIPv6(addr: string): boolean {
 }
 
 export function isLocalUrl(url: string): boolean {
-  let s = URL.parse(url)?.href.replace(/\\/g, "/");
-  if (!s) return false;
-
+  let s = url.replace(/\\/g, "/");
   if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) s = "http://" + s;
 
-  let host: string;
-  try {
-    host = new URL(s).hostname.toLowerCase();
-  } catch {
-    return false;
-  }
+  const host = URL.parse(s)?.hostname.toLowerCase();
+  if (host === undefined) return false;
 
   if (host === "localhost" || host.endsWith(".localhost")) return true;
   if (host.startsWith("[") && host.endsWith("]")) return isLocalIPv6(host.slice(1, -1));
