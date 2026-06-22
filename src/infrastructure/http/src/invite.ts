@@ -1,3 +1,6 @@
+import { LocalAddressError } from "./Error/LocalAddressError";
+import { isLocalUrl } from "./url";
+
 export async function isUsedCf(response: Response) {
   try {
     const { JSDOM } = await import("jsdom");
@@ -11,6 +14,8 @@ export async function isUsedCf(response: Response) {
 }
 
 export async function isInviteLink(url: string) {
+  if (isLocalUrl(url)) return new LocalAddressError(`${url} is local address`);
+
   const response = await fetch(url, {
     method: "GET",
     redirect: "follow",

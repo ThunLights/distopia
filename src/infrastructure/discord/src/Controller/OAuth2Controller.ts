@@ -4,7 +4,7 @@ import type {
   RESTPostOAuth2AccessTokenResult,
 } from "discord-api-types/v10";
 import type { Client, GuildFeature } from "discord.js";
-import { safeFetch, safeUrl } from "infra-http";
+import { LocalAddressError, safeFetch, safeUrl } from "infra-http";
 
 import type { Config } from ".";
 import { sleep } from "../sleep";
@@ -58,6 +58,11 @@ export class OAuth2Controller extends Base {
         },
       },
     );
+
+    if (response instanceof LocalAddressError) {
+      return null;
+    }
+
     if (response.status === 200) {
       return (await response.json()) as RESTAPIPartialCurrentUserGuild[];
     } else if (response.status === 429) {
@@ -75,6 +80,10 @@ export class OAuth2Controller extends Base {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+
+    if (response instanceof LocalAddressError) {
+      return null;
+    }
 
     if (response.status === 200) {
       const { id, username, email, avatar, banner } = (await response.json()) as APIUser;
@@ -110,6 +119,10 @@ export class OAuth2Controller extends Base {
       body: params.toString(),
     });
 
+    if (response instanceof LocalAddressError) {
+      return null;
+    }
+
     if (response.status === 200) {
       const { access_token, refresh_token } =
         (await response.json()) as RESTPostOAuth2AccessTokenResult;
@@ -139,6 +152,10 @@ export class OAuth2Controller extends Base {
       },
       body: params.toString(),
     });
+
+    if (response instanceof LocalAddressError) {
+      return null;
+    }
 
     if (response.status === 200) {
       const { access_token, refresh_token } =
@@ -173,6 +190,10 @@ export class OAuth2Controller extends Base {
         }),
       },
     );
+
+    if (response instanceof LocalAddressError) {
+      return null;
+    }
 
     if (response.status === 429) {
       await sleep(1000);
