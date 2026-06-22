@@ -4,7 +4,7 @@ import type {
   RESTPostOAuth2AccessTokenResult,
 } from "discord-api-types/v10";
 import type { Client, GuildFeature } from "discord.js";
-import { LocalAddressError, safeFetch, safeUrl } from "infra-http";
+import { InvalidDomainError, LocalAddressError, safeFetchForDiscord, safeUrl } from "infra-http";
 
 import type { Config } from ".";
 import { sleep } from "../sleep";
@@ -49,7 +49,7 @@ export class OAuth2Controller extends Base {
   }
 
   public async fetchGuilds(accessToken: string): Promise<Guilds | null> {
-    const response = await safeFetch(
+    const response = await safeFetchForDiscord(
       safeUrl`https://discord.com/api/v10/users/@me/guilds?with_counts=true`,
       {
         method: "GET",
@@ -59,7 +59,7 @@ export class OAuth2Controller extends Base {
       },
     );
 
-    if (response instanceof LocalAddressError) {
+    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
       return null;
     }
 
@@ -74,14 +74,14 @@ export class OAuth2Controller extends Base {
   }
 
   public async fetchUserInfo(accessToken: string): Promise<FetchUserInfoResult | null> {
-    const response = await safeFetch(safeUrl`https://discord.com/api/users/@me`, {
+    const response = await safeFetchForDiscord(safeUrl`https://discord.com/api/users/@me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
 
-    if (response instanceof LocalAddressError) {
+    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
       return null;
     }
 
@@ -111,7 +111,7 @@ export class OAuth2Controller extends Base {
     params.append("redirect_uri", encodeURI(this.config.url));
     params.append("code", code);
 
-    const response = await safeFetch(safeUrl`https://discord.com/api/v10/oauth2/token`, {
+    const response = await safeFetchForDiscord(safeUrl`https://discord.com/api/v10/oauth2/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -119,7 +119,7 @@ export class OAuth2Controller extends Base {
       body: params.toString(),
     });
 
-    if (response instanceof LocalAddressError) {
+    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
       return null;
     }
 
@@ -145,7 +145,7 @@ export class OAuth2Controller extends Base {
     params.append("grant_type", "refresh_token");
     params.append("refresh_token", refreshToken);
 
-    const response = await safeFetch(safeUrl`https://discord.com/api/oauth2/token`, {
+    const response = await safeFetchForDiscord(safeUrl`https://discord.com/api/oauth2/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -153,7 +153,7 @@ export class OAuth2Controller extends Base {
       body: params.toString(),
     });
 
-    if (response instanceof LocalAddressError) {
+    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
       return null;
     }
 
@@ -177,7 +177,7 @@ export class OAuth2Controller extends Base {
     guildId: string,
     accessToken: string,
   ): Promise<"join" | "joined" | null> {
-    const response = await safeFetch(
+    const response = await safeFetchForDiscord(
       safeUrl`https://discord.com/api/v10/guilds/${guildId}/members/${userId}`,
       {
         method: "PUT",
@@ -191,7 +191,7 @@ export class OAuth2Controller extends Base {
       },
     );
 
-    if (response instanceof LocalAddressError) {
+    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
       return null;
     }
 
