@@ -105,8 +105,8 @@ describe("isLocalUrl", () => {
     ["https://[fd00::1]", "IPv6 unique-local"],
     ["https://[::ffff:127.0.0.1]", "IPv4-mapped IPv6"],
     ["https://\\127.0.0.1\\admin", "backslash-obfuscated"],
-  ])("returns true for %s (%s)", (url) => {
-    expect(isLocalUrl(url)).toBe(true);
+  ])("returns true for %s (%s)", async (url) => {
+    expect(await isLocalUrl(url)).toBe(true);
   });
 
   test.each([
@@ -118,7 +118,7 @@ describe("isLocalUrl", () => {
     ["http://256.256.256.256", "invalid octets"],
     ["not a url", "non-URL text"],
     ["", "empty string"],
-  ])("returns false for %s (%s)", (url) => {
-    expect(isLocalUrl(url)).toBe(false);
+  ])("returns false for %s (%s)", async (url) => {
+    expect(await isLocalUrl(url)).toBe(false);
   });
 });
