@@ -90,7 +90,7 @@ export class Message extends Base {
           isInviteLink: response.content,
           createdAt: new Date(),
         });
-        if (content) {
+        if (response.content) {
           inviteLinks.push(url);
         }
       }
