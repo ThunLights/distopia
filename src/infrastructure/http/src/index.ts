@@ -1,3 +1,4 @@
+export * from "./Error/BodySizeError";
 export * from "./Error/HeaderError";
 export * from "./Error/InvalidDomainError";
 export * from "./Error/LocalAddressError";
