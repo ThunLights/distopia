@@ -8,6 +8,12 @@ export type IsInviteLink = {
   isUsedCf: boolean;
 };
 
+export const DISCORD_INVITE_LINK_START = [
+  "https://discord.com/invite/",
+  "https://ptb.discord.com/invite/",
+  "https://canary.discord.com/invite/",
+];
+
 // this function is fucking shit.
 // I will fix it someday.
 export async function isUsedCf(res: Response) {
@@ -44,8 +50,10 @@ export async function isInviteLink(
     return response;
   }
 
+  const resUrl = response.url;
+
   return {
-    content: response.url.startsWith("https://discord.com/invite/"),
+    content: DISCORD_INVITE_LINK_START.some((value) => resUrl.startsWith(value)),
     isUsedCf: await isUsedCf(response),
   };
 }
