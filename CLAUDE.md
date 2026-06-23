@@ -60,7 +60,8 @@ distopia/
 │       ├── discord/      # Discord infrastructure
 │       └── http/         # Security-focused HTTP utilities (SSRF prevention)
 ├── lib/
-│   └── distopia/         # Public library (npm / jsr)
+│   ├── distopia/         # Public library (npm / jsr)
+│   └── template/         # Shared lint/format config (oxlint + oxfmt)
 ├── docker/               # Docker Compose configs
 ├── scripts/              # Setup and utility scripts
 └── .devcontainer/        # Devcontainer config
@@ -81,6 +82,7 @@ distopia/
 | `src/domain/repository/search` | `repo-search` |
 | `src/domain/model` | `domain-model` |
 | `lib/distopia` | `distopia` |
+| `lib/template` | `distopia-template` |
 
 ---
 
@@ -198,6 +200,39 @@ docker compose exec app sh -c "cd src/presentation/web && npx playwright test"
 # Storybook
 docker compose exec app sh -c "cd src/presentation/web && bun run storybook"
 ```
+
+---
+
+## Lint/Format Template (`distopia-template`)
+
+`lib/template` is an internal package (`distopia-template`) that centralises oxlint and oxfmt configuration for all non-web packages in the monorepo.
+
+### Shared configs
+
+| File | Consumed via |
+|---|---|
+| `lib/template/oxfmt.config.ts` | `--config ../../../lib/template/oxfmt.config.ts` |
+| `lib/template/oxlint.config.ts` | `--config ../../../lib/template/oxlint.config.ts` |
+
+### oxfmt settings
+
+| Option | Value |
+|---|---|
+| Print width | 100 |
+| Semicolons | yes |
+| Quotes | double |
+| Indent | 2 spaces |
+| Trailing commas | all |
+| Import sorting | enabled |
+| Ignored patterns | `*.auto.ts`, `dist/**` |
+
+### oxlint settings
+
+- Plugins: `typescript`, `unicorn`, `oxc`
+- All `correctness` rules are errors
+- Ignored patterns: `*.auto.ts`, `dist/**`
+
+> The web package (`presentation-web`) uses ESLint + Prettier instead and does **not** consume these configs.
 
 ---
 
