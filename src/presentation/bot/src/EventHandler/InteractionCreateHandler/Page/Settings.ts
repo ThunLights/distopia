@@ -29,6 +29,11 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
         value: settings?.actingOwner ? `<@${settings.actingOwner}>` : "未設定",
         inline: false,
       },
+      {
+        name: "招待リンクブロック",
+        value: settings?.inviteLinkBlock ? `On` : "未設定",
+        inline: false,
+      },
     );
 
   const selector = new StringSelectMenuBuilder()
@@ -41,6 +46,9 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder()
         .setLabel("Bump時のメッセージを変更")
         .setValue("bumpNoticeContent"),
+      new StringSelectMenuOptionBuilder()
+        .setLabel("招待リンクブロック")
+        .setValue("inviteLinkBlock"),
     );
 
   return {

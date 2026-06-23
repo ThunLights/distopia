@@ -125,6 +125,31 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
           ),
         ],
       });
+    } else if (value === "inviteLinkBlock") {
+      const embed = new EmbedBuilder()
+        .setColor("Navy")
+        .setTitle("招待リンクブロック")
+        .setDescription("招待リンクをブロックすることが出来ます。");
+
+      const onButton = new ButtonBuilder()
+        .setCustomId("inviteLinkBlockOn")
+        .setLabel("On")
+        .setStyle(ButtonStyle.Success);
+      const offButton = new ButtonBuilder()
+        .setCustomId("inviteLinkBlockOff")
+        .setLabel("Off")
+        .setStyle(ButtonStyle.Danger);
+
+      return await interaction.update({
+        embeds: [embed],
+        components: [
+          new ActionRowBuilder<ButtonBuilder>().addComponents(
+            await backSettingsPageButton(),
+            offButton,
+            onButton,
+          ),
+        ],
+      });
     }
 
     return {
