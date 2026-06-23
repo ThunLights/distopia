@@ -1,5 +1,11 @@
 # distopia
 
+## 0.4.0
+
+### Minor Changes
+
+- 7143c57: feat: add all infra-http modules
+
 ## 0.3.0
 
 ### Minor Changes
