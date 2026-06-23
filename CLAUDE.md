@@ -121,7 +121,7 @@ docker compose exec app sudo bun run deploy-db    # Apply DB migrations
 ### Production Deploy (outside devcontainer)
 
 ```bash
-environment/prod.sh
+environment/production.sh
 ```
 
 ---
