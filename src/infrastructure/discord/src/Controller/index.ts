@@ -3,6 +3,7 @@ import type { Client } from "discord.js";
 import { AvatarController } from "./AvatarController";
 import { Base } from "./Base";
 import { ChannelController } from "./ChannelController";
+import { EmbedController } from "./EmbedController";
 import { GuildController } from "./GuildController";
 import { MessageController } from "./MessageController";
 import { OAuth2Controller } from "./OAuth2Controller";
@@ -19,6 +20,7 @@ export type Config = {
 export class Controller extends Base {
   public readonly avatar = new AvatarController(this.client);
   public readonly channel = new ChannelController(this.client);
+  public readonly embed = new EmbedController(this.client);
   public readonly guild = new GuildController(this.client);
   public readonly message = new MessageController(this.client);
   public readonly role = new RoleController(this.client);

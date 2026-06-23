@@ -5,3 +5,5 @@ export * from "./level";
 export * from "./omit";
 export * from "./random";
 export * from "./rate";
+export * from "./string";
+export * from "./url";

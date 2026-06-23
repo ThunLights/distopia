@@ -91,6 +91,7 @@ model GuildSetting {
   bumpNotice        Boolean @default(false)
   bumpNoticeRole    String?
   bumpNoticeContent String?
+  inviteLinkBlock   Boolean @default(false)
 }
 
 model Panel {
