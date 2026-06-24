@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Banner from "$lib/assets/banner/2025/banner.webp?enhanced";
+  import Banner from "$lib/assets/banner/2026/summer.webp?enhanced";
 </script>
 
 <div>
