@@ -1,5 +1,6 @@
 {
   "name": "app-schedule",
+  "type": "module",
   "private": true,
   "exports": {
     ".": {
