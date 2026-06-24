@@ -1,7 +1,7 @@
 {
   "name": "app-schedule",
-  "type": "module",
   "private": true,
+  "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts"
