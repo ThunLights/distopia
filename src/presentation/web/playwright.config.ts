@@ -6,11 +6,10 @@ export default defineConfig({
     baseURL: "http://localhost:4173",
   },
   webServer: {
-    // sudo is required because the devcontainer mounts files with restricted permissions.
-    command: "sudo npm run build && npm run preview",
+    command: "npm run build && npm run preview",
     port: 4173,
     // Reuse the server if it is already running (e.g. from a previous test run or `npm run preview`).
-    reuseExistingServer: !process.env["CI"],
+    reuseExistingServer: true,
   },
   testMatch: "**/*.e2e.{ts,js}",
 });
