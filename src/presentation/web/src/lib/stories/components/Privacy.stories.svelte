@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  import Privacy from "./Privacy.svelte";
+  import Privacy from "../../components/Main/Privacy.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
   const { Story } = defineMeta({

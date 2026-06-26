@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  import Recruitment from "./Recruitment.svelte";
+  import Recruitment from "../../components/Staff/Recruitment.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
   const { Story } = defineMeta({
