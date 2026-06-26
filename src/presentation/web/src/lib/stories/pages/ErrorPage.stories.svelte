@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
   import ErrorPage from "../../../routes/+error.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 

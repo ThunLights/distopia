@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
   import Page from "../../../routes/ranking/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 

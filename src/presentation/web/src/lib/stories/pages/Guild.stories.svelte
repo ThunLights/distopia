@@ -1,16 +1,43 @@
-<script module>
+<script lang="ts" module>
   import { mockUser } from "../../../mocks/data";
   import Page from "../../../routes/guilds/[id]/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
-  const mockGuild = {
+  type GuildData = {
+    guildId: string;
+    name: string;
+    nsfw: boolean;
+    description: string | null;
+    boostCount: number;
+    tags: string[];
+    iconUrl: string | undefined;
+    activeRate: number;
+    activeRateRank: number | undefined;
+    level: bigint | undefined;
+    point: bigint | undefined;
+    levelRank: number | undefined;
+    maxActiveRateRank: bigint | undefined;
+    maxActiveRate: bigint | undefined;
+    maxLevelRank: bigint | undefined;
+    invite: string;
+  };
+
+  type Review = {
+    userId: string;
+    username: string | null;
+    avatarUrl: string | null;
+    star: number;
+    content: string | null;
+  };
+
+  const mockGuild: GuildData = {
     guildId: "111111111111111111",
     name: "テストサーバー Alpha",
     nsfw: false,
     description: "テスト用のDiscordサーバーです。ゲームやコミュニティ活動を行っています。",
     boostCount: 5,
     tags: ["ゲーム", "コミュニティ", "雑談"],
-    iconUrl: null,
+    iconUrl: undefined,
     activeRate: 85,
     activeRateRank: 2,
     level: 25n,
@@ -22,7 +49,7 @@
     invite: "https://discord.gg/example1",
   };
 
-  const mockReviews = [
+  const mockReviews: Review[] = [
     {
       userId: "555555555555555555",
       username: "レビュアーA",

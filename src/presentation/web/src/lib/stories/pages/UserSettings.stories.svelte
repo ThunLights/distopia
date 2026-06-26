@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
   import { mockUser } from "../../../mocks/data";
   import Page from "../../../routes/user/settings/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";

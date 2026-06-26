@@ -1,7 +1,10 @@
+import type { ResponseBodyTypeGuild } from "$lib/shared/types/routes/api/user/cache";
+import type { ResponseMethodPost } from "$lib/shared/types/routes/api/guild/search";
+import type { ResponseMethodGet } from "$lib/shared/types/routes/api/ranking";
 import { mockGuildCards, mockGuildRankings, mockUserGuilds, mockUserRankings } from "./data";
 import { spyOn } from "storybook/test";
 
-const jsonResponse = (data: unknown, status = 200): Response =>
+const jsonResponse = <T>(data: T, status = 200): Response =>
   new Response(JSON.stringify(data), {
     status,
     headers: { "Content-Type": "application/json" },
@@ -23,7 +26,7 @@ export async function globalFetchMock(
         ),
       },
       user: { bump: mockUserRankings },
-    });
+    } satisfies ResponseMethodGet);
   }
 
   if (url.includes("/api/guild/search") && method === "POST") {
@@ -31,11 +34,11 @@ export async function globalFetchMock(
       guilds: mockGuildCards,
       time: "0.05",
       count: mockGuildCards.length,
-    });
+    } satisfies ResponseMethodPost);
   }
 
   if (url.includes("/api/user/cache") && method === "DELETE") {
-    return jsonResponse({ guilds: mockUserGuilds });
+    return jsonResponse({ guilds: mockUserGuilds } satisfies ResponseBodyTypeGuild);
   }
 
   if (url.includes("/api/user/logout") && method === "DELETE") {
@@ -43,7 +46,7 @@ export async function globalFetchMock(
   }
 
   if (url.includes("/api/guild/join") && method === "POST") {
-    return jsonResponse({ url: "https://discord.gg/example" });
+    return new Response(null, { status: 201 });
   }
 
   return new Response(null, { status: 404 });

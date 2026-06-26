@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
   import Page from "../../../routes/guideline/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
@@ -8,4 +8,4 @@
   });
 </script>
 
-<Story name="ガイドライン" args={{ data: { user: null } }} />
+<Story name="ガイドライン" />

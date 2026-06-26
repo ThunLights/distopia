@@ -1,4 +1,4 @@
-<script module>
+<script lang="ts" module>
   import Icon from "$lib/assets/staff/robot.webp";
   import Profile from "./Profile.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";

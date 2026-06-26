@@ -1,7 +1,14 @@
-<script module>
+<script lang="ts" module>
   import { mockUser, mockGuildCards } from "../../../mocks/data";
   import Page from "../../../routes/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
+
+  // Home page load function returns iconUrl: string | undefined (from meta.iconUrl),
+  // while the search API Guild type uses iconUrl: string | null. Map here to match.
+  const homeGuilds = mockGuildCards.map(({ iconUrl, ...rest }) => ({
+    ...rest,
+    iconUrl: iconUrl ?? undefined,
+  }));
 
   const { Story } = defineMeta({
     title: "Pages/Home",
@@ -14,8 +21,8 @@
   args={{
     data: {
       user: mockUser,
-      latestGuilds: mockGuildCards,
-      activeGuilds: [...mockGuildCards].reverse(),
+      latestGuilds: homeGuilds,
+      activeGuilds: [...homeGuilds].reverse(),
     },
   }}
 />
@@ -25,7 +32,7 @@
   args={{
     data: {
       user: null,
-      latestGuilds: mockGuildCards,
+      latestGuilds: homeGuilds,
       activeGuilds: [],
     },
   }}

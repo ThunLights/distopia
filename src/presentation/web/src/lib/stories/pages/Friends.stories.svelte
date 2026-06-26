@@ -1,8 +1,17 @@
-<script module>
+<script lang="ts" module>
   import Page from "../../../routes/friends/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
-  const mockFriends = [
+  type Friend = {
+    userId: string;
+    username: string;
+    description: string;
+    nsfw: boolean;
+    avatarUrl: string | null;
+    tags: string[];
+  };
+
+  const mockFriends: Friend[] = [
     {
       userId: "111111111111111111",
       username: "フレンド募集さん",

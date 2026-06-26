@@ -1,7 +1,6 @@
 import type { UserAuth } from "$lib/shared/types/UserAuth";
 import type { Guild as SearchGuild } from "$lib/shared/types/routes/api/guild/search";
 import type { GuildRanking, UserRanking } from "$lib/shared/types/routes/api/ranking";
-import type { Guilds } from "$lib/shared/types/routes/api/user/cache";
 
 export const mockUser: UserAuth = {
   id: "123456789012345678",
@@ -123,7 +122,7 @@ export const mockUserRankings: UserRanking[] = [
   },
 ];
 
-export const mockUserGuilds: Guilds = [
+export const mockUserGuilds = [
   {
     id: "111111111111111111",
     name: "テストサーバー Alpha",
