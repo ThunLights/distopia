@@ -9,18 +9,6 @@
     title: "Pages/Search",
     component: Page,
   });
-
-  const mockGuild = {
-    guildId: "111111111111111111",
-    name: "テストサーバー Alpha",
-    nsfw: false,
-    description: "テスト用のDiscordサーバーです。ゲームやコミュニティ活動を行っています。",
-    boostCount: 5,
-    tags: ["ゲーム", "コミュニティ", "雑談"],
-    iconUrl: null,
-    rank: 2,
-    invite: "https://discord.gg/example1",
-  };
 </script>
 
 <Story name="検索結果あり" args={{ data: { word: "テスト", user: null } }} />
@@ -33,7 +21,7 @@
       if (String(input).includes("/api/guild/search")) {
         return new Response(
           JSON.stringify({
-            guilds: [mockGuild],
+            guilds: [],
             time: "0.01",
             count: 0,
           } satisfies ResponseMethodPost),
