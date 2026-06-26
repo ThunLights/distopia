@@ -2,11 +2,8 @@ name: Story Book
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   pull_request_target:
-  push:
-    branches:
-      - main
-      - release-*
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
