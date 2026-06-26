@@ -123,8 +123,13 @@ jobs:
             })
 
   cleanup:
+    name: Cleanup preview
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - name: Checkout gh-pages
         uses: actions/checkout@v6
