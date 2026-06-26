@@ -52,13 +52,11 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install and build
-        run: |
-          bun install --frozen-lockfile
-          npm run build-storybook
+      - name: Install
+        run: bun install --frozen-lockfile
 
       - name: Build
-        run: npm run build-storybook
+        run: bun run build-storybook
 
       - name: Move
         run: |
@@ -83,7 +81,7 @@ jobs:
 
     steps:
       - name: Checkout gh-pages
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: gh-pages
 
@@ -141,7 +139,7 @@ jobs:
 
     steps:
       - name: Checkout gh-pages
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: gh-pages
 
