@@ -69,7 +69,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: storybook-output
-          path: tmp/storybook-static
+          path: tmp/storybook-static/
+          retention-days: 1
 
   preview:
     name: Preview
