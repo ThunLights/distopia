@@ -100,7 +100,10 @@ jobs:
 
       - name: Clean Dir
         run: |
-          ls | grep -i -v -E 'storybook' | xargs rm -rf
+          find . -maxdepth 1 -mindepth 1 \
+          ! -name 'storybook' \
+          ! -name '.git' \
+          -exec rm -rf {} +
 
       - name: Create .nojekyll
         run: touch .nojekyll

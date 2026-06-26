@@ -83,7 +83,11 @@
       user: mockUser,
       guildId: "999999999999999999",
       guild: null,
-      meta: { id: "999999999999999999", name: "未登録サーバー", avatarUrl: undefined } satisfies GuildMeta,
+      meta: {
+        id: "999999999999999999",
+        name: "未登録サーバー",
+        avatarUrl: undefined,
+      } satisfies GuildMeta,
       record: null,
     },
   }}
