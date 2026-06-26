@@ -124,7 +124,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Preview deployed to: https://${context.repo.owner}.github.io/distopia/${process.env.PAGE_DIR}`
+              body: `Preview deployed to: https://${context.repo.owner}.github.io/distopia/storybook/${process.env.PAGE_DIR}`
             })
 
   cleanup:
