@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: preview-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
