@@ -96,7 +96,7 @@ jobs:
       - name: Move
         run: |
           mkdir -p storybook/${{ env.PAGE_DIR }}
-          mv tmp/storybook-static storybook/${{ env.PAGE_DIR }}
+          mv tmp/storybook-static/* storybook/${{ env.PAGE_DIR }}
 
       - name: Clean Dir
         run: |
