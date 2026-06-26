@@ -91,6 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: storybook-output
+          path: tmp/storybook-static/
 
       - name: Move
         run: |
