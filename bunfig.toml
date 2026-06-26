@@ -1,5 +1,0 @@
-[install.cache]
-minimumReleaseAge = 259200 # 3days
-dir = "./.cache/bun/install"
-disable = false
-disableManifest = false
