@@ -75,5 +75,10 @@
     "svelte-exmarkdown": "5.0.2",
     "uuid": "14.0.0",
     "zod": "catalog:"
+  },
+  "msw": {
+    "workerDirectory": [
+      "static"
+    ]
   }
 }
