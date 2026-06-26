@@ -1,5 +1,5 @@
-<script module>
-  import Terms from "./Terms.svelte";
+<script lang="ts" module>
+  import Terms from "../../components/Main/Terms.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
   const { Story } = defineMeta({

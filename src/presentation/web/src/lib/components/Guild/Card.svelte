@@ -35,7 +35,12 @@
     <div>
       <div class="guild-info">
         <div>
-          <Icon height={60} width={60} iconPath={iconUrl ?? DiscordIcon} rank={rank ?? undefined} />
+          <Icon
+            height="60px"
+            width="60px"
+            iconPath={iconUrl ?? DiscordIcon}
+            rank={rank ?? undefined}
+          />
         </div>
         <div>
           <p class="guild-name">
