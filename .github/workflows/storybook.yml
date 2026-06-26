@@ -2,11 +2,8 @@ name: Story Book
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   pull_request_target:
-  push:
-    branches:
-      - main
-      - release-*
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
@@ -74,7 +71,7 @@ jobs:
     name: Preview
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && github.event_name != 'push'
     permissions:
       contents: write
       pull-requests: write
