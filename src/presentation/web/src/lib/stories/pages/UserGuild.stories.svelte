@@ -47,14 +47,14 @@
 
   const mockRecord: GuildRecord = {
     bumpCounter: 42,
-    activeRate: 85n,
-    maxRate: 92n,
-    maxRateRank: 1n,
-    maxLevelRank: 2n,
+    activeRate: 85 as unknown as bigint,
+    maxRate: 92 as unknown as bigint,
+    maxRateRank: 1 as unknown as bigint,
+    maxLevelRank: 2 as unknown as bigint,
     levelRank: 3,
     rateRank: 2,
-    level: 25n,
-    point: 1234n,
+    level: 25 as unknown as bigint,
+    point: 1234 as unknown as bigint,
   };
 
   const { Story } = defineMeta({

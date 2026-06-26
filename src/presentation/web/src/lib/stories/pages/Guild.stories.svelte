@@ -40,12 +40,12 @@
     iconUrl: undefined,
     activeRate: 85,
     activeRateRank: 2,
-    level: 25n,
-    point: 1234n,
+    level: 25 as unknown as bigint,
+    point: 1234 as unknown as bigint,
     levelRank: 3,
-    maxActiveRateRank: 1n,
-    maxActiveRate: 92n,
-    maxLevelRank: 2n,
+    maxActiveRateRank: 1 as unknown as bigint,
+    maxActiveRate: 92 as unknown as bigint,
+    maxLevelRank: 2 as unknown as bigint,
     invite: "https://discord.gg/example1",
   };
 
