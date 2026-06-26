@@ -95,7 +95,11 @@ jobs:
 
       - name: Move
         run: |
-          mkdir -p storybook/${{ env.PAGE_DIR }}
+          if [ -e "storybook/${{ env.PAGE_DIR }}" ]; then
+            rm -rf storybook/${{ env.PAGE_DIR }}/*
+          else
+            mkdir -p storybook/${{ env.PAGE_DIR }}
+          fi
           mv -f tmp/storybook-static/* storybook/${{ env.PAGE_DIR }}
 
       - name: Clean Dir
