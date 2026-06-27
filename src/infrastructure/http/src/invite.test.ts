@@ -8,7 +8,13 @@ import type { MockedFunction } from "vitest";
 
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { RedirectError } from "./Error/RedirectError";
-import { DISCORD_DOMAINS, DISCORD_INVITE_LINK_START, INVITE_PROTOCOL, isInviteLink, isUsedCf } from "./invite";
+import {
+  DISCORD_DOMAINS,
+  DISCORD_INVITE_LINK_START,
+  INVITE_PROTOCOL,
+  isInviteLink,
+  isUsedCf,
+} from "./invite";
 import { safeFetch } from "./safefetch";
 
 const safeFetchMock = safeFetch as MockedFunction<typeof safeFetch>;
@@ -166,15 +172,12 @@ describe("isInviteLink — DISCORD_INVITE_LINK_START equivalence", () => {
   // ── resUrl path ─────────────────────────────────────────────────────────────
 
   describe("resUrl", () => {
-    it.each(DISCORD_INVITE_LINK_START)(
-      "content: true — %s + invite code",
-      async (prefix) => {
-        safeFetchMock.mockResolvedValueOnce(fakeResponse(`${prefix}abc123`));
-        const result = await isInviteLink("https://shortener.example.com/xyz");
-        expect(result).not.toBeInstanceOf(Error);
-        expect((result as { content: boolean }).content).toBe(true);
-      },
-    );
+    it.each(DISCORD_INVITE_LINK_START)("content: true — %s + invite code", async (prefix) => {
+      safeFetchMock.mockResolvedValueOnce(fakeResponse(`${prefix}abc123`));
+      const result = await isInviteLink("https://shortener.example.com/xyz");
+      expect(result).not.toBeInstanceOf(Error);
+      expect((result as { content: boolean }).content).toBe(true);
+    });
 
     it.each([
       // no trailing slash → pathname stays /invite and does not match /invite/
@@ -241,18 +244,14 @@ describe("isInviteLink — DISCORD_INVITE_LINK_START equivalence", () => {
   // are covered by their respective constants without omission.
 
   it("INVITE_PROTOCOL covers all protocols used in DISCORD_INVITE_LINK_START", () => {
-    const usedProtocols = new Set(
-      DISCORD_INVITE_LINK_START.map((url) => new URL(url).protocol),
-    );
+    const usedProtocols = new Set(DISCORD_INVITE_LINK_START.map((url) => new URL(url).protocol));
     for (const protocol of usedProtocols) {
       expect(INVITE_PROTOCOL).toContain(protocol);
     }
   });
 
   it("DISCORD_DOMAINS covers all hosts used in DISCORD_INVITE_LINK_START", () => {
-    const usedHosts = new Set(
-      DISCORD_INVITE_LINK_START.map((url) => new URL(url).hostname),
-    );
+    const usedHosts = new Set(DISCORD_INVITE_LINK_START.map((url) => new URL(url).hostname));
     for (const host of usedHosts) {
       expect(DISCORD_DOMAINS).toContain(host);
     }

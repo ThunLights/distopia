@@ -8,15 +8,6 @@ export type IsInviteLink = {
   isUsedCf: boolean;
 };
 
-export const DISCORD_INVITE_LINK_START = [
-  "https://discord.com/invite/",
-  "https://ptb.discord.com/invite/",
-  "https://canary.discord.com/invite/",
-  "discord://discord.com/invite/",
-  "discord://ptb.discord.com/invite/",
-  "discord://canary.discord.com/invite/",
-];
-
 export const DISCORD_DOMAINS = ["discord.com", "ptb.discord.com", "canary.discord.com"];
 
 export const INVITE_PROTOCOL = ["discord:", "http:", "https:"];
