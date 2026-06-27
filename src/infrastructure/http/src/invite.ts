@@ -42,12 +42,18 @@ export async function isUsedCf(res: Response) {
 export async function isInviteLink(
   url: string,
 ): Promise<IsInviteLink | LocalAddressError | HeaderError | RedirectError | BodySizeError> {
-  const response = await safeFetch(url as SafeUrl, {
-    method: "GET",
-    headers: {
-      "User-Agent": "Mozilla/5.0",
+  const response = await safeFetch(
+    url as SafeUrl,
+    {
+      method: "GET",
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+      },
     },
-  });
+    {
+      detectDiscordProtocol: true,
+    },
+  );
 
   if (response instanceof Error) {
     return response;

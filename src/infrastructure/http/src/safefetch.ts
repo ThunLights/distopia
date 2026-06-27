@@ -9,6 +9,10 @@ import { isValidSize } from "./size";
 import { DEFAULT_TIMEOUT, DISCORD_TIMEOUT } from "./timeout";
 import { isHttpProtocol, isLocalUrl } from "./url";
 
+export type SafeFetchOptions = {
+  detectDiscordProtocol?: boolean;
+};
+
 export const DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
 
 export async function safeFetchForDiscord(
@@ -28,6 +32,7 @@ export async function safeFetchForDiscord(
 export async function safeFetch(
   input: SafeUrl,
   init?: RequestInit,
+  options?: SafeFetchOptions,
 ): Promise<Response | LocalAddressError | HeaderError | RedirectError | BodySizeError> {
   let reqUrl: string = input;
   let currentInit = init;
@@ -59,6 +64,10 @@ export async function safeFetch(
         url = new URL(location, reqUrl);
       } catch {
         return new HeaderError(`${location} is invalid.`);
+      }
+
+      if (options?.detectDiscordProtocol && url.protocol === "discord://") {
+        return response;
       }
 
       if (!(await isHttpProtocol(url))) {
