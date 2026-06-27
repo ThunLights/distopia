@@ -8,14 +8,17 @@ import type { MockedFunction } from "vitest";
 
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { RedirectError } from "./Error/RedirectError";
-import {
-  DISCORD_DOMAINS,
-  DISCORD_INVITE_LINK_START,
-  INVITE_PROTOCOL,
-  isInviteLink,
-  isUsedCf,
-} from "./invite";
+import { DISCORD_DOMAINS, INVITE_PROTOCOL, isInviteLink, isUsedCf } from "./invite";
 import { safeFetch } from "./safefetch";
+
+const DISCORD_INVITE_LINK_START = [
+  "https://discord.com/invite/",
+  "https://ptb.discord.com/invite/",
+  "https://canary.discord.com/invite/",
+  "discord://discord.com/invite/",
+  "discord://ptb.discord.com/invite/",
+  "discord://canary.discord.com/invite/",
+];
 
 const safeFetchMock = safeFetch as MockedFunction<typeof safeFetch>;
 

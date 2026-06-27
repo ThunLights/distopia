@@ -13,7 +13,7 @@ export type SafeFetchOptions = {
   detectDiscordProtocol?: boolean;
 };
 
-export const DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
+export const ALLOW_DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
 
 export async function safeFetchForDiscord(
   input: SafeUrl,
@@ -22,7 +22,7 @@ export async function safeFetchForDiscord(
   if (await isLocalUrl(input)) return new LocalAddressError(`${input} is local address.`);
   const hostname = new URL(input).hostname;
 
-  if (!DISCORD_DOMAINS.includes(hostname)) {
+  if (!ALLOW_DISCORD_DOMAINS.includes(hostname)) {
     return new InvalidDomainError(`${hostname} is not discord domain.`);
   }
 
