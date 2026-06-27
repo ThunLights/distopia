@@ -67,7 +67,7 @@ export class Message extends Base {
     await this.state.database.guildRecordOneDay.upsertAll(query);
   }
 
-  public async includeInviteLink(content: string) {
+  public async includeInviteLink(content: string): Promise<string[]> {
     const { inviteLinks, normalUrls } = await findUrls(content);
 
     for (const url of normalUrls) {
@@ -96,6 +96,6 @@ export class Message extends Base {
       }
     }
 
-    return inviteLinks;
+    return Array.from(new Set(inviteLinks));
   }
 }
