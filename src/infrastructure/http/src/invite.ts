@@ -60,9 +60,12 @@ export async function isInviteLink(
   }
 
   const resUrl = response.url;
+  const location = response.headers.get("location");
 
   return {
-    content: DISCORD_INVITE_LINK_START.some((value) => resUrl.startsWith(value)),
+    content: DISCORD_INVITE_LINK_START.some(
+      (value) => resUrl.startsWith(value) || (location && location.startsWith(value)),
+    ),
     isUsedCf: await isUsedCf(response),
   };
 }
