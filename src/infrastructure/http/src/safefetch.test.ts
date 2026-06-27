@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./url", () => ({
-  isLocalUrl: vi.fn(),
-}));
+vi.mock("./url", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./url")>();
+  return {
+    ...actual,
+    isLocalUrl: vi.fn(),
+  };
+});
 vi.mock("./size", () => ({
   isValidSize: vi.fn(),
 }));

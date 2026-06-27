@@ -7,7 +7,7 @@ import { DEFAULT_MAX_REDIRECT } from "./redirect";
 import type { SafeUrl } from "./safeurl";
 import { isValidSize } from "./size";
 import { DEFAULT_TIMEOUT, DISCORD_TIMEOUT } from "./timeout";
-import { isLocalUrl } from "./url";
+import { isHttpProtocol, isLocalUrl } from "./url";
 
 export const DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
 
@@ -61,7 +61,7 @@ export async function safeFetch(
         return new HeaderError(`${location} is invalid.`);
       }
 
-      if (url.protocol !== "http:" && url.protocol !== "https:") {
+      if (!(await isHttpProtocol(url))) {
         return new HeaderError(`${url.protocol} is not allowed.`);
       }
 
