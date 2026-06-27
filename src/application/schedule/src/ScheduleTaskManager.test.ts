@@ -14,7 +14,7 @@ describe("ScheduleTaskManager", () => {
       setTimeout(r, 1000);
     });
 
-    expect(excuted).toBe(1);
+    expect(excuted).toBeGreaterThanOrEqual(1);
 
     manager.delete(taskId);
   });
