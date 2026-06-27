@@ -12,6 +12,9 @@ export const DISCORD_INVITE_LINK_START = [
   "https://discord.com/invite/",
   "https://ptb.discord.com/invite/",
   "https://canary.discord.com/invite/",
+  "discord://discord.com/invite/",
+  "discord://ptb.discord.com/invite/",
+  "discord://canary.discord.com/invite/",
 ];
 
 // this function is fucking shit.
