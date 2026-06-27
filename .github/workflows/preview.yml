@@ -1,12 +1,13 @@
-name: Story Book
+name: Preview
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
   pull_request_target:
+    types: [opened, synchronize, reopened, closed]
 
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: pr-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
@@ -30,10 +31,12 @@ env:
   PAGE_DIR: pr-preview-${{ github.event.pull_request.number }}
 
 jobs:
-  build:
-    name: build
+  build-storybook:
+    name: build Storybook
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -70,7 +73,7 @@ jobs:
   preview:
     name: Preview
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build-storybook]
     if: github.event.action != 'closed' && github.event_name != 'push'
     permissions:
       contents: write
@@ -128,7 +131,12 @@ jobs:
 
   cleanup:
     name: Cleanup preview
-    if: github.event.action == 'closed'
+    if: >-
+      github.event.action == 'closed' &&
+      (
+        (github.event_name == 'pull_request_target' && github.event.repository.fork) ||
+        (github.event_name == 'pull_request' && !github.event.repository.fork)
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: write
