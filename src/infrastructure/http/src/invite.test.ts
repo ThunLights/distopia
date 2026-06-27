@@ -17,6 +17,7 @@ function fakeResponse(responseUrl: string, status = 200, body = ""): Response {
   const obj = {
     url: responseUrl,
     status,
+    headers: new Headers(),
     clone() {
       return fakeResponse(responseUrl, status, body);
     },

@@ -17,6 +17,24 @@ export const DISCORD_INVITE_LINK_START = [
   "discord://canary.discord.com/invite/",
 ];
 
+export const DISCORD_DOMAINS = ["discord.com", "ptb.discord.com", "canary.discord.com"];
+
+export const INVITE_PROTOCOL = ["discord:", "http:", "https:"];
+
+async function isDiscordInviteLink(url: string | URL) {
+  const parsedUrl = URL.parse(url);
+
+  if (parsedUrl === null) {
+    return false;
+  }
+
+  return (
+    INVITE_PROTOCOL.includes(parsedUrl.protocol) &&
+    DISCORD_DOMAINS.includes(parsedUrl.host) &&
+    parsedUrl.pathname.startsWith("/invite/")
+  );
+}
+
 // this function is fucking shit.
 // I will fix it someday.
 export async function isUsedCf(res: Response) {
@@ -63,9 +81,9 @@ export async function isInviteLink(
   const location = response.headers.get("location");
 
   return {
-    content: DISCORD_INVITE_LINK_START.some(
-      (value) => resUrl.startsWith(value) || (location && location.startsWith(value)),
-    ),
+    content:
+      (await isDiscordInviteLink(resUrl)) ||
+      (location !== null && (await isDiscordInviteLink(location))),
     isUsedCf: await isUsedCf(response),
   };
 }
