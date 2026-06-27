@@ -8,10 +8,10 @@ export type FindUrls = {
 
 export const URL_REGEXP = /https?:\/\/[\w!?/+\-_~=;.,*&@#$%()'[\]]+/im;
 
-export const URL_REGEXP_DISCORD_GG = /(?:https?:\/\/)?discord\.gg\/[a-zA-Z0-9_-]+/im;
+export const URL_REGEXP_DISCORD_GG = /(?:(https?|discord):\/\/)?discord\.gg\/[a-zA-Z0-9_-]+/im;
 
 export const URL_REGEXP_DISCORD_COM =
-  /(?:https?:\/\/)?\S*(?:discord\.com|discordapp\.com)\S*invite\S*[a-zA-Z0-9_-]+/im;
+  /(?:(https?|discord):\/\/)?\S*(?:discord\.com|discordapp\.com)\S*invite\S*[a-zA-Z0-9_-]+/im;
 
 export function findUrlsSync(content: string): FindUrls {
   const inviteLinks: string[] = [];
