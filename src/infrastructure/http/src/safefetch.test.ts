@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./url", () => ({
-  isLocalUrl: vi.fn(),
-}));
+vi.mock("./url", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./url")>();
+  return {
+    ...actual,
+    isLocalUrl: vi.fn(),
+  };
+});
 vi.mock("./size", () => ({
   isValidSize: vi.fn(),
 }));
@@ -15,7 +19,7 @@ import { InvalidDomainError } from "./Error/InvalidDomainError";
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { RedirectError } from "./Error/RedirectError";
 import { DEFAULT_MAX_REDIRECT } from "./redirect";
-import { DISCORD_DOMAINS, safeFetch, safeFetchForDiscord } from "./safefetch";
+import { ALLOW_DISCORD_DOMAINS, safeFetch, safeFetchForDiscord } from "./safefetch";
 import type { SafeUrl } from "./safeurl";
 import { isValidSize } from "./size";
 import { isLocalUrl } from "./url";
@@ -58,7 +62,7 @@ describe("safeFetchForDiscord", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it.each(DISCORD_DOMAINS)("allows the Discord domain '%s'", async (domain) => {
+  it.each(ALLOW_DISCORD_DOMAINS)("allows the Discord domain '%s'", async (domain) => {
     fetchMock.mockResolvedValueOnce(ok());
     const result = await safeFetchForDiscord(url(`https://${domain}/api`));
     expect(result).toBeInstanceOf(Response);

@@ -7,9 +7,13 @@ import { DEFAULT_MAX_REDIRECT } from "./redirect";
 import type { SafeUrl } from "./safeurl";
 import { isValidSize } from "./size";
 import { DEFAULT_TIMEOUT, DISCORD_TIMEOUT } from "./timeout";
-import { isLocalUrl } from "./url";
+import { isHttpProtocol, isLocalUrl } from "./url";
 
-export const DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
+export type SafeFetchOptions = {
+  detectDiscordProtocol?: boolean;
+};
+
+export const ALLOW_DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
 
 export async function safeFetchForDiscord(
   input: SafeUrl,
@@ -18,7 +22,7 @@ export async function safeFetchForDiscord(
   if (await isLocalUrl(input)) return new LocalAddressError(`${input} is local address.`);
   const hostname = new URL(input).hostname;
 
-  if (!DISCORD_DOMAINS.includes(hostname)) {
+  if (!ALLOW_DISCORD_DOMAINS.includes(hostname)) {
     return new InvalidDomainError(`${hostname} is not discord domain.`);
   }
 
@@ -28,6 +32,7 @@ export async function safeFetchForDiscord(
 export async function safeFetch(
   input: SafeUrl,
   init?: RequestInit,
+  options?: SafeFetchOptions,
 ): Promise<Response | LocalAddressError | HeaderError | RedirectError | BodySizeError> {
   let reqUrl: string = input;
   let currentInit = init;
@@ -61,7 +66,11 @@ export async function safeFetch(
         return new HeaderError(`${location} is invalid.`);
       }
 
-      if (url.protocol !== "http:" && url.protocol !== "https:") {
+      if (options?.detectDiscordProtocol && url.protocol === "discord://") {
+        return response;
+      }
+
+      if (!(await isHttpProtocol(url))) {
         return new HeaderError(`${url.protocol} is not allowed.`);
       }
 

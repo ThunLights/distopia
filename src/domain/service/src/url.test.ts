@@ -27,6 +27,12 @@ describe("url.ts", () => {
         // normal urls
         "https://google.com",
         "https://www.youtube.com/watch?v=AICOs2mNTrw",
+
+        // duplicate
+        "https://discord.com/invite/foo",
+        "https://discord.com/invite/foo",
+        "https://example.com",
+        "https://example.com",
       ].join("\n"),
     );
 
@@ -55,17 +61,17 @@ describe("url.ts", () => {
       "https://discord.com/invite/fuga",
       "http://\\canary.diScordApP.com\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../fuga",
       "https://\\canary.diScordApP.com\\google.com⁂⌘∮/..\\/invite\\/youtube.com‖∠∇\\../twitter.com⁑∋〻\\../\\../fuga",
+
+      "https://discord.com/invite/foo",
     ]);
 
     expect(urls.normalUrls).toEqual([
       "https://discord.com/",
       "https://discord.com/terms",
       "https://discord.com/terms/terms-of-service-april-2024",
-      "https://discord.com/",
-      "https://discord.com/terms",
-      "https://discord.com/terms/terms-of-service-april-2024",
       "https://google.com",
       "https://www.youtube.com/watch?v=AICOs2mNTrw",
+      "https://example.com",
     ]);
   });
 });

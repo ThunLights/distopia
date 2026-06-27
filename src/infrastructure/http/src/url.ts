@@ -62,3 +62,9 @@ export async function isLocalUrl(url: string): Promise<boolean> {
 
   return await isLocalHostname(hostname);
 }
+
+export async function isHttpProtocol(url: string | URL): Promise<boolean> {
+  const protocol = URL.parse(url)?.protocol;
+
+  return protocol === "http:" || protocol === "https:";
+}

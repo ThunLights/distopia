@@ -8,17 +8,32 @@ import type { MockedFunction } from "vitest";
 
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { RedirectError } from "./Error/RedirectError";
-import { DISCORD_INVITE_LINK_START, isInviteLink, isUsedCf } from "./invite";
+import { DISCORD_DOMAINS, INVITE_PROTOCOL, isInviteLink, isUsedCf } from "./invite";
 import { safeFetch } from "./safefetch";
+
+const DISCORD_INVITE_LINK_START = [
+  "https://discord.com/invite/",
+  "https://ptb.discord.com/invite/",
+  "https://canary.discord.com/invite/",
+  "discord://discord.com/invite/",
+  "discord://ptb.discord.com/invite/",
+  "discord://canary.discord.com/invite/",
+];
 
 const safeFetchMock = safeFetch as MockedFunction<typeof safeFetch>;
 
-function fakeResponse(responseUrl: string, status = 200, body = ""): Response {
+function fakeResponse(
+  responseUrl: string,
+  status = 200,
+  body = "",
+  extraHeaders: Record<string, string> = {},
+): Response {
   const obj = {
     url: responseUrl,
     status,
+    headers: new Headers(extraHeaders),
     clone() {
-      return fakeResponse(responseUrl, status, body);
+      return fakeResponse(responseUrl, status, body, extraHeaders);
     },
     async text() {
       return body;
@@ -143,5 +158,105 @@ describe("isInviteLink", () => {
     await isInviteLink("https://example.com/");
     const callInit = safeFetchMock.mock.calls[0]?.[1] as RequestInit;
     expect((callInit?.headers as Record<string, string>)?.["User-Agent"]).toBe("Mozilla/5.0");
+  });
+});
+
+// ─── DISCORD_INVITE_LINK_START equivalence ───────────────────────────────────
+//
+// Verifies that the URL-parsing approach (isDiscordInviteLink) detects exactly
+// the same URLs as the old DISCORD_INVITE_LINK_START.some(v => url.startsWith(v))
+// approach, for both the final response URL and the Location response header.
+
+describe("isInviteLink — DISCORD_INVITE_LINK_START equivalence", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // ── resUrl path ─────────────────────────────────────────────────────────────
+
+  describe("resUrl", () => {
+    it.each(DISCORD_INVITE_LINK_START)("content: true — %s + invite code", async (prefix) => {
+      safeFetchMock.mockResolvedValueOnce(fakeResponse(`${prefix}abc123`));
+      const result = await isInviteLink("https://shortener.example.com/xyz");
+      expect(result).not.toBeInstanceOf(Error);
+      expect((result as { content: boolean }).content).toBe(true);
+    });
+
+    it.each([
+      // no trailing slash → pathname stays /invite and does not match /invite/
+      "https://discord.com/invite",
+      "https://ptb.discord.com/invite",
+      "https://canary.discord.com/invite",
+      "discord://discord.com/invite",
+      // non-invite path
+      "https://discord.com/channels/123456/789012",
+      "https://discord.com/",
+      // subdomain spoofing
+      "https://evil.discord.com/invite/abc123",
+      // domain spoofing
+      "https://discord.com.evil.com/invite/abc123",
+      // unrelated domain
+      "https://example.com/invite/abc123",
+    ])("content: false — %s", async (nonInviteUrl) => {
+      safeFetchMock.mockResolvedValueOnce(fakeResponse(nonInviteUrl));
+      const result = await isInviteLink("https://shortener.example.com/xyz");
+      expect(result).not.toBeInstanceOf(Error);
+      expect((result as { content: boolean }).content).toBe(false);
+    });
+  });
+
+  // ── location header path ────────────────────────────────────────────────────
+
+  describe("location header", () => {
+    it.each(DISCORD_INVITE_LINK_START)(
+      "content: true — Location: %s + invite code",
+      async (prefix) => {
+        safeFetchMock.mockResolvedValueOnce(
+          fakeResponse("https://example.com/", 200, "", { location: `${prefix}abc123` }),
+        );
+        const result = await isInviteLink("https://shortener.example.com/xyz");
+        expect(result).not.toBeInstanceOf(Error);
+        expect((result as { content: boolean }).content).toBe(true);
+      },
+    );
+
+    it.each([
+      "https://discord.com/invite",
+      "https://evil.discord.com/invite/abc123",
+      "https://discord.com.evil.com/invite/abc123",
+      "https://example.com/invite/abc123",
+    ])("content: false — Location: %s", async (location) => {
+      safeFetchMock.mockResolvedValueOnce(
+        fakeResponse("https://example.com/", 200, "", { location }),
+      );
+      const result = await isInviteLink("https://shortener.example.com/xyz");
+      expect(result).not.toBeInstanceOf(Error);
+      expect((result as { content: boolean }).content).toBe(false);
+    });
+
+    it("content: false when Location header is absent", async () => {
+      safeFetchMock.mockResolvedValueOnce(fakeResponse("https://example.com/page"));
+      const result = await isInviteLink("https://shortener.example.com/xyz");
+      expect(result).not.toBeInstanceOf(Error);
+      expect((result as { content: boolean }).content).toBe(false);
+    });
+  });
+
+  // ── INVITE_PROTOCOL / DISCORD_DOMAINS exports ────────────────────────────────
+  // Verifies that all protocols and hosts present in the legacy DISCORD_INVITE_LINK_START
+  // are covered by their respective constants without omission.
+
+  it("INVITE_PROTOCOL covers all protocols used in DISCORD_INVITE_LINK_START", () => {
+    const usedProtocols = new Set(DISCORD_INVITE_LINK_START.map((url) => new URL(url).protocol));
+    for (const protocol of usedProtocols) {
+      expect(INVITE_PROTOCOL).toContain(protocol);
+    }
+  });
+
+  it("DISCORD_DOMAINS covers all hosts used in DISCORD_INVITE_LINK_START", () => {
+    const usedHosts = new Set(DISCORD_INVITE_LINK_START.map((url) => new URL(url).hostname));
+    for (const host of usedHosts) {
+      expect(DISCORD_DOMAINS).toContain(host);
+    }
   });
 });
