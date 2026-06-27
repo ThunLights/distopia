@@ -14,8 +14,8 @@ export const URL_REGEXP_DISCORD_COM =
   /(?:(https?|discord):\/\/)?\S*(?:discord\.com|discordapp\.com)\S*invite\S*[a-zA-Z0-9_-]+/im;
 
 export function findUrlsSync(content: string): FindUrls {
-  const inviteLinks: string[] = [];
-  const normalUrls: string[] = [];
+  const inviteLinks = new Set<string>();
+  const normalUrls = new Set<string>();
   const lines = content.split("\n");
 
   for (const line of lines) {
@@ -38,16 +38,16 @@ export function findUrlsSync(content: string): FindUrls {
       const isUrl = new RegExp(URL_REGEXP.source, "im").test(url);
 
       if (isInviteLink) {
-        inviteLinks.push(url);
+        inviteLinks.add(url);
       } else if (isUrl) {
-        normalUrls.push(url);
+        normalUrls.add(url);
       }
     }
   }
 
   return {
-    inviteLinks,
-    normalUrls,
+    inviteLinks: Array.from(inviteLinks),
+    normalUrls: Array.from(normalUrls),
   };
 }
 
