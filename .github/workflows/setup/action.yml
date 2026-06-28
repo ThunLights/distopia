@@ -24,11 +24,19 @@ runs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Use cache
+    - name: Cache Bun install
       uses: actions/cache@v6
       with:
-        path: .cache
+        path: .cache/bun/install
         key: ${{ runner.os }}-cache-${{ hashFiles('**/bun.lock') }}
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v6
+      with:
+        path: .cache/ms-playwright
+        key: ${{ runner.os }}-playwright-${{ hashFiles('src/presentation/web/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-playwright-
 
     - name: Checkout Container
       working-directory: ./docker/
