@@ -15,7 +15,7 @@
     "setup": "PLAYWRIGHT_BROWSERS_PATH=../../../.cache/ms-playwright playwright install --with-deps && npm run build-storybook",
     "test:unit": "vitest",
     "test": "npm run test:unit -- --run && npm run test:e2e",
-    "test:e2e": "playwright test",
+    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=../../../.cache/ms-playwright playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
