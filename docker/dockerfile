@@ -30,7 +30,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN [[ $(id -u ubuntu) = $USER_UID ]] || usermod -u $USER_UID ubuntu \
-    && [[ $(id -u ubuntu) = $USER_GID ]] || groupmod -g $USER_GID ubuntu \
+    && [[ $(id -g ubuntu) = $USER_GID ]] || groupmod -g $USER_GID ubuntu \
     && echo "ubuntu ALL=NOPASSWD: ALL" > /etc/sudoers.d/ubuntu \
     && chmod 0440 /etc/sudoers.d/ubuntu
 
