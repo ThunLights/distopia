@@ -28,7 +28,9 @@ runs:
       uses: actions/cache@v6
       with:
         path: .cache/bun/install
-        key: ${{ runner.os }}-cache-${{ hashFiles('**/bun.lock') }}
+        key: ${{ runner.os }}-bun-install-${{ hashFiles('**/bun.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-install-
 
     - name: Cache Playwright browsers
       uses: actions/cache@v6
