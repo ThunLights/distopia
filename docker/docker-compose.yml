@@ -26,16 +26,13 @@ services:
     init: true
     networks:
       - distopia-network
-    command: sleep infinity
     volumes:
       - ..:/workspaces/distopia:cached
-      - distopia-cache:/workspaces/distopia/.cache
       - distopia-node-modules:/workspaces/distopia/node_modules
 
 volumes:
   distopia-db-store:
     external: true
-  distopia-cache:
   distopia-node-modules:
 
 networks:
