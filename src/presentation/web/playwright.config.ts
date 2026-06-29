@@ -6,7 +6,7 @@ export default defineConfig({
     baseURL: "http://localhost:4173",
   },
   webServer: {
-    command: "npm run build && npm run preview",
+    command: "npm run preview",
     port: 4173,
     // Reuse the server if it is already running (e.g. from a previous test run or `npm run preview`).
     reuseExistingServer: true,
