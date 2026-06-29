@@ -16,7 +16,8 @@
       "dependsOn": ["^format"]
     },
     "setup": {
-      "dependsOn": ["^setup"]
+      "dependsOn": ["^setup"],
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
