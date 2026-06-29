@@ -32,22 +32,6 @@ runs:
         restore-keys: |
           ${{ runner.os }}-bun-install-
 
-    - name: Cache Playwright browsers
-      uses: actions/cache@v6
-      with:
-        path: .cache/ms-playwright
-        key: ${{ runner.os }}-playwright-${{ hashFiles('src/presentation/web/package.json') }}
-        restore-keys: |
-          ${{ runner.os }}-playwright-
-
-    - name: Cache Turbo
-      uses: actions/cache@v6
-      with:
-        path: .cache/turbo
-        key: ${{ runner.os }}-turbo-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-turbo-
-
     - name: Checkout Container
       working-directory: ./docker/
       shell: bash
