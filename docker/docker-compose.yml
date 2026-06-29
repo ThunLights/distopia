@@ -26,7 +26,6 @@ services:
     init: true
     networks:
       - distopia-network
-    command: sleep infinity
     volumes:
       - ..:/workspaces/distopia:cached
       - distopia-node-modules:/workspaces/distopia/node_modules
