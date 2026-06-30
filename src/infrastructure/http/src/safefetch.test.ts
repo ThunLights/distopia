@@ -76,6 +76,13 @@ describe("safeFetchForDiscord", () => {
     expect(result).toBeInstanceOf(Response);
   });
 
+  it("passes redirect: manual to fetch to prevent automatic redirect following", async () => {
+    fetchMock.mockResolvedValueOnce(ok());
+    await safeFetchForDiscord(url("https://discord.com/api"));
+    const callInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    expect(callInit?.redirect).toBe("manual");
+  });
+
   it("returns InvalidDomainError for a non-Discord domain", async () => {
     const result = await safeFetchForDiscord(url("https://evil.com/"));
     expect(result).toBeInstanceOf(InvalidDomainError);
@@ -302,5 +309,13 @@ describe("safeFetch", () => {
     fetchMock.mockResolvedValueOnce(ok());
     const result = await safeFetch(url("https://example.com/path"));
     expect((result as Response).url).toBe("https://example.com/path");
+  });
+
+  it("wraps an IPv6 result in brackets when pinning the URL hostname", async () => {
+    resolveHostnameToSafeIpMock.mockResolvedValueOnce("2001:db8::1");
+    fetchMock.mockResolvedValueOnce(ok());
+    await safeFetch(url("https://ipv6-host.example.com/path"));
+    const calledUrl = fetchMock.mock.calls[0]?.[0] as string;
+    expect(calledUrl).toBe("https://[2001:db8::1]/path");
   });
 });

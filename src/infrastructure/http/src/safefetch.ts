@@ -56,7 +56,9 @@ async function resolveToPinnedUrl(
   }
 
   const pinnedUrlObj = new URL(url);
-  pinnedUrlObj.hostname = resolvedIp;
+  // URL.hostname requires IPv6 literals to be wrapped in brackets;
+  // assigning a raw IPv6 like "2001:db8::1" is silently ignored.
+  pinnedUrlObj.hostname = resolvedIp.includes(":") ? `[${resolvedIp}]` : resolvedIp;
 
   const headers = new Headers(init.headers);
   headers.set("Host", host);
@@ -83,7 +85,11 @@ export async function safeFetchForDiscord(
   const pinned = await resolveToPinnedUrl(input, init ?? {});
   if (pinned instanceof LocalAddressError) return pinned;
 
-  return await fetch(pinned.url, { ...pinned.init, signal: AbortSignal.timeout(DISCORD_TIMEOUT) });
+  return await fetch(pinned.url, {
+    ...pinned.init,
+    signal: AbortSignal.timeout(DISCORD_TIMEOUT),
+    redirect: "manual",
+  });
 }
 
 export async function safeFetch(

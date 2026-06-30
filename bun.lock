@@ -183,6 +183,9 @@
     },
     "src/infrastructure/http": {
       "name": "infra-http",
+      "dependencies": {
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@types/node": "catalog:",
         "vitest": "catalog:",
