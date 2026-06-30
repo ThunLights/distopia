@@ -1,5 +1,11 @@
 # distopia
 
+## 0.5.0
+
+### Minor Changes
+
+- 786618c: fix: remove unused dependencies and improve URL parsing in invite handling
+
 ## 0.4.0
 
 ### Minor Changes
