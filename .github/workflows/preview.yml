@@ -24,7 +24,6 @@ env:
   PUBLIC_BOT_ID: "1505544379639660745"
   BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
   BOT_SECRET: ${{ secrets.BOT_SECRET }}
-  BOT_REDIRECT_URL: http://localhost:3000/auth
 
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
