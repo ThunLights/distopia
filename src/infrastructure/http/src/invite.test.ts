@@ -46,49 +46,27 @@ function fakeResponse(
 // ─── isUsedCf ───────────────────────────────────────────────────────────────
 
 describe("isUsedCf", () => {
-  it("returns false for a non-403 response", async () => {
-    const res = fakeResponse("https://example.com", 200, "<html><title>Welcome</title></html>");
-    expect(await isUsedCf(res)).toBe(false);
+  it("returns true when cf-mitigated: challenge header is present", () => {
+    const res = fakeResponse("https://example.com", 403, "", { "cf-mitigated": "challenge" });
+    expect(isUsedCf(res)).toBe(true);
   });
 
-  it("returns false for a 200 with a Cloudflare-like title", async () => {
-    const res = fakeResponse(
-      "https://example.com",
-      200,
-      "<html><title>Just a moment...</title></html>",
-    );
-    expect(await isUsedCf(res)).toBe(false);
+  it("returns true for any status code when cf-mitigated: challenge is set", () => {
+    // CF challenges can be served with 200, 403, 429, or 503
+    for (const status of [200, 403, 429, 503]) {
+      const res = fakeResponse("https://example.com", status, "", { "cf-mitigated": "challenge" });
+      expect(isUsedCf(res)).toBe(true);
+    }
   });
 
-  it("returns true for a 403 with the exact Cloudflare title", async () => {
-    const html =
-      "<html><head><title>Just a moment...</title></head><body>CF challenge</body></html>";
-    const res = fakeResponse("https://example.com", 403, html);
-    expect(await isUsedCf(res)).toBe(true);
+  it("returns false when cf-mitigated header is absent", () => {
+    const res = fakeResponse("https://example.com", 403, "");
+    expect(isUsedCf(res)).toBe(false);
   });
 
-  it("returns false for a 403 with a different title", async () => {
-    const html = "<html><head><title>Access Denied</title></head><body>Forbidden</body></html>";
-    const res = fakeResponse("https://example.com", 403, html);
-    expect(await isUsedCf(res)).toBe(false);
-  });
-
-  it("returns false for a 403 with no <title> element", async () => {
-    const html = "<html><body>Forbidden</body></html>";
-    const res = fakeResponse("https://example.com", 403, html);
-    expect(await isUsedCf(res)).toBe(false);
-  });
-
-  it("returns false for a 403 with a title that partially matches", async () => {
-    const html = "<html><head><title>Just a moment</title></head></html>";
-    const res = fakeResponse("https://example.com", 403, html);
-    expect(await isUsedCf(res)).toBe(false);
-  });
-
-  it("returns false for a 403 with an empty title", async () => {
-    const html = "<html><head><title></title></head></html>";
-    const res = fakeResponse("https://example.com", 403, html);
-    expect(await isUsedCf(res)).toBe(false);
+  it("returns false when cf-mitigated has a value other than 'challenge'", () => {
+    const res = fakeResponse("https://example.com", 403, "", { "cf-mitigated": "other" });
+    expect(isUsedCf(res)).toBe(false);
   });
 });
 
@@ -136,9 +114,10 @@ describe("isInviteLink", () => {
     expect((result as { content: boolean }).content).toBe(false);
   });
 
-  it("returns isUsedCf: true when response is a Cloudflare 403 challenge", async () => {
-    const html = "<html><head><title>Just a moment...</title></head><body>CF</body></html>";
-    safeFetchMock.mockResolvedValueOnce(fakeResponse("https://example.com/", 403, html));
+  it("returns isUsedCf: true when response has cf-mitigated: challenge header", async () => {
+    safeFetchMock.mockResolvedValueOnce(
+      fakeResponse("https://example.com/", 403, "", { "cf-mitigated": "challenge" }),
+    );
     const result = await isInviteLink("https://example.com/");
     expect(result).not.toBeInstanceOf(Error);
     expect((result as { isUsedCf: boolean }).isUsedCf).toBe(true);

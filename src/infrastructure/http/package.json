@@ -15,10 +15,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "jsdom": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/jsdom": "catalog:",
     "@types/node": "catalog:",
     "vitest": "catalog:"
   },

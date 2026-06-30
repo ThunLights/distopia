@@ -1,7 +1,7 @@
 import type { BodySizeError, HeaderError, RedirectError } from "./Error";
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { safeFetch } from "./safefetch";
-import type { SafeUrl } from "./safeurl";
+import { validateSafeUrl } from "./safeurl";
 
 export type IsInviteLink = {
   content: boolean;
@@ -13,7 +13,7 @@ export const DISCORD_DOMAINS = ["discord.com", "ptb.discord.com", "canary.discor
 export const INVITE_PROTOCOL = ["discord:", "http:", "https:"];
 
 async function isDiscordInviteLink(url: string | URL) {
-  const parsedUrl = URL.parse(url);
+  const parsedUrl = URL.parse(url.toString());
 
   if (parsedUrl === null) {
     return false;
@@ -26,33 +26,21 @@ async function isDiscordInviteLink(url: string | URL) {
   );
 }
 
-// this function is fucking shit.
-// I will fix it someday.
-export async function isUsedCf(res: Response) {
-  try {
-    const response = res.clone();
-
-    if (response.status !== 403) {
-      return false;
-    }
-
-    const { JSDOM } = await import("jsdom");
-
-    const html = await response.text();
-    const jsdom = new JSDOM(html);
-    const title = jsdom.window.document.querySelector("title");
-
-    return title?.textContent === "Just a moment...";
-  } catch {
-    return false;
-  }
+// Detects Cloudflare challenge pages via the cf-mitigated response header.
+// Cloudflare sets cf-mitigated: challenge on JS challenges, managed challenges,
+// and CAPTCHAs regardless of status code or response language.
+export function isUsedCf(res: Response): boolean {
+  return res.headers.get("cf-mitigated") === "challenge";
 }
 
 export async function isInviteLink(
   url: string,
 ): Promise<IsInviteLink | LocalAddressError | HeaderError | RedirectError | BodySizeError> {
+  const safeUrl = validateSafeUrl(url);
+  if (safeUrl === null) return new LocalAddressError(`${url} is not a safe URL.`);
+
   const response = await safeFetch(
-    url as SafeUrl,
+    safeUrl,
     {
       method: "GET",
       headers: {
@@ -75,6 +63,6 @@ export async function isInviteLink(
     content:
       (await isDiscordInviteLink(resUrl)) ||
       (location !== null && (await isDiscordInviteLink(location))),
-    isUsedCf: await isUsedCf(response),
+    isUsedCf: isUsedCf(response),
   };
 }

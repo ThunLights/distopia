@@ -12,6 +12,9 @@ describe("isLocalIPv4", () => {
     ["172.31.255.255", "172.16.0.0/12 upper bound"],
     ["192.168.1.1", "192.168.0.0/16"],
     ["169.254.169.254", "169.254.0.0/16 link-local"],
+    ["100.64.0.0", "100.64.0.0/10 CGNAT lower bound"],
+    ["100.127.255.255", "100.64.0.0/10 CGNAT upper bound"],
+    ["100.100.100.100", "100.64.0.0/10 CGNAT mid-range"],
   ])("returns true for %s (%s)", (host) => {
     expect(isLocalIPv4(host)).toBe(true);
   });
@@ -19,6 +22,8 @@ describe("isLocalIPv4", () => {
   test.each([
     ["8.8.8.8", "public"],
     ["1.1.1.1", "public"],
+    ["100.63.255.255", "just below 100.64.0.0/10 CGNAT"],
+    ["100.128.0.0", "just above 100.64.0.0/10 CGNAT"],
     ["172.15.0.1", "just below 172.16.0.0/12"],
     ["172.32.0.1", "just above 172.16.0.0/12"],
     ["192.169.0.1", "not 192.168"],

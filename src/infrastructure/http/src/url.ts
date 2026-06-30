@@ -18,6 +18,7 @@ export function isLocalIPv4(host: string): boolean {
     a === 0 || // 0.0.0.0/8
     a === 127 || // 127.0.0.0/8 loop back
     a === 10 || // 10.0.0.0/8
+    (a === 100 && b >= 64 && b <= 127) || // 100.64.0.0/10 CGNAT (RFC 6598)
     (a === 172 && b >= 16 && b <= 31) || // 172.16.0.0/12
     (a === 192 && b === 168) || // 192.168.0.0/16
     (a === 169 && b === 254) // 169.254.0.0/16 link local
@@ -64,7 +65,7 @@ export async function isLocalUrl(url: string): Promise<boolean> {
 }
 
 export async function isHttpProtocol(url: string | URL): Promise<boolean> {
-  const protocol = URL.parse(url)?.protocol;
+  const protocol = URL.parse(url.toString())?.protocol;
 
   return protocol === "http:" || protocol === "https:";
 }

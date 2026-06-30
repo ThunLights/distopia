@@ -1,3 +1,4 @@
+import { resolveHostnameToSafeIp } from "./dns";
 import { BodySizeError } from "./Error/BodySizeError";
 import { HeaderError } from "./Error/HeaderError";
 import { InvalidDomainError } from "./Error/InvalidDomainError";
@@ -7,7 +8,7 @@ import { DEFAULT_MAX_REDIRECT } from "./redirect";
 import type { SafeUrl } from "./safeurl";
 import { isValidSize } from "./size";
 import { DEFAULT_TIMEOUT, DISCORD_TIMEOUT } from "./timeout";
-import { isHttpProtocol, isLocalUrl } from "./url";
+import { isHttpProtocol, isLocalIPv4, isLocalIPv6 } from "./url";
 
 export type SafeFetchOptions = {
   detectDiscordProtocol?: boolean;
@@ -15,18 +16,80 @@ export type SafeFetchOptions = {
 
 export const ALLOW_DISCORD_DOMAINS = ["discord.com", "discordapp.com", "discord.gg"];
 
+type PinnedRequest = {
+  url: string;
+  init: RequestInit;
+};
+
+// Resolves a URL to a pinned IP to prevent DNS rebinding attacks.
+// For hostname URLs: resolves DNS once, validates all IPs, and replaces the hostname
+// with the resolved IP in the URL so fetch() never performs a second DNS lookup.
+// The original Host header and TLS SNI are preserved for correct server routing.
+async function resolveToPinnedUrl(
+  url: string,
+  init: RequestInit,
+): Promise<PinnedRequest | LocalAddressError> {
+  const urlObj = new URL(url);
+  const { hostname, host, protocol } = urlObj;
+
+  if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+    return new LocalAddressError(`${url} is local address.`);
+  }
+
+  if (hostname.startsWith("[") && hostname.endsWith("]")) {
+    if (isLocalIPv6(hostname.slice(1, -1))) {
+      return new LocalAddressError(`${url} is local address.`);
+    }
+    return { url, init };
+  }
+
+  if (/^\d/.test(hostname)) {
+    if (isLocalIPv4(hostname)) {
+      return new LocalAddressError(`${url} is local address.`);
+    }
+    return { url, init };
+  }
+
+  const resolvedIp = await resolveHostnameToSafeIp(hostname);
+  if (resolvedIp === null) {
+    return new LocalAddressError(`${url} is local address.`);
+  }
+
+  const pinnedUrlObj = new URL(url);
+  // URL.hostname requires IPv6 literals to be wrapped in brackets;
+  // assigning a raw IPv6 like "2001:db8::1" is silently ignored.
+  pinnedUrlObj.hostname = resolvedIp.includes(":") ? `[${resolvedIp}]` : resolvedIp;
+
+  const headers = new Headers(init.headers);
+  headers.set("Host", host);
+
+  const pinnedInit: RequestInit & { tls?: { serverName: string } } = {
+    ...init,
+    headers,
+    ...(protocol === "https:" ? { tls: { serverName: hostname } } : {}),
+  };
+
+  return { url: pinnedUrlObj.href, init: pinnedInit };
+}
+
 export async function safeFetchForDiscord(
   input: SafeUrl,
   init?: RequestInit,
 ): Promise<Response | LocalAddressError | InvalidDomainError> {
-  if (await isLocalUrl(input)) return new LocalAddressError(`${input} is local address.`);
   const hostname = new URL(input).hostname;
 
   if (!ALLOW_DISCORD_DOMAINS.includes(hostname)) {
     return new InvalidDomainError(`${hostname} is not discord domain.`);
   }
 
-  return await fetch(input, { ...init, signal: AbortSignal.timeout(DISCORD_TIMEOUT) });
+  const pinned = await resolveToPinnedUrl(input, init ?? {});
+  if (pinned instanceof LocalAddressError) return pinned;
+
+  return await fetch(pinned.url, {
+    ...pinned.init,
+    signal: AbortSignal.timeout(DISCORD_TIMEOUT),
+    redirect: "manual",
+  });
 }
 
 export async function safeFetch(
@@ -35,14 +98,16 @@ export async function safeFetch(
   options?: SafeFetchOptions,
 ): Promise<Response | LocalAddressError | HeaderError | RedirectError | BodySizeError> {
   let reqUrl: string = input;
-  let currentInit = init;
+  let currentInit: RequestInit = init ?? {};
   let redirectCount = 0;
   let response: Response;
 
   while (true) {
-    if (await isLocalUrl(reqUrl)) return new LocalAddressError(`${reqUrl} is local address.`);
-    response = await fetch(reqUrl, {
-      ...currentInit,
+    const pinned = await resolveToPinnedUrl(reqUrl, currentInit);
+    if (pinned instanceof LocalAddressError) return pinned;
+
+    response = await fetch(pinned.url, {
+      ...pinned.init,
       signal: AbortSignal.timeout(DEFAULT_TIMEOUT),
       redirect: "manual",
     });
@@ -75,7 +140,7 @@ export async function safeFetch(
       }
 
       if (new URL(reqUrl).origin !== url.origin) {
-        const headers = new Headers(currentInit?.headers);
+        const headers = new Headers(currentInit.headers);
         headers.delete("authorization");
         headers.delete("cookie");
         currentInit = { ...currentInit, headers };
@@ -84,7 +149,17 @@ export async function safeFetch(
       reqUrl = url.href;
       redirectCount += 1;
     } else {
-      return response;
+      // Expose the original hostname URL via response.url rather than the pinned IP URL,
+      // so callers can perform domain-based checks (e.g. isDiscordInviteLink) correctly.
+      const finalUrl = reqUrl;
+      return new Proxy(response, {
+        get(target, prop) {
+          if (prop === "url") return finalUrl;
+          // Always use target as receiver so native class private fields (#state etc.) resolve correctly.
+          const value = Reflect.get(target, prop, target);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      }) as Response;
     }
 
     if (redirectCount > DEFAULT_MAX_REDIRECT) {
