@@ -1,7 +1,7 @@
 import type { BodySizeError, HeaderError, RedirectError } from "./Error";
 import { LocalAddressError } from "./Error/LocalAddressError";
 import { safeFetch } from "./safefetch";
-import type { SafeUrl } from "./safeurl";
+import { validateSafeUrl } from "./safeurl";
 
 export type IsInviteLink = {
   content: boolean;
@@ -51,8 +51,11 @@ export async function isUsedCf(res: Response) {
 export async function isInviteLink(
   url: string,
 ): Promise<IsInviteLink | LocalAddressError | HeaderError | RedirectError | BodySizeError> {
+  const safeUrl = validateSafeUrl(url);
+  if (safeUrl === null) return new LocalAddressError(`${url} is not a safe URL.`);
+
   const response = await safeFetch(
-    url as SafeUrl,
+    safeUrl,
     {
       method: "GET",
       headers: {

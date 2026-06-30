@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./url", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./url")>();
+vi.mock("./dns", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./dns")>();
   return {
     ...actual,
-    isLocalUrl: vi.fn(),
+    resolveHostnameToSafeIp: vi.fn(),
   };
 });
 vi.mock("./size", () => ({
@@ -13,6 +13,7 @@ vi.mock("./size", () => ({
 
 import type { MockedFunction } from "vitest";
 
+import { resolveHostnameToSafeIp } from "./dns";
 import { BodySizeError } from "./Error/BodySizeError";
 import { HeaderError } from "./Error/HeaderError";
 import { InvalidDomainError } from "./Error/InvalidDomainError";
@@ -22,9 +23,10 @@ import { DEFAULT_MAX_REDIRECT } from "./redirect";
 import { ALLOW_DISCORD_DOMAINS, safeFetch, safeFetchForDiscord } from "./safefetch";
 import type { SafeUrl } from "./safeurl";
 import { isValidSize } from "./size";
-import { isLocalUrl } from "./url";
 
-const isLocalUrlMock = isLocalUrl as MockedFunction<typeof isLocalUrl>;
+const resolveHostnameToSafeIpMock = resolveHostnameToSafeIp as MockedFunction<
+  typeof resolveHostnameToSafeIp
+>;
 const isValidSizeMock = isValidSize as MockedFunction<typeof isValidSize>;
 
 function url(s: string): SafeUrl {
@@ -47,7 +49,7 @@ describe("safeFetchForDiscord", () => {
   beforeEach(() => {
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    isLocalUrlMock.mockResolvedValue(false);
+    resolveHostnameToSafeIpMock.mockResolvedValue("1.2.3.4");
   });
 
   afterEach(() => {
@@ -55,9 +57,15 @@ describe("safeFetchForDiscord", () => {
     vi.clearAllMocks();
   });
 
-  it("returns LocalAddressError and never calls fetch for local URLs", async () => {
-    isLocalUrlMock.mockResolvedValueOnce(true);
+  it("returns InvalidDomainError (not fetch) for a non-Discord URL like localhost", async () => {
     const result = await safeFetchForDiscord(url("http://localhost/"));
+    expect(result).toBeInstanceOf(InvalidDomainError);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("returns LocalAddressError if a Discord domain resolves to a private IP", async () => {
+    resolveHostnameToSafeIpMock.mockResolvedValueOnce(null);
+    const result = await safeFetchForDiscord(url("https://discord.com/api"));
     expect(result).toBeInstanceOf(LocalAddressError);
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -93,7 +101,7 @@ describe("safeFetch", () => {
   beforeEach(() => {
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    isLocalUrlMock.mockResolvedValue(false);
+    resolveHostnameToSafeIpMock.mockResolvedValue("1.2.3.4");
     isValidSizeMock.mockResolvedValue(true);
   });
 
@@ -104,17 +112,21 @@ describe("safeFetch", () => {
 
   // ── SSRF protection ──────────────────────────────────────────────────────
 
-  it("returns LocalAddressError for a local initial URL without calling fetch", async () => {
-    isLocalUrlMock.mockResolvedValueOnce(true);
+  it("returns LocalAddressError for a local IP literal without calling fetch", async () => {
     const result = await safeFetch(url("http://10.0.0.1/"));
+    expect(result).toBeInstanceOf(LocalAddressError);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("returns LocalAddressError when a hostname resolves to a private IP", async () => {
+    resolveHostnameToSafeIpMock.mockResolvedValueOnce(null);
+    const result = await safeFetch(url("https://evil.com/"));
     expect(result).toBeInstanceOf(LocalAddressError);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("returns LocalAddressError when a redirect points to a local address (open-redirect SSRF)", async () => {
     fetchMock.mockResolvedValueOnce(redirect("http://192.168.1.1/internal"));
-    // First isLocalUrl call (original URL) → false; second (redirect target) → true
-    isLocalUrlMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
     const result = await safeFetch(url("https://example.com/"));
     expect(result).toBeInstanceOf(LocalAddressError);
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -282,5 +294,13 @@ describe("safeFetch", () => {
     await safeFetch(url("https://example.com/"));
     const callInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
     expect(callInit?.redirect).toBe("manual");
+  });
+
+  // ── DNS pinning ───────────────────────────────────────────────────────────
+
+  it("exposes the original hostname URL via response.url (not the pinned IP)", async () => {
+    fetchMock.mockResolvedValueOnce(ok());
+    const result = await safeFetch(url("https://example.com/path"));
+    expect((result as Response).url).toBe("https://example.com/path");
   });
 });
