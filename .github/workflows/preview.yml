@@ -64,7 +64,7 @@ jobs:
           mv src/presentation/web/storybook-static tmp/storybook-static
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storybook-output
           path: tmp/storybook-static/
