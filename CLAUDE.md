@@ -166,7 +166,7 @@ Key layout under `src/presentation/bot/src/`:
 | `safeFetchForDiscord` | `safeFetch` variant restricted to Discord domains only (`discord.com`, `discordapp.com`, `discord.gg`) |
 | `isLocalUrl` | Returns `true` if a URL resolves to a private/local address (blocks SSRF) |
 | `isInviteLink` | Follows redirects via `safeFetch` and checks whether the final URL is a Discord invite link |
-| `isUsedCf` | Detects Cloudflare challenge pages (HTTP 403 + "Just a moment..." title) |
+| `isUsedCf` | Detects Cloudflare challenge pages via the `cf-mitigated: challenge` response header |
 
 ### Error types
 
