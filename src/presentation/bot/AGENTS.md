@@ -60,9 +60,7 @@ export class MyCommand extends ChatInputCommandInteractionBase {
   // Optional: restrict to users with these guild permissions
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
 
-  protected override async exec(
-    interaction: ChatInputCommandInteraction<CacheType>,
-  ) {
+  protected override async exec(interaction: ChatInputCommandInteraction<CacheType>) {
     const guild = await this.parseGuild(interaction);
     if (guild instanceof GuildParseError) {
       return interaction.reply({ content: guild.message, flags: [MessageFlags.Ephemeral] });
@@ -80,11 +78,11 @@ The pattern is identical for `ButtonInteractionBase`, `ModalInteractionBase`, an
 
 ## Select Menu Handlers
 
-| Type | Base class | `exec` receives |
-|---|---|---|
-| String | `StringSelectMenuInteractionBase` | `interaction, values: string[]` |
-| User | `UserSelectMenuInteractionBase` | `interaction, values: string[]` (user IDs) |
-| Role | `RoleSelectMenuInteractionBase` | `interaction, values: string[]` (role IDs) |
+| Type   | Base class                        | `exec` receives                            |
+| ------ | --------------------------------- | ------------------------------------------ |
+| String | `StringSelectMenuInteractionBase` | `interaction, values: string[]`            |
+| User   | `UserSelectMenuInteractionBase`   | `interaction, values: string[]` (user IDs) |
+| Role   | `RoleSelectMenuInteractionBase`   | `interaction, values: string[]` (role IDs) |
 
 - `customId` must be unique across **all** select menu handler types
 - Use `interaction.update(...)` (not `reply`) when the menu is part of an existing message

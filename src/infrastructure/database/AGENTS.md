@@ -62,6 +62,7 @@ sudo bun run build
 ```
 
 Regenerates:
+
 - `src/prisma-client/` — Prisma client types
 - `src/zod/` — Zod schemas per model (via `zod-prisma-types`)
 - `src/sql/` — TypedSQL wrappers (if `.sql` files changed)
@@ -70,11 +71,11 @@ Regenerates:
 
 ## Prisma Schema Notes
 
-| Column type | Runtime type | Note |
-|---|---|---|
-| `BigInt` | `bigint` | Requires `Number()` before JSON serialization |
-| `Bytes` | `Buffer` | Used for JWT keys (`jwtVerifyKey`, `key`) |
-| `DateTime @updatedAt` | managed by Prisma | Never set manually |
+| Column type           | Runtime type      | Note                                          |
+| --------------------- | ----------------- | --------------------------------------------- |
+| `BigInt`              | `bigint`          | Requires `Number()` before JSON serialization |
+| `Bytes`               | `Buffer`          | Used for JWT keys (`jwtVerifyKey`, `key`)     |
+| `DateTime @updatedAt` | managed by Prisma | Never set manually                            |
 
 ---
 

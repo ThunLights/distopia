@@ -61,10 +61,10 @@ Path aliases: `$lib` → `src/lib/`, `$env/static/private` for server env vars.
 
 ```typescript
 // src/routes/api/[resource]/+server.ts
-import z from "zod";
 import { authAndValidateHandler } from "$lib/server/handler";
-import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { json } from "@sveltejs/kit";
+import z from "zod";
 
 const BodySchema = z.object({
   guildId: z.string(),

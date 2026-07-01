@@ -8,16 +8,16 @@ Package `infra-http` — security-focused HTTP utility library. No build step; c
 
 ## Key Exports
 
-| Export | Description |
-|---|---|
-| `SafeUrl` | Branded `string & { __brand: "distopiaSafeUrl" }` — validated http/https URL |
-| `safeUrl` | Tagged template literal — encodes interpolated values with `encodeURIComponent` |
-| `validateSafeUrl` | Validates a raw string via Zod schema, returns `SafeUrl \| null` |
-| `safeFetch` | SSRF-protected fetch with DNS pinning, redirect loop, body size limit, timeout |
-| `safeFetchForDiscord` | `safeFetch` restricted to `discord.com`, `discordapp.com`, `discord.gg` |
-| `isLocalUrl` | Returns `true` if the URL resolves to a private/reserved IP |
-| `isInviteLink` | Follows redirects and returns `{ content: boolean, isUsedCf: boolean }` |
-| `isUsedCf` | Synchronous — returns `true` if `res.headers.get("cf-mitigated") === "challenge"` |
+| Export                | Description                                                                       |
+| --------------------- | --------------------------------------------------------------------------------- |
+| `SafeUrl`             | Branded `string & { __brand: "distopiaSafeUrl" }` — validated http/https URL      |
+| `safeUrl`             | Tagged template literal — encodes interpolated values with `encodeURIComponent`   |
+| `validateSafeUrl`     | Validates a raw string via Zod schema, returns `SafeUrl \| null`                  |
+| `safeFetch`           | SSRF-protected fetch with DNS pinning, redirect loop, body size limit, timeout    |
+| `safeFetchForDiscord` | `safeFetch` restricted to `discord.com`, `discordapp.com`, `discord.gg`           |
+| `isLocalUrl`          | Returns `true` if the URL resolves to a private/reserved IP                       |
+| `isInviteLink`        | Follows redirects and returns `{ content: boolean, isUsedCf: boolean }`           |
+| `isUsedCf`            | Synchronous — returns `true` if `res.headers.get("cf-mitigated") === "challenge"` |
 
 ---
 
@@ -46,7 +46,7 @@ if (url === null) return; // invalid — not http/https or malformed
 2. **DNS resolution** — calls `resolveHostnameToSafeIp` which resolves once and validates all IPs
 3. **Private IP block** — blocks 0.0.0.0/8, 127.x, 10.x, 100.64.0.0/10 (CGNAT RFC 6598), 172.16–31.x, 192.168.x, 169.254.x, and IPv6 equivalents
 4. **URL pinning** — replaces hostname in the URL with the resolved IP; prevents DNS rebinding
-5. **IPv6 bracketing** — `resolvedIp.includes(":") ? \`[\${resolvedIp}]\` : resolvedIp` (required — raw IPv6 silently fails as `URL.hostname`)
+5. **IPv6 bracketing** — `resolvedIp.includes(":") ? \`[\${resolvedIp}]\` : resolvedIp`(required — raw IPv6 silently fails as`URL.hostname`)
 6. **`redirect: "manual"`** — always set; prevents the runtime from auto-following redirects and bypassing DNS pinning
 7. **Manual redirect loop** — follows Location headers manually; strips `Authorization`/`Cookie` on cross-origin hops
 8. **`response.url` proxy** — wraps the final Response in a Proxy so `response.url` returns the original hostname URL, not the pinned IP
@@ -56,14 +56,30 @@ if (url === null) return; // invalid — not http/https or malformed
 ## Error Types
 
 ```typescript
-import { LocalAddressError, InvalidDomainError, RedirectError, HeaderError, BodySizeError } from "infra-http";
+import {
+  LocalAddressError,
+  InvalidDomainError,
+  RedirectError,
+  HeaderError,
+  BodySizeError,
+} from "infra-http";
 
 const result = await safeFetch(url);
-if (result instanceof LocalAddressError) { /* private IP */ }
-if (result instanceof InvalidDomainError) { /* Discord-only: non-discord domain */ }
-if (result instanceof RedirectError) { /* too many redirects */ }
-if (result instanceof HeaderError) { /* bad Location header */ }
-if (result instanceof BodySizeError) { /* body too large */ }
+if (result instanceof LocalAddressError) {
+  /* private IP */
+}
+if (result instanceof InvalidDomainError) {
+  /* Discord-only: non-discord domain */
+}
+if (result instanceof RedirectError) {
+  /* too many redirects */
+}
+if (result instanceof HeaderError) {
+  /* bad Location header */
+}
+if (result instanceof BodySizeError) {
+  /* body too large */
+}
 // else: Response
 ```
 
@@ -115,17 +131,25 @@ vi.mock("./dns", async (importOriginal) => {
 // Fake Response helper
 function fakeResponse(url: string, status = 200, body = "", headers: Record<string, string> = {}) {
   return {
-    url, status,
+    url,
+    status,
     headers: new Headers(headers),
-    clone() { return fakeResponse(url, status, body, headers); },
-    async text() { return body; },
+    clone() {
+      return fakeResponse(url, status, body, headers);
+    },
+    async text() {
+      return body;
+    },
     body: null,
   } as unknown as Response;
 }
 
 // Stub global fetch
 beforeEach(() => vi.stubGlobal("fetch", vi.fn()));
-afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); });
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.clearAllMocks();
+});
 ```
 
 When testing `isUsedCf`, pass a response with `{ "cf-mitigated": "challenge" }` in headers. No HTML body needed.
