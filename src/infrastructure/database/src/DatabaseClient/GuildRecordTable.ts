@@ -37,8 +37,13 @@ export class GuildRecordTable extends Base {
   }
 
   public async upsertAll(input: GuildRecordUpsertInput[]) {
+    // Sort by guildId so concurrent batches always acquire row locks in the
+    // same order, avoiding Postgres deadlocks (40P01) between overlapping
+    // cron jobs (e.g. VoiceChannel.update, ActiveRate.update, Record.update
+    // all upsert into guildRecord independently).
+    const sorted = [...input].sort((a, b) => a.guildId.localeCompare(b.guildId));
     return await this.prisma.$transaction(
-      input.map((value) =>
+      sorted.map((value) =>
         this.prisma.guildRecord.upsert({
           where: { guildId: value.guildId },
           update: value,

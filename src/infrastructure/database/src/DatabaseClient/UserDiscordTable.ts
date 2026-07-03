@@ -19,8 +19,11 @@ export class UserDiscordTable extends Base {
   }
 
   public async upsertAll(inputs: UserDiscordUpsertInput[]) {
+    // Sort by userId so concurrent batches always acquire row locks in the
+    // same order, avoiding Postgres deadlocks (40P01).
+    const sorted = [...inputs].sort((a, b) => a.userId.localeCompare(b.userId));
     return await this.prisma.$transaction(
-      inputs.map((value) =>
+      sorted.map((value) =>
         this.prisma.userDiscord.upsert({
           where: { userId: value.userId },
           update: value,
@@ -35,8 +38,11 @@ export class UserDiscordTable extends Base {
   }
 
   public async deleteAll(userIds: string[]) {
+    // Sort by userId so concurrent batches always acquire row locks in the
+    // same order, avoiding Postgres deadlocks (40P01).
+    const sorted = [...userIds].sort((a, b) => a.localeCompare(b));
     return await this.prisma.$transaction(
-      userIds.map((userId) => this.prisma.userDiscord.delete({ where: { userId } })),
+      sorted.map((userId) => this.prisma.userDiscord.delete({ where: { userId } })),
     );
   }
 }
