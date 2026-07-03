@@ -3,6 +3,7 @@ import type { AppState } from "app-core/AppState";
 import {
   ApplicationCommandOptionType,
   Guild,
+  MessageFlags,
   type CacheType,
   type ChatInputCommandInteraction,
   type GuildChannelResolvable,
@@ -99,5 +100,45 @@ describe("ChatInputCommandBase", () => {
         },
       } as ChatInputCommandInteraction<CacheType>),
     ).toEqual({ content: "123456" + "foo" });
+  });
+
+  test("denies execution and returns an ephemeral error when permission is missing", async () => {
+    expect(
+      await command.run({
+        id: "123456",
+        commandName: "huga",
+        channelId: "123456",
+        options: {
+          getString: (name) => (name === "data" ? "foo" : "Error"),
+        },
+        guild: {
+          members: {
+            me: {
+              permissions: {
+                has(_permission, _checkAdmin) {
+                  return false;
+                },
+              },
+              permissionsIn(_channel: GuildChannelResolvable) {
+                return {
+                  has(_permission, _checkAdmin) {
+                    return true;
+                  },
+                };
+              },
+            },
+          },
+        } as Guild,
+        memberPermissions: {
+          has(_permission, _checkAdmin) {
+            return true;
+          },
+        },
+      } as ChatInputCommandInteraction<CacheType>),
+    ).toEqual(
+      expect.objectContaining({
+        flags: [MessageFlags.Ephemeral],
+      }),
+    );
   });
 });
