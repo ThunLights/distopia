@@ -37,8 +37,14 @@ export class GuildRecordOneDayTable extends Base {
   }
 
   public async upsertAll(inputs: GuildRecordOneDayUpsertInput[]) {
+    // Sort by the unique key so concurrent batches always acquire row locks in
+    // the same order, avoiding Postgres deadlocks (40P01) between overlapping
+    // cron jobs that upsert overlapping guildId/date sets.
+    const sorted = [...inputs].sort(
+      (a, b) => a.guildId.localeCompare(b.guildId) || a.date.getTime() - b.date.getTime(),
+    );
     return await this.prisma.$transaction(
-      inputs.map((value) =>
+      sorted.map((value) =>
         this.prisma.guildRecordOneDay.upsert({
           where: { guildId_date: { guildId: value.guildId, date: value.date } },
           update: value,
@@ -93,6 +99,11 @@ export class GuildRecordOneDayTable extends Base {
       }
     }
 
+    // Sort by guildId so concurrent batches always acquire row locks in the
+    // same order, avoiding Postgres deadlocks (40P01) between overlapping
+    // cron jobs.
+    query.sort((a, b) => a.guildId.localeCompare(b.guildId));
+
     return await this.prisma.$transaction(
       query.map(({ guildId, date, vcMembers }) =>
         this.prisma.guildRecordOneDay.upsert({
@@ -143,8 +154,12 @@ export class GuildRecordOneDayTable extends Base {
   }
 
   public async upsertVcMemberUpperTwoAll(guildIds: string[], date: Date, num: number = 1) {
+    // Sort by guildId so concurrent batches always acquire row locks in the
+    // same order, avoiding Postgres deadlocks (40P01) between overlapping
+    // cron jobs.
+    const sortedGuildIds = [...guildIds].sort((a, b) => a.localeCompare(b));
     return await this.prisma.$transaction(
-      guildIds.map((guildId) =>
+      sortedGuildIds.map((guildId) =>
         this.prisma.guildRecordOneDay.upsert({
           where: { guildId_date: { guildId, date } },
           update: {
