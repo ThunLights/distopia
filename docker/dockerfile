@@ -6,6 +6,7 @@ ARG USER_GID=$USER_UID
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG BUN_VERSION=1.3.13
 ARG NODE_VERSION=24.18.0
 ARG NPM_VERSION=11.17.0
 ARG JQ_VERSION=1.8.1
@@ -42,7 +43,7 @@ RUN npm i -g n \
 
 # Install npm packages
 RUN npm i -g \
-    bun \
+    bun@${BUN_VERSION} \
     npm@${NPM_VERSION} \
     playwright@${PLAYWRIGHT_VERSION}
 
