@@ -44,8 +44,7 @@ RUN npm i -g n \
 RUN npm i -g \
     bun \
     npm@${NPM_VERSION} \
-    playwright@${PLAYWRIGHT_VERSION} \
-    @antfu/ni
+    playwright@${PLAYWRIGHT_VERSION}
 
 # Install scanning secrets tools
 RUN curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/v${TRUFFLEHOG_VERSION}/scripts/install.sh | sh -s -- -b /usr/local/bin
