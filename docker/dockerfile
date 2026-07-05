@@ -6,11 +6,13 @@ ARG USER_GID=$USER_UID
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG BUN_VERSION=1.3.13
 ARG NODE_VERSION=24.18.0
 ARG NPM_VERSION=11.17.0
 ARG JQ_VERSION=1.8.1
 ARG GITLEAKS_VERSION=8.30.1
 ARG TRUFFLEHOG_VERSION=3.95.6
+ARG PLAYWRIGHT_VERSION=1.60.0
 
 SHELL ["/bin/bash", "-c"]
 
@@ -41,9 +43,9 @@ RUN npm i -g n \
 
 # Install npm packages
 RUN npm i -g \
-    bun \
+    bun@${BUN_VERSION} \
     npm@${NPM_VERSION} \
-    @antfu/ni
+    playwright@${PLAYWRIGHT_VERSION}
 
 # Install scanning secrets tools
 RUN curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/v${TRUFFLEHOG_VERSION}/scripts/install.sh | sh -s -- -b /usr/local/bin
@@ -53,5 +55,7 @@ RUN git clone -b v${GITLEAKS_VERSION} --depth 1 https://github.com/gitleaks/gitl
 ENV PATH="${PATH}:/gitleaks"
 
 RUN curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && chmod +x /usr/local/bin/jq
+
+RUN playwright install --with-deps
 
 USER ubuntu
