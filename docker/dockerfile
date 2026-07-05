@@ -11,6 +11,7 @@ ARG NPM_VERSION=11.17.0
 ARG JQ_VERSION=1.8.1
 ARG GITLEAKS_VERSION=8.30.1
 ARG TRUFFLEHOG_VERSION=3.95.6
+ARG PLAYWRIGHT_VERSION=1.60.0
 
 SHELL ["/bin/bash", "-c"]
 
@@ -43,6 +44,7 @@ RUN npm i -g n \
 RUN npm i -g \
     bun \
     npm@${NPM_VERSION} \
+    playwright@${PLAYWRIGHT_VERSION} \
     @antfu/ni
 
 # Install scanning secrets tools
@@ -53,5 +55,7 @@ RUN git clone -b v${GITLEAKS_VERSION} --depth 1 https://github.com/gitleaks/gitl
 ENV PATH="${PATH}:/gitleaks"
 
 RUN curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && chmod +x /usr/local/bin/jq
+
+RUN playwright install --with-deps
 
 USER ubuntu
