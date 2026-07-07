@@ -86,4 +86,8 @@ export class User extends Base {
 
     return null;
   }
+
+  public async setActivity() {
+    await this.state.discord.user.setActivity();
+  }
 }

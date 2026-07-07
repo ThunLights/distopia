@@ -80,6 +80,7 @@ async function start() {
       );
       await core.record.update();
       await updatePanels();
+      await core.user.setActivity();
     },
     // This job's runtime scales with guild count (sequential Discord API
     // calls); without noOverlap a slow run can still be executing when the

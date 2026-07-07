@@ -1,5 +1,5 @@
 import type { AppCore } from "app-core";
-import { ActivityType, type Client } from "discord.js";
+import type { Client } from "discord.js";
 
 import { GuildMemberAddHandler } from "./EventHandler/GuildMemberAddHandler";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
@@ -11,10 +11,7 @@ export function handleClient(client: Client, core: AppCore) {
   const guildMemberAddHandler = new GuildMemberAddHandler(core);
 
   client.on("clientReady", async (client) => {
-    client.user.setActivity({
-      name: `${client.guilds.cache.size}server | ${client.users.cache.size}users | distopia.top`,
-      type: ActivityType.Playing,
-    });
+    await core.user.setActivity();
 
     const commands = interactionCreateHandler.commands.chatInput.map((command) => command.register);
 
