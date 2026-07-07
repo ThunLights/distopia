@@ -1,20 +1,19 @@
 import type { AppCore } from "app-core";
-import { ActivityType, type Client } from "discord.js";
+import type { Client } from "discord.js";
 
 import { GuildMemberAddHandler } from "./EventHandler/GuildMemberAddHandler";
 import { InteractionCreateHandler } from "./EventHandler/InteractionCreateHandler/index";
 import { MessageCreateHandler } from "./EventHandler/MessageCreateHandler";
+import { MessageUpdateHandler } from "./EventHandler/MessageUpdateHandler";
 
 export function handleClient(client: Client, core: AppCore) {
   const interactionCreateHandler = new InteractionCreateHandler(core);
   const messageCreateHandler = new MessageCreateHandler(core);
+  const messageUpdateHandler = new MessageUpdateHandler(core);
   const guildMemberAddHandler = new GuildMemberAddHandler(core);
 
   client.on("clientReady", async (client) => {
-    client.user.setActivity({
-      name: `${client.guilds.cache.size}server | ${client.users.cache.size}users | distopia.top`,
-      type: ActivityType.Playing,
-    });
+    await core.user.setActivity();
 
     const commands = interactionCreateHandler.commands.chatInput.map((command) => command.register);
 
@@ -29,6 +28,11 @@ export function handleClient(client: Client, core: AppCore) {
   );
 
   client.on("messageCreate", async (message) => await messageCreateHandler.handle(message));
+
+  client.on(
+    "messageUpdate",
+    async (oldMsg, newMsg) => await messageUpdateHandler.handle(oldMsg, newMsg),
+  );
 
   client.on("guildMemberAdd", async (member) => await guildMemberAddHandler.handle(member));
 

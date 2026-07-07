@@ -1,3 +1,5 @@
+import { ActivityType } from "discord.js";
+
 import type { User } from "../types/User";
 import { Base } from "./Base";
 
@@ -24,5 +26,16 @@ export class UserController extends Base {
   public async getAvatarUrl(userId: string) {
     const avatarUrl = this.client.users.cache.get(userId)?.avatarURL() ?? null;
     return avatarUrl;
+  }
+
+  public async setActivity() {
+    if (!this.client.isReady()) {
+      return;
+    }
+
+    this.client.user.setActivity({
+      name: `${this.client.guilds.cache.size}server | ${this.client.users.cache.size}users | distopia.top`,
+      type: ActivityType.Playing,
+    });
   }
 }
