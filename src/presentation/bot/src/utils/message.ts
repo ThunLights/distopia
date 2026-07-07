@@ -19,7 +19,10 @@ export async function detectSpamMessage(
 
     const embedInviteLinks = await core.state.discord.embed.detectInviteLinks(message.embeds);
     if (embedInviteLinks.length) {
-      const messages = (await message.channel.messages.fetch({ limit: 30 })).values().toArray();
+      const messages = message.channel.messages.cache
+        .values()
+        .toArray()
+        .filter((msg) => msg.author.id === message.author.id);
 
       for (const msg of messages) {
         for (const inviteLink of embedInviteLinks) {
