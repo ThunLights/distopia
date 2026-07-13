@@ -1,1 +1,0 @@
-import{i as e}from"./preload-helper-xPQekRTU.js";import{n as t,t as n}from"./toast-Dcfk_hFr.js";async function r(e){let{content:t}=await e.json();n.error(`エラー「${t}」`)}var i=e((()=>{t()}));export{r as n,i as t};
