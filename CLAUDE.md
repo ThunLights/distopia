@@ -236,6 +236,23 @@ docker compose exec app sh -c "cd src/presentation/web && bun run storybook"
 
 ---
 
+## Dependency Version Pins
+
+Package versions live in more places than each package's `package.json`. When bumping a dependency, grep for the old version string across the whole repo — not just `package.json` — and update every location:
+
+| Location | What it pins |
+|---|---|
+| `package.json` (per package) | Direct dependency versions |
+| Root `package.json` → `workspaces.catalog` | Shared versions consumed via `"catalog:"` (e.g. `bun`, `oxfmt`, `oxlint`, `typescript`, `vitest`, `zod`, `discord.js`, `@types/node`) |
+| Root `package.json` → `packageManager` | Must match the `bun` catalog version |
+| `lib/distopia/jsr.json` → `imports` | Duplicate pins for JSR publishing (`oxfmt`, `oxlint`, `tsdown`, `jsr`, `zod`, `@types/node`) — must match `lib/distopia/package.json` / the catalog |
+| `docker/dockerfile` → `ARG ..._VERSION` | Tool versions baked into the devcontainer image. `BUN_VERSION` must match the catalog `bun` version; `PLAYWRIGHT_VERSION` must match `playwright` in `src/presentation/web/package.json` |
+| `.github/workflows/*.yml` → `bun-version` | CI-pinned bun version — must match the catalog `bun` version (`release.yml` currently pins it in 3 places) |
+
+**Dependabot does not track `catalog:` entries** — it only opens PRs for direct `package.json` versions. Run `bun outdated` to check catalog packages (`bun`, `oxfmt`, `oxlint`, `typescript`, etc.) separately; nothing will surface them otherwise.
+
+---
+
 ## Versioning & Releases
 
 Changesets is used for versioning.
