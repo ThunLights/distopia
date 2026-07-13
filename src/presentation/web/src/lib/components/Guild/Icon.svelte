@@ -17,6 +17,8 @@
 
   const { imgStyle, iconPath, rank, height, width }: Props = $props();
 
+  const framePaddingRatio = 0.2;
+
   function genFrame(rank: number) {
     if (rank <= 1) return No1Frame;
     if (rank <= 2) return No2Frame;
@@ -30,16 +32,28 @@
 {#if rank && rank <= 50}
   <IconWithFrame {height} {width} {iconPath} {imgStyle} edgePath={genFrame(rank)} />
 {:else}
-  <img
-    class="guild-icon"
-    style={[imgStyle, `height: ${height}`, `width: ${width}`].join("; ")}
-    src={iconPath}
-    alt="guild icon"
-  />
+  <div
+    class="guild-icon-wrapper"
+    style={[
+      imgStyle,
+      `height: ${height}`,
+      `width: ${width}`,
+      `padding: ${framePaddingRatio * 100}%`,
+    ].join("; ")}
+  >
+    <img class="guild-icon" src={iconPath} alt="guild icon" />
+  </div>
 {/if}
 
 <style>
+  .guild-icon-wrapper {
+    box-sizing: border-box;
+  }
+
   .guild-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
   }
 </style>
