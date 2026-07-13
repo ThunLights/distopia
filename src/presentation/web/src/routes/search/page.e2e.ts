@@ -235,8 +235,20 @@ test("the URL is updated with the new search term after Enter", async ({ page })
 });
 
 test("clicking a tag re-searches with the tag as the term", async ({ page }) => {
-  await mockSearch(page, [GUILD_NORMAL]);
+  // Return different guilds depending on the search term, so the test also verifies
+  // that the tag click actually re-fetches and re-renders results (not just the URL).
+  await page.route("**/api/guild/search", async (route) => {
+    const body = (await route.request().postDataJSON()) as { term: string };
+    const guilds = body.term === "alpha" ? [GUILD_NORMAL] : [GUILD_NSFW];
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ guilds, count: guilds.length, time: "0ms" }),
+    });
+  });
+
   await page.goto("/search?w=alpha");
+  await expect(page.getByText(GUILD_NORMAL.name)).toBeVisible();
 
   // getByText("gaming") also matches the guild name "Alpha Gaming Guild" (partial match),
   // and the guild card itself is now a link too, so an exact name match is required to
@@ -244,10 +256,15 @@ test("clicking a tag re-searches with the tag as the term", async ({ page }) => 
   const gamingLink = page.getByRole("link", { name: "gaming", exact: true });
   await expect(gamingLink).toBeVisible();
 
-  // Clicking a tag navigates to /search?w=gaming (via href, not onMount search).
+  // Clicking a tag navigates to /search?w=gaming (via SvelteKit client-side navigation,
+  // which reuses the page component instance rather than remounting it).
   // Wait for the URL to specifically contain "gaming" — waitForURL(/\/search/) would
   // match the current /search?w=alpha URL before the navigation finishes.
   await gamingLink.click();
   await page.waitForURL(/gaming/);
   expect(page.url()).toContain("gaming");
+
+  // The displayed results must actually update to reflect the new term, not just the URL.
+  await expect(page.getByText(GUILD_NSFW.name)).toBeVisible();
+  await expect(page.getByText(GUILD_NORMAL.name)).not.toBeVisible();
 });
