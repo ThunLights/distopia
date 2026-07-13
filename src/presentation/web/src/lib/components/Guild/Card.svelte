@@ -33,25 +33,27 @@
 <div class="guild">
   <div class="guild-context">
     <div>
-      <div class="guild-info">
-        <div>
-          <Icon
-            height="60px"
-            width="60px"
-            iconPath={iconUrl ?? DiscordIcon}
-            rank={rank ?? undefined}
-          />
+      <a href={resolve(`/guilds/${guildId}`)} class="no-text-decoration">
+        <div class="guild-info">
+          <div>
+            <Icon
+              height="60px"
+              width="60px"
+              iconPath={iconUrl ?? DiscordIcon}
+              rank={rank ?? undefined}
+            />
+          </div>
+          <div>
+            <p class="guild-name">
+              {name}
+              {#if nsfw}
+                <small class="nsfw">NSFW!!</small>
+              {/if}
+            </p>
+            <p>ブースト: {boostCount}</p>
+          </div>
         </div>
-        <div>
-          <p class="guild-name">
-            {name}
-            {#if nsfw}
-              <small class="nsfw">NSFW!!</small>
-            {/if}
-          </p>
-          <p>ブースト: {boostCount}</p>
-        </div>
-      </div>
+      </a>
       <div>
         {#if tags.length}
           <LinkTagsLayout
@@ -76,6 +78,9 @@
 </div>
 
 <style>
+  .no-text-decoration {
+    text-decoration: none;
+  }
   .nsfw {
     color: red;
   }

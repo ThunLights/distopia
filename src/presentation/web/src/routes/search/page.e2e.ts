@@ -135,8 +135,10 @@ test("tags appear as links pointing to /search?w={tag}", async ({ page }) => {
   await mockSearch(page, [GUILD_NORMAL]);
   await page.goto("/search?w=alpha");
 
-  // GUILD_NORMAL has tags ["gaming", "fps"]
-  const gamingTag = page.getByRole("link", { name: "gaming" });
+  // GUILD_NORMAL has tags ["gaming", "fps"]. The guild card itself is also a link whose
+  // accessible name ("Alpha Gaming Guild ...") contains "gaming" as a substring, so an
+  // exact match is required to target only the tag link.
+  const gamingTag = page.getByRole("link", { name: "gaming", exact: true });
   await expect(gamingTag).toBeVisible();
   await expect(gamingTag).toHaveAttribute("href", /\/search\?w=gaming/);
 
@@ -237,8 +239,9 @@ test("clicking a tag re-searches with the tag as the term", async ({ page }) => 
   await page.goto("/search?w=alpha");
 
   // getByText("gaming") also matches the guild name "Alpha Gaming Guild" (partial match),
-  // causing a strict-mode violation. Use getByRole to target only the <a> tag element.
-  const gamingLink = page.getByRole("link", { name: "gaming" });
+  // and the guild card itself is now a link too, so an exact name match is required to
+  // target only the tag's <a> element.
+  const gamingLink = page.getByRole("link", { name: "gaming", exact: true });
   await expect(gamingLink).toBeVisible();
 
   // Clicking a tag navigates to /search?w=gaming (via href, not onMount search).
