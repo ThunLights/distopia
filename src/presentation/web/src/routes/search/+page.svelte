@@ -10,7 +10,6 @@
     PostBody,
     ResponseMethodPost,
   } from "$lib/shared/types/routes/api/guild/search";
-  import { onMount } from "svelte";
 
   const { data } = $props();
   const { user } = $derived(data);
@@ -48,8 +47,10 @@
     };
   }
 
-  onMount(async () => {
-    await search(word)();
+  // Tag links navigate client-side (component isn't remounted), so onMount alone
+  // wouldn't re-fetch when `word` changes. React to it instead.
+  $effect(() => {
+    search(word)();
   });
 </script>
 
