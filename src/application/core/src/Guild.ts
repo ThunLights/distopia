@@ -5,6 +5,8 @@ import type {
   GuildSetting,
   GuildSettingUpsertInput,
   GuildUpsertInput,
+  GuildWhiteList,
+  WhiteListPermission,
 } from "infra-database/types";
 import type { Value } from "repo-memory/GuildEdit";
 import type { GuildDBValue, SearchOptions } from "repo-search";
@@ -329,6 +331,23 @@ export class Guild extends Base {
     const setting = await this.state.database.guildSetting.upsert(input);
     this.state.memory.guildSetting.set(input.guildId, { ...setting, createdAt: new Date() });
     return setting;
+  }
+
+  public async getWhiteList(guildId: string): Promise<GuildWhiteList[]> {
+    return await this.state.database.guildWhiteList.findAll(guildId);
+  }
+
+  public async isWhiteListed(
+    guildId: string,
+    targetIds: string[],
+    permission: WhiteListPermission,
+  ): Promise<boolean> {
+    const whiteList = await this.getWhiteList(guildId);
+    return whiteList.some(
+      (entry) =>
+        targetIds.includes(entry.targetId) &&
+        (entry.allPermissions || entry.permissions.includes(permission)),
+    );
   }
 
   public async saveReview(input: GuildReviewUpsertInput) {
