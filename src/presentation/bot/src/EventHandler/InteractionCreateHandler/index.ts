@@ -9,6 +9,7 @@ import {
 
 import { BaseHandler } from "../BaseHandler";
 import { type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
+import type { ChannelSelectMenuInteractionBase } from "./Base/ChannelSelectMenuInteractionBase";
 import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
 import { ModalSended } from "./Base/Modal/ModalSended";
 import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
@@ -16,6 +17,7 @@ import type { RoleSelectMenuInteractionBase } from "./Base/RoleSelectMenuInterac
 import type { StringSelectMenuInteractionBase } from "./Base/StringSelectMenuInteractionBase";
 import type { UserSelectMenuInteractionBase } from "./Base/UserSelectMenuInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
+import { commands as channelSelectMenus } from "./ChannelSelectMenus.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";
 import { commands as modalCommands } from "./Modals.auto";
 import { commands as roleSelectMenus } from "./RoleSelectMenus.auto";
@@ -27,6 +29,7 @@ type Commands = {
   button: ButtonInteractionBase[];
   modal: ModalSubmitInteractionBase[];
   roleSelectMenu: RoleSelectMenuInteractionBase[];
+  channelSelectMenu: ChannelSelectMenuInteractionBase[];
   stringSelectMenu: StringSelectMenuInteractionBase[];
   userSelectMenu: UserSelectMenuInteractionBase[];
 };
@@ -44,6 +47,7 @@ export class InteractionCreateHandler extends BaseHandler<
     button: buttonCommands.map((Command) => new Command(this.core)),
     modal: modalCommands.map((Command) => new Command(this.core)),
     roleSelectMenu: roleSelectMenus.map((Menu) => new Menu(this.core)),
+    channelSelectMenu: channelSelectMenus.map((Menu) => new Menu(this.core)),
     stringSelectMenu: stringSelectMenus.map((Menu) => new Menu(this.core)),
     userSelectMenu: userSelectMenus.map((Menu) => new Menu(this.core)),
   };
@@ -119,6 +123,17 @@ export class InteractionCreateHandler extends BaseHandler<
       }
     } else if (interaction.isRoleSelectMenu()) {
       for (const menu of this.commands.roleSelectMenu) {
+        if (await menu.match(interaction)) {
+          const res = await menu.run(interaction);
+          if (res instanceof InteractionResponse) {
+            return;
+          } else {
+            return void (await interaction.reply(res));
+          }
+        }
+      }
+    } else if (interaction.isChannelSelectMenu()) {
+      for (const menu of this.commands.channelSelectMenu) {
         if (await menu.match(interaction)) {
           const res = await menu.run(interaction);
           if (res instanceof InteractionResponse) {
