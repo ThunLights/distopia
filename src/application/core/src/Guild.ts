@@ -334,7 +334,14 @@ export class Guild extends Base {
   }
 
   public async getWhiteList(guildId: string): Promise<GuildWhiteList[]> {
-    return await this.state.database.guildWhiteList.findAll(guildId);
+    const cached = this.state.memory.guildWhiteList.get(guildId);
+    if (cached) {
+      return cached.entries;
+    }
+
+    const entries = await this.state.database.guildWhiteList.findAll(guildId);
+    this.state.memory.guildWhiteList.set(guildId, { entries, createdAt: new Date() });
+    return entries;
   }
 
   public async isWhiteListed(

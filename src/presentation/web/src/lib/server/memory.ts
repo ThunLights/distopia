@@ -3,6 +3,7 @@ import { Friend } from "repo-memory/Friend";
 import { GuildEdit } from "repo-memory/GuildEdit";
 import { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import { GuildSetting } from "repo-memory/GuildSetting";
+import { GuildWhiteList } from "repo-memory/GuildWhiteList";
 import { JWTKey } from "repo-memory/JWTKey";
 import { MessageCreate } from "repo-memory/MessageCreate";
 import { OAuth2Guilds } from "repo-memory/OAuth2Guilds";
@@ -27,6 +28,7 @@ export const memory: AppState["memory"] = {
   friend: new Friend(),
   guildEdit: new GuildEdit(),
   guildSetting: new GuildSetting(),
+  guildWhiteList: new GuildWhiteList(),
   guildMemberAdd: new GuildMemberAdd(),
   jwtKey: new JWTKey(),
   messageCreate: new MessageCreate(),

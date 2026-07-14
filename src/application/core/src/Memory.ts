@@ -15,6 +15,7 @@ export class Memory extends Base {
     const mems: MapWithGC<any, any>[] = [
       this.state.memory.guildEdit,
       this.state.memory.guildSetting,
+      this.state.memory.guildWhiteList,
       this.state.memory.guildMemberAdd,
       this.state.memory.messageCreate,
       this.state.memory.oauth2PKCE,
