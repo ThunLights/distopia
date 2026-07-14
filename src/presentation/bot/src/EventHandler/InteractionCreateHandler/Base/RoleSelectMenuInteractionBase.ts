@@ -17,7 +17,7 @@ export const OptionsSchema = z.object({
 
 export abstract class RoleSelectMenuInteractionBase<
   Schema extends typeof OptionsSchema = typeof OptionsSchema,
-  O = z.infer<Schema>,
+  O extends z.infer<Schema> = z.infer<Schema>,
   T extends RoleSelectMenuInteraction = RoleSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | InteractionResponse,
 > extends MessageComponentInteractionBase<T, R> {

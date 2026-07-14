@@ -17,7 +17,7 @@ export const OptionsSchema = z.object({
 
 export abstract class ChannelSelectMenuInteractionBase<
   Schema extends typeof OptionsSchema = typeof OptionsSchema,
-  O = z.infer<Schema>,
+  O extends z.infer<Schema> = z.infer<Schema>,
   T extends ChannelSelectMenuInteraction = ChannelSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | InteractionResponse,
 > extends MessageComponentInteractionBase<T, R> {

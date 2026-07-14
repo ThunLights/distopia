@@ -6,6 +6,7 @@ import type {
   GuildSettingUpsertInput,
   GuildUpsertInput,
   GuildWhiteList,
+  GuildWhiteListUpsertInput,
   WhiteListPermission,
 } from "infra-database/types";
 import type { Value } from "repo-memory/GuildEdit";
@@ -342,6 +343,26 @@ export class Guild extends Base {
     const entries = await this.state.database.guildWhiteList.findAll(guildId);
     this.state.memory.guildWhiteList.set(guildId, { entries, createdAt: new Date() });
     return entries;
+  }
+
+  public async findWhiteListEntry(
+    guildId: string,
+    targetId: string,
+  ): Promise<GuildWhiteList | null> {
+    const whiteList = await this.getWhiteList(guildId);
+    return whiteList.find((entry) => entry.targetId === targetId) ?? null;
+  }
+
+  public async upsertWhiteListEntry(input: GuildWhiteListUpsertInput): Promise<GuildWhiteList> {
+    const entry = await this.state.database.guildWhiteList.upsert(input);
+    this.state.memory.guildWhiteList.delete(input.guildId);
+    return entry;
+  }
+
+  public async deleteWhiteListEntry(guildId: string, targetId: string): Promise<GuildWhiteList> {
+    const entry = await this.state.database.guildWhiteList.delete(guildId, targetId);
+    this.state.memory.guildWhiteList.delete(guildId);
+    return entry;
   }
 
   public async isWhiteListed(

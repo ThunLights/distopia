@@ -49,6 +49,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder()
         .setLabel("招待リンクブロック")
         .setValue("inviteLinkBlock"),
+      new StringSelectMenuOptionBuilder().setLabel("ホワイトリスト設定").setValue("whiteList"),
     );
 
   return {

@@ -62,4 +62,29 @@ export class GuildController extends Base {
   public iconUrl(guildId: string, iconHash: string) {
     return this.client.rest.cdn.icon(guildId, iconHash);
   }
+
+  public async fetchWhiteListTargetName(
+    guildId: string,
+    idType: "ChannelId" | "RoleId" | "UserId",
+    targetId: string,
+  ): Promise<string | null> {
+    const guild = this.client.guilds.cache.get(guildId);
+
+    if (!guild) {
+      return null;
+    }
+
+    if (idType === "ChannelId") {
+      return guild.channels.cache.get(targetId)?.name ?? null;
+    }
+
+    if (idType === "RoleId") {
+      return guild.roles.cache.get(targetId)?.name ?? null;
+    }
+
+    const member =
+      guild.members.cache.get(targetId) ?? (await guild.members.fetch(targetId).catch(() => null));
+
+    return member?.displayName ?? null;
+  }
 }
