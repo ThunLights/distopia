@@ -14,9 +14,11 @@ import {
 import type { Guild } from "domain-model";
 
 import {
+  buildWhiteListFieldValue,
   encodeWhiteListTarget,
   idTypeLabel,
   mention,
+  SELECT_MENU_MAX_OPTIONS,
   truncateSelectMenuLabel,
 } from "../../../utils/whiteList";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
@@ -30,6 +32,17 @@ export async function whiteListPage(core: AppCore, guild: Guild): Promise<Intera
     ),
   );
 
+  const whiteListLines = whiteList.map((entry, index) => {
+    const name = names[index];
+    const permissionSummary = entry.allPermissions
+      ? "全許可"
+      : entry.permissions.join(", ") || "権限なし";
+
+    return `${mention(entry.idType, entry.targetId)}${name ? ` (${name})` : ""} [${
+      idTypeLabel[entry.idType]
+    }] - ${permissionSummary}`;
+  });
+
   const embed = new EmbedBuilder()
     .setColor("Navy")
     .setTitle("ホワイトリスト設定")
@@ -38,20 +51,7 @@ export async function whiteListPage(core: AppCore, guild: Guild): Promise<Intera
     )
     .addFields({
       name: "現在のホワイトリスト",
-      value: whiteList.length
-        ? whiteList
-            .map((entry, index) => {
-              const name = names[index];
-              const permissionSummary = entry.allPermissions
-                ? "全許可"
-                : entry.permissions.join(", ") || "権限なし";
-
-              return `${mention(entry.idType, entry.targetId)}${name ? ` (${name})` : ""} [${
-                idTypeLabel[entry.idType]
-              }] - ${permissionSummary}`;
-            })
-            .join("\n")
-        : "登録されていません",
+      value: buildWhiteListFieldValue(whiteListLines),
     });
 
   const addUserSelector = new UserSelectMenuBuilder()
@@ -93,7 +93,7 @@ export async function whiteListPage(core: AppCore, guild: Guild): Promise<Intera
       .setCustomId("whiteListManage")
       .setPlaceholder("編集/削除する対象を選択")
       .addOptions(
-        whiteList.map((entry, index) => {
+        whiteList.slice(0, SELECT_MENU_MAX_OPTIONS).map((entry, index) => {
           const name = names[index];
 
           return new StringSelectMenuOptionBuilder()
