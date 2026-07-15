@@ -14,3 +14,6 @@ function genPrismaClient(databaseUrl: string) {
 export function genDatabaseClient(databaseUrl: string) {
   return new DatabaseClient(genPrismaClient(databaseUrl));
 }
+
+export * from "./DatabaseClient/index";
+export * from "./types/index";

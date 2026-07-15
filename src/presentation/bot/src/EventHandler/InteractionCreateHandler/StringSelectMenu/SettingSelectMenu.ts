@@ -14,8 +14,10 @@ import {
   InteractionResponse,
 } from "discord.js";
 
+import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
+import { whiteListPage } from "../Page/WhiteListPage";
 
 export class SettingSelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -149,6 +151,24 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
             onButton,
           ),
         ],
+      });
+    } else if (value === "whiteList") {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const whiteListPagePayload = await whiteListPage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
+
+      return await interaction.update({
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
       });
     }
 

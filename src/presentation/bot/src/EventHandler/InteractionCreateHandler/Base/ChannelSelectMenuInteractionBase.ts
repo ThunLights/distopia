@@ -1,9 +1,9 @@
 import {
   InteractionResponse,
   MessageFlags,
+  type ChannelSelectMenuInteraction,
   type InteractionReplyOptions,
   type MessagePayload,
-  type RoleSelectMenuInteraction,
 } from "discord.js";
 import { z } from "zod";
 
@@ -12,13 +12,13 @@ import { PermissionError } from "./Error/PermissionError";
 import { MessageComponentInteractionBase } from "./MessageComponentInteractionBase";
 
 export const OptionsSchema = z.object({
-  roleId: z.string().regex(/^\d+$/),
+  channelId: z.string().regex(/^\d+$/),
 });
 
-export abstract class RoleSelectMenuInteractionBase<
+export abstract class ChannelSelectMenuInteractionBase<
   Schema extends typeof OptionsSchema = typeof OptionsSchema,
   O extends z.infer<Schema> = z.infer<Schema>,
-  T extends RoleSelectMenuInteraction = RoleSelectMenuInteraction,
+  T extends ChannelSelectMenuInteraction = ChannelSelectMenuInteraction,
   R = string | MessagePayload | InteractionReplyOptions | InteractionResponse,
 > extends MessageComponentInteractionBase<T, R> {
   public override async run(interaction: T): Promise<R> {
@@ -38,9 +38,9 @@ export abstract class RoleSelectMenuInteractionBase<
   }
 
   public async parseOptions(interaction: T): Promise<ValidateResult<O>> {
-    const [roleId] = interaction.values;
+    const [channelId] = interaction.values;
 
-    return (await validator({ roleId }, OptionsSchema)) as O;
+    return (await validator({ channelId }, OptionsSchema)) as O;
   }
 
   protected abstract exec(interaction: T, options: O): Promise<R>;

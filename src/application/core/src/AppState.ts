@@ -4,6 +4,7 @@ import type { Friend } from "repo-memory/Friend";
 import type { GuildEdit } from "repo-memory/GuildEdit";
 import type { GuildMemberAdd } from "repo-memory/GuildMemberAdd";
 import type { GuildSetting } from "repo-memory/GuildSetting";
+import type { GuildWhiteList } from "repo-memory/GuildWhiteList";
 import type { JWTKey } from "repo-memory/JWTKey";
 import type { ButtonLateLimit } from "repo-memory/latelimit/ButtonLateLimit";
 import type { ChatInputCommandLateLimit } from "repo-memory/latelimit/ChatInputCommandLateLimit";
@@ -34,6 +35,7 @@ export type AppState = {
     friend: Friend;
     guildEdit: GuildEdit;
     guildSetting: GuildSetting;
+    guildWhiteList: GuildWhiteList;
     guildMemberAdd: GuildMemberAdd;
     jwtKey: JWTKey;
     messageCreate: MessageCreate;

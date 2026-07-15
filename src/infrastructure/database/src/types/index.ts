@@ -5,6 +5,7 @@ export * from "./GuildRecord";
 export * from "./GuildRecordOneDay";
 export * from "./GuildReview";
 export * from "./GuildSetting";
+export * from "./GuildWhiteList";
 export * from "./JWTKey";
 export * from "./Panel";
 export * from "./UserDiscord";

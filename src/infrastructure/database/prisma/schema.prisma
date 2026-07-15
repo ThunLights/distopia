@@ -94,6 +94,28 @@ model GuildSetting {
   inviteLinkBlock   Boolean @default(false)
 }
 
+model GuildWhiteList {
+  guildId        String
+  targetId       String
+  idType         WhiteListIdType
+  allPermissions Boolean               @default(false)
+  permissions    WhiteListPermission[] @default([])
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@id([guildId, targetId])
+}
+
+enum WhiteListIdType {
+  ChannelId
+  RoleId
+  UserId
+}
+
+enum WhiteListPermission {
+  InviteLinkBlock
+}
+
 model Panel {
   guildId   String
   type      PanelType

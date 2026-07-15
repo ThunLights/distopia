@@ -5,6 +5,9 @@ import type {
   GuildSetting,
   GuildSettingUpsertInput,
   GuildUpsertInput,
+  GuildWhiteList,
+  GuildWhiteListUpsertInput,
+  WhiteListPermission,
 } from "infra-database/types";
 import type { Value } from "repo-memory/GuildEdit";
 import type { GuildDBValue, SearchOptions } from "repo-search";
@@ -329,6 +332,50 @@ export class Guild extends Base {
     const setting = await this.state.database.guildSetting.upsert(input);
     this.state.memory.guildSetting.set(input.guildId, { ...setting, createdAt: new Date() });
     return setting;
+  }
+
+  public async getWhiteList(guildId: string): Promise<GuildWhiteList[]> {
+    const cached = this.state.memory.guildWhiteList.get(guildId);
+    if (cached) {
+      return cached.entries;
+    }
+
+    const entries = await this.state.database.guildWhiteList.findAll(guildId);
+    this.state.memory.guildWhiteList.set(guildId, { entries, createdAt: new Date() });
+    return entries;
+  }
+
+  public async findWhiteListEntry(
+    guildId: string,
+    targetId: string,
+  ): Promise<GuildWhiteList | null> {
+    const whiteList = await this.getWhiteList(guildId);
+    return whiteList.find((entry) => entry.targetId === targetId) ?? null;
+  }
+
+  public async upsertWhiteListEntry(input: GuildWhiteListUpsertInput): Promise<GuildWhiteList> {
+    const entry = await this.state.database.guildWhiteList.upsert(input);
+    this.state.memory.guildWhiteList.delete(input.guildId);
+    return entry;
+  }
+
+  public async deleteWhiteListEntry(guildId: string, targetId: string): Promise<GuildWhiteList> {
+    const entry = await this.state.database.guildWhiteList.delete(guildId, targetId);
+    this.state.memory.guildWhiteList.delete(guildId);
+    return entry;
+  }
+
+  public async isWhiteListed(
+    guildId: string,
+    targetIds: string[],
+    permission: WhiteListPermission,
+  ): Promise<boolean> {
+    const whiteList = await this.getWhiteList(guildId);
+    return whiteList.some(
+      (entry) =>
+        targetIds.includes(entry.targetId) &&
+        (entry.allPermissions || entry.permissions.includes(permission)),
+    );
   }
 
   public async saveReview(input: GuildReviewUpsertInput) {

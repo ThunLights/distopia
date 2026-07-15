@@ -12,6 +12,7 @@ const dirs = [
   "Modal",
   "UserSelectMenu",
   "RoleSelectMenu",
+  "ChannelSelectMenu",
   "StringSelectMenu",
 ];
 const outputDirPath = path.join(__dirname, "../src/EventHandler/InteractionCreateHandler");

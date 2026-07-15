@@ -5,6 +5,7 @@ import { GuildRecordTable } from "./GuildRecordTable";
 import { GuildReviewTable } from "./GuildReviewTable";
 import { GuildSettingTable } from "./GuildSettingTable";
 import { GuildTable } from "./GuildTable";
+import { GuildWhiteListTable } from "./GuildWhiteListTable";
 import { JWTKeyTable } from "./JWTKeyTable";
 import { PanelTable } from "./PanelTable";
 import { UserDiscordTable } from "./UserDiscordTable";
@@ -18,6 +19,7 @@ export class DatabaseClient extends Base {
   public readonly guildRecordOneDay = new GuildRecordOneDayTable(this.prisma);
   public readonly guildReview = new GuildReviewTable(this.prisma);
   public readonly guildSetting = new GuildSettingTable(this.prisma);
+  public readonly guildWhiteList = new GuildWhiteListTable(this.prisma);
   public readonly jwtKey = new JWTKeyTable(this.prisma);
   public readonly panel = new PanelTable(this.prisma);
   public readonly userDiscord = new UserDiscordTable(this.prisma);
