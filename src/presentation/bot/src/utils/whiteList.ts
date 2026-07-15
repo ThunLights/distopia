@@ -37,6 +37,15 @@ export function encodeWhiteListTarget(idType: WhiteListIdType, targetId: string)
   return `${idType}:${targetId}`;
 }
 
+const SELECT_MENU_LABEL_MAX_LENGTH = 100;
+
+export function truncateSelectMenuLabel(label: string): string {
+  if (label.length <= SELECT_MENU_LABEL_MAX_LENGTH) {
+    return label;
+  }
+  return `${label.slice(0, SELECT_MENU_LABEL_MAX_LENGTH - 1)}…`;
+}
+
 export function decodeWhiteListTargetValue(value: string): unknown {
   const [idType, targetId] = value.split(":");
   return { idType, targetId };

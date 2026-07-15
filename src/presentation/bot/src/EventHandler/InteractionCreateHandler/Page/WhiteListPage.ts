@@ -13,7 +13,12 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { encodeWhiteListTarget, idTypeLabel, mention } from "../../../utils/whiteList";
+import {
+  encodeWhiteListTarget,
+  idTypeLabel,
+  mention,
+  truncateSelectMenuLabel,
+} from "../../../utils/whiteList";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function whiteListPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
@@ -93,7 +98,9 @@ export async function whiteListPage(core: AppCore, guild: Guild): Promise<Intera
 
           return new StringSelectMenuOptionBuilder()
             .setLabel(
-              `${idTypeLabel[entry.idType]}: ${name ?? entry.targetId}${name ? ` (${entry.targetId})` : ""}`,
+              truncateSelectMenuLabel(
+                `${idTypeLabel[entry.idType]}: ${name ?? entry.targetId}${name ? ` (${entry.targetId})` : ""}`,
+              ),
             )
             .setValue(encodeWhiteListTarget(entry.idType, entry.targetId));
         }),
