@@ -1,6 +1,6 @@
 import { MapWithGC } from "./MapWithGC";
 
-export type Value = {
+export type GuildEditValue = {
   description?: string;
   nsfw?: boolean;
   pub?: boolean;
@@ -9,7 +9,7 @@ export type Value = {
   updated: Date;
 };
 
-export class GuildEdit extends MapWithGC<string, Value> {
+export class GuildEdit extends MapWithGC<string, GuildEditValue> {
   public override gc(): void {
     const nowTime = Date.now();
     const twoHours = 2 * 60 * 60 * 1000;

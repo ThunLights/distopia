@@ -1,10 +1,10 @@
 import { MapWithGC } from "./MapWithGC";
 
-export type Value = {
+export type VoiceChannelMemberValue = {
   memberCounts: number[];
 };
 
-export class VoiceChannelMember extends MapWithGC<string, Value> {
+export class VoiceChannelMember extends MapWithGC<string, VoiceChannelMemberValue> {
   public override gc(): void {
     for (const [key, value] of this.entries()) {
       if (value.memberCounts.length > 40) {

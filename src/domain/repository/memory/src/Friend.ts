@@ -1,4 +1,4 @@
-export type Value = {
+export type FriendValue = {
   userId: string;
   username: string;
   description: string;
@@ -9,4 +9,4 @@ export type Value = {
   tags: string[];
 };
 
-export class Friend extends Map<string, Value> {}
+export class Friend extends Map<string, FriendValue> {}

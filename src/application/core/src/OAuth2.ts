@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 
 import type { UserDiscordUpsertInput } from "infra-database/types";
-import type { Guilds } from "repo-memory/OAuth2Guilds";
+import type { Guilds } from "repo-memory";
 
 import type { AppState } from "./AppState";
 import { Base } from "./Base";

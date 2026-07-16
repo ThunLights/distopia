@@ -1,6 +1,6 @@
 import { MapWithGC } from "./MapWithGC";
 
-export type Value = {
+export type UserOAuth2Value = {
   username: string;
   email?: string;
   avatarUrl?: string;
@@ -8,7 +8,7 @@ export type Value = {
   updatedAt: Date;
 };
 
-export class UserOAuth2 extends MapWithGC<string, Value> {
+export class UserOAuth2 extends MapWithGC<string, UserOAuth2Value> {
   public override gc(): void {
     for (const [id, { updatedAt }] of this.entries()) {
       if (Date.now() > updatedAt.getTime() + 10 * 60 * 1000) {

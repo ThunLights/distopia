@@ -1,5 +1,5 @@
 import type { FriendUpsertInput } from "infra-database/types";
-import type { Value as FriendModel } from "repo-memory/Friend";
+import type { FriendValue as FriendModel } from "repo-memory";
 
 import { Base } from "./Base";
 
