@@ -2,6 +2,21 @@ import type { AppState } from "./AppState";
 import { Base } from "./Base";
 import type { Record } from "./Record";
 
+type StatChannelField =
+  | "statChannelAllMembers"
+  | "statChannelUsers"
+  | "statChannelBots"
+  | "statChannelActiveRate"
+  | "statChannelActiveRateRanking";
+
+const STAT_CHANNEL_FIELDS: StatChannelField[] = [
+  "statChannelAllMembers",
+  "statChannelUsers",
+  "statChannelBots",
+  "statChannelActiveRate",
+  "statChannelActiveRateRanking",
+];
+
 export class StatChannel extends Base {
   constructor(
     state: AppState,
@@ -10,48 +25,64 @@ export class StatChannel extends Base {
     super(state);
   }
 
+  private async buildName(guildId: string, field: StatChannelField): Promise<string> {
+    if (
+      field === "statChannelAllMembers" ||
+      field === "statChannelUsers" ||
+      field === "statChannelBots"
+    ) {
+      const counts = await this.state.discord.guild.fetchMemberCounts(guildId);
+
+      if (field === "statChannelAllMembers") {
+        return `全メンバー: ${counts?.all ?? 0}`;
+      }
+      if (field === "statChannelUsers") {
+        return `ユーザー: ${counts?.users ?? 0}`;
+      }
+      return `Bot: ${counts?.bots ?? 0}`;
+    }
+
+    if (field === "statChannelActiveRate") {
+      const record = await this.state.database.guildRecord.find(guildId);
+      return `アクティブレート: ${record?.activeRate ?? 0}`;
+    }
+
+    const rank = this.record.getActiveRateRanking(guildId);
+    return `アクティブレート順位: ${rank ? `${rank}位` : "圏外"}`;
+  }
+
   public async update() {
     for (const setting of await this.state.database.guildSetting.findAll()) {
-      const { guildId } = setting;
+      for (const field of STAT_CHANNEL_FIELDS) {
+        const channelId = setting[field];
 
-      if (setting.statChannelAllMembers || setting.statChannelUsers || setting.statChannelBots) {
-        const counts = await this.state.discord.guild.fetchMemberCounts(guildId);
-
-        if (counts) {
-          if (setting.statChannelAllMembers) {
-            await this.state.discord.channel.rename(
-              setting.statChannelAllMembers,
-              `全メンバー: ${counts.all}`,
-            );
-          }
-          if (setting.statChannelUsers) {
-            await this.state.discord.channel.rename(
-              setting.statChannelUsers,
-              `ユーザー: ${counts.users}`,
-            );
-          }
-          if (setting.statChannelBots) {
-            await this.state.discord.channel.rename(setting.statChannelBots, `Bot: ${counts.bots}`);
-          }
+        if (channelId) {
+          await this.state.discord.channel.rename(
+            channelId,
+            await this.buildName(setting.guildId, field),
+          );
         }
       }
+    }
+  }
 
-      if (setting.statChannelActiveRate) {
-        const record = await this.state.database.guildRecord.find(guildId);
+  public async setupAll(guildId: string) {
+    const setting = await this.state.database.guildSetting.find(guildId);
 
-        await this.state.discord.channel.rename(
-          setting.statChannelActiveRate,
-          `アクティブレート: ${record?.activeRate ?? 0}`,
-        );
+    for (const field of STAT_CHANNEL_FIELDS) {
+      const channelId = setting?.[field];
+
+      if (channelId && this.state.discord.channel.existsVoiceChannel(channelId)) {
+        continue;
       }
 
-      if (setting.statChannelActiveRateRanking) {
-        const rank = this.record.getActiveRateRanking(guildId);
+      const channel = await this.state.discord.channel.create(
+        guildId,
+        await this.buildName(guildId, field),
+      );
 
-        await this.state.discord.channel.rename(
-          setting.statChannelActiveRateRanking,
-          `アクティブレート順位: ${rank ? `${rank}位` : "圏外"}`,
-        );
+      if (channel) {
+        await this.state.database.guildSetting.upsert({ guildId, [field]: channel.id });
       }
     }
   }
