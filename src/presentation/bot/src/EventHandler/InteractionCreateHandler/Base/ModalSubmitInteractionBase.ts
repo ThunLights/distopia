@@ -1,11 +1,7 @@
 import {
   InteractionResponse,
   MessageFlags,
-  type CacheType,
   type InteractionReplyOptions,
-  type InteractionUpdateOptions,
-  type MessagePayload,
-  type ModalMessageModalSubmitInteraction,
   type ModalSubmitInteraction,
 } from "discord.js";
 
@@ -43,15 +39,4 @@ export abstract class ModalSubmitInteractionBase<
   public abstract parseOptions(interaction: T): Promise<ValidateResult<O>>;
 
   protected abstract exec(interaction: T, options: O): Promise<R>;
-
-  protected async safeUpdate(
-    interaction: ModalMessageModalSubmitInteraction<CacheType>,
-    options: string | MessagePayload | InteractionUpdateOptions,
-  ): Promise<R> {
-    if (!(await this.messageExists(interaction.message))) {
-      return (await interaction.reply(options as InteractionReplyOptions)) as R;
-    }
-
-    return (await interaction.update(options)) as R;
-  }
 }

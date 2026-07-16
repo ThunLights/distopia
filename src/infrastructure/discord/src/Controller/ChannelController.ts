@@ -33,10 +33,6 @@ export class ChannelController extends Base {
       return false;
     }
 
-    if (!channel.guild.members.me?.permissionsIn(channel).has(PermissionFlagsBits.ManageChannels)) {
-      return true;
-    }
-
     if (channel.name !== name) {
       await channel.setName(name);
     }

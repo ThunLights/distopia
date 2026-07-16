@@ -44,7 +44,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
         .setLabel("自分に権限を戻す")
         .setStyle(ButtonStyle.Danger);
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         embeds: [embed],
         components: [
           new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(userSelector),
@@ -70,7 +70,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
         .setLabel("通知OFF")
         .setStyle(ButtonStyle.Success);
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         embeds: [embed],
         components: [
           new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -93,7 +93,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
         .setStyle(ButtonStyle.Danger)
         .setCustomId("bumpRoleReset");
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         embeds: [embed],
         components: [
           new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(roleSelector),
@@ -118,7 +118,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
         .setLabel("リセット")
         .setStyle(ButtonStyle.Danger);
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         embeds: [embed],
         components: [
           new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -143,7 +143,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
         .setLabel("Off")
         .setStyle(ButtonStyle.Danger);
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         embeds: [embed],
         components: [
           new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -164,7 +164,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
 
       const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         content,
         components,
         embeds,
@@ -182,7 +182,7 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
 
       const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
-      return await this.safeUpdate(interaction, {
+      return await interaction.update({
         content,
         components,
         embeds,

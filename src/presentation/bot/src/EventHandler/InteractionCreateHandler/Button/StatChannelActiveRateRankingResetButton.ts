@@ -31,7 +31,7 @@ export class StatChannelActiveRateRankingResetButton extends ButtonInteractionBa
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return await this.safeUpdate(interaction, {
+    return await interaction.update({
       content,
       components,
       embeds,
