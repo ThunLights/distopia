@@ -79,6 +79,7 @@ async function start() {
         PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
       );
       await core.record.update();
+      await core.statChannel.update();
       await updatePanels();
       await core.user.setActivity();
     },

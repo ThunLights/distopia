@@ -185,6 +185,11 @@ describe("GuildSetting.gc()", () => {
       bumpNoticeRole: null,
       bumpNoticeContent: null,
       inviteLinkBlock: false,
+      statChannelAllMembers: null,
+      statChannelUsers: null,
+      statChannelBots: null,
+      statChannelActiveRate: null,
+      statChannelActiveRateRanking: null,
     };
 
     map.set("old", { ...base, guildId: "g1", createdAt: at(-TWELVE_HOURS - 1) });

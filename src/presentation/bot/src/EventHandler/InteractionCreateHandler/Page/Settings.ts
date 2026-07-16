@@ -50,6 +50,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
         .setLabel("招待リンクブロック")
         .setValue("inviteLinkBlock"),
       new StringSelectMenuOptionBuilder().setLabel("ホワイトリスト設定").setValue("whiteList"),
+      new StringSelectMenuOptionBuilder().setLabel("統計チャンネル設定").setValue("statChannel"),
     );
 
   return {

@@ -1,4 +1,4 @@
-import type { GuildMember } from "discord.js";
+import { ChannelType, PermissionFlagsBits, type GuildMember } from "discord.js";
 
 import { Base } from "./Base";
 
@@ -24,5 +24,45 @@ export class ChannelController extends Base {
       }));
 
     return voiceChannels;
+  }
+
+  public async rename(channelId: string, name: string): Promise<boolean> {
+    const channel = this.client.channels.cache.get(channelId);
+
+    if (!channel?.isVoiceBased()) {
+      return false;
+    }
+
+    if (channel.name !== name) {
+      await channel.setName(name);
+    }
+
+    return true;
+  }
+
+  public existsVoiceChannel(channelId: string): boolean {
+    const channel = this.client.channels.cache.get(channelId);
+    return channel?.isVoiceBased() ?? false;
+  }
+
+  public async create(guildId: string, name: string): Promise<{ id: string } | null> {
+    const guild = this.client.guilds.cache.get(guildId);
+
+    if (!guild) {
+      return null;
+    }
+
+    const channel = await guild.channels.create({
+      name,
+      type: ChannelType.GuildVoice,
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone.id,
+          deny: [PermissionFlagsBits.Connect],
+        },
+      ],
+    });
+
+    return { id: channel.id };
   }
 }

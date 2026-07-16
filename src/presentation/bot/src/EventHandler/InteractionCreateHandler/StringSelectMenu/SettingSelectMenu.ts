@@ -17,6 +17,7 @@ import {
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
+import { statChannelPage } from "../Page/StatChannelPage";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 export class SettingSelectMenu extends StringSelectMenuInteractionBase {
@@ -162,6 +163,24 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
       const whiteListPagePayload = await whiteListPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
+
+      return await interaction.update({
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
+      });
+    } else if (value === "statChannel") {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const statChannelPagePayload = await statChannelPage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
       return await interaction.update({
         content,

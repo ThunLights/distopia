@@ -11,6 +11,7 @@ import { OAuth2 } from "./OAuth2";
 import { Panel } from "./Panel";
 import { Ranking } from "./Ranking";
 import { Record } from "./Record";
+import { StatChannel } from "./StatChannel";
 import { User } from "./User";
 import { VoiceChannel } from "./VoiceChannel";
 
@@ -27,6 +28,7 @@ export class AppCore extends Base {
   public readonly message = new Message(this.state);
   public readonly oauth2 = new OAuth2(this.state, this.guild);
   public readonly panel = new Panel(this.state);
+  public readonly statChannel = new StatChannel(this.state, this.record, this.guild);
   public readonly user = new User(this.state, this.oauth2);
   public readonly voice = new VoiceChannel(this.state);
 
@@ -124,3 +126,4 @@ export class AppCore extends Base {
 export * from "./types/UserBumpRanking";
 export * from "./types/GuildMetaData";
 export * from "./types/RootPage";
+export type { StatChannelField } from "./StatChannel";
