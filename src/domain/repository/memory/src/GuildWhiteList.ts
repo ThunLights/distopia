@@ -10,14 +10,14 @@ export type Entry = {
   updatedAt: Date;
 };
 
-export type Value = {
+export type GuildWhiteListValue = {
   entries: Entry[];
   createdAt: Date;
 };
 
 const twelveHours = 12 * 60 * 60 * 1000;
 
-export class GuildWhiteList extends MapWithGC<string, Value> {
+export class GuildWhiteList extends MapWithGC<string, GuildWhiteListValue> {
   public override gc(): void {
     for (const [guildId, value] of this.entries()) {
       if (Date.now() - twelveHours > value.createdAt.getTime()) {
