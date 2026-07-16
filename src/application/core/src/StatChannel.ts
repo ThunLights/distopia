@@ -2,7 +2,7 @@ import type { AppState } from "./AppState";
 import { Base } from "./Base";
 import type { Record } from "./Record";
 
-type StatChannelField =
+export type StatChannelField =
   | "statChannelAllMembers"
   | "statChannelUsers"
   | "statChannelBots"
@@ -75,10 +75,10 @@ export class StatChannel extends Base {
     }
   }
 
-  public async setupAll(guildId: string) {
+  public async setupAll(guildId: string, fields: StatChannelField[] = STAT_CHANNEL_FIELDS) {
     const setting = await this.state.database.guildSetting.find(guildId);
 
-    for (const field of STAT_CHANNEL_FIELDS) {
+    for (const field of fields) {
       const channelId = setting?.[field];
 
       if (channelId && this.state.discord.channel.existsVoiceChannel(channelId)) {
