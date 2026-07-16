@@ -34,7 +34,6 @@ export class ChannelController extends Base {
     }
 
     if (!channel.guild.members.me?.permissionsIn(channel).has(PermissionFlagsBits.ManageChannels)) {
-      console.error(`Missing ManageChannels permission to rename channel ${channelId}`);
       return true;
     }
 
