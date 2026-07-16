@@ -56,11 +56,20 @@ export class StatChannel extends Base {
       for (const field of STAT_CHANNEL_FIELDS) {
         const channelId = setting[field];
 
-        if (channelId) {
-          await this.state.discord.channel.rename(
-            channelId,
-            await this.buildName(setting.guildId, field),
-          );
+        if (!channelId) {
+          continue;
+        }
+
+        const exists = await this.state.discord.channel.rename(
+          channelId,
+          await this.buildName(setting.guildId, field),
+        );
+
+        if (!exists) {
+          await this.state.database.guildSetting.upsert({
+            guildId: setting.guildId,
+            [field]: null,
+          });
         }
       }
     }

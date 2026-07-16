@@ -26,12 +26,18 @@ export class ChannelController extends Base {
     return voiceChannels;
   }
 
-  public async rename(channelId: string, name: string) {
+  public async rename(channelId: string, name: string): Promise<boolean> {
     const channel = this.client.channels.cache.get(channelId);
 
-    if (channel?.isVoiceBased() && channel.name !== name) {
+    if (!channel?.isVoiceBased()) {
+      return false;
+    }
+
+    if (channel.name !== name) {
       await channel.setName(name);
     }
+
+    return true;
   }
 
   public existsVoiceChannel(channelId: string): boolean {
