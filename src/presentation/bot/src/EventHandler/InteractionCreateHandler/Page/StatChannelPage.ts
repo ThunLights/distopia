@@ -59,6 +59,17 @@ export async function statChannelPage(
       ),
     );
 
+  const setupSelector = new StringSelectMenuBuilder()
+    .setCustomId("statChannelSetup")
+    .setPlaceholder("セットアップするタイプを選択(複数選択可)")
+    .setMinValues(1)
+    .setMaxValues(Object.keys(statChannelLabels).length)
+    .addOptions(
+      Object.entries(statChannelLabels).map(([value, { shortLabel }]) =>
+        new StringSelectMenuOptionBuilder().setLabel(shortLabel).setValue(value),
+      ),
+    );
+
   const bulkSetupButton = new ButtonBuilder()
     .setCustomId("statChannelBulkSetup")
     .setLabel("未設定を一括セットアップ")
@@ -68,6 +79,7 @@ export async function statChannelPage(
     embeds: [embed],
     components: [
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selector),
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(setupSelector),
       new ActionRowBuilder<ButtonBuilder>().addComponents(
         await backSettingsPageButton(),
         bulkSetupButton,

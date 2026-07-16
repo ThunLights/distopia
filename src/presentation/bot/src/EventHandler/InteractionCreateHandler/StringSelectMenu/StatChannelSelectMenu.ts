@@ -14,7 +14,7 @@ import {
   EmbedBuilder,
 } from "discord.js";
 
-import { statChannelLabels } from "../../../utils/statChannel";
+import { isStatChannelField, statChannelLabels } from "../../../utils/statChannel";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
@@ -33,19 +33,26 @@ export class StatChannelSelectMenu extends StringSelectMenuInteractionBase {
     }
 
     const { value } = options;
-    const label = statChannelLabels[value];
 
-    if (!label) {
+    if (!isStatChannelField(value)) {
       return {
         content: `${value}は無効な選択肢です`,
         flags: [MessageFlags.Ephemeral],
       };
     }
 
+    const label = statChannelLabels[value];
+    const settings = await this.core.guild.getSetting(guild.id);
+    const currentChannelId = settings?.[value];
+
     const embed = new EmbedBuilder()
       .setColor("Navy")
       .setTitle(label.title)
-      .setDescription(label.description);
+      .setDescription(label.description)
+      .addFields({
+        name: "現在の設定",
+        value: currentChannelId ? `<#${currentChannelId}>` : "未設定",
+      });
 
     const channelSelector = new ChannelSelectMenuBuilder()
       .setCustomId(`${value}Select`)

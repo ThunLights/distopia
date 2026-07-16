@@ -1,5 +1,19 @@
+export const STAT_CHANNEL_FIELDS = [
+  "statChannelAllMembers",
+  "statChannelUsers",
+  "statChannelBots",
+  "statChannelActiveRate",
+  "statChannelActiveRateRanking",
+] as const;
+
+export type StatChannelField = (typeof STAT_CHANNEL_FIELDS)[number];
+
+export function isStatChannelField(value: string): value is StatChannelField {
+  return (STAT_CHANNEL_FIELDS as readonly string[]).includes(value);
+}
+
 export const statChannelLabels: Record<
-  string,
+  StatChannelField,
   { shortLabel: string; title: string; description: string }
 > = {
   statChannelAllMembers: {
