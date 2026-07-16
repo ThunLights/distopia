@@ -29,7 +29,7 @@ export class WebEditCancelButton extends ButtonInteractionBase {
 
     await this.core.guild.deleteDraft(guild.id);
 
-    return await interaction.update({
+    return await this.safeUpdate(interaction, {
       content: "サーバープロフィール設定をキャンセルしました。",
     });
   }

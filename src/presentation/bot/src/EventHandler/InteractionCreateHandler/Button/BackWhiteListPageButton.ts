@@ -29,7 +29,7 @@ export class BackWhiteListPageButton extends ButtonInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
 
-    return await interaction.update({
+    return await this.safeUpdate(interaction, {
       content,
       components,
       embeds,

@@ -40,7 +40,7 @@ export class StatChannelActiveRateRankingSelectMenu extends ChannelSelectMenuInt
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return await interaction.update({
+    return await this.safeUpdate(interaction, {
       content,
       components,
       embeds,

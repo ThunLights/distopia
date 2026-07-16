@@ -37,7 +37,7 @@ export class WhiteListAddUserSelectMenu extends UserSelectMenuInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
 
-    return await interaction.update({
+    return await this.safeUpdate(interaction, {
       content,
       components,
       embeds,

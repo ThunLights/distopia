@@ -66,7 +66,7 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
 
       const { content, components, embeds, allowedMentions, files } = settingPage;
 
-      const res = await interaction.update({
+      const res = await this.safeUpdate(interaction, {
         content,
         components,
         embeds,
