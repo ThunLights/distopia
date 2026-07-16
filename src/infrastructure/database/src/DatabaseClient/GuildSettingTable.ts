@@ -12,6 +12,10 @@ export class GuildSettingTable extends Base {
     });
   }
 
+  public async findAll(): Promise<GuildSetting[]> {
+    return await this.prisma.guildSetting.findMany();
+  }
+
   public async update(input: GuildSettingUpdateInput): Promise<GuildSetting> {
     return await this.prisma.guildSetting.update({
       where: { guildId: input.guildId },
