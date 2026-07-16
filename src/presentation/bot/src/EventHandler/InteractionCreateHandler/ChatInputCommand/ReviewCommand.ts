@@ -24,6 +24,7 @@ import { ModalSended } from "../Base/Modal/ModalSended";
 
 const OptionsSchema = z.object({
   subCommand: z.string(),
+  guildId: z.string().nullable(),
 });
 
 type Options = z.infer<typeof OptionsSchema>;
@@ -42,6 +43,14 @@ export class ReviewCommand extends ChatInputCommandBase<Options> {
         type: ApplicationCommandOptionType.Subcommand,
         name: "delete",
         description: "レビューの削除が可能です。",
+        options: [
+          {
+            type: ApplicationCommandOptionType.String,
+            name: "guild_id",
+            description: "削除したいサーバーのIDを指定できます。(未指定の場合は現在のサーバー)",
+            required: false,
+          },
+        ],
       },
     ],
   };
@@ -52,6 +61,7 @@ export class ReviewCommand extends ChatInputCommandBase<Options> {
     return await validator(
       {
         subCommand: interaction.options.getSubcommand(),
+        guildId: interaction.options.getString("guild_id", false),
       },
       OptionsSchema,
     );
@@ -63,15 +73,23 @@ export class ReviewCommand extends ChatInputCommandBase<Options> {
   ): Promise<
     string | InteractionReplyOptions | MessagePayload | InteractionCallbackResponse<boolean>
   > {
-    const { subCommand } = options;
+    const { subCommand, guildId } = options;
 
-    const guild = await this.parseGuild(interaction);
+    let targetGuildId: string;
 
-    if (guild instanceof GuildParseError) {
-      return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+    if (subCommand === "delete" && guildId) {
+      targetGuildId = guildId;
+    } else {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      targetGuildId = guild.id;
     }
 
-    const dbGuild = await this.core.guild.find(guild.id);
+    const dbGuild = await this.core.guild.find(targetGuildId);
 
     if (!dbGuild) {
       return {
