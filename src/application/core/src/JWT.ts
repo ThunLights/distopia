@@ -1,4 +1,4 @@
-import type { Value } from "repo-memory/JWTKey";
+import type { JWTKeyValue as Value } from "repo-memory";
 
 import { Base } from "./Base";
 

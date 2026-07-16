@@ -9,7 +9,7 @@ import type {
   GuildWhiteListUpsertInput,
   WhiteListPermission,
 } from "infra-database/types";
-import type { Value } from "repo-memory/GuildEdit";
+import type { GuildEditValue as Value } from "repo-memory";
 import type { GuildDBValue, SearchOptions } from "repo-search";
 
 import type { AppState } from "./AppState";

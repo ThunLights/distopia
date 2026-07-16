@@ -1,4 +1,4 @@
-import type { MapWithGC } from "repo-memory/MapWithGC";
+import type { MapWithGC } from "repo-memory";
 
 import { Base } from "./Base";
 
