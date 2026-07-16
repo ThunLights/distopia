@@ -30,10 +30,7 @@ export class StatChannelActiveRateSelectMenu extends ChannelSelectMenuInteractio
       return { content: "ボイスチャンネルを選択してください。", flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({
-      guildId: guild.id,
-      statChannelActiveRate: options.channelId,
-    });
+    await this.core.statChannel.assignChannel(guild.id, "statChannelActiveRate", options.channelId);
 
     const settingPage = await statChannelPage(this.core, guild);
 

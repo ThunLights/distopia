@@ -39,18 +39,16 @@ export class StatChannelSetupSelectMenu extends MessageComponentInteractionBase<
 
     const fields = interaction.values.filter(isStatChannelField);
 
+    const deferred = await interaction.deferUpdate();
+
     await this.core.statChannel.setupAll(guild.id, fields);
 
     const statChannelPagePayload = await statChannelPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
-    return await interaction.update({
-      content,
-      components,
-      embeds,
-      allowedMentions,
-      files,
-    });
+    await interaction.editReply({ content, components, embeds, allowedMentions, files });
+
+    return deferred;
   }
 }

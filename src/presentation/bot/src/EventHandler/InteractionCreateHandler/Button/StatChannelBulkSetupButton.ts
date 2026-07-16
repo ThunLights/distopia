@@ -26,18 +26,16 @@ export class StatChannelBulkSetupButton extends ButtonInteractionBase {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
+    const deferred = await interaction.deferUpdate();
+
     await this.core.statChannel.setupAll(guild.id);
 
     const statChannelPagePayload = await statChannelPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
-    return await interaction.update({
-      content,
-      components,
-      embeds,
-      allowedMentions,
-      files,
-    });
+    await interaction.editReply({ content, components, embeds, allowedMentions, files });
+
+    return deferred;
   }
 }

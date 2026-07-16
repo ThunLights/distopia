@@ -30,10 +30,7 @@ export class StatChannelBotsSelectMenu extends ChannelSelectMenuInteractionBase 
       return { content: "ボイスチャンネルを選択してください。", flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({
-      guildId: guild.id,
-      statChannelBots: options.channelId,
-    });
+    await this.core.statChannel.assignChannel(guild.id, "statChannelBots", options.channelId);
 
     const settingPage = await statChannelPage(this.core, guild);
 

@@ -28,7 +28,7 @@ export class AppCore extends Base {
   public readonly message = new Message(this.state);
   public readonly oauth2 = new OAuth2(this.state, this.guild);
   public readonly panel = new Panel(this.state);
-  public readonly statChannel = new StatChannel(this.state, this.record);
+  public readonly statChannel = new StatChannel(this.state, this.record, this.guild);
   public readonly user = new User(this.state, this.oauth2);
   public readonly voice = new VoiceChannel(this.state);
 

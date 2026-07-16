@@ -1,5 +1,8 @@
+import type { GuildSettingUpsertInput } from "infra-database/types";
+
 import type { AppState } from "./AppState";
 import { Base } from "./Base";
+import type { Guild } from "./Guild";
 import type { Record } from "./Record";
 
 export type StatChannelField =
@@ -21,6 +24,7 @@ export class StatChannel extends Base {
   constructor(
     state: AppState,
     private readonly record: Record,
+    private readonly guild: Guild,
   ) {
     super(state);
   }
@@ -60,19 +64,39 @@ export class StatChannel extends Base {
           continue;
         }
 
-        const exists = await this.state.discord.channel.rename(
-          channelId,
-          await this.buildName(setting.guildId, field),
-        );
+        try {
+          const exists = await this.state.discord.channel.rename(
+            channelId,
+            await this.buildName(setting.guildId, field),
+          );
 
-        if (!exists) {
-          await this.state.database.guildSetting.upsert({
-            guildId: setting.guildId,
-            [field]: null,
-          });
+          if (!exists) {
+            await this.state.database.guildSetting.upsert({
+              guildId: setting.guildId,
+              [field]: null,
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Failed to update stat channel ${field} for guild ${setting.guildId}:`,
+            error,
+          );
         }
       }
     }
+  }
+
+  public async assignChannel(guildId: string, field: StatChannelField, channelId: string) {
+    const setting = await this.guild.getSetting(guildId);
+    const input: GuildSettingUpsertInput = { guildId, [field]: channelId };
+
+    for (const otherField of STAT_CHANNEL_FIELDS) {
+      if (otherField !== field && setting?.[otherField] === channelId) {
+        input[otherField] = null;
+      }
+    }
+
+    return await this.guild.saveSetting(input);
   }
 
   public async setupAll(guildId: string, fields: StatChannelField[] = STAT_CHANNEL_FIELDS) {
