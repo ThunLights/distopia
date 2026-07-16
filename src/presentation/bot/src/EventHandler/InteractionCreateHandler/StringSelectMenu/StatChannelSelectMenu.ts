@@ -69,7 +69,7 @@ export class StatChannelSelectMenu extends StringSelectMenuInteractionBase {
       .setLabel("統計チャンネル設定に戻る")
       .setStyle(ButtonStyle.Secondary);
 
-    return await this.safeUpdate(interaction, {
+    return await interaction.update({
       embeds: [embed],
       components: [
         new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(channelSelector),

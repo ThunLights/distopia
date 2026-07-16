@@ -54,7 +54,7 @@ export class WebEditSubmitButton extends ButtonInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = await page(this.core, guild);
 
-    return await this.safeUpdate(interaction, {
+    return await interaction.update({
       content,
       components,
       embeds,

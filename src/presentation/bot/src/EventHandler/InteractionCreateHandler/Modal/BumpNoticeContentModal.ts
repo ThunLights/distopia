@@ -52,7 +52,7 @@ export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
     if (interaction.isFromMessage()) {
-      const res = await this.safeUpdate(interaction, {
+      const res = await interaction.update({
         content,
         components,
         embeds,

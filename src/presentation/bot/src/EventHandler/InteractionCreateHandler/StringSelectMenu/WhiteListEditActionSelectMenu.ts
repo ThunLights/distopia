@@ -76,7 +76,7 @@ export class WhiteListEditActionSelectMenu extends StringSelectMenuInteractionBa
 
     const { content, components, embeds, allowedMentions, files } = detailPagePayload;
 
-    return await this.safeUpdate(interaction, {
+    return await interaction.update({
       content,
       components,
       embeds,

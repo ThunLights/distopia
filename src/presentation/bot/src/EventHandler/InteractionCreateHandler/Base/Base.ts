@@ -1,11 +1,5 @@
 import type { AppCore } from "app-core";
-import {
-  DiscordAPIError,
-  RESTJSONErrorCodes,
-  type BaseInteraction,
-  type Message,
-  type PermissionResolvable,
-} from "discord.js";
+import { type BaseInteraction, type PermissionResolvable } from "discord.js";
 import type { Guild, User } from "domain-model";
 
 import { codeBlock } from "../../../utils/codeblock";
@@ -55,18 +49,6 @@ export abstract class Base<T extends BaseInteraction, R = void> {
     }
 
     return new PermissionSuccess();
-  }
-
-  protected async messageExists(message: Message): Promise<boolean> {
-    try {
-      await message.fetch();
-      return true;
-    } catch (error) {
-      if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage) {
-        return false;
-      }
-      throw error;
-    }
   }
 
   protected async parseUser(interaction: T): Promise<User> {

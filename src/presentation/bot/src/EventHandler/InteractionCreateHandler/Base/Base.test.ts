@@ -1,15 +1,12 @@
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
 import merge from "deepmerge";
-import {
-  DiscordAPIError,
-  RESTJSONErrorCodes,
-  type BaseInteraction,
-  type CacheType,
-  type Guild,
-  type GuildChannelResolvable,
-  type Message,
-  type PermissionsBitField,
+import type {
+  BaseInteraction,
+  CacheType,
+  Guild,
+  GuildChannelResolvable,
+  PermissionsBitField,
 } from "discord.js";
 import { describe, expect, suite, test } from "vitest";
 
@@ -26,21 +23,6 @@ class TestCommand extends Base<BaseInteraction> {
   public async test(interaction: BaseInteraction<CacheType>) {
     return (await this.checkPermission(interaction)) instanceof PermissionSuccess;
   }
-
-  public async testMessageExists(message: Message) {
-    return await this.messageExists(message);
-  }
-}
-
-function unknownMessageError() {
-  return new DiscordAPIError(
-    { message: "Unknown Message", code: RESTJSONErrorCodes.UnknownMessage },
-    RESTJSONErrorCodes.UnknownMessage,
-    404,
-    "GET",
-    "/channels/1/messages/1",
-    { body: undefined, files: undefined },
-  );
 }
 
 const testCommand = new TestCommand(new AppCore({} as AppState));
@@ -147,34 +129,6 @@ describe("Base.ts", () => {
           ),
         ).toBe(false);
       });
-    });
-  });
-
-  describe("messageExists", () => {
-    test("returns true when the message can be fetched", async () => {
-      const message = { fetch: async () => ({}) } as unknown as Message;
-
-      expect(await testCommand.testMessageExists(message)).toBe(true);
-    });
-
-    test("returns false when the message was deleted", async () => {
-      const message = {
-        fetch: async () => {
-          throw unknownMessageError();
-        },
-      } as unknown as Message;
-
-      expect(await testCommand.testMessageExists(message)).toBe(false);
-    });
-
-    test("rethrows unrelated errors", async () => {
-      const message = {
-        fetch: async () => {
-          throw new Error("network error");
-        },
-      } as unknown as Message;
-
-      await expect(testCommand.testMessageExists(message)).rejects.toThrow("network error");
     });
   });
 });

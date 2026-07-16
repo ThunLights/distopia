@@ -29,7 +29,7 @@ export class BackStatChannelPageButton extends ButtonInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
-    return await this.safeUpdate(interaction, {
+    return await interaction.update({
       content,
       components,
       embeds,
