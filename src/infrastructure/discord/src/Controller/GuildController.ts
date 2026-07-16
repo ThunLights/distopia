@@ -35,6 +35,21 @@ export class GuildController extends Base {
     }
   }
 
+  public async fetchMemberCounts(
+    guildId: string,
+  ): Promise<{ all: number; users: number; bots: number } | null> {
+    const guild = this.client.guilds.cache.get(guildId);
+
+    if (!guild) {
+      return null;
+    }
+
+    const bots = guild.members.cache.filter((member) => member.user.bot).size;
+    const all = guild.memberCount;
+
+    return { all, users: all - bots, bots };
+  }
+
   public async fetchBoostCount(guildId: string) {
     return this.client.guilds.cache.get(guildId)?.premiumSubscriptionCount;
   }
