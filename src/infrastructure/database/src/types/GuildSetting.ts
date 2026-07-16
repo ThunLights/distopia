@@ -8,8 +8,8 @@ export type GuildSetting = {
   statChannelAllMembers: string | null;
   statChannelUsers: string | null;
   statChannelBots: string | null;
+  statChannelActiveRate: string | null;
   statChannelActiveRateRanking: string | null;
-  statChannelActiveRateExclude: string | null;
 };
 
 export type GuildSettingUpdateInput = Pick<GuildSetting, "guildId"> & Partial<GuildSetting>;

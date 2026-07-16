@@ -10,8 +10,8 @@ export type GuildSettingValue = {
   statChannelAllMembers: string | null;
   statChannelUsers: string | null;
   statChannelBots: string | null;
+  statChannelActiveRate: string | null;
   statChannelActiveRateRanking: string | null;
-  statChannelActiveRateExclude: string | null;
   createdAt: Date;
 };
 

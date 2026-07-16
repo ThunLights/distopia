@@ -188,8 +188,8 @@ describe("GuildSetting.gc()", () => {
       statChannelAllMembers: null,
       statChannelUsers: null,
       statChannelBots: null,
+      statChannelActiveRate: null,
       statChannelActiveRateRanking: null,
-      statChannelActiveRateExclude: null,
     };
 
     map.set("old", { ...base, guildId: "g1", createdAt: at(-TWELVE_HOURS - 1) });

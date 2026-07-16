@@ -95,8 +95,8 @@ model GuildSetting {
   statChannelAllMembers        String?
   statChannelUsers             String?
   statChannelBots              String?
+  statChannelActiveRate        String?
   statChannelActiveRateRanking String?
-  statChannelActiveRateExclude String?
 }
 
 model GuildWhiteList {

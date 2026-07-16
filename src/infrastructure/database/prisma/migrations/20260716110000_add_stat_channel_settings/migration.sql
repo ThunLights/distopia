@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE "GuildSetting" ADD COLUMN     "statChannelActiveRateExclude" TEXT,
+ALTER TABLE "GuildSetting" ADD COLUMN     "statChannelActiveRate" TEXT,
 ADD COLUMN     "statChannelActiveRateRanking" TEXT,
 ADD COLUMN     "statChannelAllMembers" TEXT,
 ADD COLUMN     "statChannelBots" TEXT,
