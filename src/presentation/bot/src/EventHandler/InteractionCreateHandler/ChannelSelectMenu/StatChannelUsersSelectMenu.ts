@@ -26,6 +26,10 @@ export class StatChannelUsersSelectMenu extends ChannelSelectMenuInteractionBase
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
+    if (!this.core.state.discord.channel.existsVoiceChannel(options.channelId)) {
+      return { content: "ボイスチャンネルを選択してください。", flags: [MessageFlags.Ephemeral] };
+    }
+
     await this.core.guild.saveSetting({
       guildId: guild.id,
       statChannelUsers: options.channelId,
