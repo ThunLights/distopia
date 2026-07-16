@@ -104,7 +104,7 @@ export class WebEditModal extends ModalSubmitInteractionBase<Options> {
     if (interaction.isFromMessage()) {
       const { content, components, embeds, allowedMentions, files } = await page(this.core, guild);
 
-      return await interaction.update({
+      return await this.safeUpdate(interaction, {
         content,
         components,
         embeds,

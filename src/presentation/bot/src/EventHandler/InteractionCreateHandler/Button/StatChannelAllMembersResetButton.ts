@@ -31,7 +31,7 @@ export class StatChannelAllMembersResetButton extends ButtonInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
-    return await interaction.update({
+    return await this.safeUpdate(interaction, {
       content,
       components,
       embeds,

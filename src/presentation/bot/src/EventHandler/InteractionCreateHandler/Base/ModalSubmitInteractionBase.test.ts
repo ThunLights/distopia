@@ -1,13 +1,16 @@
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
 import {
+  DiscordAPIError,
   MessageFlags,
+  RESTJSONErrorCodes,
   type Guild,
   type GuildChannelResolvable,
+  type ModalMessageModalSubmitInteraction,
   type ModalSubmitInteraction,
   type PermissionsBitField,
 } from "discord.js";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ModalSubmitInteractionBase } from "./ModalSubmitInteractionBase";
@@ -28,6 +31,21 @@ class TestModal extends ModalSubmitInteractionBase<Options> {
     this.execCallCount++;
     return { content: options.value };
   }
+
+  public async testSafeUpdate(interaction: ModalMessageModalSubmitInteraction, options: object) {
+    return await this.safeUpdate(interaction, options);
+  }
+}
+
+function unknownMessageError() {
+  return new DiscordAPIError(
+    { message: "Unknown Message", code: RESTJSONErrorCodes.UnknownMessage },
+    RESTJSONErrorCodes.UnknownMessage,
+    404,
+    "GET",
+    "/channels/1/messages/1",
+    { body: undefined, files: undefined },
+  );
 }
 
 class InvalidOptionsModal extends TestModal {
@@ -108,5 +126,45 @@ describe("ModalSubmitInteractionBase", () => {
 
     expect(result).toEqual({ content: "invalid" });
     expect(modal.execCallCount).toBe(0);
+  });
+
+  describe("safeUpdate", () => {
+    test("calls interaction.update when the original message still exists", async () => {
+      const modal = new TestModal(new AppCore({} as AppState));
+      const update = vi.fn().mockResolvedValue("updated");
+      const reply = vi.fn();
+      const interaction = {
+        message: { fetch: async () => ({}) },
+        update,
+        reply,
+      } as unknown as ModalMessageModalSubmitInteraction;
+
+      const result = await modal.testSafeUpdate(interaction, { content: "hi" });
+
+      expect(update).toHaveBeenCalledWith({ content: "hi" });
+      expect(reply).not.toHaveBeenCalled();
+      expect(result).toBe("updated");
+    });
+
+    test("falls back to interaction.reply when the original message was deleted", async () => {
+      const modal = new TestModal(new AppCore({} as AppState));
+      const update = vi.fn();
+      const reply = vi.fn().mockResolvedValue("replied");
+      const interaction = {
+        message: {
+          fetch: async () => {
+            throw unknownMessageError();
+          },
+        },
+        update,
+        reply,
+      } as unknown as ModalMessageModalSubmitInteraction;
+
+      const result = await modal.testSafeUpdate(interaction, { content: "hi" });
+
+      expect(update).not.toHaveBeenCalled();
+      expect(reply).toHaveBeenCalledWith({ content: "hi" });
+      expect(result).toBe("replied");
+    });
   });
 });

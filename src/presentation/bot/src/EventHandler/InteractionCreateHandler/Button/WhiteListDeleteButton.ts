@@ -48,7 +48,7 @@ export class WhiteListDeleteButton extends ButtonInteractionBase {
 
     const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
 
-    return await interaction.update({
+    return await this.safeUpdate(interaction, {
       content,
       components,
       embeds,

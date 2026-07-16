@@ -47,7 +47,7 @@ export class StatChannelSetupSelectMenu extends MessageComponentInteractionBase<
 
     const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
-    await interaction.editReply({ content, components, embeds, allowedMentions, files });
+    await this.safeEditReply(interaction, { content, components, embeds, allowedMentions, files });
 
     return deferred;
   }
