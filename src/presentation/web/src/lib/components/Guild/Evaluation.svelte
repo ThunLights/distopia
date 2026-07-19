@@ -12,9 +12,9 @@
   let starAvg = $derived(
     reviews.length
       ? (reviews.reduce((sum, star) => sum + star, 0) / reviews.length).toFixed(2)
-      : "レビューなし",
+      : null,
   );
-  let title = $derived(`評価: ${starAvg}`);
+  let title = $derived(starAvg === null ? "レビューなし" : `評価: ${starAvg}`);
 </script>
 
 <Block>
