@@ -33,7 +33,7 @@ jobs:
   container:
     name: Container
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
     steps:
       - name: Checkout repository
@@ -41,6 +41,8 @@ jobs:
 
       - name: Setup Container
         uses: ./.github/workflows/setup
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
   typecheck:
     name: Typecheck
@@ -53,6 +55,8 @@ jobs:
 
       - name: Setup Container
         uses: ./.github/workflows/setup
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - name: Typecheck
         working-directory: ./docker/
@@ -71,6 +75,8 @@ jobs:
 
       - name: Setup Container
         uses: ./.github/workflows/setup
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - name: Build
         working-directory: ./docker/
@@ -89,6 +95,8 @@ jobs:
 
       - name: Setup Container
         uses: ./.github/workflows/setup
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - name: Lint
         working-directory: ./docker/
@@ -107,6 +115,8 @@ jobs:
 
       - name: Setup Container
         uses: ./.github/workflows/setup
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - name: Test
         working-directory: ./docker/
@@ -118,7 +128,7 @@ jobs:
   devcontainer:
     name: Dev Container
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       packages: write
@@ -126,6 +136,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
+          persist-credentials: false
 
       - name: Lowercase image name
         id: img
