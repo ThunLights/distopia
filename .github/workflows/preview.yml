@@ -33,7 +33,7 @@ jobs:
   build-storybook:
     name: build Storybook
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
 
@@ -133,8 +133,8 @@ jobs:
     if: >-
       github.event.action == 'closed' &&
       (
-        (github.event_name == 'pull_request_target' && github.event.repository.fork) ||
-        (github.event_name == 'pull_request' && !github.event.repository.fork)
+        (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) ||
+        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
       )
     runs-on: ubuntu-latest
     permissions:
