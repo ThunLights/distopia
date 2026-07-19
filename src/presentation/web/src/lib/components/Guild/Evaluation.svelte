@@ -9,7 +9,12 @@
 
   const { reviews }: Props = $props();
 
-  let title = $state("評価:");
+  let starAvg = $derived(
+    reviews.length
+      ? (reviews.reduce((sum, star) => sum + star, 0) / reviews.length).toFixed(2)
+      : "レビューなし",
+  );
+  let title = $derived(`評価: ${starAvg}`);
 </script>
 
 <Block>
