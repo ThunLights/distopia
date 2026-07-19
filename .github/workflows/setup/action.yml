@@ -2,11 +2,20 @@ name: Setup
 
 description: Setup for distopia
 
+inputs:
+  ref:
+    description: Git ref to check out (defaults to the triggering event's ref/sha)
+    required: false
+    default: ''
+
 runs:
   using: 'composite'
   steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.ref }}
+        persist-credentials: false
 
     - name: Generate .env
       shell: bash

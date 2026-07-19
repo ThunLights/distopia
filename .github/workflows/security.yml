@@ -12,13 +12,15 @@ jobs:
   gitleaks:
     name: Git Leaks
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
+          persist-credentials: false
 
       - name: Check Leaks
         uses: gitleaks/gitleaks-action@v3
@@ -29,13 +31,15 @@ jobs:
   trufflehog:
     name: Trufflehog
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.repository.fork) || (github.event_name == 'pull_request' && !github.event.repository.fork)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
+          persist-credentials: false
 
       - name: Secret Scanning
         uses: trufflesecurity/trufflehog@main
