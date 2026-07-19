@@ -68,7 +68,7 @@
       <BlockTitle title="タグ一覧" />
       <div class="tags">
         {#each tags as tag (tag)}
-          <a class="tag" href={resolve("/search?content={tag}")}>
+          <a class="tag" href={resolve(`/search?content=${tag}`)}>
             <div class="content">
               <p>{tag}</p>
             </div>
