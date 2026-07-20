@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('bun.lock') }}
 
       - name: Checkout nodejs
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.15.0'
           registry-url: 'https://registry.npmjs.org'
@@ -91,7 +91,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('bun.lock') }}
 
       - name: Checkout nodejs
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.15.0'
           registry-url: 'https://registry.npmjs.org'
@@ -141,7 +141,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('bun.lock') }}
 
       - name: Checkout nodejs
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.15.0'
           registry-url: 'https://registry.npmjs.org'
