@@ -140,7 +140,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           cacheFrom: ${{ steps.img.outputs.name }}
-          push: ${{ github.event_name == 'push' && 'always' || 'never' }}
+          push: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release-'))) && 'always' || 'never' }}
           runCmd: |
             sudo ./scripts/setup.sh
             sudo bun run typecheck
