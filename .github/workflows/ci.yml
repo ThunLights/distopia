@@ -30,24 +30,10 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
-  container:
-    name: Container
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup Container
-        uses: ./.github/workflows/setup
-        with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
-
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
-    needs: ["container"]
+    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
     steps:
       - name: Checkout repository
@@ -155,7 +141,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           cacheFrom: ${{ steps.img.outputs.name }}
-          push: never
+          push: ${{ github.event_name == 'push' && 'always' || 'never' }}
           runCmd: |
             sudo ./scripts/setup.sh
             sudo bun run typecheck
