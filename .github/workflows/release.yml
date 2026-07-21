@@ -45,7 +45,7 @@ jobs:
           git clone https://github.com/gitleaks/gitleaks.git "$RUNNER_TEMP/gitleaks"
           cd "$RUNNER_TEMP/gitleaks" && make build
           sudo mv gitleaks /usr/local/bin
-          sudo curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.8.1/jq-linux64 && sudo chmod +x /usr/local/bin/jq
+          sudo curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.8.2/jq-linux64 && sudo chmod +x /usr/local/bin/jq
 
       - name: Check tools
         run: |
