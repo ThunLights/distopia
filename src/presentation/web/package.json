@@ -41,7 +41,7 @@
     "bun": "catalog:",
     "eslint": "10.5.0",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-storybook": "10.5.0",
+    "eslint-plugin-storybook": "10.5.3",
     "eslint-plugin-svelte": "3.19.0",
     "globals": "17.7.0",
     "playwright": "1.61.1",
