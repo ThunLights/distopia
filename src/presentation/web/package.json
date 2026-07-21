@@ -58,7 +58,7 @@
     "vitest-browser-svelte": "2.1.1"
   },
   "dependencies": {
-    "@fontsource/inter": "5.2.8",
+    "@fontsource/inter": "5.3.0",
     "@fontsource/open-sans": "5.2.7",
     "@standard-schema/spec": "catalog:",
     "app-core": "workspace:*",
