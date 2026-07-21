@@ -42,7 +42,7 @@
     "jsr": "0.14.3",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "tsdown": "0.22.3",
+    "tsdown": "0.22.7",
     "zod": "catalog:"
   },
   "devDependencies": {
