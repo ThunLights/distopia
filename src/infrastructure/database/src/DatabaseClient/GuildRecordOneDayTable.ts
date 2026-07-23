@@ -54,6 +54,30 @@ export class GuildRecordOneDayTable extends Base {
     );
   }
 
+  public async upsertDailyMaxAll(
+    inputs: { guildId: string; date: Date; memberCount: number; activeRate: bigint }[],
+  ) {
+    // Sort by the unique key so concurrent batches always acquire row locks in
+    // the same order, avoiding Postgres deadlocks (40P01) between overlapping
+    // cron jobs. The GREATEST() comparison happens atomically in the DB on
+    // conflict, so overlapping ActiveRate.update() runs can never overwrite a
+    // larger value already recorded for the day with a smaller/stale one.
+    const sorted = [...inputs].sort(
+      (a, b) => a.guildId.localeCompare(b.guildId) || a.date.getTime() - b.date.getTime(),
+    );
+    return await this.prisma.$transaction(
+      sorted.map(
+        ({ guildId, date, memberCount, activeRate }) => this.prisma.$executeRaw`
+          INSERT INTO "GuildRecordOneDay" ("guildId", "date", "memberCount", "activeRate")
+          VALUES (${guildId}, ${date}, ${memberCount}, ${activeRate})
+          ON CONFLICT ("guildId", "date") DO UPDATE SET
+            "memberCount" = GREATEST("GuildRecordOneDay"."memberCount", EXCLUDED."memberCount"),
+            "activeRate" = GREATEST("GuildRecordOneDay"."activeRate", EXCLUDED."activeRate")
+        `,
+      ),
+    );
+  }
+
   public async upsertVcMembers(guildId: string, date: Date, vcMember: string) {
     const data = await this.prisma.guildRecordOneDay.findUnique({
       where: { guildId_date: { guildId, date } },
