@@ -5,6 +5,8 @@ export type GuildRecordOneDay = {
   newMembers: string[];
   newMessages: number;
   vcMemberUpperTwo: number;
+  memberCount: number;
+  activeRate: bigint;
 };
 
 export type GuildRecordOneDayUpsertInput = Pick<GuildRecordOneDay, "date" | "guildId"> &
