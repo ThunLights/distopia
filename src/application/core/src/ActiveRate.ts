@@ -1,10 +1,19 @@
 import { calcActiveRate } from "domain-service";
 import type { GuildRecordOneDay, GuildRecordUpsertInput } from "infra-database/types";
 
+import type { AppState } from "./AppState";
 import { Base } from "./Base";
+import type { Guild } from "./Guild";
 import { formatYMD } from "./utils/date";
 
 export class ActiveRate extends Base {
+  constructor(
+    state: AppState,
+    private readonly guild: Guild,
+  ) {
+    super(state);
+  }
+
   public async update() {
     const thirtyDays = 30 * 24 * 60 * 60 * 1000;
     const thirtyDaysAgo = new Date(Date.now() - thirtyDays);
@@ -63,5 +72,12 @@ export class ActiveRate extends Base {
 
     await this.state.database.guildRecord.upsertAll(query);
     await this.state.database.guildRecordOneDay.upsertDailyMaxAll(oneDayQuery);
+
+    try {
+      await this.guild.updateActiveGuilds();
+    } catch {
+      // Best-effort: a failed cache refresh must not turn the completed
+      // activeRate/memberCount upserts above into a reported failure.
+    }
   }
 }

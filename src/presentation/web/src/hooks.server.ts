@@ -40,14 +40,6 @@ async function start() {
   console.log("Loaded SearchEngine.");
 
   schedule.add(
-    "*/30 * * * * *",
-    async () => {
-      await core.guild.updateRootPage();
-    },
-    { noOverlap: true },
-  );
-
-  schedule.add(
     "*/5 * * * *",
     async () => {
       await core.jwt.update();

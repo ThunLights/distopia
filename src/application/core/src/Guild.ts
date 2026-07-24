@@ -48,6 +48,10 @@ export class Guild extends Base {
     this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
   }
 
+  public async updateActiveGuilds() {
+    this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
+  }
+
   public async loadSearchEngine() {
     const insertQuery: GuildDBValue[] = [];
     const guilds = (await this.state.database.guild.findAll())
@@ -134,7 +138,7 @@ export class Guild extends Base {
 
     latelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
 
-    await database.guild.update({
+    const updatedGuild = await database.guild.update({
       guildId: guild.id,
       bumpTime: nowDate,
     });
@@ -144,6 +148,23 @@ export class Guild extends Base {
     );
 
     const { bumpCounter: userBumpCounter } = await database.user.increaseBumpCounter(user.id);
+
+    try {
+      const meta = await this.fetchMetaData(guild.id);
+      const latestGuilds = this.rootPage.latestGuilds.filter(
+        ({ guild: g }) => g.guildId !== guild.id,
+      );
+
+      if (updatedGuild.public && meta) {
+        latestGuilds.push({ guild: updatedGuild, meta });
+      }
+
+      this.rootPage.latestGuilds = latestGuilds
+        .sort((a, b) => b.guild.bumpTime.getTime() - a.guild.bumpTime.getTime())
+        .slice(0, 40);
+    } catch {
+      // Best-effort: a failed cache refresh must not turn a successful bump into an error.
+    }
 
     return {
       guildBumpCounter: guildBumpCounter ?? 1,
