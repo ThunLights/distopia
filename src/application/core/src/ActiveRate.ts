@@ -72,6 +72,12 @@ export class ActiveRate extends Base {
 
     await this.state.database.guildRecord.upsertAll(query);
     await this.state.database.guildRecordOneDay.upsertDailyMaxAll(oneDayQuery);
-    await this.guild.updateActiveGuilds();
+
+    try {
+      await this.guild.updateActiveGuilds();
+    } catch {
+      // Best-effort: a failed cache refresh must not turn the completed
+      // activeRate/memberCount upserts above into a reported failure.
+    }
   }
 }

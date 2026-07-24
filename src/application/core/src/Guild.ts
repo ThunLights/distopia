@@ -149,16 +149,21 @@ export class Guild extends Base {
 
     const { bumpCounter: userBumpCounter } = await database.user.increaseBumpCounter(user.id);
 
-    const meta = await this.fetchMetaData(guild.id);
-    if (meta) {
-      this.rootPage.latestGuilds = [
-        { guild: updatedGuild, meta },
-        ...this.rootPage.latestGuilds.filter(({ guild: g }) => g.guildId !== guild.id),
-      ];
+    try {
+      const meta = await this.fetchMetaData(guild.id);
+      const latestGuilds = this.rootPage.latestGuilds.filter(
+        ({ guild: g }) => g.guildId !== guild.id,
+      );
 
-      if (this.rootPage.latestGuilds.length > 40) {
-        this.rootPage.latestGuilds.pop();
+      if (updatedGuild.public && meta) {
+        latestGuilds.push({ guild: updatedGuild, meta });
       }
+
+      this.rootPage.latestGuilds = latestGuilds
+        .sort((a, b) => b.guild.bumpTime.getTime() - a.guild.bumpTime.getTime())
+        .slice(0, 40);
+    } catch {
+      // Best-effort: a failed cache refresh must not turn a successful bump into an error.
     }
 
     return {
