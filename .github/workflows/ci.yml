@@ -110,6 +110,44 @@ jobs:
           docker compose exec app sudo bun run build
           docker compose exec app sudo bun run test
 
+  e2e-prod:
+    name: E2E (production build)
+    runs-on: ubuntu-latest
+    needs: ["typecheck"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
+          persist-credentials: false
+
+      - name: Generate .env
+        run: printenv > .env
+
+      - name: Create distopia-db-store
+        run: docker volume create distopia-db-store
+
+      - name: Start production stack
+        run: ./environment/production.sh
+
+      - name: Wait for production server to be ready
+        run: timeout 180 bash -c 'until curl -sf http://localhost:3000/ -o /dev/null; do sleep 2; done'
+
+      - name: Run E2E tests against production build
+        working-directory: ./docker/
+        run: docker compose exec -T app sudo sh -c "cd src/presentation/web && bun run test:e2e:prod"
+
+      - name: Dump app logs on failure
+        if: failure()
+        working-directory: ./docker/
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml logs app
+
+      - name: Tear down production stack
+        if: always()
+        working-directory: ./docker/
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+
   devcontainer:
     name: Dev Container
     runs-on: ubuntu-latest
