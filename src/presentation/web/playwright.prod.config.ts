@@ -5,7 +5,7 @@ import { defineConfig } from "@playwright/test";
 // of Playwright's own dev-mode webServer used by playwright.config.ts.
 export default defineConfig({
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+    baseURL: "http://localhost:3000",
   },
   testMatch: "**/*.e2e.{ts,js}",
 });
