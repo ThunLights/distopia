@@ -118,7 +118,7 @@ sudo bun run deploy-db    # Apply DB migrations
 ### Production Deploy (run on the host, outside devcontainer)
 
 ```bash
-environment/production.sh
+production/run.sh
 ```
 
 ---

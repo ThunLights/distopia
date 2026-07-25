@@ -137,7 +137,7 @@ The devcontainer (`.devcontainer/devcontainer.json`) uses `docker-compose.yml` +
 From outside the devcontainer, on the production host:
 
 ```bash
-environment/production.sh
+production/run.sh
 ```
 
 This runs `docker-compose.prod.yml`, which executes `scripts/prod.sh`:
