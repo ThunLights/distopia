@@ -19,11 +19,20 @@ export class ActiveRate extends Base {
     const thirtyDaysAgo = new Date(Date.now() - thirtyDays);
     const today = await formatYMD(new Date());
     const query: GuildRecordUpsertInput[] = [];
-    const oneDayQuery: { guildId: string; date: Date; memberCount: number; activeRate: bigint }[] =
-      [];
+    const oneDayQuery: {
+      guildId: string;
+      date: Date;
+      memberCount: number;
+      activeRate: bigint;
+      level: bigint;
+      point: bigint;
+    }[] = [];
 
     const allGuildRecord =
       await this.state.database.guildRecordOneDay.findFixedTimesAll(thirtyDaysAgo);
+    const guildRecords = new Map(
+      (await this.state.database.guildRecord.findAll()).map((record) => [record.guildId, record]),
+    );
 
     for (const guild of await this.state.database.guild.findAll()) {
       const records = await (async () => {
@@ -67,6 +76,8 @@ export class ActiveRate extends Base {
         date: today,
         memberCount,
         activeRate: BigInt(rate),
+        level: guildRecords.get(guild.guildId)?.level ?? 0n,
+        point: guildRecords.get(guild.guildId)?.point ?? 0n,
       });
     }
 

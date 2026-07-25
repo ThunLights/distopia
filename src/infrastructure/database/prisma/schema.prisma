@@ -72,6 +72,8 @@ model GuildRecordOneDay {
   vcMemberUpperTwo Int      @default(0)
   memberCount      Int      @default(0)
   activeRate       BigInt   @default(0)
+  level            BigInt   @default(0)
+  point            BigInt   @default(0)
 
   @@id([guildId, date])
 }
