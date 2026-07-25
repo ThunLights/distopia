@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "GuildRecordOneDay" ADD COLUMN     "level" BIGINT NOT NULL DEFAULT 0,
+ADD COLUMN     "point" BIGINT NOT NULL DEFAULT 0;

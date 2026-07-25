@@ -55,7 +55,14 @@ export class GuildRecordOneDayTable extends Base {
   }
 
   public async upsertDailyMaxAll(
-    inputs: { guildId: string; date: Date; memberCount: number; activeRate: bigint }[],
+    inputs: {
+      guildId: string;
+      date: Date;
+      memberCount: number;
+      activeRate: bigint;
+      level: bigint;
+      point: bigint;
+    }[],
   ) {
     // Sort by the unique key so concurrent batches always acquire row locks in
     // the same order, avoiding Postgres deadlocks (40P01) between overlapping
@@ -67,12 +74,14 @@ export class GuildRecordOneDayTable extends Base {
     );
     return await this.prisma.$transaction(
       sorted.map(
-        ({ guildId, date, memberCount, activeRate }) => this.prisma.$executeRaw`
-          INSERT INTO "GuildRecordOneDay" ("guildId", "date", "memberCount", "activeRate")
-          VALUES (${guildId}, ${date}, ${memberCount}, ${activeRate})
+        ({ guildId, date, memberCount, activeRate, level, point }) => this.prisma.$executeRaw`
+          INSERT INTO "GuildRecordOneDay" ("guildId", "date", "memberCount", "activeRate", "level", "point")
+          VALUES (${guildId}, ${date}, ${memberCount}, ${activeRate}, ${level}, ${point})
           ON CONFLICT ("guildId", "date") DO UPDATE SET
             "memberCount" = GREATEST("GuildRecordOneDay"."memberCount", EXCLUDED."memberCount"),
-            "activeRate" = GREATEST("GuildRecordOneDay"."activeRate", EXCLUDED."activeRate")
+            "activeRate" = GREATEST("GuildRecordOneDay"."activeRate", EXCLUDED."activeRate"),
+            "level" = GREATEST("GuildRecordOneDay"."level", EXCLUDED."level"),
+            "point" = GREATEST("GuildRecordOneDay"."point", EXCLUDED."point")
         `,
       ),
     );

@@ -7,6 +7,8 @@ export type GuildRecordOneDay = {
   vcMemberUpperTwo: number;
   memberCount: number;
   activeRate: bigint;
+  level: bigint;
+  point: bigint;
 };
 
 export type GuildRecordOneDayUpsertInput = Pick<GuildRecordOneDay, "date" | "guildId"> &
