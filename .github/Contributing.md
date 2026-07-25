@@ -57,5 +57,5 @@ sudo bun run deploy-db
 Execute following command outside of devcontainer.
 
 ```
-environment/production.sh
+production/run.sh
 ```

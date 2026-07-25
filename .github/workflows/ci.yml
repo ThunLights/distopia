@@ -129,7 +129,7 @@ jobs:
         run: docker volume create distopia-db-store
 
       - name: Start production stack
-        run: ./environment/production.sh
+        run: ./production/run.sh
 
       - name: Wait for production server to be ready
         run: timeout 180 bash -c 'until curl -sf http://localhost:3000/ -o /dev/null; do sleep 2; done'
