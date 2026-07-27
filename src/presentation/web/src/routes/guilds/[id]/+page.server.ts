@@ -5,7 +5,8 @@ import { error } from "@sveltejs/kit";
 export const load: PageServerLoad = async (e) => {
   const { guildId } = await e.parent();
 
-  const { meta, guild, record, reviews } = await core.guild.findWithAllRefData(guildId);
+  const { meta, guild, record, reviews, recordOneDays } =
+    await core.guild.findWithAllRefData(guildId);
 
   if (!meta || !guild || !guild.public) {
     return error(404, { message: "Guild not found" });
@@ -38,6 +39,14 @@ export const load: PageServerLoad = async (e) => {
         avatarUrl,
         star,
         content,
+      })),
+    recordOneDays: recordOneDays
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .map(({ date, memberCount, activeRate, level }) => ({
+        date,
+        memberCount,
+        activeRate: Number(activeRate),
+        level: Number(level),
       })),
   };
 };

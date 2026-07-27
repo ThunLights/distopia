@@ -30,6 +30,13 @@
     content: string | null;
   };
 
+  type RecordOneDay = {
+    date: Date;
+    memberCount: number;
+    activeRate: number;
+    level: number;
+  };
+
   const mockGuild: GuildData = {
     guildId: "111111111111111111",
     name: "テストサーバー Alpha",
@@ -73,6 +80,15 @@
     },
   ];
 
+  const mockRecordOneDays: RecordOneDay[] = [
+    { date: new Date("2026-07-20"), memberCount: 120, activeRate: 70, level: 20 },
+    { date: new Date("2026-07-21"), memberCount: 125, activeRate: 75, level: 21 },
+    { date: new Date("2026-07-22"), memberCount: 130, activeRate: 78, level: 22 },
+    { date: new Date("2026-07-23"), memberCount: 128, activeRate: 80, level: 23 },
+    { date: new Date("2026-07-24"), memberCount: 135, activeRate: 82, level: 24 },
+    { date: new Date("2026-07-25"), memberCount: 140, activeRate: 85, level: 25 },
+  ];
+
   const { Story } = defineMeta({
     title: "Pages/Guild",
     component: Page,
@@ -87,6 +103,7 @@
       guildId: "111111111111111111",
       guild: mockGuild,
       reviews: mockReviews,
+      recordOneDays: mockRecordOneDays,
     },
   }}
 />
@@ -99,6 +116,7 @@
       guildId: "111111111111111111",
       guild: mockGuild,
       reviews: mockReviews,
+      recordOneDays: mockRecordOneDays,
     },
   }}
 />
@@ -111,6 +129,7 @@
       guildId: "111111111111111111",
       guild: { ...mockGuild, description: null },
       reviews: [],
+      recordOneDays: mockRecordOneDays,
     },
   }}
 />
