@@ -14,8 +14,8 @@
 <Meta {title} {description} />
 
 <main>
-  <div class="contents">
-    <p class="contents-title">{page.status}</p>
+  <div class="error-content">
+    <p class="error-title">{page.status}</p>
     {#if page.error?.message}
       <p>{page.error.message}</p>
     {/if}
@@ -30,10 +30,10 @@
   p {
     color: rgb(153, 153, 153);
   }
-  .contents {
+  .error-content {
     text-align: center;
   }
-  .contents-title {
+  .error-title {
     font-size: 60px;
   }
 </style>

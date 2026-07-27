@@ -102,7 +102,7 @@
           memberCount={guild.approximate_member_count}
         >
           <p
-            class="is-bot-joined inline-block"
+            class="is-bot-joined status-inline"
             style={`color: ${guild.isBotJoined ? "green" : "red"};`}
           >
             {guild.isBotJoined ? "ボット導入" : "ボット未導入"}
@@ -123,7 +123,7 @@
   .is-bot-joined {
     font-size: 8px;
   }
-  .inline-block {
+  .status-inline {
     display: inline-block;
   }
   p {

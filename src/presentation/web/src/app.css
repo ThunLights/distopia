@@ -1,3 +1,6 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
 :root {
   --body-background-color: #313338;
   --a-tag-color: #6969d5;
@@ -29,4 +32,17 @@ h6 {
 
 a {
   color: var(--a-tag-color);
+}
+
+.lc-root-container {
+  /* Default marks color when not using explicit color or color scale */
+  --color-primary: var(--color-sky-700);
+
+  /* Progressively darker shades representing surfaces (backgrounds). */
+  --color-surface-100: var(--color-white);
+  --color-surface-200: var(--color-gray-100);
+  --color-surface-300: var(--color-gray-300);
+
+  /* Content (text) color */
+  --color-surface-content: var(--color-gray-400);
 }

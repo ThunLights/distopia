@@ -33,7 +33,7 @@
     <div class="bager">
       <input
         id="drawer_input"
-        class="drawer_hidden hidden"
+        class="drawer_hidden drawer-input-hidden"
         type="checkbox"
         onchange={bagerSwitcher}
       />
@@ -78,7 +78,7 @@
         <div class="discord-login">
           <a href={resolve("/login")} rel="external">
             <div class="login-block">
-              <p class="discord-login-content inline">Login</p>
+              <p class="discord-login-content login-text-inline">Login</p>
             </div>
           </a>
         </div>
@@ -138,7 +138,7 @@
     display: none;
   }
 
-  .hidden {
+  .drawer-input-hidden {
     display: none;
   }
 
@@ -167,7 +167,7 @@
     font-size: 30px;
     padding: 20px;
   }
-  .inline {
+  .login-text-inline {
     display: inline-block;
   }
   .login-block {

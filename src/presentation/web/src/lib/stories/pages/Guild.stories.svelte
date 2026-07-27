@@ -30,6 +30,13 @@
     content: string | null;
   };
 
+  type RecordOneDay = {
+    date: Date;
+    memberCount: number;
+    activeRate: number;
+    level: number;
+  };
+
   const mockGuild: GuildData = {
     guildId: "111111111111111111",
     name: "テストサーバー Alpha",
@@ -73,6 +80,31 @@
     },
   ];
 
+  // Half a year of daily data points, matching the +page.server.ts's
+  // six-month window, so the Storybook preview shows a realistic amount
+  // of history instead of a handful of points.
+  function generateMockRecordOneDays(days: number): RecordOneDay[] {
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const today = new Date("2026-07-25").getTime();
+    const records: RecordOneDay[] = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today - i * oneDayMs);
+      const progress = (days - i) / days;
+
+      records.push({
+        date,
+        memberCount: Math.round(100 + progress * 60 + Math.sin(i / 5) * 8),
+        activeRate: Math.round(60 + Math.sin(i / 7) * 20 + progress * 10),
+        level: Math.min(30, Math.floor(progress * 30)),
+      });
+    }
+
+    return records;
+  }
+
+  const mockRecordOneDays: RecordOneDay[] = generateMockRecordOneDays(182);
+
   const { Story } = defineMeta({
     title: "Pages/Guild",
     component: Page,
@@ -87,6 +119,7 @@
       guildId: "111111111111111111",
       guild: mockGuild,
       reviews: mockReviews,
+      recordOneDays: mockRecordOneDays,
     },
   }}
 />
@@ -99,6 +132,7 @@
       guildId: "111111111111111111",
       guild: mockGuild,
       reviews: mockReviews,
+      recordOneDays: mockRecordOneDays,
     },
   }}
 />
@@ -111,6 +145,7 @@
       guildId: "111111111111111111",
       guild: { ...mockGuild, description: null },
       reviews: [],
+      recordOneDays: mockRecordOneDays,
     },
   }}
 />

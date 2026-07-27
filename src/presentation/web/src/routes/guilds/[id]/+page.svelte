@@ -2,6 +2,7 @@
   import Block from "$lib/components/Block.svelte";
   import BlockTitle from "$lib/components/Guild/BlockTitle.svelte";
   import Evaluation from "$lib/components/Guild/Evaluation.svelte";
+  import Graph from "$lib/components/Guild/Graph.svelte";
   import GuildBlock from "$lib/components/Guild/GuildBlock.svelte";
   import Review from "$lib/components/Guild/Review.svelte";
   import Meta from "$lib/components/Meta.svelte";
@@ -28,7 +29,7 @@
   } = $derived(guild);
 
   const reviewStars = $derived(data.reviews.map(({ star }) => star));
-  const { reviews } = $derived(data);
+  const { reviews, recordOneDays } = $derived(data);
 </script>
 
 <Meta title={name} />
@@ -52,6 +53,7 @@
   {user}
   {invite}
 />
+<Graph data={recordOneDays} />
 <Evaluation reviews={reviewStars} />
 <Block>
   <BlockTitle title="レビュー" />

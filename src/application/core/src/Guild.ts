@@ -290,9 +290,9 @@ export class Guild extends Base {
     return guildsWithMeta;
   }
 
-  public async findWithAllRefData(guildId: string) {
+  public async findWithAllRefData(guildId: string, recordOneDaysSince?: Date) {
     const { guild, record, settings, recordOneDays, reviews } =
-      await this.state.database.guild.findWithAllRefData(guildId);
+      await this.state.database.guild.findWithAllRefData(guildId, recordOneDaysSince);
     const guildMetaData = await this.fetchMetaData(guildId);
 
     return {
