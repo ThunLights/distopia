@@ -4,7 +4,7 @@
   const { fixed = false } = $props();
 </script>
 
-<footer class={fixed ? "fixed" : ""}>
+<footer class={fixed ? "footer-fixed" : ""}>
   <p>Contact: <a href={DISCORD_INVITE_LINK} rel="external">Official Discord Server</a></p>
   <p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
   <p>Distopia</p>
@@ -21,7 +21,7 @@
   a {
     color: rgb(88, 212, 228);
   }
-  .fixed {
+  .footer-fixed {
     width: 100%;
     position: fixed;
     bottom: 0;

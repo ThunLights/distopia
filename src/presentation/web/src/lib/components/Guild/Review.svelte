@@ -24,11 +24,11 @@
       </div>
     </div>
     <div class="stars">
-      <div class="inline-block">
+      <div class="rating-inline">
         <p class="section-title">評価</p>
       </div>
       {#each [0, 1, 2, 3, 4] as i (i)}
-        <div class="star inline-block">
+        <div class="star rating-inline">
           <img src={i + 1 <= star ? Star : BlackStar} alt="" />
         </div>
       {/each}
@@ -73,7 +73,7 @@
   .section-title {
     font-weight: 700;
   }
-  .inline-block {
+  .rating-inline {
     display: inline-block;
   }
 </style>

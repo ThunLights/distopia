@@ -1,3 +1,6 @@
 {
-  "editorconfig.generateAuto": true
+  "editorconfig.generateAuto": true,
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
 }
