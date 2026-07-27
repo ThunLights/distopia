@@ -25,12 +25,14 @@ export class GuildTable extends Base {
     };
   }
 
-  public async findWithAllRefData(guildId: string) {
+  public async findWithAllRefData(guildId: string, recordOneDaysSince?: Date) {
     const [guild, record, settings, recordOneDays, reviews] = await this.prisma.$transaction([
       this.prisma.guild.findUnique({ where: { guildId } }),
       this.prisma.guildRecord.findUnique({ where: { guildId } }),
       this.prisma.guildSetting.findUnique({ where: { guildId } }),
-      this.prisma.guildRecordOneDay.findMany({ where: { guildId } }),
+      this.prisma.guildRecordOneDay.findMany({
+        where: { guildId, ...(recordOneDaysSince ? { date: { gte: recordOneDaysSince } } : {}) },
+      }),
       this.prisma.guildReview.findMany({ where: { guildId } }),
     ]);
     return {

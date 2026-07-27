@@ -30,7 +30,7 @@
 <Block>
   <div class="header">
     <BlockTitle title="推移" />
-    <select bind:value={metric}>
+    <select bind:value={metric} aria-label="グラフに表示する指標">
       <option value="activeRate">{metricLabels.activeRate}</option>
       <option value="memberCount">{metricLabels.memberCount}</option>
       <option value="level">{metricLabels.level}</option>
