@@ -5,6 +5,9 @@ import { error } from "@sveltejs/kit";
 export const load: PageServerLoad = async (e) => {
   const { guildId } = await e.parent();
 
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
   const { meta, guild, record, reviews, recordOneDays } =
     await core.guild.findWithAllRefData(guildId);
 
@@ -41,6 +44,7 @@ export const load: PageServerLoad = async (e) => {
         content,
       })),
     recordOneDays: recordOneDays
+      .filter(({ date }) => date.getTime() >= sixMonthsAgo.getTime())
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .map(({ date, memberCount, activeRate, level }) => ({
         date,

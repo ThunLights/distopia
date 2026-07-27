@@ -80,14 +80,30 @@
     },
   ];
 
-  const mockRecordOneDays: RecordOneDay[] = [
-    { date: new Date("2026-07-20"), memberCount: 120, activeRate: 70, level: 20 },
-    { date: new Date("2026-07-21"), memberCount: 125, activeRate: 75, level: 21 },
-    { date: new Date("2026-07-22"), memberCount: 130, activeRate: 78, level: 22 },
-    { date: new Date("2026-07-23"), memberCount: 128, activeRate: 80, level: 23 },
-    { date: new Date("2026-07-24"), memberCount: 135, activeRate: 82, level: 24 },
-    { date: new Date("2026-07-25"), memberCount: 140, activeRate: 85, level: 25 },
-  ];
+  // Half a year of daily data points, matching the +page.server.ts's
+  // six-month window, so the Storybook preview shows a realistic amount
+  // of history instead of a handful of points.
+  function generateMockRecordOneDays(days: number): RecordOneDay[] {
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const today = new Date("2026-07-25").getTime();
+    const records: RecordOneDay[] = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today - i * oneDayMs);
+      const progress = (days - i) / days;
+
+      records.push({
+        date,
+        memberCount: Math.round(100 + progress * 60 + Math.sin(i / 5) * 8),
+        activeRate: Math.round(60 + Math.sin(i / 7) * 20 + progress * 10),
+        level: Math.min(30, Math.floor(progress * 30)),
+      });
+    }
+
+    return records;
+  }
+
+  const mockRecordOneDays: RecordOneDay[] = generateMockRecordOneDays(182);
 
   const { Story } = defineMeta({
     title: "Pages/Guild",
