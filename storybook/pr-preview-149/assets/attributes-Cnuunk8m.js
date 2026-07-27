@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-xPQekRTU.js";import{c as t,l as n}from"./common-BwfN2NlY.js";function r(e){return typeof e==`object`&&!!e&&typeof e!=`function`}function i(e,t,...i){return r(e)?{...e,class:n(t,...i,e.class)}:{class:n(t,...i)}}var a=e((()=>{t()}));export{a as n,i as t};
