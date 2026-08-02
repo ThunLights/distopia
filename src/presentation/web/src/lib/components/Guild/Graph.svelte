@@ -25,11 +25,13 @@
     memberCount: "メンバー数",
     level: "レベル",
   };
+
+  const title = $derived(`${metricLabels[metric]}の推移`);
 </script>
 
 <Block>
   <div class="header">
-    <BlockTitle title="推移" />
+    <BlockTitle {title} />
     <select bind:value={metric} aria-label="グラフに表示する指標">
       <option value="activeRate">{metricLabels.activeRate}</option>
       <option value="memberCount">{metricLabels.memberCount}</option>
