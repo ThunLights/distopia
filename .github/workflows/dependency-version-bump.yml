@@ -89,8 +89,10 @@ jobs:
 
             Task:
             1. Before doing anything else, check whether a batch PR from an earlier run is
-               still open: `gh pr list --state open --json headRefName,url --jq
-               '.[] | select(.headRefName | startswith("chore/deps-bump-"))'`. If one exists,
+               still open: `gh pr list --state open --limit 1000 --json headRefName,url --jq
+               '.[] | select(.headRefName | startswith("chore/deps-bump-"))'` (`gh pr list`
+               defaults to only the 30 most recent PRs, which could miss an older batch PR
+               and let a conflicting second batch through). If one exists,
                stop here and end cleanly — let that PR merge or close first rather than
                stacking a second batch of lockfile changes on top of it.
             2. Run `bun outdated` at the repo root, and separately in
@@ -112,11 +114,19 @@ jobs:
                edits for all chosen packages first.
             6. Once every package's pin locations are updated, run `bun install` ONCE to
                refresh `bun.lock` for the whole batch, then verify once with
-               typecheck/lint/build. If a specific package's change is the cause of a
-               failure, revert just that package's edits (and its lockfile entries via
-               another `bun install`) and keep the rest — note the dropped package in the
-               final summary. If nothing survives verification, discard the branch and end
-               without opening a PR.
+               typecheck/lint/build. If that combined verification fails, you cannot assume
+               which package caused it — isolate it deterministically instead of guessing:
+               revert one candidate package's pin-location edits, run `bun install` again to
+               refresh the lockfile, and rerun typecheck/lint/build. If it now passes, that
+               reverted package was (at least one) cause — leave it out and, if more than one
+               package remains, repeat the same one-at-a-time revert-and-verify loop on the
+               rest before concluding they're clean. If it still fails, put that package's
+               edits back, revert a different candidate instead, and continue until
+               verification passes or every package has been tried alone. Keep every package
+               whose removal was never required to make verification pass; note every
+               dropped package and why in the final summary. If nothing survives (removing
+               each package one at a time never gets verification to pass), discard the
+               branch and end without opening a PR.
             7. Follow the `/open-pr` instructions in `.claude/commands/open-pr.md` to commit
                (message: `chore(deps): bump N packages` listing each `<package>
                <old-version> -> <new-version>` on its own line) and open ONE PR against

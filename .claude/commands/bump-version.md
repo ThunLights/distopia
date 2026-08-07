@@ -16,7 +16,7 @@ Follow the **Dependency Version Pins** table in `CLAUDE.md` — a single version
    - **Root `package.json` → `packageManager`** — only when bumping `bun`; format is `bun@<version>`, must equal the catalog `bun` version.
    - **`lib/distopia/jsr.json` → `imports`** — duplicate pin for JSR publishing (`oxfmt`, `oxlint`, `tsdown`, `jsr`, `zod`, `@types/node`); must match `lib/distopia/package.json` / the catalog.
    - **`docker/dockerfile` → `ARG ..._VERSION`** — only for tools baked into the devcontainer image (`BUN_VERSION`, `NODE_VERSION`, `NPM_VERSION`, `JQ_VERSION`, `GITLEAKS_VERSION`, `TRUFFLEHOG_VERSION`, `PLAYWRIGHT_VERSION`). `BUN_VERSION` must match the catalog `bun` version; `PLAYWRIGHT_VERSION` must match `playwright` in `src/presentation/web/package.json`.
-   - **`.github/workflows/*.yml` → `bun-version`** — only for `bun`. `release.yml` currently pins it in 3 places; leave any `bun-version: latest` entries (e.g. in `preview.yml`) untouched since they float intentionally.
+   - **`.github/workflows/*.yml` → `bun-version`** — only for `bun`. Every `bun-version:` value across every workflow (`release.yml` currently pins it in 3 places, `preview.yml` in 1) must match the catalog `bun` version — including replacing a stray `bun-version: latest` if you find one, since CLAUDE.md requires CI-pinned `bun` to track the catalog exactly, not float.
 
 3. **Refresh the lockfile** inside the devcontainer (never on the host — the pre-commit hook needs `sudo`, which only works in-container):
 
