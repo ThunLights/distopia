@@ -1,0 +1,107 @@
+name: Scheduled Dependency Version Bump
+
+# Runs /bump-version + /open-pr (see .claude/commands/) on a schedule to keep
+# pinned dependency versions (package.json, workspaces.catalog, packageManager,
+# lib/distopia/jsr.json, docker/dockerfile ARGs, workflow bun-version pins — see
+# the "Dependency Version Pins" table in CLAUDE.md) up to date. Dependabot does
+# not track `catalog:` entries, so this is the only automated coverage for them.
+#
+# Requires repo secret ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN, swap the
+# input below) with access to the Anthropic API.
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # every Monday 03:00 UTC
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup git identity
+        run: |
+          git config --global user.name "claude[bot]"
+          git config --global user.email "claude[bot]@users.noreply.github.com"
+
+      - name: Checkout nodejs
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.18.0"
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: "1.3.14"
+
+      - name: Install Deps
+        run: bun ci
+
+      # .husky/pre-commit runs trufflehog + gitleaks; install them here so
+      # commits made by the action below don't fail the hook. Pinned to the
+      # same versions as docker/dockerfile's TRUFFLEHOG_VERSION / GITLEAKS_VERSION
+      # ARGs (not `main`) — see the Dependency Version Pins table in CLAUDE.md.
+      - name: Install commit-hook tools
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/v3.95.9/scripts/install.sh | sh -s -- -b /usr/local/bin
+          git clone -b v8.30.1 --depth 1 https://github.com/gitleaks/gitleaks.git "$RUNNER_TEMP/gitleaks"
+          cd "$RUNNER_TEMP/gitleaks" && make build
+          sudo mv gitleaks /usr/local/bin
+
+      - name: Run Claude dependency bump
+        uses: anthropics/claude-code-action@1623c36729ac1cd5895198cded705a287de7db79 # v1.0.187
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --allowedTools
+            'Edit,MultiEdit,Write,Read,Glob,Grep,Bash(git:*),Bash(bun:*),Bash(gh:*),Bash(grep:*),Bash(rg:*)'
+            --max-turns 60
+          prompt: |
+            Repository: ${{ github.repository }}
+            Default branch: main
+
+            You are running directly on an ephemeral GitHub Actions runner, NOT inside the
+            project's devcontainer. Passwordless sudo is already available here and bun/git/gh
+            are already on PATH, so ignore any instruction in .claude/commands/ or CLAUDE.md to
+            wrap commands in `docker compose exec app ...` — run the plain command instead
+            (e.g. `bun install` not `docker compose exec app sudo bun install`,
+            `bun run typecheck` not `docker compose exec app sudo bun run typecheck`). Every
+            other instruction in those files still applies as written.
+
+            Task:
+            1. Run `bun outdated` at the repo root, and separately in
+               `src/presentation/web` (for packages like `@sveltejs/kit` and `playwright`
+               that aren't in `workspaces.catalog`), to see what has newer versions available.
+            2. Pick at most 3 outdated packages to act on this run. Prefer the shared
+               `workspaces.catalog` / tooling packages (bun, oxfmt, oxlint, typescript,
+               vitest, zod, discord.js, @types/node) since Dependabot does not track
+               `catalog:` entries and nothing else surfaces them. Skip any package where the
+               available update crosses a major version boundary — leave those for manual
+               review. If nothing qualifies, do nothing and end here.
+            3. For each chosen package, before creating anything, check whether
+               `chore/bump-<package>-<new-version>` already exists — either as a remote
+               branch (`git ls-remote --heads origin chore/bump-<package>-<new-version>`) or
+               as an open PR (`gh pr list --head chore/bump-<package>-<new-version> --state
+               open`). If it already exists, skip this package (an earlier run is already
+               handling that exact bump) rather than creating a second branch or forcing a
+               non-fast-forward push. Only when neither exists, start from a clean `main`
+               (`git checkout main && git checkout -b chore/bump-<package>-<new-version>`)
+               and follow the `/bump-version <package> <new-version>` instructions in
+               `.claude/commands/bump-version.md` to update every pin location and verify
+               with typecheck/lint/build.
+            4. If verification passes, follow the `/open-pr` instructions in
+               `.claude/commands/open-pr.md` to commit (message: `chore(deps): bump
+               <package> to <new-version>`) and open a PR against `main` with that same
+               title, summarizing exactly which files changed.
+            5. If verification fails for a package, do not commit or open a PR for it —
+               note why in your final summary and move on to the next candidate.
+          track_progress: true
