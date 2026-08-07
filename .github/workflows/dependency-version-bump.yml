@@ -104,4 +104,3 @@ jobs:
                title, summarizing exactly which files changed.
             5. If verification fails for a package, do not commit or open a PR for it —
                note why in your final summary and move on to the next candidate.
-          track_progress: true
