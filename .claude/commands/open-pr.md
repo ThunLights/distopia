@@ -22,7 +22,7 @@ Commit the currently staged/unstaged changes on this branch and open a pull requ
    ```
 
    Write a concise commit message focused on *why*, following the repository's existing commit style (`git log` for examples). End it with:
-   ```
+   ```text
    Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
    ```
 
