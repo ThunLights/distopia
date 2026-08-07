@@ -6,6 +6,10 @@ name: Scheduled Dependency Version Bump
 # the "Dependency Version Pins" table in CLAUDE.md) up to date. Dependabot does
 # not track `catalog:` entries, so this is the only automated coverage for them.
 #
+# All packages bumped in a run land in a single branch/PR (not one PR per
+# package) — separate PRs from the same run all touch bun.lock and conflict
+# with each other as soon as the first one merges.
+#
 # Requires repo secret ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN, swap the
 # input below) with access to the Anthropic API.
 
@@ -77,30 +81,55 @@ jobs:
             `bun run typecheck` not `docker compose exec app sudo bun run typecheck`). Every
             other instruction in those files still applies as written.
 
+            IMPORTANT: bundle every bump from this run into a SINGLE branch and a SINGLE
+            pull request. Do not create one branch/PR per package — separate same-run PRs
+            all touch `bun.lock` (and often the same `package.json`/`jsr.json` keys), so
+            merging one immediately puts the others in conflict with `main`, exactly what
+            happened with #155/#156 previously. One PR per scheduled run avoids that.
+
             Task:
-            1. Run `bun outdated` at the repo root, and separately in
+            1. Before doing anything else, check whether a batch PR from an earlier run is
+               still open: `gh pr list --state open --limit 1000 --json headRefName,url --jq
+               '.[] | select(.headRefName | startswith("chore/deps-bump-"))'` (`gh pr list`
+               defaults to only the 30 most recent PRs, which could miss an older batch PR
+               and let a conflicting second batch through). If one exists,
+               stop here and end cleanly — let that PR merge or close first rather than
+               stacking a second batch of lockfile changes on top of it.
+            2. Run `bun outdated` at the repo root, and separately in
                `src/presentation/web` (for packages like `@sveltejs/kit` and `playwright`
                that aren't in `workspaces.catalog`), to see what has newer versions available.
-            2. Pick at most 3 outdated packages to act on this run. Prefer the shared
+            3. Pick at most 3 outdated packages to act on this run. Prefer the shared
                `workspaces.catalog` / tooling packages (bun, oxfmt, oxlint, typescript,
                vitest, zod, discord.js, @types/node) since Dependabot does not track
                `catalog:` entries and nothing else surfaces them. Skip any package where the
                available update crosses a major version boundary — leave those for manual
                review. If nothing qualifies, do nothing and end here.
-            3. For each chosen package, before creating anything, check whether
-               `chore/bump-<package>-<new-version>` already exists — either as a remote
-               branch (`git ls-remote --heads origin chore/bump-<package>-<new-version>`) or
-               as an open PR (`gh pr list --head chore/bump-<package>-<new-version> --state
-               open`). If it already exists, skip this package (an earlier run is already
-               handling that exact bump) rather than creating a second branch or forcing a
-               non-fast-forward push. Only when neither exists, start from a clean `main`
-               (`git checkout main && git checkout -b chore/bump-<package>-<new-version>`)
-               and follow the `/bump-version <package> <new-version>` instructions in
-               `.claude/commands/bump-version.md` to update every pin location and verify
-               with typecheck/lint/build.
-            4. If verification passes, follow the `/open-pr` instructions in
-               `.claude/commands/open-pr.md` to commit (message: `chore(deps): bump
-               <package> to <new-version>`) and open a PR against `main` with that same
-               title, summarizing exactly which files changed.
-            5. If verification fails for a package, do not commit or open a PR for it —
-               note why in your final summary and move on to the next candidate.
+            4. Create one branch off a clean `main` for the whole batch:
+               `git checkout main && git checkout -b chore/deps-bump-<run-id>` (use
+               `${{ github.run_id }}` for `<run-id>`).
+            5. For each chosen package, in that same branch, follow the version-file edits
+               from `/bump-version <package> <new-version>` in
+               `.claude/commands/bump-version.md` — i.e. update every pin location for that
+               package — but do NOT run its own `bun install` or verification yet; apply the
+               edits for all chosen packages first.
+            6. Once every package's pin locations are updated, run `bun install` ONCE to
+               refresh `bun.lock` for the whole batch, then verify once with
+               typecheck/lint/build. If that combined verification fails, you cannot assume
+               which package caused it — isolate it deterministically instead of guessing:
+               revert one candidate package's pin-location edits, run `bun install` again to
+               refresh the lockfile, and rerun typecheck/lint/build. If it now passes, that
+               reverted package was (at least one) cause — leave it out and, if more than one
+               package remains, repeat the same one-at-a-time revert-and-verify loop on the
+               rest before concluding they're clean. If it still fails, put that package's
+               edits back, revert a different candidate instead, and continue until
+               verification passes or every package has been tried alone. Keep every package
+               whose removal was never required to make verification pass; note every
+               dropped package and why in the final summary. If nothing survives (removing
+               each package one at a time never gets verification to pass), discard the
+               branch and end without opening a PR.
+            7. Follow the `/open-pr` instructions in `.claude/commands/open-pr.md` to commit
+               (message: `chore(deps): bump N packages` listing each `<package>
+               <old-version> -> <new-version>` on its own line) and open ONE PR against
+               `main` titled `chore(deps): scheduled dependency bump` (or, if only one
+               package survived, `chore(deps): bump <package> to <new-version>`),
+               summarizing every package bumped and every file touched.
