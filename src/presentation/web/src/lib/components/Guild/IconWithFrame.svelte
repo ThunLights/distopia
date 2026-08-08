@@ -1,7 +1,5 @@
 <script lang="ts">
   import DiscordIcon from "$lib/assets/icon/discord.webp";
-  import { onMount } from "svelte";
-  import { v4 } from "uuid";
 
   type Props = {
     height: number | string;
@@ -14,19 +12,23 @@
   const { imgStyle, iconPath, edgePath, height, width }: Props = $props();
 
   const size = 512;
-  const uuid = v4();
+  const uuid = crypto.randomUUID();
   const image1Id = uuid + "Image1Id";
   const image2Id = uuid + "Image2Id";
   const clipId = uuid + "clipId";
 
-  let imgPath = $state(DiscordIcon);
+  let failed = $state(false);
 
-  onMount(async () => {
-    const reponse = await fetch(iconPath);
-    if (reponse.status === 200) {
-      imgPath = iconPath;
-    }
+  $effect(() => {
+    void iconPath;
+    failed = false;
   });
+
+  const imgPath = $derived(failed ? DiscordIcon : iconPath);
+
+  function handleIconError() {
+    failed = true;
+  }
 </script>
 
 <svg
@@ -54,6 +56,13 @@
   </g>
   <defs>
     <image id={image1Id} width={size} height={size} href={edgePath} xlink:href={edgePath} />
-    <image id={image2Id} width={size} height={size} href={imgPath} xlink:href={imgPath} />
+    <image
+      id={image2Id}
+      width={size}
+      height={size}
+      href={imgPath}
+      xlink:href={imgPath}
+      onerror={handleIconError}
+    />
   </defs>
 </svg>
