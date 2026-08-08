@@ -68,7 +68,7 @@ jobs:
           claude_args: >-
             --allowedTools
             'Edit,MultiEdit,Write,Read,Glob,Grep,Bash(git:*),Bash(bun:*),Bash(gh:*),Bash(grep:*),Bash(rg:*)'
-            --max-turns 60
+            --max-turns 180
           prompt: |
             Repository: ${{ github.repository }}
             Default branch: main
