@@ -1,3 +1,4 @@
+import { partytownVite } from "@qwik.dev/partytown/utils";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { enhancedImages } from "@sveltejs/enhanced-img";
 import { sveltekit } from "@sveltejs/kit/vite";
@@ -13,7 +14,7 @@ const dirname =
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [tailwindcss(), enhancedImages(), sveltekit(), devtoolsJson()],
+  plugins: [tailwindcss(), enhancedImages(), sveltekit(), partytownVite({}), devtoolsJson()],
   server: {
     watch: {
       ignored: [

@@ -66,6 +66,7 @@
   "dependencies": {
     "@fontsource/inter": "5.2.8",
     "@fontsource/open-sans": "5.2.7",
+    "@qwik.dev/partytown": "0.14.0",
     "@standard-schema/spec": "catalog:",
     "app-core": "workspace:*",
     "app-schedule": "workspace:*",
