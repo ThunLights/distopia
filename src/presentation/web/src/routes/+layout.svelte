@@ -12,7 +12,7 @@
   <script>
     window.partytown = { forward: ["dataLayer.push"] };
   </script>
-  <script async src="/~partytown/partytown.js"></script>
+  <script src="/~partytown/partytown.js"></script>
   <script
     async
     fetchpriority="low"
