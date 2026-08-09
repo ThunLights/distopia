@@ -45,7 +45,7 @@ export class BumpSettingSelectMenu extends StringSelectMenuInteractionBase {
       const offButton = new ButtonBuilder()
         .setCustomId("bumpNoticeOff")
         .setLabel("通知OFF")
-        .setStyle(ButtonStyle.Success);
+        .setStyle(ButtonStyle.Danger);
 
       return await interaction.update({
         embeds: [embed],
