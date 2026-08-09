@@ -10,7 +10,7 @@ import {
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { RoleSelectMenuInteractionBase } from "../Base/RoleSelectMenuInteractionBase";
-import { page } from "../Page/Settings";
+import { bumpPage } from "../Page/BumpPage";
 
 export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -31,7 +31,7 @@ export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {
       bumpNoticeRole: options.roleId,
     });
 
-    const settingPage = await page(this.core, guild);
+    const settingPage = await bumpPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 

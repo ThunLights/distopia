@@ -41,11 +41,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
     .setPlaceholder("変更要素を選択")
     .addOptions(
       new StringSelectMenuOptionBuilder().setLabel("代理オーナー設定").setValue("actingOwner"),
-      new StringSelectMenuOptionBuilder().setLabel("Bump通知 ON/OFF").setValue("bumpNotice"),
-      new StringSelectMenuOptionBuilder().setLabel("Bumpt通知ロール").setValue("bumpRole"),
-      new StringSelectMenuOptionBuilder()
-        .setLabel("Bump時のメッセージを変更")
-        .setValue("bumpNoticeContent"),
+      new StringSelectMenuOptionBuilder().setLabel("Bump設定").setValue("bump"),
       new StringSelectMenuOptionBuilder()
         .setLabel("招待リンクブロック")
         .setValue("inviteLinkBlock"),

@@ -12,7 +12,7 @@ import z from "zod";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
-import { page } from "../Page/Settings";
+import { bumpPage } from "../Page/BumpPage";
 
 const OptionsSchema = z.object({
   content: z.string().max(CHARACTER_LIMIT.description),
@@ -47,7 +47,7 @@ export class BumpNoticeContentModal extends ModalSubmitInteractionBase<Options> 
 
     await this.core.guild.saveSetting({ guildId: guild.id, bumpNoticeContent: options.content });
 
-    const settingPage = await page(this.core, guild);
+    const settingPage = await bumpPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 

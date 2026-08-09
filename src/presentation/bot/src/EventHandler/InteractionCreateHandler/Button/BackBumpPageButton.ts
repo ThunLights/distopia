@@ -12,9 +12,9 @@ import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { bumpPage } from "../Page/BumpPage";
 
-export class BumpNoticeOnButton extends ButtonInteractionBase {
+export class BackBumpPageButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override customId: string = "bumpNoticeOn";
+  public override customId: string = "backBumpPage";
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
@@ -25,11 +25,9 @@ export class BumpNoticeOnButton extends ButtonInteractionBase {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({ guildId: guild.id, bumpNotice: true });
+    const bumpPagePayload = await bumpPage(this.core, guild);
 
-    const settingPage = await bumpPage(this.core, guild);
-
-    const { content, components, embeds, allowedMentions, files } = settingPage;
+    const { content, components, embeds, allowedMentions, files } = bumpPagePayload;
 
     return await interaction.update({
       content,
