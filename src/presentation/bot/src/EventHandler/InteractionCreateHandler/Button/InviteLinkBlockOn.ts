@@ -10,7 +10,7 @@ import {
 
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
-import { page } from "../Page/Settings";
+import { antiRaidPage } from "../Page/AntiRaidPage";
 
 export class InviteLinkBlockOn extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -27,7 +27,7 @@ export class InviteLinkBlockOn extends ButtonInteractionBase {
 
     await this.core.guild.saveSetting({ guildId: guild.id, inviteLinkBlock: true });
 
-    const settingPage = await page(this.core, guild);
+    const settingPage = await antiRaidPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
