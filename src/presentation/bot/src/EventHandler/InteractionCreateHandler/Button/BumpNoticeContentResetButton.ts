@@ -10,7 +10,7 @@ import {
 
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
-import { page } from "../Page/Settings";
+import { bumpPage } from "../Page/BumpPage";
 
 export class BumpNoticeContentResetButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -27,7 +27,7 @@ export class BumpNoticeContentResetButton extends ButtonInteractionBase {
 
     await this.core.guild.saveSetting({ guildId: guild.id, bumpNoticeContent: null });
 
-    const settingPage = await page(this.core, guild);
+    const settingPage = await bumpPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 

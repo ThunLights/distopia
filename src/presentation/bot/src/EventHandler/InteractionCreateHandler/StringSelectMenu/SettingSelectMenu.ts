@@ -10,13 +10,13 @@ import {
   ActionRowBuilder,
   MessageFlags,
   type PermissionResolvable,
-  RoleSelectMenuBuilder,
   InteractionResponse,
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
+import { bumpPage } from "../Page/BumpPage";
 import { statChannelPage } from "../Page/StatChannelPage";
 import { whiteListPage } from "../Page/WhiteListPage";
 
@@ -54,79 +54,23 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
           ),
         ],
       });
-    } else if (value === "bumpNotice") {
-      const embed = new EmbedBuilder()
-        .setColor("Navy")
-        .setTitle("Bump通知設定")
-        .setDescription("以下のボタンから通知設定を変更可能です。");
+    } else if (value === "bump") {
+      const guild = await this.parseGuild(interaction);
 
-      const onButton = new ButtonBuilder()
-        .setCustomId("bumpNoticeOn")
-        .setLabel("通知ON")
-        .setStyle(ButtonStyle.Success);
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
 
-      const offButton = new ButtonBuilder()
-        .setCustomId("bumpNoticeOff")
-        .setLabel("通知OFF")
-        .setStyle(ButtonStyle.Success);
+      const bumpPagePayload = await bumpPage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = bumpPagePayload;
 
       return await interaction.update({
-        embeds: [embed],
-        components: [
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            await backSettingsPageButton(),
-            offButton,
-            onButton,
-          ),
-        ],
-      });
-    } else if (value === "bumpRole") {
-      const embed = new EmbedBuilder()
-        .setColor("Navy")
-        .setTitle("Bump通知: ロール")
-        .setDescription("再Bump可能時にロールをメンションします。");
-
-      const roleSelector = new RoleSelectMenuBuilder().setCustomId("bumpRole");
-
-      const resetButton = new ButtonBuilder()
-        .setLabel("ロールをリセットする")
-        .setStyle(ButtonStyle.Danger)
-        .setCustomId("bumpRoleReset");
-
-      return await interaction.update({
-        embeds: [embed],
-        components: [
-          new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(roleSelector),
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            await backSettingsPageButton(),
-            resetButton,
-          ),
-        ],
-      });
-    } else if (value === "bumpNoticeContent") {
-      const embed = new EmbedBuilder()
-        .setColor("Navy")
-        .setTitle("Bumpメッセージ設定")
-        .setDescription("Bumpメッセージを設定することができます。");
-
-      const submitButton = new ButtonBuilder()
-        .setCustomId("bumpNoticeContentSubmit")
-        .setLabel("設定する")
-        .setStyle(ButtonStyle.Success);
-      const resetButton = new ButtonBuilder()
-        .setCustomId("bumpNoticeContentReset")
-        .setLabel("リセット")
-        .setStyle(ButtonStyle.Danger);
-
-      return await interaction.update({
-        embeds: [embed],
-        components: [
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            await backSettingsPageButton(),
-            resetButton,
-            submitButton,
-          ),
-        ],
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
       });
     } else if (value === "inviteLinkBlock") {
       const embed = new EmbedBuilder()
