@@ -16,6 +16,7 @@ import {
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
+import { antiRaidPage } from "../Page/AntiRaidPage";
 import { bumpPage } from "../Page/BumpPage";
 import { statChannelPage } from "../Page/StatChannelPage";
 import { whiteListPage } from "../Page/WhiteListPage";
@@ -72,30 +73,23 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
         allowedMentions,
         files,
       });
-    } else if (value === "inviteLinkBlock") {
-      const embed = new EmbedBuilder()
-        .setColor("Navy")
-        .setTitle("招待リンクブロック")
-        .setDescription("招待リンクをブロックすることが出来ます。");
+    } else if (value === "antiRaid") {
+      const guild = await this.parseGuild(interaction);
 
-      const onButton = new ButtonBuilder()
-        .setCustomId("inviteLinkBlockOn")
-        .setLabel("On")
-        .setStyle(ButtonStyle.Success);
-      const offButton = new ButtonBuilder()
-        .setCustomId("inviteLinkBlockOff")
-        .setLabel("Off")
-        .setStyle(ButtonStyle.Danger);
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const antiRaidPagePayload = await antiRaidPage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = antiRaidPagePayload;
 
       return await interaction.update({
-        embeds: [embed],
-        components: [
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            await backSettingsPageButton(),
-            offButton,
-            onButton,
-          ),
-        ],
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
       });
     } else if (value === "whiteList") {
       const guild = await this.parseGuild(interaction);
