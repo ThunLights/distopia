@@ -14,13 +14,16 @@ import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButt
 export async function antiRaidPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const settings = await core.guild.getSetting(guild.id);
 
+  const inviteLinkBlockStatus =
+    settings?.inviteLinkBlock === undefined ? "未設定" : settings.inviteLinkBlock ? "On" : "Off";
+
   const embed = new EmbedBuilder()
     .setColor("Navy")
     .setTitle("荒らし対策設定")
     .setDescription("以下から変更したい項目を選択してください。")
     .addFields({
       name: "招待リンクブロック",
-      value: settings?.inviteLinkBlock ? "On" : "未設定",
+      value: inviteLinkBlockStatus,
       inline: false,
     });
 
