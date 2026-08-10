@@ -97,6 +97,22 @@ model GuildSetting {
   bumpNoticeContent            String?
   inviteLinkBlock              Boolean @default(false)
   logAntiRaid                  String?
+  logMemberJoin                String?
+  logMemberLeave               String?
+  logMemberTimeout             String?
+  logMemberKick                String?
+  logMemberBan                 String?
+  logMemberUnban               String?
+  logRoleCreate                String?
+  logRoleEdit                  String?
+  logRoleDelete                String?
+  logChannelCreate             String?
+  logChannelEdit               String?
+  logChannelDelete             String?
+  logMessageEdit               String?
+  logMessageDelete             String?
+  logVoiceJoin                 String?
+  logVoiceLeave                String?
   statChannelAllMembers        String?
   statChannelUsers             String?
   statChannelBots              String?

@@ -1,0 +1,17 @@
+-- AlterTable
+ALTER TABLE "GuildSetting" ADD COLUMN     "logChannelCreate" TEXT,
+ADD COLUMN     "logChannelDelete" TEXT,
+ADD COLUMN     "logChannelEdit" TEXT,
+ADD COLUMN     "logMemberBan" TEXT,
+ADD COLUMN     "logMemberJoin" TEXT,
+ADD COLUMN     "logMemberKick" TEXT,
+ADD COLUMN     "logMemberLeave" TEXT,
+ADD COLUMN     "logMemberTimeout" TEXT,
+ADD COLUMN     "logMemberUnban" TEXT,
+ADD COLUMN     "logMessageDelete" TEXT,
+ADD COLUMN     "logMessageEdit" TEXT,
+ADD COLUMN     "logRoleCreate" TEXT,
+ADD COLUMN     "logRoleDelete" TEXT,
+ADD COLUMN     "logRoleEdit" TEXT,
+ADD COLUMN     "logVoiceJoin" TEXT,
+ADD COLUMN     "logVoiceLeave" TEXT;
