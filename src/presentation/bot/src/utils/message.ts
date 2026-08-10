@@ -1,6 +1,8 @@
 import type { AppCore } from "app-core";
 import { EmbedBuilder, type Message, type OmitPartialGroupDMChannel } from "discord.js";
 
+import { codeBlock } from "./codeblock";
+
 async function logAntiRaidTrigger(
   settings: Awaited<ReturnType<AppCore["guild"]["getSetting"]>>,
   message: OmitPartialGroupDMChannel<Message<boolean>>,
@@ -25,7 +27,8 @@ async function logAntiRaidTrigger(
       [
         `ユーザー: <@${message.author.id}> (${message.author.id})`,
         `チャンネル: <#${message.channelId}>`,
-        `検知したリンク: ${inviteLinks.join(", ")}`,
+        "検知したリンク:",
+        codeBlock(inviteLinks.join("\n")),
       ].join("\n"),
     )
     .setTimestamp();
