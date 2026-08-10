@@ -8,7 +8,7 @@ import {
   type StringSelectMenuInteraction,
 } from "discord.js";
 
-import { isLogField } from "../../../utils/log";
+import { isLogField, type LogField } from "../../../utils/log";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { PermissionError } from "../Base/Error/PermissionError";
 import { MessageComponentInteractionBase } from "../Base/MessageComponentInteractionBase";
@@ -38,9 +38,16 @@ export class LogBulkClearFieldsSelectMenu extends MessageComponentInteractionBas
 
     const fields = interaction.values.filter(isLogField);
 
-    for (const field of fields) {
-      await this.core.guild.saveSetting({ guildId: guild.id, [field]: null });
+    if (!fields.length) {
+      return { content: "有効なログ種類が選択されていません。", flags: [MessageFlags.Ephemeral] };
     }
+
+    const updates = fields.reduce<Partial<Record<LogField, null>>>((acc, field) => {
+      acc[field] = null;
+      return acc;
+    }, {});
+
+    await this.core.guild.saveSetting({ guildId: guild.id, ...updates });
 
     const logPagePayload = await logPage(this.core, guild);
 

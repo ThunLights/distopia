@@ -14,13 +14,13 @@ export class MessageUpdateHandler extends BaseHandler<
     oldMessage: OmitPartialGroupDMChannel<Message<boolean> | PartialMessage<boolean>>,
     newMessage: OmitPartialGroupDMChannel<Message<boolean>>,
   ): Promise<void> {
-    const isDetected = await detectSpamMessage(this.core, newMessage);
-
-    if (isDetected) {
+    if (!newMessage.guild || newMessage.author.bot) {
       return;
     }
 
-    if (!newMessage.guild || newMessage.author.bot) {
+    const isDetected = await detectSpamMessage(this.core, newMessage);
+
+    if (isDetected) {
       return;
     }
 

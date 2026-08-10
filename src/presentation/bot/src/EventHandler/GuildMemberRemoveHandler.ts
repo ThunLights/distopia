@@ -39,19 +39,27 @@ export class GuildMemberRemoveHandler extends BaseHandler<
   private async classifyRemoval(
     member: GuildMember | PartialGuildMember,
   ): Promise<"ban" | "kick" | "leave"> {
+    const recentThreshold = Date.now() - recentAuditLogWindowMs;
+
     try {
-      const auditLogs = await member.guild.fetchAuditLogs({ limit: 5 });
-      const recentThreshold = Date.now() - recentAuditLogWindowMs;
+      const banLogs = await member.guild.fetchAuditLogs({
+        type: AuditLogEvent.MemberBanAdd,
+        limit: 3,
+      });
 
-      for (const entry of auditLogs.entries.values()) {
-        if (entry.targetId !== member.id || entry.createdTimestamp < recentThreshold) {
-          continue;
-        }
-
-        if (entry.action === AuditLogEvent.MemberBanAdd) {
+      for (const entry of banLogs.entries.values()) {
+        if (entry.targetId === member.id && entry.createdTimestamp >= recentThreshold) {
           return "ban";
         }
-        if (entry.action === AuditLogEvent.MemberKick) {
+      }
+
+      const kickLogs = await member.guild.fetchAuditLogs({
+        type: AuditLogEvent.MemberKick,
+        limit: 3,
+      });
+
+      for (const entry of kickLogs.entries.values()) {
+        if (entry.targetId === member.id && entry.createdTimestamp >= recentThreshold) {
           return "kick";
         }
       }

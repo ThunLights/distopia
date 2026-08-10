@@ -9,14 +9,11 @@ export class MessageDeleteHandler extends BaseHandler<
   public override async handle(
     message: OmitPartialGroupDMChannel<Message<boolean> | PartialMessage<boolean>>,
   ): Promise<void> {
-    if (!message.guild || message.author?.bot) {
+    if (!message.guild || message.partial || message.author.bot) {
       return;
     }
 
-    const content = message.partial ? "(内容不明)" : (message.content || "(空)").slice(0, 1000);
-    const authorMention = message.author
-      ? `<@${message.author.id}> (${message.author.id})`
-      : "不明なユーザー";
+    const content = (message.content || "(空)").slice(0, 1000);
 
     await sendLog(
       this.core,
@@ -24,7 +21,7 @@ export class MessageDeleteHandler extends BaseHandler<
       "logMessageDelete",
       "メッセージ削除",
       [
-        `${authorMention} のメッセージが削除されました。`,
+        `<@${message.author.id}> (${message.author.id}) のメッセージが削除されました。`,
         `チャンネル: <#${message.channelId}>`,
         `内容: ${content}`,
       ].join("\n"),

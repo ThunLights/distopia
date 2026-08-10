@@ -10,10 +10,12 @@ export class GuildMemberUpdateHandler extends BaseHandler<
     oldMember: GuildMember | PartialGuildMember,
     newMember: GuildMember,
   ): Promise<void> {
+    const now = Date.now();
     const oldUntil = oldMember.communicationDisabledUntilTimestamp;
     const newUntil = newMember.communicationDisabledUntilTimestamp;
 
-    const isNewTimeout = newUntil !== null && newUntil > Date.now() && newUntil !== oldUntil;
+    const wasTimedOut = oldUntil !== null && oldUntil > now;
+    const isNewTimeout = newUntil !== null && newUntil > now && !wasTimedOut;
 
     if (!isNewTimeout) {
       return;
