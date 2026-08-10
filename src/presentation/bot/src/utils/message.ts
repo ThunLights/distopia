@@ -1,5 +1,40 @@
 import type { AppCore } from "app-core";
-import type { Message, OmitPartialGroupDMChannel } from "discord.js";
+import { EmbedBuilder, type Message, type OmitPartialGroupDMChannel } from "discord.js";
+
+import { codeBlock } from "./codeblock";
+
+async function logAntiRaidTrigger(
+  settings: Awaited<ReturnType<AppCore["guild"]["getSetting"]>>,
+  message: OmitPartialGroupDMChannel<Message<boolean>>,
+  inviteLinks: string[],
+): Promise<void> {
+  const logChannelId = settings?.logAntiRaid;
+
+  if (!logChannelId || !message.guild) {
+    return;
+  }
+
+  const channel = message.guild.channels.cache.get(logChannelId);
+
+  if (!channel?.isSendable()) {
+    return;
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor("Red")
+    .setTitle("荒らし対策: 招待リンクを検知しました")
+    .setDescription(
+      [
+        `ユーザー: <@${message.author.id}> (${message.author.id})`,
+        `チャンネル: <#${message.channelId}>`,
+        "検知したリンク:",
+        await codeBlock(inviteLinks.join("\n")),
+      ].join("\n"),
+    )
+    .setTimestamp();
+
+  await channel.send({ embeds: [embed] });
+}
 
 export async function detectSpamMessage(
   core: AppCore,
@@ -29,6 +64,7 @@ export async function detectSpamMessage(
       if (message.deletable) {
         await message.delete();
       }
+      await logAntiRaidTrigger(settings, message, inviteLinks);
       return true;
     }
 
@@ -50,6 +86,8 @@ export async function detectSpamMessage(
       if (message.deletable) {
         await message.delete();
       }
+
+      await logAntiRaidTrigger(settings, message, embedInviteLinks);
 
       return true;
     }

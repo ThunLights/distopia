@@ -7,6 +7,7 @@ export type GuildSettingValue = {
   bumpNoticeRole: string | null;
   bumpNoticeContent: string | null;
   inviteLinkBlock: boolean;
+  logAntiRaid: string | null;
   statChannelAllMembers: string | null;
   statChannelUsers: string | null;
   statChannelBots: string | null;
