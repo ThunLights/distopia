@@ -18,6 +18,7 @@ import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInterac
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 import { antiRaidPage } from "../Page/AntiRaidPage";
 import { bumpPage } from "../Page/BumpPage";
+import { logPage } from "../Page/LogPage";
 import { statChannelPage } from "../Page/StatChannelPage";
 import { whiteListPage } from "../Page/WhiteListPage";
 
@@ -83,6 +84,24 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
       const antiRaidPagePayload = await antiRaidPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = antiRaidPagePayload;
+
+      return await interaction.update({
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
+      });
+    } else if (value === "log") {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const logPagePayload = await logPage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = logPagePayload;
 
       return await interaction.update({
         content,
