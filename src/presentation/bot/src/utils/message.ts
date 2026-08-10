@@ -28,7 +28,7 @@ async function logAntiRaidTrigger(
         `ユーザー: <@${message.author.id}> (${message.author.id})`,
         `チャンネル: <#${message.channelId}>`,
         "検知したリンク:",
-        codeBlock(inviteLinks.join("\n")),
+        await codeBlock(inviteLinks.join("\n")),
       ].join("\n"),
     )
     .setTimestamp();
