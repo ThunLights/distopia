@@ -185,6 +185,7 @@ describe("GuildSetting.gc()", () => {
       bumpNoticeRole: null,
       bumpNoticeContent: null,
       inviteLinkBlock: false,
+      logAntiRaid: null,
       statChannelAllMembers: null,
       statChannelUsers: null,
       statChannelBots: null,
