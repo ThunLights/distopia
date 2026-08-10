@@ -10,24 +10,28 @@ export async function sendLog(
   title: string,
   description: string,
 ): Promise<void> {
-  const settings = await core.guild.getSetting(guild.id);
-  const channelId = settings?.[field];
+  try {
+    const settings = await core.guild.getSetting(guild.id);
+    const channelId = settings?.[field];
 
-  if (!channelId) {
-    return;
+    if (!channelId) {
+      return;
+    }
+
+    const channel = guild.channels.cache.get(channelId);
+
+    if (!channel?.isSendable()) {
+      return;
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor("Navy")
+      .setTitle(title)
+      .setDescription(description)
+      .setTimestamp();
+
+    await channel.send({ embeds: [embed] });
+  } catch (error) {
+    console.error(`Failed to send log for ${field}:`, error);
   }
-
-  const channel = guild.channels.cache.get(channelId);
-
-  if (!channel?.isSendable()) {
-    return;
-  }
-
-  const embed = new EmbedBuilder()
-    .setColor("Navy")
-    .setTitle(title)
-    .setDescription(description)
-    .setTimestamp();
-
-  await channel.send({ embeds: [embed] });
 }
