@@ -2,6 +2,7 @@ import type { AppCore } from "app-core";
 import {
   ActionRowBuilder,
   ButtonBuilder,
+  ButtonStyle,
   EmbedBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
@@ -42,11 +43,25 @@ export async function logPage(core: AppCore, guild: Guild): Promise<InteractionR
       ),
     );
 
+  const bulkSetButton = new ButtonBuilder()
+    .setCustomId("logBulkSet")
+    .setLabel("一括設定")
+    .setStyle(ButtonStyle.Success);
+
+  const bulkClearButton = new ButtonBuilder()
+    .setCustomId("logBulkClear")
+    .setLabel("一括解除")
+    .setStyle(ButtonStyle.Danger);
+
   return {
     embeds: [embed],
     components: [
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selector),
-      new ActionRowBuilder<ButtonBuilder>().addComponents(await backSettingsPageButton()),
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        await backSettingsPageButton(),
+        bulkSetButton,
+        bulkClearButton,
+      ),
     ],
   };
 }
