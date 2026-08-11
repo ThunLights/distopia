@@ -25,6 +25,13 @@ export class GuildMemberUpdateHandler extends BaseHandler<
       newMember.guild,
       AuditLogEvent.MemberUpdate,
       newMember.id,
+      (candidate) =>
+        candidate.changes.some(
+          (change) =>
+            change.key === "communication_disabled_until" &&
+            typeof change.new === "string" &&
+            new Date(change.new).getTime() === newUntil,
+        ),
     );
 
     await this.logger.log(

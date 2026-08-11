@@ -12,7 +12,7 @@ export class MessageDeleteHandler extends BaseHandler<
       return;
     }
 
-    const content = (message.content || "(空)").slice(0, 1000);
+    const content = message.content || "(空)";
 
     await this.logger.log(message.guild, "logMessageDelete", message, content);
   }
