@@ -24,7 +24,7 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "node-cron": "4.2.1",
+    "node-cron": "4.6.0",
     "typescript": "catalog:"
   }
 }
