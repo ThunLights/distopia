@@ -1,6 +1,5 @@
 import type { DMChannel, NonThreadGuildBasedChannel } from "discord.js";
 
-import { sendLog } from "../utils/sendLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class ChannelUpdateHandler extends BaseHandler<
@@ -31,12 +30,6 @@ export class ChannelUpdateHandler extends BaseHandler<
       return;
     }
 
-    await sendLog(
-      this.core,
-      newChannel.guild,
-      "logChannelEdit",
-      "チャンネル編集",
-      [`<#${newChannel.id}> (${newChannel.name}) が編集されました。`, ...changes].join("\n"),
-    );
+    await this.logger.log(newChannel.guild, "logChannelEdit", newChannel, changes);
   }
 }

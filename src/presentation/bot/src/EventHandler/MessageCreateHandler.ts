@@ -9,7 +9,7 @@ export class MessageCreateHandler extends BaseHandler<
   public override async handle(
     message: OmitPartialGroupDMChannel<Message<boolean>>,
   ): Promise<void> {
-    const isDetected = await detectSpamMessage(this.core, message);
+    const isDetected = await detectSpamMessage(this.core, this.logger, message);
 
     if (isDetected) {
       return;

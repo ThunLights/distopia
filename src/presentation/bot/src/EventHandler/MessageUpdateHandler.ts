@@ -1,7 +1,6 @@
 import type { Message, OmitPartialGroupDMChannel, PartialMessage } from "discord.js";
 
 import { detectSpamMessage } from "../utils/message";
-import { sendLog } from "../utils/sendLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class MessageUpdateHandler extends BaseHandler<
@@ -18,7 +17,7 @@ export class MessageUpdateHandler extends BaseHandler<
       return;
     }
 
-    const isDetected = await detectSpamMessage(this.core, newMessage);
+    const isDetected = await detectSpamMessage(this.core, this.logger, newMessage);
 
     if (isDetected) {
       return;
@@ -33,17 +32,6 @@ export class MessageUpdateHandler extends BaseHandler<
       : (oldMessage.content || "(空)").slice(0, 1000);
     const newContent = (newMessage.content || "(空)").slice(0, 1000);
 
-    await sendLog(
-      this.core,
-      newMessage.guild,
-      "logMessageEdit",
-      "メッセージ編集",
-      [
-        `<@${newMessage.author.id}> (${newMessage.author.id}) がメッセージを編集しました。`,
-        `チャンネル: <#${newMessage.channelId}>`,
-        `編集前: ${oldContent}`,
-        `編集後: ${newContent}`,
-      ].join("\n"),
-    );
+    await this.logger.log(newMessage.guild, "logMessageEdit", newMessage, oldContent, newContent);
   }
 }

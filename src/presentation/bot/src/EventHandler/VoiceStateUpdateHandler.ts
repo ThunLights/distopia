@@ -1,6 +1,5 @@
 import type { VoiceState } from "discord.js";
 
-import { sendLog } from "../utils/sendLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class VoiceStateUpdateHandler extends BaseHandler<
@@ -14,23 +13,11 @@ export class VoiceStateUpdateHandler extends BaseHandler<
     const memberId = newState.id;
 
     if (oldState.channelId) {
-      await sendLog(
-        this.core,
-        newState.guild,
-        "logVoiceLeave",
-        "ボイスチャンネル退出",
-        `<@${memberId}> (${memberId}) が <#${oldState.channelId}> から退出しました。`,
-      );
+      await this.logger.log(newState.guild, "logVoiceLeave", memberId, oldState.channelId);
     }
 
     if (newState.channelId) {
-      await sendLog(
-        this.core,
-        newState.guild,
-        "logVoiceJoin",
-        "ボイスチャンネル参加",
-        `<@${memberId}> (${memberId}) が <#${newState.channelId}> に参加しました。`,
-      );
+      await this.logger.log(newState.guild, "logVoiceJoin", memberId, newState.channelId);
     }
   }
 }
