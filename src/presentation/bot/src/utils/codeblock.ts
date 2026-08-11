@@ -1,4 +1,4 @@
 export async function codeBlock(content: string, lang?: string) {
   const codeBlockLang = lang ?? "";
-  return `\`\`\`${codeBlockLang}\n` + content.replaceAll("`", "\`") + "```\n";
+  return `\`\`\`${codeBlockLang}\n` + content.replaceAll("`", "\\`") + "```\n";
 }
