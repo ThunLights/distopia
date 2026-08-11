@@ -79,7 +79,7 @@
     "presentation-bot": "workspace:*",
     "repo-memory": "workspace:*",
     "repo-search": "workspace:*",
-    "super-sitemap": "1.0.12",
+    "super-sitemap": "2.0.6",
     "svelte-exmarkdown": "5.0.2",
     "zod": "catalog:"
   },
