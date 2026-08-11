@@ -1,9 +1,12 @@
-import type { GuildBan } from "discord.js";
+import { AuditLogEvent, type GuildBan } from "discord.js";
 
+import { findRecentAuditLogEntry } from "../utils/auditLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildBanAddHandler extends BaseHandler<(ban: GuildBan) => void> {
   public override async handle(ban: GuildBan): Promise<void> {
-    await this.logger.log(ban.guild, "logMemberBan", ban);
+    const entry = await findRecentAuditLogEntry(ban.guild, AuditLogEvent.MemberBanAdd, ban.user.id);
+
+    await this.logger.log(ban.guild, "logMemberBan", ban, entry?.executor ?? null);
   }
 }

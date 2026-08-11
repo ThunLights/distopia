@@ -27,13 +27,17 @@ export class Logger {
       }
 
       const format = logFormats[field] as LogFormat;
-      const description = await format.build(...args);
+      const content = await format.build(...args);
 
       const embed = new EmbedBuilder()
         .setColor(format.color ?? "Navy")
         .setTitle(format.title)
-        .setDescription(description)
+        .setDescription(content.description)
         .setTimestamp();
+
+      if (content.fields?.length) {
+        embed.addFields(content.fields);
+      }
 
       await channel.send({ embeds: [embed] });
     } catch (error) {

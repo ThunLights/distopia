@@ -27,10 +27,8 @@ export class MessageUpdateHandler extends BaseHandler<
       return;
     }
 
-    const oldContent = oldMessage.partial
-      ? "(内容不明)"
-      : (oldMessage.content || "(空)").slice(0, 1000);
-    const newContent = (newMessage.content || "(空)").slice(0, 1000);
+    const oldContent = oldMessage.partial ? "(内容不明)" : oldMessage.content || "(空)";
+    const newContent = newMessage.content || "(空)";
 
     await this.logger.log(newMessage.guild, "logMessageEdit", newMessage, oldContent, newContent);
   }
