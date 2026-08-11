@@ -1,6 +1,5 @@
 import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
 
-import { sendLog } from "../utils/sendLog";
 import { BaseHandler } from "./BaseHandler";
 
 const recentAuditLogWindowMs = 5000;
@@ -17,23 +16,11 @@ export class GuildMemberRemoveHandler extends BaseHandler<
     }
 
     if (classification === "kick") {
-      await sendLog(
-        this.core,
-        member.guild,
-        "logMemberKick",
-        "メンバーキック",
-        `<@${member.id}> (${member.id}) がキックされました。`,
-      );
+      await this.logger.log(member.guild, "logMemberKick", member);
       return;
     }
 
-    await sendLog(
-      this.core,
-      member.guild,
-      "logMemberLeave",
-      "メンバー退出",
-      `<@${member.id}> (${member.id}) がサーバーから退出しました。`,
-    );
+    await this.logger.log(member.guild, "logMemberLeave", member);
   }
 
   private async classifyRemoval(

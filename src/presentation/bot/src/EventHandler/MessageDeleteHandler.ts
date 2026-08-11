@@ -1,6 +1,5 @@
 import type { Message, OmitPartialGroupDMChannel, PartialMessage } from "discord.js";
 
-import { sendLog } from "../utils/sendLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class MessageDeleteHandler extends BaseHandler<
@@ -15,16 +14,6 @@ export class MessageDeleteHandler extends BaseHandler<
 
     const content = (message.content || "(空)").slice(0, 1000);
 
-    await sendLog(
-      this.core,
-      message.guild,
-      "logMessageDelete",
-      "メッセージ削除",
-      [
-        `<@${message.author.id}> (${message.author.id}) のメッセージが削除されました。`,
-        `チャンネル: <#${message.channelId}>`,
-        `内容: ${content}`,
-      ].join("\n"),
-    );
+    await this.logger.log(message.guild, "logMessageDelete", message, content);
   }
 }

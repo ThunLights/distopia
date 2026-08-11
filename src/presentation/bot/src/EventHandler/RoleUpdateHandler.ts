@@ -1,6 +1,5 @@
 import type { Role } from "discord.js";
 
-import { sendLog } from "../utils/sendLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class RoleUpdateHandler extends BaseHandler<(oldRole: Role, newRole: Role) => void> {
@@ -31,12 +30,6 @@ export class RoleUpdateHandler extends BaseHandler<(oldRole: Role, newRole: Role
       return;
     }
 
-    await sendLog(
-      this.core,
-      newRole.guild,
-      "logRoleEdit",
-      "ロール編集",
-      [`<@&${newRole.id}> (${newRole.name}) が編集されました。`, ...changes].join("\n"),
-    );
+    await this.logger.log(newRole.guild, "logRoleEdit", newRole, changes);
   }
 }
