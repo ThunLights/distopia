@@ -1,5 +1,6 @@
-import type { GuildMember, PartialGuildMember } from "discord.js";
+import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
 
+import { findRecentAuditLogEntry } from "../utils/auditLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildMemberUpdateHandler extends BaseHandler<
@@ -20,6 +21,18 @@ export class GuildMemberUpdateHandler extends BaseHandler<
       return;
     }
 
-    await this.logger.log(newMember.guild, "logMemberTimeout", newMember, newUntil);
+    const entry = await findRecentAuditLogEntry(
+      newMember.guild,
+      AuditLogEvent.MemberUpdate,
+      newMember.id,
+    );
+
+    await this.logger.log(
+      newMember.guild,
+      "logMemberTimeout",
+      newMember,
+      newUntil,
+      entry?.executor ?? null,
+    );
   }
 }

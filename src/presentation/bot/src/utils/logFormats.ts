@@ -6,7 +6,9 @@ import type {
   NonThreadGuildBasedChannel,
   OmitPartialGroupDMChannel,
   PartialGuildMember,
+  PartialUser,
   Role,
+  User,
 } from "discord.js";
 
 import { codeBlock } from "./codeblock";
@@ -25,6 +27,10 @@ export type LogFormat<Args extends unknown[] = unknown[]> = {
   build: (...args: Args) => LogContent | Promise<LogContent>;
 };
 
+function executorLine(executor: User | PartialUser | null): string {
+  return `実行者: ${executor ? `<@${executor.id}> (${executor.id})` : "不明"}`;
+}
+
 export const logFormats = {
   logMemberJoin: {
     title: "メンバー参加",
@@ -40,15 +46,19 @@ export const logFormats = {
   },
   logMemberKick: {
     title: "メンバーキック",
-    build: (member: GuildMember | PartialGuildMember) => ({
-      description: `<@${member.id}> (${member.id}) がキックされました。`,
+    build: (member: GuildMember | PartialGuildMember, executor: User | PartialUser | null) => ({
+      description: [
+        `<@${member.id}> (${member.id}) がキックされました。`,
+        executorLine(executor),
+      ].join("\n"),
     }),
   },
   logMemberBan: {
     title: "メンバーBAN",
-    build: (ban: GuildBan) => ({
+    build: (ban: GuildBan, executor: User | PartialUser | null) => ({
       description: [
         `<@${ban.user.id}> (${ban.user.id}) がBANされました。`,
+        executorLine(executor),
         ban.reason && `理由: ${ban.reason}`,
       ]
         .filter(Boolean)
@@ -57,15 +67,19 @@ export const logFormats = {
   },
   logMemberUnban: {
     title: "メンバーBAN解除",
-    build: (ban: GuildBan) => ({
-      description: `<@${ban.user.id}> (${ban.user.id}) のBANが解除されました。`,
+    build: (ban: GuildBan, executor: User | PartialUser | null) => ({
+      description: [
+        `<@${ban.user.id}> (${ban.user.id}) のBANが解除されました。`,
+        executorLine(executor),
+      ].join("\n"),
     }),
   },
   logMemberTimeout: {
     title: "メンバータイムアウト",
-    build: (member: GuildMember, until: number) => ({
+    build: (member: GuildMember, until: number, executor: User | PartialUser | null) => ({
       description: [
         `<@${member.id}> (${member.id}) がタイムアウトされました。`,
+        executorLine(executor),
         `解除予定: <t:${Math.floor(until / 1000)}:F>`,
       ].join("\n"),
     }),
