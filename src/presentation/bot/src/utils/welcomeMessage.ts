@@ -24,8 +24,10 @@ export const welcomeMessageLabels: Record<
   join: {
     shortLabel: "参加メッセージ",
     title: "入退出メッセージ: 参加",
-    description:
+    description: [
       "メンバーがサーバーに参加した際に送信するメッセージを設定します。チャンネルを未設定にすると通知は送信されません。",
+      "内容には {user}/{username}/{server}/{membercount} が使えます。",
+    ].join("\n"),
     channelField: "welcomeMessageChannel",
     contentField: "welcomeMessageContent",
     color: "Green",
@@ -34,8 +36,10 @@ export const welcomeMessageLabels: Record<
   leave: {
     shortLabel: "退出メッセージ",
     title: "入退出メッセージ: 退出",
-    description:
+    description: [
       "メンバーがサーバーから退出した際に送信するメッセージを設定します。チャンネルを未設定にすると通知は送信されません。",
+      "内容には {user}/{username}/{server}/{membercount} が使えます。",
+    ].join("\n"),
     channelField: "leaveMessageChannel",
     contentField: "leaveMessageContent",
     color: "Grey",
