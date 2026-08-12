@@ -17,17 +17,13 @@ export const supportersKeyValue = {
     name: "クリームパンと愉快な仲間たち",
     invite: "https://discord.gg/De8T2NS74X",
   },
-  mikan: {
-    name: "Mikan Soba Club",
-    invite: "https://discord.gg/HaFhCWS2Kk",
-  },
   cappuccino: {
     name: "Cappuccino",
     invite: "https://discord.gg/cappuccino",
   },
   hima: {
     name: "暇人鯖",
-    invite: "https://discord.gg/hima",
+    invite: "https://discord.gg/8v43tgwvfQ",
   },
   lemon: {
     name: "大檸檬帝国",
@@ -37,7 +33,6 @@ export const supportersKeyValue = {
 
 export const supporters = [
   supportersKeyValue.bread,
-  supportersKeyValue.mikan,
   supportersKeyValue.cappuccino,
   supportersKeyValue.hima,
   supportersKeyValue.lemon,
