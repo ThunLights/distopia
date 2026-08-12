@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-DkW27tQK.js";import{n as t,t as n}from"./toast-D3VZ0GaP.js";async function r(e){let{content:t}=await e.json();n.error(`エラー「${t}」`)}function i(){return(i=e((()=>{t()})))()}export{r as n,i as t};
