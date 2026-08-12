@@ -113,6 +113,10 @@ model GuildSetting {
   logMessageDelete             String?
   logVoiceJoin                 String?
   logVoiceLeave                String?
+  welcomeMessageChannel        String?
+  welcomeMessageContent        String?
+  leaveMessageChannel          String?
+  leaveMessageContent          String?
   statChannelAllMembers        String?
   statChannelUsers             String?
   statChannelBots              String?

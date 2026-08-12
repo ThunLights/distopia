@@ -42,6 +42,9 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
     .addOptions(
       new StringSelectMenuOptionBuilder().setLabel("代理オーナー設定").setValue("actingOwner"),
       new StringSelectMenuOptionBuilder().setLabel("Bump設定").setValue("bump"),
+      new StringSelectMenuOptionBuilder()
+        .setLabel("入退出メッセージ設定")
+        .setValue("welcomeMessage"),
       new StringSelectMenuOptionBuilder().setLabel("荒らし対策設定").setValue("antiRaid"),
       new StringSelectMenuOptionBuilder().setLabel("ログ設定").setValue("log"),
       new StringSelectMenuOptionBuilder().setLabel("ホワイトリスト設定").setValue("whiteList"),

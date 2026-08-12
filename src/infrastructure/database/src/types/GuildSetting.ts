@@ -22,6 +22,10 @@ export type GuildSetting = {
   logMessageDelete: string | null;
   logVoiceJoin: string | null;
   logVoiceLeave: string | null;
+  welcomeMessageChannel: string | null;
+  welcomeMessageContent: string | null;
+  leaveMessageChannel: string | null;
+  leaveMessageContent: string | null;
   statChannelAllMembers: string | null;
   statChannelUsers: string | null;
   statChannelBots: string | null;
