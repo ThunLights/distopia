@@ -1,6 +1,7 @@
 import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
 
 import { findRecentAuditLogEntry } from "../utils/auditLog";
+import { sendWelcomeMessage } from "../utils/welcomeMessage";
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildMemberRemoveHandler extends BaseHandler<
@@ -30,5 +31,6 @@ export class GuildMemberRemoveHandler extends BaseHandler<
     }
 
     await this.logger.log(member.guild, "logMemberLeave", member);
+    await sendWelcomeMessage(this.core, member.guild, member, "leave");
   }
 }

@@ -20,6 +20,7 @@ import { antiRaidPage } from "../Page/AntiRaidPage";
 import { bumpPage } from "../Page/BumpPage";
 import { logPage } from "../Page/LogPage";
 import { statChannelPage } from "../Page/StatChannelPage";
+import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 export class SettingSelectMenu extends StringSelectMenuInteractionBase {
@@ -66,6 +67,24 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
       const bumpPagePayload = await bumpPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = bumpPagePayload;
+
+      return await interaction.update({
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
+      });
+    } else if (value === "welcomeMessage") {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const welcomeMessagePagePayload = await welcomeMessagePage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = welcomeMessagePagePayload;
 
       return await interaction.update({
         content,
