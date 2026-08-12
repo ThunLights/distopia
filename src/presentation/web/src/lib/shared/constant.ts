@@ -8,7 +8,6 @@ import breadIcon from "$lib/assets/supporter/bread.webp";
 import cappuccinoIcon from "$lib/assets/supporter/cappuccino.webp";
 import himaIcon from "$lib/assets/supporter/hima.webp";
 import lemonIcon from "$lib/assets/supporter/lemon.webp";
-import mikanIcon from "$lib/assets/supporter/mikan.gif";
 import {
   staffsKeyValue as baseStaff,
   supportersKeyValue as baseSupporters,
@@ -67,10 +66,6 @@ export const supporters = [
   {
     ...baseSupporters.bread,
     icon: breadIcon,
-  },
-  {
-    ...baseSupporters.mikan,
-    icon: mikanIcon,
   },
   {
     ...baseSupporters.cappuccino,
