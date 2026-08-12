@@ -23,7 +23,7 @@ export const supportersKeyValue = {
   },
   hima: {
     name: "暇人鯖",
-    invite: "https://discord.gg/hima",
+    invite: "https://discord.gg/8v43tgwvfQ",
   },
   lemon: {
     name: "大檸檬帝国",
