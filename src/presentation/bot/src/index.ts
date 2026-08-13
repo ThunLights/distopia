@@ -42,23 +42,28 @@ export function handleClient(client: Client, core: AppCore) {
     const commands = interactionCreateHandler.commands.chatInput
       .filter((command) => command.availableGuildId === null)
       .map((command) => command.register);
-    const specificGuildCommands = interactionCreateHandler.commands.chatInput
-      .filter((command) => command.availableGuildId !== null)
-      .map(
-        (command) =>
-          [command.availableGuildId, command.register] as [
-            string,
-            RESTPostAPIChatInputApplicationCommandsJSONBody,
-          ],
-      );
+    const specificGuildCommands = new Map<
+      string,
+      RESTPostAPIChatInputApplicationCommandsJSONBody[]
+    >();
+
+    for (const command of interactionCreateHandler.commands.chatInput) {
+      if (command.availableGuildId === null) {
+        continue;
+      }
+
+      const guildCommands = specificGuildCommands.get(command.availableGuildId) ?? [];
+      guildCommands.push(command.register);
+      specificGuildCommands.set(command.availableGuildId, guildCommands);
+    }
 
     await client.rest.put(`/applications/${client.user.id}/commands`, {
       body: commands,
     });
 
-    for (const [guildId, command] of specificGuildCommands) {
+    for (const [guildId, guildCommands] of specificGuildCommands) {
       await client.rest.put(`/applications/${client.user.id}/guilds/${guildId}/commands`, {
-        body: command,
+        body: guildCommands,
       });
     }
   });
