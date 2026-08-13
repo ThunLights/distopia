@@ -6,6 +6,7 @@ import {
   EmbedBuilder,
   MessageFlags,
   MessagePayload,
+  PermissionFlagsBits,
   type CacheType,
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
@@ -22,10 +23,11 @@ const OptionsSchema = z.object({
 
 type Options = z.infer<typeof OptionsSchema>;
 
-export class AdminCommand extends ChatInputCommandBase<Options> {
+export class OwnerCommand extends ChatInputCommandBase<Options> {
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-    name: "admin",
-    description: "only admin",
+    name: "owner",
+    description: "only owner",
+    default_member_permissions: PermissionFlagsBits.Administrator.toString(),
     options: [
       {
         type: ApplicationCommandOptionType.Subcommand,
@@ -39,6 +41,7 @@ export class AdminCommand extends ChatInputCommandBase<Options> {
       },
     ],
   };
+  public override availableGuildId: string | null = this.core.state.supportServerId;
 
   public override async parseOptions(
     interaction: ChatInputCommandInteraction<CacheType>,

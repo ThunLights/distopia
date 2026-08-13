@@ -26,6 +26,7 @@ export type AppState = {
   owner: {
     id: string;
   };
+  supportServerId: string;
   url: string;
   memory: {
     latelimit: {

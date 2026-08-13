@@ -1,5 +1,5 @@
 import type { AppCore } from "app-core";
-import type { Client } from "discord.js";
+import type { Client, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 
 import { ChannelCreateHandler } from "./EventHandler/ChannelCreateHandler";
 import { ChannelDeleteHandler } from "./EventHandler/ChannelDeleteHandler";
@@ -39,11 +39,33 @@ export function handleClient(client: Client, core: AppCore) {
   client.on("clientReady", async (client) => {
     await core.user.setActivity();
 
-    const commands = interactionCreateHandler.commands.chatInput.map((command) => command.register);
+    const commands = interactionCreateHandler.commands.chatInput
+      .filter((command) => command.availableGuildId === null)
+      .map((command) => command.register);
+    const specificGuildCommands = new Map<
+      string,
+      RESTPostAPIChatInputApplicationCommandsJSONBody[]
+    >();
+
+    for (const command of interactionCreateHandler.commands.chatInput) {
+      if (command.availableGuildId === null) {
+        continue;
+      }
+
+      const guildCommands = specificGuildCommands.get(command.availableGuildId) ?? [];
+      guildCommands.push(command.register);
+      specificGuildCommands.set(command.availableGuildId, guildCommands);
+    }
 
     await client.rest.put(`/applications/${client.user.id}/commands`, {
       body: commands,
     });
+
+    for (const [guildId, guildCommands] of specificGuildCommands) {
+      await client.rest.put(`/applications/${client.user.id}/guilds/${guildId}/commands`, {
+        body: guildCommands,
+      });
+    }
   });
 
   client.on(
