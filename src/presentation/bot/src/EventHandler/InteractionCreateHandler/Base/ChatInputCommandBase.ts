@@ -12,6 +12,7 @@ export abstract class ChatInputCommandBase<
     RESTPostAPIChatInputApplicationCommandsJSONBody,
 > extends CommandInteractionBase<O, ChatInputCommandInteraction<CacheType>> {
   public abstract readonly register: T;
+  public readonly availableGuildId: string | null = null;
 
   public override async match(
     interaction: ChatInputCommandInteraction<CacheType>,
