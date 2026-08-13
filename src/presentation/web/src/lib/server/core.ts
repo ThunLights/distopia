@@ -1,4 +1,4 @@
-import { PUBLIC_OWNER_ID, PUBLIC_URL } from "$env/static/public";
+import { PUBLIC_OWNER_ID, PUBLIC_URL, PUBLIC_HOME_SERVER_ID } from "$env/static/public";
 import { djsController } from "./bot";
 import { database } from "./database";
 import { memory } from "./memory";
@@ -15,6 +15,7 @@ export function genCore(state: AppState) {
 
 export const core = genCore({
   owner: { id: PUBLIC_OWNER_ID },
+  supportServerId: PUBLIC_HOME_SERVER_ID,
   url: PUBLIC_URL,
   memory,
   searchEngine,
