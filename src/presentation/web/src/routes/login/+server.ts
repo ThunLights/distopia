@@ -11,5 +11,9 @@ export const GET: RequestHandler = async (e) => {
     expires: new Date(Date.now() + 20 * 60 * 1000),
   });
 
-  return redirect(302, PUBLIC_OAUTH_URL + `&state=${encodeURIComponent(sessionId)}`);
+  const oauthUrl = new URL(PUBLIC_OAUTH_URL);
+
+  oauthUrl.searchParams.set("state", sessionId);
+
+  return redirect(302, oauthUrl.toString());
 };

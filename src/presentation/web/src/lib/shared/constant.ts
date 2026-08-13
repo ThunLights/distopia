@@ -81,6 +81,26 @@ export const supporters = [
   },
 ] satisfies Supporter[];
 
-export const PUBLIC_OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_BOT_ID}&response_type=code&redirect_uri=${encodeURIComponent(`${PUBLIC_URL}/auth`)}&scope=identify+guilds+email+guilds.join`;
+function buildDiscordOAuthUrl(params: Record<string, string>): string {
+  const url = new URL("https://discord.com/oauth2/authorize");
 
-export const PUBLIC_BOT_INVITE_LINK = `https://discord.com/oauth2/authorize?client_id=${PUBLIC_BOT_ID}&permissions=8&integration_type=0&scope=bot`;
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+
+  return url.toString();
+}
+
+export const PUBLIC_OAUTH_URL = buildDiscordOAuthUrl({
+  client_id: PUBLIC_BOT_ID,
+  response_type: "code",
+  redirect_uri: `${PUBLIC_URL}/auth`,
+  scope: "identify guilds email guilds.join",
+});
+
+export const PUBLIC_BOT_INVITE_LINK = buildDiscordOAuthUrl({
+  client_id: PUBLIC_BOT_ID,
+  permissions: "8",
+  integration_type: "0",
+  scope: "bot",
+});
