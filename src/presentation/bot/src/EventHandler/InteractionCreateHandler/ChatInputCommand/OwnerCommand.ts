@@ -6,6 +6,7 @@ import {
   EmbedBuilder,
   MessageFlags,
   MessagePayload,
+  PermissionFlagsBits,
   type CacheType,
   type ChatInputCommandInteraction,
   type InteractionReplyOptions,
@@ -26,6 +27,7 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "owner",
     description: "only owner",
+    default_member_permissions: PermissionFlagsBits.Administrator.toString(),
     options: [
       {
         type: ApplicationCommandOptionType.Subcommand,
