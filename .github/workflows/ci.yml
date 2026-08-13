@@ -29,8 +29,8 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
-  typecheck:
-    name: Typecheck
+  ci-dev:
+    name: Development container ci
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
@@ -43,77 +43,30 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
+      - name: Run setup.sh
+        working-directory: ./docker/
+        run: docker compose exec app sudo scripts/setup.sh
+
       - name: Typecheck
         working-directory: ./docker/
-        run: |
-          docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun run typecheck
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: ["typecheck"]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup Container
-        uses: ./.github/workflows/setup
-        with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
+        run: docker compose exec app sudo bun run typecheck
 
       - name: Build
         working-directory: ./docker/
-        run: |
-          docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun run build
+        run: docker compose exec app sudo bun run build
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    needs: ["typecheck"]
+      - parallel:
+        - name: Lint
+          working-directory: ./docker/
+          run: docker compose exec app sudo bun run lint
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup Container
-        uses: ./.github/workflows/setup
-        with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
-
-      - name: Lint
-        working-directory: ./docker/
-        run: |
-          docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun run lint
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: ["typecheck"]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup Container
-        uses: ./.github/workflows/setup
-        with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
-
-      - name: Test
-        working-directory: ./docker/
-        run: |
-          docker compose exec app sudo scripts/setup.sh
-          docker compose exec app sudo bun run build
-          docker compose exec app sudo bun run test
+        - name: Test
+          working-directory: ./docker/
+          run: docker compose exec app sudo bun run test
 
   e2e-prod:
     name: E2E (production build)
     runs-on: ubuntu-latest
-    needs: ["typecheck"]
 
     steps:
       - name: Checkout repository
