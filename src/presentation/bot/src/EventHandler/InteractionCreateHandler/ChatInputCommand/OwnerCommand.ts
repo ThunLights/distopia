@@ -22,10 +22,10 @@ const OptionsSchema = z.object({
 
 type Options = z.infer<typeof OptionsSchema>;
 
-export class AdminCommand extends ChatInputCommandBase<Options> {
+export class OwnerCommand extends ChatInputCommandBase<Options> {
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
-    name: "admin",
-    description: "only admin",
+    name: "owner",
+    description: "only owner",
     options: [
       {
         type: ApplicationCommandOptionType.Subcommand,
