@@ -1,6 +1,8 @@
 import { database } from "$lib/server/database";
 import type { RequestHandler } from "@sveltejs/kit";
-import * as sitemap from "super-sitemap";
+import * as sitemap from "super-sitemap/sveltekit";
+
+const excludeRoutePatterns = [/^\/api.*/, /^\/user.*/, /^\/auth.*/];
 
 export const GET: RequestHandler = async () => {
   const publicGuildIds = (await database.guild.findAll())
@@ -9,7 +11,7 @@ export const GET: RequestHandler = async () => {
 
   return await sitemap.response({
     origin: "https://distopia.top",
-    excludeRoutePatterns: ["^/api.*", "^/user.*", "^/auth.*"],
+    excludeRoutePatterns,
     paramValues: {
       "/guilds/[id]": publicGuildIds,
     },
