@@ -41,7 +41,14 @@ export class WebEditChangeButton extends ButtonInteractionBase {
 
     if (draft.invite) {
       try {
-        const invite = await interaction.client.fetchInvite(draft.invite);
+        // Discord requires the modal to be shown within 3 seconds of the interaction,
+        // so this lookup must not be allowed to run as long as the REST client's own timeout.
+        const invite = await Promise.race([
+          interaction.client.fetchInvite(draft.invite),
+          new Promise<never>((_resolve, reject) =>
+            setTimeout(() => reject(new Error("invite fetch timed out")), 1500),
+          ),
+        ]);
         inviteChannelId = invite.channelId ?? undefined;
       } catch {
         inviteChannelId = undefined;
