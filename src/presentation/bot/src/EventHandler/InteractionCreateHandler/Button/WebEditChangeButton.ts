@@ -37,17 +37,32 @@ export class WebEditChangeButton extends ButtonInteractionBase {
 
     const draft = await this.core.guild.getDraft(guild.id);
 
+    let inviteChannelId: string | undefined;
+
+    if (draft.invite) {
+      try {
+        const invite = await interaction.client.fetchInvite(draft.invite);
+        inviteChannelId = invite.channelId ?? undefined;
+      } catch {
+        inviteChannelId = undefined;
+      }
+    }
+
+    const inviteChannelSelectMenu = new ChannelSelectMenuBuilder()
+      .setCustomId("invite")
+      .setChannelTypes(ChannelType.GuildText);
+
+    if (inviteChannelId) {
+      inviteChannelSelectMenu.setDefaultChannels(inviteChannelId);
+    }
+
     const modal = new ModalBuilder()
       .setCustomId("webEdit")
       .setTitle("Web公開設定")
       .setLabelComponents(
         new LabelBuilder()
           .setLabel("招待リンク作成")
-          .setChannelSelectMenuComponent(
-            new ChannelSelectMenuBuilder()
-              .setCustomId("invite")
-              .setChannelTypes(ChannelType.GuildText),
-          ),
+          .setChannelSelectMenuComponent(inviteChannelSelectMenu),
         new LabelBuilder().setLabel("説明文").setTextInputComponent(
           new TextInputBuilder()
             .setCustomId("description")
