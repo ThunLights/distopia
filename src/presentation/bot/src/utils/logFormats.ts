@@ -18,8 +18,37 @@ export type LogEmbedField = { name: string; value: string; inline?: boolean };
 
 export type LogContent = {
   description: string;
+  image?: string;
   fields?: LogEmbedField[];
 };
+
+type AttachmentCollection = OmitPartialGroupDMChannel<Message<boolean>>["attachments"];
+
+function summarizeAttachments(attachments: AttachmentCollection): {
+  image?: string;
+  fields: LogEmbedField[];
+} {
+  const images = attachments.filter((attachment) => attachment.contentType?.startsWith("image/"));
+  const videos = attachments.filter((attachment) => attachment.contentType?.startsWith("video/"));
+
+  const fields: LogEmbedField[] = [];
+
+  if (images.size) {
+    fields.push({
+      name: `画像 (${images.size})`,
+      value: images.map((attachment) => `[${attachment.name}](${attachment.url})`).join("\n"),
+    });
+  }
+
+  if (videos.size) {
+    fields.push({
+      name: `動画 (${videos.size})`,
+      value: videos.map((attachment) => `[${attachment.name}](${attachment.url})`).join("\n"),
+    });
+  }
+
+  return { image: images.first()?.url, fields };
+}
 
 export type LogFormat<Args extends unknown[] = unknown[]> = {
   title: string;
@@ -126,26 +155,51 @@ export const logFormats = {
       message: OmitPartialGroupDMChannel<Message<boolean>>,
       oldContent: string,
       newContent: string,
-    ) => ({
-      description: [
-        `<@${message.author.id}> (${message.author.id}) がメッセージを編集しました。`,
-        `チャンネル: <#${message.channelId}>`,
-      ].join("\n"),
-      fields: [
-        { name: "編集前", value: await codeBlock(oldContent) },
-        { name: "編集後", value: await codeBlock(newContent) },
-      ],
-    }),
+      oldAttachments?: AttachmentCollection,
+    ) => {
+      const { image, fields: attachmentFields } = summarizeAttachments(message.attachments);
+      const removedAttachments = oldAttachments?.filter(
+        (attachment) => !message.attachments.has(attachment.id),
+      );
+
+      return {
+        description: [
+          `<@${message.author.id}> (${message.author.id}) がメッセージを編集しました。`,
+          `チャンネル: <#${message.channelId}>`,
+        ].join("\n"),
+        image,
+        fields: [
+          { name: "編集前", value: await codeBlock(oldContent) },
+          { name: "編集後", value: await codeBlock(newContent) },
+          ...attachmentFields,
+          ...(removedAttachments?.size
+            ? [
+                {
+                  name: `削除された添付ファイル (${removedAttachments.size})`,
+                  value: removedAttachments
+                    .map((attachment) => `[${attachment.name}](${attachment.url})`)
+                    .join("\n"),
+                },
+              ]
+            : []),
+        ],
+      };
+    },
   },
   logMessageDelete: {
     title: "メッセージ削除",
-    build: async (message: OmitPartialGroupDMChannel<Message<boolean>>, content: string) => ({
-      description: [
-        `<@${message.author.id}> (${message.author.id}) のメッセージが削除されました。`,
-        `チャンネル: <#${message.channelId}>`,
-      ].join("\n"),
-      fields: [{ name: "内容", value: await codeBlock(content) }],
-    }),
+    build: async (message: OmitPartialGroupDMChannel<Message<boolean>>, content: string) => {
+      const { image, fields: attachmentFields } = summarizeAttachments(message.attachments);
+
+      return {
+        description: [
+          `<@${message.author.id}> (${message.author.id}) のメッセージが削除されました。`,
+          `チャンネル: <#${message.channelId}>`,
+        ].join("\n"),
+        image,
+        fields: [{ name: "内容", value: await codeBlock(content) }, ...attachmentFields],
+      };
+    },
   },
   logVoiceJoin: {
     title: "ボイスチャンネル参加",

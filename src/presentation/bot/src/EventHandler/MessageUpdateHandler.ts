@@ -23,13 +23,26 @@ export class MessageUpdateHandler extends BaseHandler<
       return;
     }
 
-    if (!oldMessage.partial && oldMessage.content === newMessage.content) {
+    if (
+      !oldMessage.partial &&
+      oldMessage.content === newMessage.content &&
+      oldMessage.attachments.size === newMessage.attachments.size &&
+      oldMessage.attachments.every((attachment) => newMessage.attachments.has(attachment.id))
+    ) {
       return;
     }
 
     const oldContent = oldMessage.partial ? "(内容不明)" : oldMessage.content || "(空)";
     const newContent = newMessage.content || "(空)";
+    const oldAttachments = oldMessage.partial ? undefined : oldMessage.attachments;
 
-    await this.logger.log(newMessage.guild, "logMessageEdit", newMessage, oldContent, newContent);
+    await this.logger.log(
+      newMessage.guild,
+      "logMessageEdit",
+      newMessage,
+      oldContent,
+      newContent,
+      oldAttachments,
+    );
   }
 }
