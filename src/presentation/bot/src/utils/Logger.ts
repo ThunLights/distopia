@@ -35,6 +35,10 @@ export class Logger {
         .setDescription(content.description)
         .setTimestamp();
 
+      if (content.image) {
+        embed.setImage(content.image);
+      }
+
       if (content.fields?.length) {
         embed.addFields(content.fields);
       }
