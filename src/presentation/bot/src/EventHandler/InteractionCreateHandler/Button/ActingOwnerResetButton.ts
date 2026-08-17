@@ -10,6 +10,7 @@ import {
 
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { page } from "../Page/Settings";
 
 export class ActingOwnerResetButton extends ButtonInteractionBase {
@@ -23,6 +24,12 @@ export class ActingOwnerResetButton extends ButtonInteractionBase {
 
     if (guild instanceof GuildParseError) {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+    }
+
+    const ownerPermission = await this.checkOwnerPermission(interaction);
+
+    if (ownerPermission instanceof PermissionError) {
+      return { content: ownerPermission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     await this.core.guild.saveSetting({ guildId: guild.id, actingOwner: null });

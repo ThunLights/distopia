@@ -51,6 +51,28 @@ export abstract class Base<T extends BaseInteraction, R = void> {
     return new PermissionSuccess();
   }
 
+  protected async checkOwnerPermission(interaction: T) {
+    const { guild, user } = interaction;
+
+    if (!guild) {
+      return new PermissionError("サーバーでの権限かボットのインテントが足りません");
+    }
+
+    if (guild.ownerId === user.id) {
+      return new PermissionSuccess();
+    }
+
+    const setting = await this.core.guild.getSetting(guild.id);
+
+    if (setting?.actingOwner === user.id) {
+      return new PermissionSuccess();
+    }
+
+    return new PermissionError(
+      "このコマンドの実行にはサーバーオーナーまたはオーナー代理の権限が必要です。",
+    );
+  }
+
   protected async parseUser(interaction: T): Promise<User> {
     const { user } = interaction;
     return {

@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 
 import { GuildParseError } from "../Base/Error/GuildParseError";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 import { page } from "../Page/Settings";
 
@@ -24,6 +25,12 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
 
     if (guild instanceof GuildParseError) {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+    }
+
+    const ownerPermission = await this.checkOwnerPermission(interaction);
+
+    if (ownerPermission instanceof PermissionError) {
+      return { content: ownerPermission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     await this.core.guild.saveSetting({
