@@ -11,6 +11,8 @@ import type {
   User,
 } from "discord.js";
 
+import type { BlackListAction } from "./blackList";
+import { blackListActionLabels } from "./blackList";
 import { codeBlock } from "./codeblock";
 import type { AllLogField } from "./log";
 
@@ -222,6 +224,24 @@ export const logFormats = {
         `チャンネル: <#${message.channelId}>`,
       ].join("\n"),
       fields: [{ name: "検知したリンク", value: await codeBlock(inviteLinks.join("\n")) }],
+    }),
+  },
+  logBlackList: {
+    title: "ブラックリスト: 該当ユーザーが参加しました",
+    color: "Red",
+    build: (
+      member: GuildMember,
+      matches: { description: string; action: BlackListAction }[],
+      actionTaken: BlackListAction,
+    ) => ({
+      description: [
+        `ユーザー: <@${member.id}> (${member.id})`,
+        `実行した処理: ${blackListActionLabels[actionTaken]}`,
+      ].join("\n"),
+      fields: matches.map((match, index) => ({
+        name: `該当ブラックリスト ${index + 1} (${blackListActionLabels[match.action]})`,
+        value: match.description,
+      })),
     }),
   },
 } satisfies Record<AllLogField, LogFormat<any>>;

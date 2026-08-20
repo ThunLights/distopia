@@ -1,0 +1,383 @@
+import { CHARACTER_LIMIT } from "app-core/constant";
+import {
+  ApplicationCommandOptionType,
+  EmbedBuilder,
+  InteractionCallbackResponse,
+  LabelBuilder,
+  MessageFlags,
+  MessagePayload,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  type CacheType,
+  type ChatInputCommandInteraction,
+  type InteractionReplyOptions,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from "discord.js";
+import z from "zod";
+
+import {
+  buildBlackListFieldValue,
+  encodeBlackListTargetRef,
+  type BlackListPermission,
+} from "../../../utils/blackList";
+import { validator, type ValidateResult } from "../../../utils/validator";
+import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { ModalSended } from "../Base/Modal/ModalSended";
+
+const OptionsSchema = z.object({
+  subCommandGroup: z.string().nullable(),
+  subCommand: z.string(),
+  blackListId: z.number().nullable(),
+  userId: z.string().nullable(),
+  allPermissions: z.boolean().nullable(),
+  addPermission: z.boolean().nullable(),
+  editPermission: z.boolean().nullable(),
+  removePermission: z.boolean().nullable(),
+});
+
+type Options = z.infer<typeof OptionsSchema>;
+
+const blackListIdOption = {
+  type: ApplicationCommandOptionType.Integer,
+  name: "blacklist_id",
+  description: "ブラックリストのID",
+  required: true,
+} as const;
+
+const userOption = {
+  type: ApplicationCommandOptionType.User,
+  name: "user",
+  description: "対象のユーザー",
+  required: true,
+} as const;
+
+export class BlackListCommand extends ChatInputCommandBase<Options> {
+  public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
+    name: "blacklist",
+    description: "ブラックリストを管理します。",
+    options: [
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "create",
+        description: "新しいブラックリストを作成します。",
+      },
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "delete",
+        description: "ブラックリストを削除します。(オーナーのみ)",
+        options: [blackListIdOption],
+      },
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "list",
+        description: "自分が所有・編集できるブラックリストの一覧を表示します。",
+      },
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "show",
+        description: "ブラックリストに登録された対象の一覧を表示します。",
+        options: [blackListIdOption],
+      },
+      {
+        type: ApplicationCommandOptionType.SubcommandGroup,
+        name: "target",
+        description: "ブラックリストの対象を操作します。",
+        options: [
+          {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "add",
+            description: "対象を追加します。",
+            options: [blackListIdOption, userOption],
+          },
+          {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "edit",
+            description: "対象の説明を編集します。",
+            options: [blackListIdOption, userOption],
+          },
+          {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "remove",
+            description: "対象を削除します。",
+            options: [blackListIdOption, userOption],
+          },
+        ],
+      },
+      {
+        type: ApplicationCommandOptionType.SubcommandGroup,
+        name: "editor",
+        description: "編集権限を操作します。(オーナーのみ)",
+        options: [
+          {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "add",
+            description: "編集者を追加・更新します。(オーナーのみ)",
+            options: [
+              blackListIdOption,
+              userOption,
+              {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "all",
+                description: "全ての操作を許可する",
+                required: false,
+              },
+              {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "add",
+                description: "対象の追加を許可する",
+                required: false,
+              },
+              {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "edit",
+                description: "対象の編集を許可する",
+                required: false,
+              },
+              {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "remove",
+                description: "対象の削除を許可する",
+                required: false,
+              },
+            ],
+          },
+          {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "remove",
+            description: "編集者を削除します。(オーナーのみ)",
+            options: [blackListIdOption, userOption],
+          },
+        ],
+      },
+    ],
+  };
+
+  public override async parseOptions(
+    interaction: ChatInputCommandInteraction<CacheType>,
+  ): Promise<ValidateResult<Options>> {
+    return await validator(
+      {
+        subCommandGroup: interaction.options.getSubcommandGroup(false),
+        subCommand: interaction.options.getSubcommand(),
+        blackListId: interaction.options.getInteger("blacklist_id", false),
+        userId: interaction.options.getUser("user", false)?.id ?? null,
+        allPermissions: interaction.options.getBoolean("all", false),
+        addPermission: interaction.options.getBoolean("add", false),
+        editPermission: interaction.options.getBoolean("edit", false),
+        removePermission: interaction.options.getBoolean("remove", false),
+      },
+      OptionsSchema,
+    );
+  }
+
+  protected override async exec(
+    interaction: ChatInputCommandInteraction<CacheType>,
+    options: Options,
+  ): Promise<
+    string | InteractionReplyOptions | MessagePayload | InteractionCallbackResponse<boolean>
+  > {
+    const { subCommandGroup, subCommand, blackListId, userId } = options;
+    const requesterId = interaction.user.id;
+
+    if (subCommandGroup === "target") {
+      if (blackListId === null || userId === null) {
+        return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
+      }
+
+      if (subCommand === "add" || subCommand === "edit") {
+        const permission: BlackListPermission = subCommand === "add" ? "AddTarget" : "EditTarget";
+        const allowed = await this.core.blackList.hasPermission(
+          blackListId,
+          requesterId,
+          permission,
+        );
+
+        if (!allowed) {
+          return {
+            content: "このブラックリストを編集する権限がありません。",
+            flags: [MessageFlags.Ephemeral],
+          };
+        }
+
+        const existing =
+          subCommand === "edit" ? await this.core.blackList.findTarget(blackListId, userId) : null;
+
+        if (subCommand === "edit" && !existing) {
+          return { content: "対象が見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
+        }
+
+        const modal = new ModalBuilder()
+          .setCustomId(
+            `${subCommand === "add" ? "blackListTargetAdd" : "blackListTargetEdit"}:${encodeBlackListTargetRef(blackListId, userId)}`,
+          )
+          .setTitle(subCommand === "add" ? "ブラックリストに追加" : "説明を編集")
+          .addLabelComponents(
+            new LabelBuilder().setLabel("説明").setTextInputComponent(
+              new TextInputBuilder()
+                .setCustomId("description")
+                .setStyle(TextInputStyle.Paragraph)
+                .setMaxLength(CHARACTER_LIMIT.description)
+                .setValue(existing?.description ?? ""),
+            ),
+          );
+
+        await interaction.showModal(modal);
+        return new ModalSended();
+      }
+
+      if (subCommand === "remove") {
+        const allowed = await this.core.blackList.hasPermission(
+          blackListId,
+          requesterId,
+          "RemoveTarget",
+        );
+
+        if (!allowed) {
+          return {
+            content: "このブラックリストを編集する権限がありません。",
+            flags: [MessageFlags.Ephemeral],
+          };
+        }
+
+        const existing = await this.core.blackList.findTarget(blackListId, userId);
+
+        if (!existing) {
+          return { content: "対象が見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
+        }
+
+        await this.core.blackList.deleteTarget(blackListId, userId);
+        return { content: "対象を削除しました。", flags: [MessageFlags.Ephemeral] };
+      }
+    }
+
+    if (subCommandGroup === "editor") {
+      if (blackListId === null || userId === null) {
+        return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
+      }
+
+      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+
+      if (!isOwner) {
+        return {
+          content: "編集権限の変更はブラックリストのオーナーのみ行えます。",
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
+      if (subCommand === "add") {
+        const permissions: BlackListPermission[] = [
+          ...(options.addPermission ? (["AddTarget"] as const) : []),
+          ...(options.editPermission ? (["EditTarget"] as const) : []),
+          ...(options.removePermission ? (["RemoveTarget"] as const) : []),
+        ];
+
+        await this.core.blackList.upsertEditor({
+          blackListId,
+          userId,
+          allPermissions: options.allPermissions ?? false,
+          permissions,
+        });
+
+        return {
+          content: `<@${userId}> を編集者として設定しました。`,
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
+      if (subCommand === "remove") {
+        await this.core.blackList.deleteEditor(blackListId, userId);
+        return { content: "編集者を削除しました。", flags: [MessageFlags.Ephemeral] };
+      }
+    }
+
+    if (subCommand === "create") {
+      const list = await this.core.blackList.create(requesterId);
+      return {
+        content: `ブラックリストを作成しました。ID: \`${list.id}\``,
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
+    if (subCommand === "delete") {
+      if (blackListId === null) {
+        return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
+      }
+
+      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+
+      if (!isOwner) {
+        return {
+          content: "削除はブラックリストのオーナーのみ行えます。",
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
+      await this.core.blackList.delete(blackListId);
+      return { content: "ブラックリストを削除しました。", flags: [MessageFlags.Ephemeral] };
+    }
+
+    if (subCommand === "list") {
+      const lists = await this.core.blackList.findAllEditable(requesterId);
+
+      if (!lists.length) {
+        return {
+          content: "所有・編集できるブラックリストがありません。",
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
+      const embed = new EmbedBuilder()
+        .setColor("Navy")
+        .setTitle("ブラックリスト一覧")
+        .setDescription(
+          buildBlackListFieldValue(
+            lists.map(
+              (list) =>
+                `ID: \`${list.id}\` (${list.ownerId === requesterId ? "オーナー" : "編集者"})`,
+            ),
+          ),
+        );
+
+      return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
+    }
+
+    if (subCommand === "show") {
+      if (blackListId === null) {
+        return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
+      }
+
+      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+      const editor = isOwner
+        ? null
+        : await this.core.blackList.findEditor(blackListId, requesterId);
+
+      if (!isOwner && !editor) {
+        return {
+          content: "このブラックリストを閲覧する権限がありません。",
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
+      const targets = await this.core.blackList.listTargets(blackListId);
+
+      const embed = new EmbedBuilder()
+        .setColor("Navy")
+        .setTitle(`ブラックリスト \`${blackListId}\` の対象一覧`)
+        .setDescription(
+          buildBlackListFieldValue(
+            targets.map(
+              (target) => `<@${target.userId}> (${target.userId}): ${target.description}`,
+            ),
+          ),
+        );
+
+      return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
+    }
+
+    return {
+      content: `${subCommand}は見つかりませんでした。`,
+      flags: [MessageFlags.Ephemeral],
+    };
+  }
+}

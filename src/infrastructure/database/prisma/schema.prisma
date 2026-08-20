@@ -97,6 +97,7 @@ model GuildSetting {
   bumpNoticeContent            String?
   inviteLinkBlock              Boolean @default(false)
   logAntiRaid                  String?
+  logBlackList                 String?
   logMemberJoin                String?
   logMemberLeave               String?
   logMemberTimeout             String?
@@ -144,6 +145,63 @@ enum WhiteListIdType {
 
 enum WhiteListPermission {
   InviteLinkBlock
+}
+
+model UserBlackList {
+  id           Int               @id @default(autoincrement())
+  ownerId      String
+  targets      BlackListTarget[]
+  editors      BlackListEditor[]
+  applications GuildBlackList[]
+
+  @@index([ownerId])
+}
+
+model BlackListTarget {
+  userId        String
+  description   String
+  blackListId   Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userBlackList UserBlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@id([blackListId, userId])
+}
+
+model BlackListEditor {
+  blackListId    Int
+  userId         String
+  allPermissions Boolean               @default(false)
+  permissions    BlackListPermission[] @default([])
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  userBlackList  UserBlackList         @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@id([blackListId, userId])
+}
+
+enum BlackListPermission {
+  AddTarget
+  EditTarget
+  RemoveTarget
+}
+
+model GuildBlackList {
+  guildId       String
+  blackListId   Int
+  action        BlackListAction @default(Log)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  userBlackList UserBlackList   @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, blackListId])
+  @@index([blackListId])
+}
+
+enum BlackListAction {
+  Log
+  Kick
+  Ban
 }
 
 model Panel {

@@ -4,6 +4,7 @@ import type {
   ButtonLateLimit,
   ChatInputCommandLateLimit,
   Friend,
+  GuildBlackList,
   GuildBumpLateLimit,
   GuildEdit,
   GuildMemberAdd,
@@ -36,6 +37,7 @@ export type AppState = {
       bump: GuildBumpLateLimit;
     };
     friend: Friend;
+    guildBlackList: GuildBlackList;
     guildEdit: GuildEdit;
     guildSetting: GuildSetting;
     guildWhiteList: GuildWhiteList;

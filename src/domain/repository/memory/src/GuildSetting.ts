@@ -8,6 +8,7 @@ export type GuildSettingValue = {
   bumpNoticeContent: string | null;
   inviteLinkBlock: boolean;
   logAntiRaid: string | null;
+  logBlackList: string | null;
   logMemberJoin: string | null;
   logMemberLeave: string | null;
   logMemberTimeout: string | null;
