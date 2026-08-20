@@ -76,6 +76,9 @@ export const CHARACTER_LIMIT = {
   tag: 25,
   review: 150,
   searchTerm: 500,
+  blackListLabel: 50,
 } as const;
 
 export const NUM_TAG_LIMIT = 5;
+
+export const MAX_USER_BLACK_LIST_COUNT = 15;

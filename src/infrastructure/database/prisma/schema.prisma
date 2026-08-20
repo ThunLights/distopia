@@ -150,6 +150,7 @@ enum WhiteListPermission {
 model UserBlackList {
   id           Int               @id @default(autoincrement())
   ownerId      String
+  label        String
   targets      BlackListTarget[]
   editors      BlackListEditor[]
   applications GuildBlackList[]
@@ -159,6 +160,7 @@ model UserBlackList {
 
 model BlackListTarget {
   userId        String
+  label         String
   description   String
   blackListId   Int
   createdAt     DateTime      @default(now())

@@ -26,6 +26,15 @@ export function decodeBlackListTargetRef(value: string): unknown {
   return { blackListId, userId };
 }
 
+const SELECT_MENU_LABEL_MAX_LENGTH = 100;
+
+export function truncateSelectMenuLabel(label: string): string {
+  if (label.length <= SELECT_MENU_LABEL_MAX_LENGTH) {
+    return label;
+  }
+  return `${label.slice(0, SELECT_MENU_LABEL_MAX_LENGTH - 1)}…`;
+}
+
 const EMBED_FIELD_VALUE_MAX_LENGTH = 1024;
 
 export function buildBlackListFieldValue(lines: string[]): string {

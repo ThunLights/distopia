@@ -5,10 +5,12 @@ export type BlackListAction = "Log" | "Kick" | "Ban";
 export type UserBlackList = {
   id: number;
   ownerId: string;
+  label: string;
 };
 
 export type BlackListTarget = {
   userId: string;
+  label: string;
   description: string;
   blackListId: number;
   createdAt: Date;
@@ -17,7 +19,7 @@ export type BlackListTarget = {
 
 export type BlackListTargetUpsertInput = Pick<
   BlackListTarget,
-  "blackListId" | "userId" | "description"
+  "blackListId" | "userId" | "label" | "description"
 >;
 
 export type BlackListEditor = {

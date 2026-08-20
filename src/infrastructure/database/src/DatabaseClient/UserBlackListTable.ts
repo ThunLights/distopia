@@ -10,8 +10,8 @@ export class UserBlackListTable extends Base {
     return await this.prisma.userBlackList.findMany({ where: { ownerId } });
   }
 
-  public async create(ownerId: string): Promise<UserBlackList> {
-    return await this.prisma.userBlackList.create({ data: { ownerId } });
+  public async create(ownerId: string, label: string): Promise<UserBlackList> {
+    return await this.prisma.userBlackList.create({ data: { ownerId, label } });
   }
 
   public async delete(id: number): Promise<UserBlackList> {

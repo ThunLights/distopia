@@ -11,6 +11,7 @@ import type {
 } from "infra-database/types";
 
 import { Base } from "./Base";
+import { MAX_USER_BLACK_LIST_COUNT } from "./utils/constant";
 
 const actionSeverity: Record<BlackListAction, number> = {
   Log: 0,
@@ -19,8 +20,13 @@ const actionSeverity: Record<BlackListAction, number> = {
 };
 
 export class BlackList extends Base {
-  public async create(ownerId: string): Promise<UserBlackList> {
-    return await this.state.database.userBlackList.create(ownerId);
+  public async create(ownerId: string, label: string): Promise<UserBlackList> {
+    return await this.state.database.userBlackList.create(ownerId, label);
+  }
+
+  public async canCreate(ownerId: string): Promise<boolean> {
+    const owned = await this.findAllByOwner(ownerId);
+    return owned.length < MAX_USER_BLACK_LIST_COUNT;
   }
 
   public async delete(id: number): Promise<UserBlackList> {

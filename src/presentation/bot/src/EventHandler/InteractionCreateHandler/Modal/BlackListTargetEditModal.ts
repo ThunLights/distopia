@@ -11,10 +11,12 @@ import z from "zod";
 import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/blackList";
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
+import { blackListTargetManageDetailPage } from "../Page/BlackListTargetManageDetailPage";
 
 const customIdPrefix = "blackListTargetEdit:";
 
 const OptionsSchema = BlackListTargetRefSchema.extend({
+  label: z.string().max(CHARACTER_LIMIT.blackListLabel),
   description: z.string().max(CHARACTER_LIMIT.description),
 });
 
@@ -40,7 +42,11 @@ export class BlackListTargetEditModal extends ModalSubmitInteractionBase<Options
     }
 
     return await validator(
-      { ...ref, description: interaction.fields.getTextInputValue("description") },
+      {
+        ...ref,
+        label: interaction.fields.getTextInputValue("label"),
+        description: interaction.fields.getTextInputValue("description"),
+      },
       OptionsSchema,
     );
   }
@@ -49,7 +55,7 @@ export class BlackListTargetEditModal extends ModalSubmitInteractionBase<Options
     interaction: ModalSubmitInteraction<CacheType>,
     options: Options,
   ): Promise<InteractionReplyOptions | InteractionResponse> {
-    const { blackListId, userId, description } = options;
+    const { blackListId, userId, label, description } = options;
     const requesterId = interaction.user.id;
 
     const allowed = await this.core.blackList.hasPermission(blackListId, requesterId, "EditTarget");
@@ -67,8 +73,19 @@ export class BlackListTargetEditModal extends ModalSubmitInteractionBase<Options
       return { content: "対象が見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.blackList.upsertTarget({ blackListId, userId, description });
+    await this.core.blackList.upsertTarget({ blackListId, userId, label, description });
 
-    return { content: "説明を更新しました。", flags: [MessageFlags.Ephemeral] };
+    if (interaction.isFromMessage()) {
+      const pagePayload = await blackListTargetManageDetailPage(
+        this.core,
+        requesterId,
+        blackListId,
+      );
+      const { content, components, embeds, allowedMentions, files } = pagePayload;
+
+      return await interaction.update({ content, components, embeds, allowedMentions, files });
+    }
+
+    return { content: "対象を更新しました。", flags: [MessageFlags.Ephemeral] };
   }
 }
