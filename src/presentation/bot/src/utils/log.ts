@@ -19,8 +19,11 @@ export const LOG_FIELDS = [
 
 export type LogField = (typeof LOG_FIELDS)[number];
 
-/** Every guild-settings column that stores a log-destination channel ID, including ones outside the user-facing ログ設定 page (e.g. 荒らし対策・ブラックリストの専用ログチャンネル). */
-export type AllLogField = LogField | "logAntiRaid" | "logBlackList";
+/** Every guild-settings column that stores a log-destination channel ID, including ones outside the user-facing ログ設定 page (e.g. 荒らし対策の専用ログチャンネル). */
+export type AllLogField = LogField | "logAntiRaid";
+
+/** Log fields whose destination channel is resolved by the caller (not looked up from GuildSetting) — e.g. ブラックリスト, where the channel is configured per applied blacklist (GuildBlackList.logChannel) rather than guild-wide. */
+export type ChannelLogField = "logBlackList";
 
 export function isLogField(value: string): value is LogField {
   return (LOG_FIELDS as readonly string[]).includes(value);

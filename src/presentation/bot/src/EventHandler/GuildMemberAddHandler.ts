@@ -34,6 +34,25 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       actionTaken = "Kick";
     }
 
-    await this.logger.log(member.guild, "logBlackList", member, matches, actionTaken);
+    const matchesByChannel = new Map<string, typeof matches>();
+    for (const match of matches) {
+      if (!match.logChannel) {
+        continue;
+      }
+      const channelMatches = matchesByChannel.get(match.logChannel) ?? [];
+      channelMatches.push(match);
+      matchesByChannel.set(match.logChannel, channelMatches);
+    }
+
+    for (const [channelId, channelMatches] of matchesByChannel) {
+      await this.logger.logToChannel(
+        member.guild,
+        channelId,
+        "logBlackList",
+        member,
+        channelMatches,
+        actionTaken,
+      );
+    }
   }
 }

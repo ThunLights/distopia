@@ -14,7 +14,7 @@ import type {
 import type { BlackListAction } from "./blackList";
 import { blackListActionLabels } from "./blackList";
 import { codeBlock } from "./codeblock";
-import type { AllLogField } from "./log";
+import type { AllLogField, ChannelLogField } from "./log";
 
 export type LogEmbedField = { name: string; value: string; inline?: boolean };
 
@@ -246,4 +246,4 @@ export const logFormats = {
       })),
     }),
   },
-} satisfies Record<AllLogField, LogFormat<any>>;
+} satisfies Record<AllLogField | ChannelLogField, LogFormat<any>>;

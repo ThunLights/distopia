@@ -141,7 +141,13 @@ export class BlackList extends Base {
     guildId: string,
     userId: string,
   ): Promise<
-    { blackListId: number; action: BlackListAction; description: string; tags: string[] }[]
+    {
+      blackListId: number;
+      action: BlackListAction;
+      description: string;
+      tags: string[];
+      logChannel: string | null;
+    }[]
   > {
     const applied = await this.getApplied(guildId);
     if (!applied.length) {
@@ -165,6 +171,7 @@ export class BlackList extends Base {
         description: target.description,
         tags: target.tags,
         action: forceBan ? "Ban" : (application?.action ?? "Log"),
+        logChannel: application?.logChannel ?? null,
       };
     });
   }

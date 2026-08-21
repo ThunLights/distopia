@@ -1,7 +1,7 @@
 import type { AppCore } from "app-core";
 import { EmbedBuilder, type Guild } from "discord.js";
 
-import type { AllLogField } from "./log";
+import type { AllLogField, ChannelLogField } from "./log";
 import { logFormats, type LogFormat } from "./logFormats";
 
 export class Logger {
@@ -12,10 +12,27 @@ export class Logger {
     field: F,
     ...args: Parameters<(typeof logFormats)[F]["build"]>
   ): Promise<void> {
-    try {
-      const settings = await this.core.guild.getSetting(guild.id);
-      const channelId = settings?.[field];
+    const settings = await this.core.guild.getSetting(guild.id);
 
+    await this.send(guild, settings?.[field], field, args);
+  }
+
+  public async logToChannel<F extends ChannelLogField>(
+    guild: Guild,
+    channelId: string,
+    field: F,
+    ...args: Parameters<(typeof logFormats)[F]["build"]>
+  ): Promise<void> {
+    await this.send(guild, channelId, field, args);
+  }
+
+  private async send<F extends AllLogField | ChannelLogField>(
+    guild: Guild,
+    channelId: string | null | undefined,
+    field: F,
+    args: Parameters<(typeof logFormats)[F]["build"]>,
+  ): Promise<void> {
+    try {
       if (!channelId) {
         return;
       }

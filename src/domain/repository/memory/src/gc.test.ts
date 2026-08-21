@@ -186,7 +186,6 @@ describe("GuildSetting.gc()", () => {
       bumpNoticeContent: null,
       inviteLinkBlock: false,
       logAntiRaid: null,
-      logBlackList: null,
       logMemberJoin: null,
       logMemberLeave: null,
       logMemberTimeout: null,

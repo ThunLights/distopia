@@ -3,6 +3,8 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  ChannelSelectMenuBuilder,
+  ChannelType,
   EmbedBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
@@ -30,6 +32,7 @@ export async function blackListDetailPage(
         ? [
             `処理: ${blackListActionLabels[application.action]}`,
             `BANするタグ: ${application.banTags.length ? application.banTags.join(", ") : "なし"}`,
+            `ログチャンネル: ${application.logChannel ? `<#${application.logChannel}>` : "未設定"}`,
           ].join("\n")
         : "このブラックリストは適用されていません。",
     );
@@ -42,6 +45,7 @@ export async function blackListDetailPage(
   const components: (
     | ActionRowBuilder<ButtonBuilder>
     | ActionRowBuilder<StringSelectMenuBuilder>
+    | ActionRowBuilder<ChannelSelectMenuBuilder>
   )[] = [];
 
   if (application && list?.tags.length) {
@@ -64,10 +68,25 @@ export async function blackListDetailPage(
     );
   }
 
+  if (application) {
+    components.push(
+      new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
+        new ChannelSelectMenuBuilder()
+          .setCustomId(`blackListLogChannel:${blackListId}`)
+          .setPlaceholder("このブラックリストのログチャンネルを設定")
+          .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement),
+      ),
+    );
+  }
+
   const bottomRow = new ActionRowBuilder<ButtonBuilder>().addComponents(backButton);
 
   if (application) {
     bottomRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId(`blackListLogChannelReset:${blackListId}`)
+        .setLabel("ログチャンネルをリセット")
+        .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(`blackListUnapply:${blackListId}`)
         .setLabel("解除する")

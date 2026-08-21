@@ -3,8 +3,6 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  ChannelSelectMenuBuilder,
-  ChannelType,
   EmbedBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
@@ -21,10 +19,7 @@ export async function blackListPage(
   guild: Guild,
   page: number = 0,
 ): Promise<InteractionReplyOptions> {
-  const [settings, applied] = await Promise.all([
-    core.guild.getSetting(guild.id),
-    core.blackList.getApplied(guild.id),
-  ]);
+  const applied = await core.blackList.getApplied(guild.id);
 
   const {
     items: pageApplied,
@@ -38,35 +33,25 @@ export async function blackListPage(
     .setColor("Navy")
     .setTitle("ブラックリスト設定")
     .setDescription(
-      "自分がオーナー・編集者になっているブラックリストをこのサーバーに適用できます。\nブラックリストのIDは `/blacklist list` で確認できます。",
+      "自分がオーナー・編集者になっているブラックリストをこのサーバーに適用できます。\nブラックリストのIDは `/blacklist list` で確認できます。\n適用後、処理・BANするタグ・ログチャンネルは一覧から選択して設定できます。",
     )
-    .addFields(
-      {
-        name:
-          totalPages > 1
-            ? `適用中のブラックリスト (${currentPage + 1}/${totalPages}ページ)`
-            : "適用中のブラックリスト",
-        value: buildBlackListFieldValue(
-          applied.map(
-            (entry) => `ID: \`${entry.blackListId}\` (${blackListActionLabels[entry.action]})`,
-          ),
+    .addFields({
+      name:
+        totalPages > 1
+          ? `適用中のブラックリスト (${currentPage + 1}/${totalPages}ページ)`
+          : "適用中のブラックリスト",
+      value: buildBlackListFieldValue(
+        applied.map(
+          (entry) =>
+            `ID: \`${entry.blackListId}\` (${blackListActionLabels[entry.action]})${entry.logChannel ? ` - <#${entry.logChannel}>` : ""}`,
         ),
-      },
-      {
-        name: "ログチャンネル",
-        value: settings?.logBlackList ? `<#${settings.logBlackList}>` : "未設定",
-      },
-    );
+      ),
+    });
 
   const applyButton = new ButtonBuilder()
     .setCustomId("blackListApplyOpen")
     .setLabel("適用・更新する")
     .setStyle(ButtonStyle.Primary);
-
-  const resetLogChannelButton = new ButtonBuilder()
-    .setCustomId("blackListLogChannelReset")
-    .setLabel("ログチャンネルをリセット")
-    .setStyle(ButtonStyle.Danger);
 
   const topButtons: ButtonBuilder[] = [applyButton];
 
@@ -88,13 +73,12 @@ export async function blackListPage(
   const components: (
     | ActionRowBuilder<ButtonBuilder>
     | ActionRowBuilder<StringSelectMenuBuilder>
-    | ActionRowBuilder<ChannelSelectMenuBuilder>
   )[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(topButtons)];
 
   if (pageApplied.length) {
     const manageSelector = new StringSelectMenuBuilder()
       .setCustomId("blackListManage")
-      .setPlaceholder("解除するブラックリストを選択")
+      .setPlaceholder("管理・解除するブラックリストを選択")
       .addOptions(
         pageApplied.map((entry) =>
           new StringSelectMenuOptionBuilder()
@@ -107,15 +91,7 @@ export async function blackListPage(
   }
 
   components.push(
-    new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
-      new ChannelSelectMenuBuilder()
-        .setCustomId("blackListLogChannel")
-        .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement),
-    ),
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
-      await backSettingsPageButton(),
-      resetLogChannelButton,
-    ),
+    new ActionRowBuilder<ButtonBuilder>().addComponents(await backSettingsPageButton()),
   );
 
   return {

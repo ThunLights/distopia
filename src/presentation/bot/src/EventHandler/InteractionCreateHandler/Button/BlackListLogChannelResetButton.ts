@@ -7,14 +7,24 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import z from "zod";
 
+import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
-import { blackListPage } from "../Page/BlackListPage";
+import { blackListDetailPage } from "../Page/BlackListDetailPage";
+
+const customIdPrefix = "blackListLogChannelReset:";
+
+const BlackListIdSchema = z.coerce.number().int();
 
 export class BlackListLogChannelResetButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override customId: string = "blackListLogChannelReset";
+  public override customId: string = customIdPrefix;
+
+  public override async match(interaction: ButtonInteraction<CacheType>): Promise<boolean> {
+    return interaction.customId.startsWith(customIdPrefix);
+  }
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
@@ -25,9 +35,18 @@ export class BlackListLogChannelResetButton extends ButtonInteractionBase {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({ guildId: guild.id, logBlackList: null });
+    const blackListId = await validator(
+      interaction.customId.slice(customIdPrefix.length),
+      BlackListIdSchema,
+    );
 
-    const pagePayload = await blackListPage(this.core, guild);
+    if (blackListId instanceof ValidateError) {
+      return blackListId.content;
+    }
+
+    await this.core.blackList.apply({ guildId: guild.id, blackListId, logChannel: null });
+
+    const pagePayload = await blackListDetailPage(this.core, guild, blackListId);
     const { content, components, embeds, allowedMentions, files } = pagePayload;
 
     return await interaction.update({ content, components, embeds, allowedMentions, files });

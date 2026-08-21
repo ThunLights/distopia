@@ -7,14 +7,26 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import z from "zod";
 
+import { ValidateError, validator } from "../../../utils/validator";
 import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
-import { blackListPage } from "../Page/BlackListPage";
+import { blackListDetailPage } from "../Page/BlackListDetailPage";
+
+const customIdPrefix = "blackListLogChannel:";
+
+const BlackListIdSchema = z.coerce.number().int();
 
 export class BlackListLogChannelSelectMenu extends ChannelSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override customId: string = "blackListLogChannel";
+  public override customId: string = customIdPrefix;
+
+  public override async match(
+    interaction: ChannelSelectMenuInteraction<CacheType>,
+  ): Promise<boolean> {
+    return interaction.customId.startsWith(customIdPrefix);
+  }
 
   protected override async exec(
     interaction: ChannelSelectMenuInteraction<CacheType>,
@@ -26,9 +38,22 @@ export class BlackListLogChannelSelectMenu extends ChannelSelectMenuInteractionB
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({ guildId: guild.id, logBlackList: options.channelId });
+    const blackListId = await validator(
+      interaction.customId.slice(customIdPrefix.length),
+      BlackListIdSchema,
+    );
 
-    const pagePayload = await blackListPage(this.core, guild);
+    if (blackListId instanceof ValidateError) {
+      return blackListId.content;
+    }
+
+    await this.core.blackList.apply({
+      guildId: guild.id,
+      blackListId,
+      logChannel: options.channelId,
+    });
+
+    const pagePayload = await blackListDetailPage(this.core, guild, blackListId);
     const { content, components, embeds, allowedMentions, files } = pagePayload;
 
     return await interaction.update({ content, components, embeds, allowedMentions, files });
