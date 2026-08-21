@@ -1,13 +1,12 @@
 -- CreateEnum
 CREATE TYPE "BlackListPermission" AS ENUM ('AddTarget', 'EditTarget', 'RemoveTarget');
 
--- CreateEnum
-CREATE TYPE "BlackListAction" AS ENUM ('Log', 'Kick', 'Ban');
-
 -- CreateTable
 CREATE TABLE "UserBlackList" (
     "id" SERIAL NOT NULL,
     "ownerId" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
+    "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
 
     CONSTRAINT "UserBlackList_pkey" PRIMARY KEY ("id")
 );
@@ -15,7 +14,9 @@ CREATE TABLE "UserBlackList" (
 -- CreateTable
 CREATE TABLE "BlackListTarget" (
     "userId" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "tags" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "blackListId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -39,7 +40,9 @@ CREATE TABLE "BlackListEditor" (
 CREATE TABLE "GuildBlackList" (
     "guildId" TEXT NOT NULL,
     "blackListId" INTEGER NOT NULL,
-    "action" "BlackListAction" NOT NULL DEFAULT 'Log',
+    "autoBan" BOOLEAN NOT NULL DEFAULT false,
+    "banTags" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "logChannel" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
