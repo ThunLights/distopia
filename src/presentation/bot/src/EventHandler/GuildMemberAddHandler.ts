@@ -1,6 +1,5 @@
 import type { GuildMember } from "discord.js";
 
-import type { BlackListAction } from "../utils/blackList";
 import { sendWelcomeMessage } from "../utils/welcomeMessage";
 import { BaseHandler } from "./BaseHandler";
 
@@ -21,17 +20,11 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       return;
     }
 
-    const configuredAction =
-      this.core.blackList.strongestAction(matches.map((match) => match.action)) ?? "Log";
+    let banned = false;
 
-    let actionTaken: BlackListAction = "Log";
-
-    if (configuredAction === "Ban" && member.bannable) {
+    if (matches.some((match) => match.banned) && member.bannable) {
       await member.ban({ reason: "ブラックリストに該当したため" });
-      actionTaken = "Ban";
-    } else if (configuredAction === "Kick" && member.kickable) {
-      await member.kick("ブラックリストに該当したため");
-      actionTaken = "Kick";
+      banned = true;
     }
 
     const matchesByChannel = new Map<string, typeof matches>();
@@ -51,7 +44,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
         "logBlackList",
         member,
         channelMatches,
-        actionTaken,
+        banned,
       );
     }
   }

@@ -1,5 +1,4 @@
 import type {
-  BlackListAction,
   BlackListEditor,
   BlackListEditorUpsertInput,
   BlackListPermission,
@@ -12,12 +11,6 @@ import type {
 
 import { Base } from "./Base";
 import { MAX_USER_BLACK_LIST_COUNT } from "./utils/constant";
-
-const actionSeverity: Record<BlackListAction, number> = {
-  Log: 0,
-  Kick: 1,
-  Ban: 2,
-};
 
 export class BlackList extends Base {
   public async create(ownerId: string, label: string, tags: string[]): Promise<UserBlackList> {
@@ -143,10 +136,10 @@ export class BlackList extends Base {
   ): Promise<
     {
       blackListId: number;
-      action: BlackListAction;
       description: string;
       tags: string[];
       logChannel: string | null;
+      banned: boolean;
     }[]
   > {
     const applied = await this.getApplied(guildId);
@@ -162,7 +155,7 @@ export class BlackList extends Base {
 
     return targets.map((target) => {
       const application = applicationByListId.get(target.blackListId);
-      const forceBan = Boolean(
+      const banned = Boolean(
         application?.autoBan &&
         application.banTags.length &&
         target.tags.some((tag) => application.banTags.includes(tag)),
@@ -172,19 +165,9 @@ export class BlackList extends Base {
         blackListId: target.blackListId,
         description: target.description,
         tags: target.tags,
-        action: forceBan ? "Ban" : (application?.action ?? "Log"),
         logChannel: application?.logChannel ?? null,
+        banned,
       };
     });
-  }
-
-  public strongestAction(actions: BlackListAction[]): BlackListAction | null {
-    if (!actions.length) {
-      return null;
-    }
-
-    return actions.reduce((strongest, action) =>
-      actionSeverity[action] > actionSeverity[strongest] ? action : strongest,
-    );
   }
 }

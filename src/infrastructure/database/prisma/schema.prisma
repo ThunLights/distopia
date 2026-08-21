@@ -192,22 +192,15 @@ enum BlackListPermission {
 model GuildBlackList {
   guildId       String
   blackListId   Int
-  action        BlackListAction @default(Log)
-  autoBan       Boolean         @default(false)
-  banTags       String[]        @default([])
+  autoBan       Boolean       @default(false)
+  banTags       String[]      @default([])
   logChannel    String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  userBlackList UserBlackList   @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userBlackList UserBlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
 
   @@id([guildId, blackListId])
   @@index([blackListId])
-}
-
-enum BlackListAction {
-  Log
-  Kick
-  Ban
 }
 
 model Panel {

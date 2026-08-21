@@ -1,14 +1,6 @@
 import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import { z } from "zod";
 
-export type BlackListAction = "Log" | "Kick" | "Ban";
-
-export const blackListActionLabels: Record<BlackListAction, string> = {
-  Log: "ログのみ",
-  Kick: "キック",
-  Ban: "BAN",
-};
-
 export type BlackListPermission = "AddTarget" | "EditTarget" | "RemoveTarget";
 
 export const blackListPermissionLabels: Record<BlackListPermission, string> = {

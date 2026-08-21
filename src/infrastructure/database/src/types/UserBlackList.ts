@@ -1,7 +1,5 @@
 export type BlackListPermission = "AddTarget" | "EditTarget" | "RemoveTarget";
 
-export type BlackListAction = "Log" | "Kick" | "Ban";
-
 export type UserBlackList = {
   id: number;
   ownerId: string;
@@ -39,7 +37,6 @@ export type BlackListEditorUpsertInput = Pick<BlackListEditor, "blackListId" | "
 export type GuildBlackList = {
   guildId: string;
   blackListId: number;
-  action: BlackListAction;
   autoBan: boolean;
   banTags: string[];
   logChannel: string | null;

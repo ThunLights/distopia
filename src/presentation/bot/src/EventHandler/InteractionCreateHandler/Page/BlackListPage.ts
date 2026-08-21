@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { blackListActionLabels, buildBlackListFieldValue } from "../../../utils/blackList";
+import { buildBlackListFieldValue } from "../../../utils/blackList";
 import { paginate } from "../../../utils/pagination";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
@@ -33,7 +33,7 @@ export async function blackListPage(
     .setColor("Navy")
     .setTitle("ブラックリスト設定")
     .setDescription(
-      "自分がオーナー・編集者になっているブラックリストをこのサーバーに適用できます。\nブラックリストのIDは `/blacklist list` で確認できます。\n適用後、処理・BANするタグ・ログチャンネルは一覧から選択して設定できます。",
+      "自分がオーナー・編集者になっているブラックリストをこのサーバーに適用できます。\nブラックリストのIDは `/blacklist list` で確認できます。\n適用後、タグによる自動BAN・BANするタグ・ログチャンネルは一覧から選択して設定できます。",
     )
     .addFields({
       name:
@@ -43,7 +43,7 @@ export async function blackListPage(
       value: buildBlackListFieldValue(
         applied.map(
           (entry) =>
-            `ID: \`${entry.blackListId}\` (${blackListActionLabels[entry.action]})${entry.autoBan ? " [タグ自動BAN: On]" : ""}${entry.logChannel ? ` - <#${entry.logChannel}>` : ""}`,
+            `ID: \`${entry.blackListId}\`${entry.autoBan ? " [タグ自動BAN: On]" : ""}${entry.logChannel ? ` - <#${entry.logChannel}>` : ""}`,
         ),
       ),
     });
@@ -82,7 +82,7 @@ export async function blackListPage(
       .addOptions(
         pageApplied.map((entry) =>
           new StringSelectMenuOptionBuilder()
-            .setLabel(`ID: ${entry.blackListId} (${blackListActionLabels[entry.action]})`)
+            .setLabel(`ID: ${entry.blackListId}`)
             .setValue(String(entry.blackListId)),
         ),
       );

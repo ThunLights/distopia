@@ -11,8 +11,6 @@ import type {
   User,
 } from "discord.js";
 
-import type { BlackListAction } from "./blackList";
-import { blackListActionLabels } from "./blackList";
 import { codeBlock } from "./codeblock";
 import type { AllLogField, ChannelLogField } from "./log";
 
@@ -231,15 +229,15 @@ export const logFormats = {
     color: "Red",
     build: (
       member: GuildMember,
-      matches: { description: string; action: BlackListAction; tags: string[] }[],
-      actionTaken: BlackListAction,
+      matches: { description: string; tags: string[]; banned: boolean }[],
+      banned: boolean,
     ) => ({
       description: [
         `ユーザー: <@${member.id}> (${member.id})`,
-        `実行した処理: ${blackListActionLabels[actionTaken]}`,
+        `実行した処理: ${banned ? "BAN" : "ログのみ"}`,
       ].join("\n"),
       fields: matches.map((match, index) => ({
-        name: `該当ブラックリスト ${index + 1} (${blackListActionLabels[match.action]})`,
+        name: `該当ブラックリスト ${index + 1}${match.banned ? " (BAN対象)" : ""}`,
         value: [match.description, match.tags.length ? `タグ: ${match.tags.join(", ")}` : null]
           .filter(Boolean)
           .join("\n"),

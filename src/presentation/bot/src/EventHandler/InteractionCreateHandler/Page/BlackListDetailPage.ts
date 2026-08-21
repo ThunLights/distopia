@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { blackListActionLabels, truncateSelectMenuLabel } from "../../../utils/blackList";
+import { truncateSelectMenuLabel } from "../../../utils/blackList";
 
 export async function blackListDetailPage(
   core: AppCore,
@@ -30,7 +30,6 @@ export async function blackListDetailPage(
     .setDescription(
       application
         ? [
-            `処理: ${blackListActionLabels[application.action]}`,
             `タグによる自動BAN: ${application.autoBan ? "On" : "Off"}`,
             `BANするタグ: ${application.banTags.length ? application.banTags.join(", ") : "なし"}`,
             `ログチャンネル: ${application.logChannel ? `<#${application.logChannel}>` : "未設定"}`,

@@ -1,8 +1,6 @@
 import {
   LabelBuilder,
   ModalBuilder,
-  StringSelectMenuBuilder,
-  StringSelectMenuOptionBuilder,
   TextInputBuilder,
   TextInputStyle,
   type ButtonInteraction,
@@ -29,17 +27,6 @@ export class BlackListApplyOpenButton extends ButtonInteractionBase {
               .setCustomId("blackListId")
               .setStyle(TextInputStyle.Short)
               .setRequired(true),
-          ),
-        new LabelBuilder()
-          .setLabel("参加時の処理")
-          .setStringSelectMenuComponent(
-            new StringSelectMenuBuilder()
-              .setCustomId("action")
-              .addOptions(
-                new StringSelectMenuOptionBuilder().setLabel("ログのみ").setValue("Log"),
-                new StringSelectMenuOptionBuilder().setLabel("キック").setValue("Kick"),
-                new StringSelectMenuOptionBuilder().setLabel("BAN").setValue("Ban"),
-              ),
           ),
       );
 

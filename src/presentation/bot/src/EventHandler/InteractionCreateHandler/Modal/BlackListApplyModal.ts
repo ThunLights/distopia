@@ -14,7 +14,6 @@ import { blackListPage } from "../Page/BlackListPage";
 
 const OptionsSchema = z.object({
   blackListId: z.coerce.number().int(),
-  action: z.enum(["Log", "Kick", "Ban"]),
 });
 
 type Options = z.infer<typeof OptionsSchema>;
@@ -28,7 +27,6 @@ export class BlackListApplyModal extends ModalSubmitInteractionBase<Options> {
     return await validator(
       {
         blackListId: interaction.fields.getTextInputValue("blackListId"),
-        action: interaction.fields.getStringSelectValues("action")[0],
       },
       OptionsSchema,
     );
@@ -44,7 +42,7 @@ export class BlackListApplyModal extends ModalSubmitInteractionBase<Options> {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    const { blackListId, action } = options;
+    const { blackListId } = options;
     const requesterId = interaction.user.id;
 
     const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
@@ -57,7 +55,7 @@ export class BlackListApplyModal extends ModalSubmitInteractionBase<Options> {
       };
     }
 
-    await this.core.blackList.apply({ guildId: guild.id, blackListId, action });
+    await this.core.blackList.apply({ guildId: guild.id, blackListId });
 
     if (interaction.isFromMessage()) {
       const pagePayload = await blackListPage(this.core, guild);

@@ -3,7 +3,6 @@ import { MapWithGC } from "./MapWithGC";
 export type GuildBlackListEntry = {
   guildId: string;
   blackListId: number;
-  action: "Log" | "Kick" | "Ban";
   autoBan: boolean;
   banTags: string[];
   logChannel: string | null;
