@@ -11,11 +11,13 @@ import {
 } from "discord.js";
 
 import { buildBlackListFieldValue, truncateSelectMenuLabel } from "../../../utils/blackList";
+import { encodeIdPageRef, paginate } from "../../../utils/pagination";
 
 export async function blackListTargetManageDetailPage(
   core: AppCore,
   userId: string,
   blackListId: number,
+  page: number = 0,
 ): Promise<InteractionReplyOptions> {
   const [list, targets, canAdd, canEdit, canRemove, isOwner] = await Promise.all([
     core.blackList.find(blackListId),
@@ -26,11 +28,22 @@ export async function blackListTargetManageDetailPage(
     core.blackList.isOwner(blackListId, userId),
   ]);
 
+  const {
+    items: pageTargets,
+    page: currentPage,
+    totalPages,
+    hasPrev,
+    hasNext,
+  } = paginate(targets, page);
+
   const embed = new EmbedBuilder()
     .setColor("Navy")
     .setTitle(`ブラックリスト: ${list?.label ?? blackListId}`)
     .addFields({
-      name: "登録済みの対象",
+      name:
+        totalPages > 1
+          ? `登録済みの対象 (${currentPage + 1}/${totalPages}ページ)`
+          : "登録済みの対象",
       value: buildBlackListFieldValue(
         targets.map((target) => `**${target.label}** <@${target.userId}> (${target.userId})`),
       ),
@@ -58,14 +71,14 @@ export async function blackListTargetManageDetailPage(
     );
   }
 
-  if (targets.length && (canEdit || canRemove)) {
+  if (pageTargets.length && (canEdit || canRemove)) {
     components.push(
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
           .setCustomId(`blackListTargetPickManage:${blackListId}`)
           .setPlaceholder("編集・削除する対象を選択")
           .addOptions(
-            targets.slice(0, 25).map((target) =>
+            pageTargets.map((target) =>
               new StringSelectMenuOptionBuilder()
                 .setLabel(truncateSelectMenuLabel(target.label))
                 .setDescription(truncateSelectMenuLabel(target.description || target.userId))
@@ -88,6 +101,25 @@ export async function blackListTargetManageDetailPage(
         .setCustomId(`blackListManageDelete:${blackListId}`)
         .setStyle(ButtonStyle.Danger)
         .setLabel("ブラックリストを削除"),
+    );
+  }
+
+  if (totalPages > 1) {
+    bottomButtons.push(
+      new ButtonBuilder()
+        .setCustomId(
+          `blackListTargetManageDetailPageNav:${encodeIdPageRef(blackListId, currentPage - 1)}`,
+        )
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("前へ")
+        .setDisabled(!hasPrev),
+      new ButtonBuilder()
+        .setCustomId(
+          `blackListTargetManageDetailPageNav:${encodeIdPageRef(blackListId, currentPage + 1)}`,
+        )
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("次へ")
+        .setDisabled(!hasNext),
     );
   }
 

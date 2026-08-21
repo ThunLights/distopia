@@ -13,13 +13,26 @@ import {
 import type { Guild } from "domain-model";
 
 import { blackListActionLabels, buildBlackListFieldValue } from "../../../utils/blackList";
+import { paginate } from "../../../utils/pagination";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
-export async function blackListPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
+export async function blackListPage(
+  core: AppCore,
+  guild: Guild,
+  page: number = 0,
+): Promise<InteractionReplyOptions> {
   const [settings, applied] = await Promise.all([
     core.guild.getSetting(guild.id),
     core.blackList.getApplied(guild.id),
   ]);
+
+  const {
+    items: pageApplied,
+    page: currentPage,
+    totalPages,
+    hasPrev,
+    hasNext,
+  } = paginate(applied, page);
 
   const embed = new EmbedBuilder()
     .setColor("Navy")
@@ -29,7 +42,10 @@ export async function blackListPage(core: AppCore, guild: Guild): Promise<Intera
     )
     .addFields(
       {
-        name: "適用中のブラックリスト",
+        name:
+          totalPages > 1
+            ? `適用中のブラックリスト (${currentPage + 1}/${totalPages}ページ)`
+            : "適用中のブラックリスト",
         value: buildBlackListFieldValue(
           applied.map(
             (entry) => `ID: \`${entry.blackListId}\` (${blackListActionLabels[entry.action]})`,
@@ -52,24 +68,39 @@ export async function blackListPage(core: AppCore, guild: Guild): Promise<Intera
     .setLabel("ログチャンネルをリセット")
     .setStyle(ButtonStyle.Danger);
 
+  const topButtons: ButtonBuilder[] = [applyButton];
+
+  if (totalPages > 1) {
+    topButtons.push(
+      new ButtonBuilder()
+        .setCustomId(`blackListPageNav:${currentPage - 1}`)
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("前へ")
+        .setDisabled(!hasPrev),
+      new ButtonBuilder()
+        .setCustomId(`blackListPageNav:${currentPage + 1}`)
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("次へ")
+        .setDisabled(!hasNext),
+    );
+  }
+
   const components: (
     | ActionRowBuilder<ButtonBuilder>
     | ActionRowBuilder<StringSelectMenuBuilder>
     | ActionRowBuilder<ChannelSelectMenuBuilder>
-  )[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(applyButton)];
+  )[] = [new ActionRowBuilder<ButtonBuilder>().addComponents(topButtons)];
 
-  if (applied.length) {
+  if (pageApplied.length) {
     const manageSelector = new StringSelectMenuBuilder()
       .setCustomId("blackListManage")
       .setPlaceholder("解除するブラックリストを選択")
       .addOptions(
-        applied
-          .slice(0, 25)
-          .map((entry) =>
-            new StringSelectMenuOptionBuilder()
-              .setLabel(`ID: ${entry.blackListId} (${blackListActionLabels[entry.action]})`)
-              .setValue(String(entry.blackListId)),
-          ),
+        pageApplied.map((entry) =>
+          new StringSelectMenuOptionBuilder()
+            .setLabel(`ID: ${entry.blackListId} (${blackListActionLabels[entry.action]})`)
+            .setValue(String(entry.blackListId)),
+        ),
       );
 
     components.push(new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(manageSelector));

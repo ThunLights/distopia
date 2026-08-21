@@ -14,22 +14,32 @@ import {
   blackListEditorPermissionSummary,
   buildBlackListFieldValue,
 } from "../../../utils/blackList";
+import { encodeIdPageRef, paginate } from "../../../utils/pagination";
 
 export async function blackListTargetManageEditorsPage(
   core: AppCore,
   userId: string,
   blackListId: number,
+  page: number = 0,
 ): Promise<InteractionReplyOptions> {
   const [list, editors] = await Promise.all([
     core.blackList.find(blackListId),
     core.blackList.listEditors(blackListId),
   ]);
 
+  const {
+    items: pageEditors,
+    page: currentPage,
+    totalPages,
+    hasPrev,
+    hasNext,
+  } = paginate(editors, page);
+
   const embed = new EmbedBuilder()
     .setColor("Navy")
     .setTitle(`編集者管理: ${list?.label ?? blackListId}`)
     .addFields({
-      name: "編集者一覧",
+      name: totalPages > 1 ? `編集者一覧 (${currentPage + 1}/${totalPages}ページ)` : "編集者一覧",
       value: buildBlackListFieldValue(
         editors.map(
           (editor) =>
@@ -51,34 +61,51 @@ export async function blackListTargetManageEditorsPage(
     ),
   ];
 
-  if (editors.length) {
+  if (pageEditors.length) {
     components.push(
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
           .setCustomId(`blackListTargetPickEditor:${blackListId}`)
           .setPlaceholder("権限変更・削除する編集者を選択")
           .addOptions(
-            editors
-              .slice(0, 25)
-              .map((editor) =>
-                new StringSelectMenuOptionBuilder()
-                  .setLabel(editor.userId)
-                  .setDescription(blackListEditorPermissionSummary(editor))
-                  .setValue(editor.userId),
-              ),
+            pageEditors.map((editor) =>
+              new StringSelectMenuOptionBuilder()
+                .setLabel(editor.userId)
+                .setDescription(blackListEditorPermissionSummary(editor))
+                .setValue(editor.userId),
+            ),
           ),
       ),
     );
   }
 
-  components.push(
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
+  const bottomButtons: ButtonBuilder[] = [
+    new ButtonBuilder()
+      .setCustomId(`backBlackListTargetManageDetail:${blackListId}`)
+      .setStyle(ButtonStyle.Danger)
+      .setLabel("戻る"),
+  ];
+
+  if (totalPages > 1) {
+    bottomButtons.push(
       new ButtonBuilder()
-        .setCustomId(`backBlackListTargetManageDetail:${blackListId}`)
-        .setStyle(ButtonStyle.Danger)
-        .setLabel("戻る"),
-    ),
-  );
+        .setCustomId(
+          `blackListTargetManageEditorsPageNav:${encodeIdPageRef(blackListId, currentPage - 1)}`,
+        )
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("前へ")
+        .setDisabled(!hasPrev),
+      new ButtonBuilder()
+        .setCustomId(
+          `blackListTargetManageEditorsPageNav:${encodeIdPageRef(blackListId, currentPage + 1)}`,
+        )
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("次へ")
+        .setDisabled(!hasNext),
+    );
+  }
+
+  components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(bottomButtons));
 
   return {
     embeds: [embed],
