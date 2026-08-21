@@ -10,6 +10,25 @@ export const blackListActionLabels: Record<BlackListAction, string> = {
 
 export type BlackListPermission = "AddTarget" | "EditTarget" | "RemoveTarget";
 
+export const blackListPermissionLabels: Record<BlackListPermission, string> = {
+  AddTarget: "追加",
+  EditTarget: "編集",
+  RemoveTarget: "削除",
+};
+
+export function blackListEditorPermissionSummary(editor: {
+  allPermissions: boolean;
+  permissions: BlackListPermission[];
+}): string {
+  if (editor.allPermissions) {
+    return "全許可";
+  }
+  if (!editor.permissions.length) {
+    return "権限なし";
+  }
+  return editor.permissions.map((permission) => blackListPermissionLabels[permission]).join(", ");
+}
+
 export const BlackListTargetRefSchema = z.object({
   blackListId: z.coerce.number().int(),
   userId: z.string().regex(/^\d+$/),

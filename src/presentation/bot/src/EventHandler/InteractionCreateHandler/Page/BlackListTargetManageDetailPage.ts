@@ -17,12 +17,13 @@ export async function blackListTargetManageDetailPage(
   userId: string,
   blackListId: number,
 ): Promise<InteractionReplyOptions> {
-  const [list, targets, canAdd, canEdit, canRemove] = await Promise.all([
+  const [list, targets, canAdd, canEdit, canRemove, isOwner] = await Promise.all([
     core.blackList.find(blackListId),
     core.blackList.listTargets(blackListId),
     core.blackList.hasPermission(blackListId, userId, "AddTarget"),
     core.blackList.hasPermission(blackListId, userId, "EditTarget"),
     core.blackList.hasPermission(blackListId, userId, "RemoveTarget"),
+    core.blackList.isOwner(blackListId, userId),
   ]);
 
   const embed = new EmbedBuilder()
@@ -75,7 +76,22 @@ export async function blackListTargetManageDetailPage(
     );
   }
 
-  components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(backButton));
+  const bottomButtons: ButtonBuilder[] = [backButton];
+
+  if (isOwner) {
+    bottomButtons.push(
+      new ButtonBuilder()
+        .setCustomId(`blackListTargetManageEditorsOpen:${blackListId}`)
+        .setStyle(ButtonStyle.Secondary)
+        .setLabel("編集者を管理"),
+      new ButtonBuilder()
+        .setCustomId(`blackListManageDelete:${blackListId}`)
+        .setStyle(ButtonStyle.Danger)
+        .setLabel("ブラックリストを削除"),
+    );
+  }
+
+  components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(bottomButtons));
 
   return {
     embeds: [embed],
