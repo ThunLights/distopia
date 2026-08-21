@@ -129,7 +129,7 @@ export async function blackListTargetManageDetailPage(
           .setStyle(ButtonStyle.Secondary)
           .setLabel("編集者を管理"),
         new ButtonBuilder()
-          .setCustomId(`blackListTagsEditOpen:${blackListId}`)
+          .setCustomId(`blackListTagsManageOpen:${blackListId}`)
           .setStyle(ButtonStyle.Secondary)
           .setLabel("タグを編集"),
         new ButtonBuilder()

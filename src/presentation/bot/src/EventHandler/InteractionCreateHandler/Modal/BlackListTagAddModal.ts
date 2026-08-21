@@ -1,3 +1,4 @@
+import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import {
   InteractionResponse,
   MessageFlags,
@@ -7,23 +8,20 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { BlackListTagsSchema, parseBlackListTagsInput } from "../../../utils/blackList";
-import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
+import { validator, type ValidateResult } from "../../../utils/validator";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
-import { blackListTargetManageDetailPage } from "../Page/BlackListTargetManageDetailPage";
+import { blackListTagsManagePage } from "../Page/BlackListTagsManagePage";
 
-const customIdPrefix = "blackListTagsEdit:";
-
-const BlackListIdSchema = z.coerce.number().int();
+const customIdPrefix = "blackListTagAdd:";
 
 const OptionsSchema = z.object({
-  blackListId: BlackListIdSchema,
-  tags: z.string(),
+  blackListId: z.coerce.number().int(),
+  tag: z.string().min(1).max(CHARACTER_LIMIT.tag),
 });
 
 type Options = z.infer<typeof OptionsSchema>;
 
-export class BlackListTagsEditModal extends ModalSubmitInteractionBase<Options> {
+export class BlackListTagAddModal extends ModalSubmitInteractionBase<Options> {
   public override customId: string = customIdPrefix;
 
   public override async match(interaction: ModalSubmitInteraction<CacheType>): Promise<boolean> {
@@ -36,7 +34,7 @@ export class BlackListTagsEditModal extends ModalSubmitInteractionBase<Options> 
     return await validator(
       {
         blackListId: interaction.customId.slice(customIdPrefix.length),
-        tags: interaction.fields.getTextInputValue("tags"),
+        tag: interaction.fields.getTextInputValue("tag").trim(),
       },
       OptionsSchema,
     );
@@ -46,7 +44,7 @@ export class BlackListTagsEditModal extends ModalSubmitInteractionBase<Options> 
     interaction: ModalSubmitInteraction<CacheType>,
     options: Options,
   ): Promise<InteractionReplyOptions | InteractionResponse> {
-    const { blackListId } = options;
+    const { blackListId, tag } = options;
     const requesterId = interaction.user.id;
 
     const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
@@ -58,25 +56,29 @@ export class BlackListTagsEditModal extends ModalSubmitInteractionBase<Options> 
       };
     }
 
-    const tags = await validator(parseBlackListTagsInput(options.tags), BlackListTagsSchema);
+    const list = await this.core.blackList.find(blackListId);
+    const currentTags = list?.tags ?? [];
 
-    if (tags instanceof ValidateError) {
-      return tags.content;
+    if (currentTags.includes(tag)) {
+      return { content: "そのタグは既に登録されています。", flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.blackList.updateTags(blackListId, tags);
+    if (currentTags.length >= NUM_BLACK_LIST_TAG_LIMIT) {
+      return {
+        content: `タグは最大${NUM_BLACK_LIST_TAG_LIMIT}個までです。`,
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
+    await this.core.blackList.updateTags(blackListId, [...currentTags, tag]);
 
     if (interaction.isFromMessage()) {
-      const pagePayload = await blackListTargetManageDetailPage(
-        this.core,
-        requesterId,
-        blackListId,
-      );
+      const pagePayload = await blackListTagsManagePage(this.core, blackListId);
       const { content, components, embeds, allowedMentions, files } = pagePayload;
 
       return await interaction.update({ content, components, embeds, allowedMentions, files });
     }
 
-    return { content: "タグを更新しました。", flags: [MessageFlags.Ephemeral] };
+    return { content: `タグ「${tag}」を追加しました。`, flags: [MessageFlags.Ephemeral] };
   }
 }

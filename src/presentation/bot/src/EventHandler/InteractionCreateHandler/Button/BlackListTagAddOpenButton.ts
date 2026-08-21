@@ -1,4 +1,4 @@
-import { NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
+import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import {
   InteractionResponse,
   LabelBuilder,
@@ -17,11 +17,11 @@ import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { ModalSended } from "../Base/Modal/ModalSended";
 
-const customIdPrefix = "blackListTagsEditOpen:";
+const customIdPrefix = "blackListTagAddOpen:";
 
 const BlackListIdSchema = z.coerce.number().int();
 
-export class BlackListTagsEditOpenButton extends ButtonInteractionBase {
+export class BlackListTagAddOpenButton extends ButtonInteractionBase {
   public override customId: string = customIdPrefix;
 
   public override async match(interaction: ButtonInteraction<CacheType>): Promise<boolean> {
@@ -53,18 +53,25 @@ export class BlackListTagsEditOpenButton extends ButtonInteractionBase {
 
     const list = await this.core.blackList.find(blackListId);
 
+    if ((list?.tags.length ?? 0) >= NUM_BLACK_LIST_TAG_LIMIT) {
+      return {
+        content: `タグは最大${NUM_BLACK_LIST_TAG_LIMIT}個までです。`,
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
     const modal = new ModalBuilder()
-      .setCustomId(`blackListTagsEdit:${blackListId}`)
-      .setTitle("タグを編集")
+      .setCustomId(`blackListTagAdd:${blackListId}`)
+      .setTitle("タグを追加")
       .addLabelComponents(
         new LabelBuilder()
-          .setLabel(`タグ (最大${NUM_BLACK_LIST_TAG_LIMIT}個, 1行に1つ)`)
+          .setLabel("新しいタグ")
           .setTextInputComponent(
             new TextInputBuilder()
-              .setCustomId("tags")
-              .setRequired(false)
-              .setStyle(TextInputStyle.Paragraph)
-              .setValue(list?.tags.join("\n") ?? ""),
+              .setCustomId("tag")
+              .setStyle(TextInputStyle.Short)
+              .setMaxLength(CHARACTER_LIMIT.tag)
+              .setRequired(true),
           ),
       );
 

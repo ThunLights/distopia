@@ -33,6 +33,7 @@ import {
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { ModalSended } from "../Base/Modal/ModalSended";
+import { blackListShowPage } from "../Page/BlackListShowPage";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
 
 const OptionsSchema = z.object({
@@ -474,40 +475,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
       }
 
-      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
-      const editor = isOwner
-        ? null
-        : await this.core.blackList.findEditor(blackListId, requesterId);
-
-      if (!isOwner && !editor) {
-        return {
-          content: "このブラックリストを閲覧する権限がありません。",
-          flags: [MessageFlags.Ephemeral],
-        };
-      }
-
-      const [list, targets] = await Promise.all([
-        this.core.blackList.find(blackListId),
-        this.core.blackList.listTargets(blackListId),
-      ]);
-
-      const embed = new EmbedBuilder()
-        .setColor("Navy")
-        .setTitle(`ブラックリスト \`${blackListId}\` の対象一覧`)
-        .setDescription(
-          buildBlackListFieldValue(
-            targets.map(
-              (target) =>
-                `**${target.label}** <@${target.userId}> (${target.userId}): ${target.description}${target.tags.length ? ` [${target.tags.join(", ")}]` : ""}`,
-            ),
-          ),
-        )
-        .addFields({
-          name: "利用可能なタグ",
-          value: list?.tags.length ? list.tags.join(", ") : "設定されていません",
-        });
-
-      return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
+      return await blackListShowPage(this.core, blackListId, requesterId);
     }
 
     return {
