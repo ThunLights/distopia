@@ -163,7 +163,9 @@ export class BlackList extends Base {
     return targets.map((target) => {
       const application = applicationByListId.get(target.blackListId);
       const forceBan = Boolean(
-        application?.banTags.length && target.tags.some((tag) => application.banTags.includes(tag)),
+        application?.autoBan &&
+        application.banTags.length &&
+        target.tags.some((tag) => application.banTags.includes(tag)),
       );
 
       return {

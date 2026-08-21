@@ -43,7 +43,7 @@ export async function blackListPage(
       value: buildBlackListFieldValue(
         applied.map(
           (entry) =>
-            `ID: \`${entry.blackListId}\` (${blackListActionLabels[entry.action]})${entry.logChannel ? ` - <#${entry.logChannel}>` : ""}`,
+            `ID: \`${entry.blackListId}\` (${blackListActionLabels[entry.action]})${entry.autoBan ? " [タグ自動BAN: On]" : ""}${entry.logChannel ? ` - <#${entry.logChannel}>` : ""}`,
         ),
       ),
     });

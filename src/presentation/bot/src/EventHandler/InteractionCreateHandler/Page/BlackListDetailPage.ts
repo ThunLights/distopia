@@ -31,6 +31,7 @@ export async function blackListDetailPage(
       application
         ? [
             `処理: ${blackListActionLabels[application.action]}`,
+            `タグによる自動BAN: ${application.autoBan ? "On" : "Off"}`,
             `BANするタグ: ${application.banTags.length ? application.banTags.join(", ") : "なし"}`,
             `ログチャンネル: ${application.logChannel ? `<#${application.logChannel}>` : "未設定"}`,
           ].join("\n")
@@ -53,7 +54,7 @@ export async function blackListDetailPage(
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
           .setCustomId(`blackListBanTags:${blackListId}`)
-          .setPlaceholder("BANするタグを選択 (該当したら参加時にBAN)")
+          .setPlaceholder("BANするタグを選択 (自動BANがOnの場合のみ有効)")
           .setMinValues(0)
           .setMaxValues(list.tags.length)
           .addOptions(
@@ -64,6 +65,23 @@ export async function blackListDetailPage(
                 .setDefault(application.banTags.includes(tag)),
             ),
           ),
+      ),
+    );
+  }
+
+  if (application) {
+    components.push(
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`blackListAutoBanOn:${blackListId}`)
+          .setLabel("タグによる自動BAN: On")
+          .setStyle(ButtonStyle.Success)
+          .setDisabled(application.autoBan),
+        new ButtonBuilder()
+          .setCustomId(`blackListAutoBanOff:${blackListId}`)
+          .setLabel("タグによる自動BAN: Off")
+          .setStyle(ButtonStyle.Danger)
+          .setDisabled(!application.autoBan),
       ),
     );
   }

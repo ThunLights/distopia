@@ -193,6 +193,7 @@ model GuildBlackList {
   guildId       String
   blackListId   Int
   action        BlackListAction @default(Log)
+  autoBan       Boolean         @default(false)
   banTags       String[]        @default([])
   logChannel    String?
   createdAt     DateTime        @default(now())

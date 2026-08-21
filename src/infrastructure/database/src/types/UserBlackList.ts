@@ -40,6 +40,7 @@ export type GuildBlackList = {
   guildId: string;
   blackListId: number;
   action: BlackListAction;
+  autoBan: boolean;
   banTags: string[];
   logChannel: string | null;
   createdAt: Date;
