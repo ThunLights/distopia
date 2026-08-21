@@ -1,4 +1,8 @@
-import { CHARACTER_LIMIT, MAX_USER_BLACK_LIST_COUNT } from "app-core/constant";
+import {
+  CHARACTER_LIMIT,
+  MAX_USER_BLACK_LIST_COUNT,
+  NUM_BLACK_LIST_TAG_LIMIT,
+} from "app-core/constant";
 import {
   ApplicationCommandOptionType,
   EmbedBuilder,
@@ -7,6 +11,8 @@ import {
   MessageFlags,
   MessagePayload,
   ModalBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
   TextInputBuilder,
   TextInputStyle,
   type CacheType,
@@ -17,11 +23,14 @@ import {
 import z from "zod";
 
 import {
+  BlackListTagsSchema,
   buildBlackListFieldValue,
   encodeBlackListTargetRef,
+  parseBlackListTagsInput,
+  truncateSelectMenuLabel,
   type BlackListPermission,
 } from "../../../utils/blackList";
-import { validator, type ValidateResult } from "../../../utils/validator";
+import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { ModalSended } from "../Base/Modal/ModalSended";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
@@ -32,6 +41,7 @@ const OptionsSchema = z.object({
   blackListId: z.number().nullable(),
   userId: z.string().nullable(),
   label: z.string().nullable(),
+  tags: z.string().nullable(),
   allPermissions: z.boolean().nullable(),
   addPermission: z.boolean().nullable(),
   editPermission: z.boolean().nullable(),
@@ -71,6 +81,12 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
             required: true,
             max_length: CHARACTER_LIMIT.blackListLabel,
           },
+          {
+            type: ApplicationCommandOptionType.String,
+            name: "tags",
+            description: `タグをカンマ区切りで指定 (最大${NUM_BLACK_LIST_TAG_LIMIT}個)`,
+            required: false,
+          },
         ],
       },
       {
@@ -78,6 +94,20 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         name: "delete",
         description: "ブラックリストを削除します。(オーナーのみ)",
         options: [blackListIdOption],
+      },
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "tags",
+        description: `ブラックリストのタグを設定します。(最大${NUM_BLACK_LIST_TAG_LIMIT}個、オーナーのみ)`,
+        options: [
+          blackListIdOption,
+          {
+            type: ApplicationCommandOptionType.String,
+            name: "tags",
+            description: `タグをカンマ区切りで指定 (最大${NUM_BLACK_LIST_TAG_LIMIT}個)`,
+            required: true,
+          },
+        ],
       },
       {
         type: ApplicationCommandOptionType.Subcommand,
@@ -179,6 +209,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         blackListId: interaction.options.getInteger("blacklist_id", false),
         userId: interaction.options.getUser("user", false)?.id ?? null,
         label: interaction.options.getString("label", false),
+        tags: interaction.options.getString("tags", false),
         allPermissions: interaction.options.getBoolean("all", false),
         addPermission: interaction.options.getBoolean("add", false),
         editPermission: interaction.options.getBoolean("edit", false),
@@ -228,6 +259,8 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
           return { content: "対象が見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
         }
 
+        const list = await this.core.blackList.find(blackListId);
+
         const modal = new ModalBuilder()
           .setCustomId(
             `${subCommand === "add" ? "blackListTargetAdd" : "blackListTargetEdit"}:${encodeBlackListTargetRef(blackListId, userId)}`,
@@ -249,6 +282,25 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
                 .setValue(existing?.description ?? ""),
             ),
           );
+
+        if (list?.tags.length) {
+          modal.addLabelComponents(
+            new LabelBuilder().setLabel("タグ").setStringSelectMenuComponent(
+              new StringSelectMenuBuilder()
+                .setCustomId("tags")
+                .setMinValues(0)
+                .setMaxValues(list.tags.length)
+                .addOptions(
+                  list.tags.map((tag) =>
+                    new StringSelectMenuOptionBuilder()
+                      .setLabel(truncateSelectMenuLabel(tag))
+                      .setValue(tag)
+                      .setDefault(existing?.tags.includes(tag) ?? false),
+                  ),
+                ),
+            ),
+          );
+        }
 
         await interaction.showModal(modal);
         return new ModalSended();
@@ -331,9 +383,45 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         };
       }
 
-      const list = await this.core.blackList.create(requesterId, options.label);
+      const tags = await validator(
+        parseBlackListTagsInput(options.tags ?? ""),
+        BlackListTagsSchema,
+      );
+
+      if (tags instanceof ValidateError) {
+        return tags.content;
+      }
+
+      const list = await this.core.blackList.create(requesterId, options.label, tags);
       return {
         content: `ブラックリストを作成しました。ID: \`${list.id}\` ラベル: ${list.label}`,
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
+    if (subCommand === "tags") {
+      if (blackListId === null || options.tags === null) {
+        return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
+      }
+
+      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+
+      if (!isOwner) {
+        return {
+          content: "タグの設定はブラックリストのオーナーのみ行えます。",
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
+      const tags = await validator(parseBlackListTagsInput(options.tags), BlackListTagsSchema);
+
+      if (tags instanceof ValidateError) {
+        return tags.content;
+      }
+
+      await this.core.blackList.updateTags(blackListId, tags);
+      return {
+        content: `タグを更新しました。${tags.length ? tags.join(", ") : "(タグなし)"}`,
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -373,7 +461,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
           buildBlackListFieldValue(
             lists.map(
               (list) =>
-                `ID: \`${list.id}\` ${list.label} (${list.ownerId === requesterId ? "オーナー" : "編集者"})`,
+                `ID: \`${list.id}\` ${list.label} (${list.ownerId === requesterId ? "オーナー" : "編集者"})${list.tags.length ? ` [${list.tags.join(", ")}]` : ""}`,
             ),
           ),
         );
@@ -398,7 +486,10 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         };
       }
 
-      const targets = await this.core.blackList.listTargets(blackListId);
+      const [list, targets] = await Promise.all([
+        this.core.blackList.find(blackListId),
+        this.core.blackList.listTargets(blackListId),
+      ]);
 
       const embed = new EmbedBuilder()
         .setColor("Navy")
@@ -407,10 +498,14 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
           buildBlackListFieldValue(
             targets.map(
               (target) =>
-                `**${target.label}** <@${target.userId}> (${target.userId}): ${target.description}`,
+                `**${target.label}** <@${target.userId}> (${target.userId}): ${target.description}${target.tags.length ? ` [${target.tags.join(", ")}]` : ""}`,
             ),
           ),
-        );
+        )
+        .addFields({
+          name: "利用可能なタグ",
+          value: list?.tags.length ? list.tags.join(", ") : "設定されていません",
+        });
 
       return { embeds: [embed], flags: [MessageFlags.Ephemeral] };
     }

@@ -4,6 +4,8 @@ import {
   LabelBuilder,
   MessageFlags,
   ModalBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
   TextInputBuilder,
   TextInputStyle,
   type ButtonInteraction,
@@ -12,7 +14,11 @@ import {
   type MessagePayload,
 } from "discord.js";
 
-import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/blackList";
+import {
+  BlackListTargetRefSchema,
+  decodeBlackListTargetRef,
+  truncateSelectMenuLabel,
+} from "../../../utils/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { ModalSended } from "../Base/Modal/ModalSended";
@@ -55,7 +61,10 @@ export class BlackListTargetEditOpenButton extends ButtonInteractionBase {
       };
     }
 
-    const existing = await this.core.blackList.findTarget(blackListId, userId);
+    const [existing, list] = await Promise.all([
+      this.core.blackList.findTarget(blackListId, userId),
+      this.core.blackList.find(blackListId),
+    ]);
 
     if (!existing) {
       return { content: "対象が見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
@@ -84,6 +93,25 @@ export class BlackListTargetEditOpenButton extends ButtonInteractionBase {
               .setValue(existing.description),
           ),
       );
+
+    if (list?.tags.length) {
+      modal.addLabelComponents(
+        new LabelBuilder().setLabel("タグ").setStringSelectMenuComponent(
+          new StringSelectMenuBuilder()
+            .setCustomId("tags")
+            .setMinValues(0)
+            .setMaxValues(list.tags.length)
+            .addOptions(
+              list.tags.map((tag) =>
+                new StringSelectMenuOptionBuilder()
+                  .setLabel(truncateSelectMenuLabel(tag))
+                  .setValue(tag)
+                  .setDefault(existing.tags.includes(tag)),
+              ),
+            ),
+        ),
+      );
+    }
 
     await interaction.showModal(modal);
 

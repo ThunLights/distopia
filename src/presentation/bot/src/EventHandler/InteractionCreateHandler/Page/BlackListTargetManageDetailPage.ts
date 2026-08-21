@@ -39,15 +39,24 @@ export async function blackListTargetManageDetailPage(
   const embed = new EmbedBuilder()
     .setColor("Navy")
     .setTitle(`ブラックリスト: ${list?.label ?? blackListId}`)
-    .addFields({
-      name:
-        totalPages > 1
-          ? `登録済みの対象 (${currentPage + 1}/${totalPages}ページ)`
-          : "登録済みの対象",
-      value: buildBlackListFieldValue(
-        targets.map((target) => `**${target.label}** <@${target.userId}> (${target.userId})`),
-      ),
-    });
+    .addFields(
+      {
+        name: "利用可能なタグ",
+        value: list?.tags.length ? list.tags.join(", ") : "設定されていません",
+      },
+      {
+        name:
+          totalPages > 1
+            ? `登録済みの対象 (${currentPage + 1}/${totalPages}ページ)`
+            : "登録済みの対象",
+        value: buildBlackListFieldValue(
+          targets.map(
+            (target) =>
+              `**${target.label}** <@${target.userId}> (${target.userId})${target.tags.length ? ` [${target.tags.join(", ")}]` : ""}`,
+          ),
+        ),
+      },
+    );
 
   const backButton = new ButtonBuilder()
     .setCustomId("backBlackListTargetManagePage")
@@ -89,23 +98,10 @@ export async function blackListTargetManageDetailPage(
     );
   }
 
-  const bottomButtons: ButtonBuilder[] = [backButton];
-
-  if (isOwner) {
-    bottomButtons.push(
-      new ButtonBuilder()
-        .setCustomId(`blackListTargetManageEditorsOpen:${blackListId}`)
-        .setStyle(ButtonStyle.Secondary)
-        .setLabel("編集者を管理"),
-      new ButtonBuilder()
-        .setCustomId(`blackListManageDelete:${blackListId}`)
-        .setStyle(ButtonStyle.Danger)
-        .setLabel("ブラックリストを削除"),
-    );
-  }
+  const navButtons: ButtonBuilder[] = [backButton];
 
   if (totalPages > 1) {
-    bottomButtons.push(
+    navButtons.push(
       new ButtonBuilder()
         .setCustomId(
           `blackListTargetManageDetailPageNav:${encodeIdPageRef(blackListId, currentPage - 1)}`,
@@ -123,7 +119,26 @@ export async function blackListTargetManageDetailPage(
     );
   }
 
-  components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(bottomButtons));
+  components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(navButtons));
+
+  if (isOwner) {
+    components.push(
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`blackListTargetManageEditorsOpen:${blackListId}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setLabel("編集者を管理"),
+        new ButtonBuilder()
+          .setCustomId(`blackListTagsEditOpen:${blackListId}`)
+          .setStyle(ButtonStyle.Secondary)
+          .setLabel("タグを編集"),
+        new ButtonBuilder()
+          .setCustomId(`blackListManageDelete:${blackListId}`)
+          .setStyle(ButtonStyle.Danger)
+          .setLabel("ブラックリストを削除"),
+      ),
+    );
+  }
 
   return {
     embeds: [embed],

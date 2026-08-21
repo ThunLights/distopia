@@ -6,12 +6,14 @@ export type UserBlackList = {
   id: number;
   ownerId: string;
   label: string;
+  tags: string[];
 };
 
 export type BlackListTarget = {
   userId: string;
   label: string;
   description: string;
+  tags: string[];
   blackListId: number;
   createdAt: Date;
   updatedAt: Date;
@@ -19,7 +21,7 @@ export type BlackListTarget = {
 
 export type BlackListTargetUpsertInput = Pick<
   BlackListTarget,
-  "blackListId" | "userId" | "label" | "description"
+  "blackListId" | "userId" | "label" | "description" | "tags"
 >;
 
 export type BlackListEditor = {
@@ -38,6 +40,7 @@ export type GuildBlackList = {
   guildId: string;
   blackListId: number;
   action: BlackListAction;
+  banTags: string[];
   createdAt: Date;
   updatedAt: Date;
 };

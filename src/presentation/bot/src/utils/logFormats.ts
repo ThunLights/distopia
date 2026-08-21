@@ -231,7 +231,7 @@ export const logFormats = {
     color: "Red",
     build: (
       member: GuildMember,
-      matches: { description: string; action: BlackListAction }[],
+      matches: { description: string; action: BlackListAction; tags: string[] }[],
       actionTaken: BlackListAction,
     ) => ({
       description: [
@@ -240,7 +240,9 @@ export const logFormats = {
       ].join("\n"),
       fields: matches.map((match, index) => ({
         name: `該当ブラックリスト ${index + 1} (${blackListActionLabels[match.action]})`,
-        value: match.description,
+        value: [match.description, match.tags.length ? `タグ: ${match.tags.join(", ")}` : null]
+          .filter(Boolean)
+          .join("\n"),
       })),
     }),
   },

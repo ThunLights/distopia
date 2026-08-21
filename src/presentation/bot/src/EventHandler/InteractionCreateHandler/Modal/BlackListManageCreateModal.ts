@@ -8,12 +8,14 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { validator, type ValidateResult } from "../../../utils/validator";
+import { BlackListTagsSchema, parseBlackListTagsInput } from "../../../utils/blackList";
+import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
 
 const OptionsSchema = z.object({
   label: z.string().max(CHARACTER_LIMIT.blackListLabel),
+  tags: z.string(),
 });
 
 type Options = z.infer<typeof OptionsSchema>;
@@ -24,7 +26,13 @@ export class BlackListManageCreateModal extends ModalSubmitInteractionBase<Optio
   public override async parseOptions(
     interaction: ModalSubmitInteraction<CacheType>,
   ): Promise<ValidateResult<Options>> {
-    return await validator({ label: interaction.fields.getTextInputValue("label") }, OptionsSchema);
+    return await validator(
+      {
+        label: interaction.fields.getTextInputValue("label"),
+        tags: interaction.fields.getTextInputValue("tags"),
+      },
+      OptionsSchema,
+    );
   }
 
   protected override async exec(
@@ -40,7 +48,13 @@ export class BlackListManageCreateModal extends ModalSubmitInteractionBase<Optio
       };
     }
 
-    await this.core.blackList.create(requesterId, options.label);
+    const tags = await validator(parseBlackListTagsInput(options.tags), BlackListTagsSchema);
+
+    if (tags instanceof ValidateError) {
+      return tags.content;
+    }
+
+    await this.core.blackList.create(requesterId, options.label, tags);
 
     if (interaction.isFromMessage()) {
       const pagePayload = await blackListTargetManagePage(this.core, requesterId);

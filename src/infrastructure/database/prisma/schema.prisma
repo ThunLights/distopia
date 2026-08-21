@@ -151,6 +151,7 @@ model UserBlackList {
   id           Int               @id @default(autoincrement())
   ownerId      String
   label        String
+  tags         String[]          @default([])
   targets      BlackListTarget[]
   editors      BlackListEditor[]
   applications GuildBlackList[]
@@ -162,6 +163,7 @@ model BlackListTarget {
   userId        String
   label         String
   description   String
+  tags          String[]      @default([])
   blackListId   Int
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -192,6 +194,7 @@ model GuildBlackList {
   guildId       String
   blackListId   Int
   action        BlackListAction @default(Log)
+  banTags       String[]        @default([])
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   userBlackList UserBlackList   @relation(fields: [blackListId], references: [id], onDelete: Cascade)

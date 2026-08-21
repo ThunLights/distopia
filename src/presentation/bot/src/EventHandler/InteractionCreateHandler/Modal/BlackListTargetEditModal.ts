@@ -18,6 +18,7 @@ const customIdPrefix = "blackListTargetEdit:";
 const OptionsSchema = BlackListTargetRefSchema.extend({
   label: z.string().max(CHARACTER_LIMIT.blackListLabel),
   description: z.string().max(CHARACTER_LIMIT.description),
+  tags: z.string().array(),
 });
 
 type Options = z.infer<typeof OptionsSchema>;
@@ -46,6 +47,9 @@ export class BlackListTargetEditModal extends ModalSubmitInteractionBase<Options
         ...ref,
         label: interaction.fields.getTextInputValue("label"),
         description: interaction.fields.getTextInputValue("description"),
+        tags: interaction.fields.fields.has("tags")
+          ? interaction.fields.getStringSelectValues("tags")
+          : [],
       },
       OptionsSchema,
     );
@@ -55,7 +59,7 @@ export class BlackListTargetEditModal extends ModalSubmitInteractionBase<Options
     interaction: ModalSubmitInteraction<CacheType>,
     options: Options,
   ): Promise<InteractionReplyOptions | InteractionResponse> {
-    const { blackListId, userId, label, description } = options;
+    const { blackListId, userId, label, description, tags } = options;
     const requesterId = interaction.user.id;
 
     const allowed = await this.core.blackList.hasPermission(blackListId, requesterId, "EditTarget");
@@ -73,7 +77,7 @@ export class BlackListTargetEditModal extends ModalSubmitInteractionBase<Options
       return { content: "対象が見つかりませんでした。", flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.blackList.upsertTarget({ blackListId, userId, label, description });
+    await this.core.blackList.upsertTarget({ blackListId, userId, label, description, tags });
 
     if (interaction.isFromMessage()) {
       const pagePayload = await blackListTargetManageDetailPage(

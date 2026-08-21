@@ -10,8 +10,12 @@ export class UserBlackListTable extends Base {
     return await this.prisma.userBlackList.findMany({ where: { ownerId } });
   }
 
-  public async create(ownerId: string, label: string): Promise<UserBlackList> {
-    return await this.prisma.userBlackList.create({ data: { ownerId, label } });
+  public async create(ownerId: string, label: string, tags: string[]): Promise<UserBlackList> {
+    return await this.prisma.userBlackList.create({ data: { ownerId, label, tags } });
+  }
+
+  public async updateTags(id: number, tags: string[]): Promise<UserBlackList> {
+    return await this.prisma.userBlackList.update({ where: { id }, data: { tags } });
   }
 
   public async delete(id: number): Promise<UserBlackList> {

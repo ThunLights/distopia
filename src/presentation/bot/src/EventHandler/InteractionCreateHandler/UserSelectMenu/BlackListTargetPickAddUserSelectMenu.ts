@@ -4,6 +4,8 @@ import {
   LabelBuilder,
   MessageFlags,
   ModalBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
   TextInputBuilder,
   TextInputStyle,
   type CacheType,
@@ -13,7 +15,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { encodeBlackListTargetRef } from "../../../utils/blackList";
+import { encodeBlackListTargetRef, truncateSelectMenuLabel } from "../../../utils/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ModalSended } from "../Base/Modal/ModalSended";
 import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
@@ -57,6 +59,8 @@ export class BlackListTargetPickAddUserSelectMenu extends UserSelectMenuInteract
       };
     }
 
+    const list = await this.core.blackList.find(blackListId);
+
     const modal = new ModalBuilder()
       .setCustomId(`blackListTargetAdd:${encodeBlackListTargetRef(blackListId, options.userId)}`)
       .setTitle("ブラックリストに追加")
@@ -78,6 +82,24 @@ export class BlackListTargetPickAddUserSelectMenu extends UserSelectMenuInteract
               .setMaxLength(CHARACTER_LIMIT.description),
           ),
       );
+
+    if (list?.tags.length) {
+      modal.addLabelComponents(
+        new LabelBuilder().setLabel("タグ").setStringSelectMenuComponent(
+          new StringSelectMenuBuilder()
+            .setCustomId("tags")
+            .setMinValues(0)
+            .setMaxValues(list.tags.length)
+            .addOptions(
+              list.tags.map((tag) =>
+                new StringSelectMenuOptionBuilder()
+                  .setLabel(truncateSelectMenuLabel(tag))
+                  .setValue(tag),
+              ),
+            ),
+        ),
+      );
+    }
 
     await interaction.showModal(modal);
 

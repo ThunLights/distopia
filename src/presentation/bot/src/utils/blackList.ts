@@ -1,3 +1,4 @@
+import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import { z } from "zod";
 
 export type BlackListAction = "Log" | "Kick" | "Ban";
@@ -43,6 +44,21 @@ export function encodeBlackListTargetRef(blackListId: number, userId: string): s
 export function decodeBlackListTargetRef(value: string): unknown {
   const [blackListId, userId] = value.split(":");
   return { blackListId, userId };
+}
+
+export const BlackListTagsSchema = z
+  .array(z.string().min(1).max(CHARACTER_LIMIT.tag))
+  .max(NUM_BLACK_LIST_TAG_LIMIT);
+
+export function parseBlackListTagsInput(raw: string): string[] {
+  return Array.from(
+    new Set(
+      raw
+        .split(/[,\n]/)
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0),
+    ),
+  );
 }
 
 const SELECT_MENU_LABEL_MAX_LENGTH = 100;

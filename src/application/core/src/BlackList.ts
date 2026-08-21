@@ -20,13 +20,17 @@ const actionSeverity: Record<BlackListAction, number> = {
 };
 
 export class BlackList extends Base {
-  public async create(ownerId: string, label: string): Promise<UserBlackList> {
-    return await this.state.database.userBlackList.create(ownerId, label);
+  public async create(ownerId: string, label: string, tags: string[]): Promise<UserBlackList> {
+    return await this.state.database.userBlackList.create(ownerId, label, tags);
   }
 
   public async canCreate(ownerId: string): Promise<boolean> {
     const owned = await this.findAllByOwner(ownerId);
     return owned.length < MAX_USER_BLACK_LIST_COUNT;
+  }
+
+  public async updateTags(id: number, tags: string[]): Promise<UserBlackList> {
+    return await this.state.database.userBlackList.updateTags(id, tags);
   }
 
   public async delete(id: number): Promise<UserBlackList> {
@@ -136,7 +140,9 @@ export class BlackList extends Base {
   public async matchOnJoin(
     guildId: string,
     userId: string,
-  ): Promise<{ blackListId: number; action: BlackListAction; description: string }[]> {
+  ): Promise<
+    { blackListId: number; action: BlackListAction; description: string; tags: string[] }[]
+  > {
     const applied = await this.getApplied(guildId);
     if (!applied.length) {
       return [];
@@ -146,13 +152,21 @@ export class BlackList extends Base {
       applied.map(({ blackListId }) => blackListId),
       userId,
     );
-    const actionByListId = new Map(applied.map(({ blackListId, action }) => [blackListId, action]));
+    const applicationByListId = new Map(applied.map((entry) => [entry.blackListId, entry]));
 
-    return targets.map((target) => ({
-      blackListId: target.blackListId,
-      description: target.description,
-      action: actionByListId.get(target.blackListId) ?? "Log",
-    }));
+    return targets.map((target) => {
+      const application = applicationByListId.get(target.blackListId);
+      const forceBan = Boolean(
+        application?.banTags.length && target.tags.some((tag) => application.banTags.includes(tag)),
+      );
+
+      return {
+        blackListId: target.blackListId,
+        description: target.description,
+        tags: target.tags,
+        action: forceBan ? "Ban" : (application?.action ?? "Log"),
+      };
+    });
   }
 
   public strongestAction(actions: BlackListAction[]): BlackListAction | null {
