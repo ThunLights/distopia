@@ -9,24 +9,16 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { validator, type ValidateResult } from "../../../utils/validator";
+import { ValidateError, validator } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const customIdPrefix = "blackListBanTags:";
 
-const OptionsSchema = z.object({
-  blackListId: z.coerce.number().int(),
-  tags: z.string().array(),
-});
+const BlackListIdSchema = z.coerce.number().int();
 
-type Options = z.infer<typeof OptionsSchema>;
-
-export class BlackListBanTagsSelectMenu extends StringSelectMenuInteractionBase<
-  typeof OptionsSchema,
-  Options
-> {
+export class BlackListBanTagsSelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override customId: string = customIdPrefix;
 
@@ -36,21 +28,8 @@ export class BlackListBanTagsSelectMenu extends StringSelectMenuInteractionBase<
     return interaction.customId.startsWith(customIdPrefix);
   }
 
-  public override async parseOptions(
-    interaction: StringSelectMenuInteraction<CacheType>,
-  ): Promise<ValidateResult<Options>> {
-    return await validator(
-      {
-        blackListId: interaction.customId.slice(customIdPrefix.length),
-        tags: interaction.values,
-      },
-      OptionsSchema,
-    );
-  }
-
   protected override async exec(
     interaction: StringSelectMenuInteraction<CacheType>,
-    options: Options,
   ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
@@ -58,13 +37,22 @@ export class BlackListBanTagsSelectMenu extends StringSelectMenuInteractionBase<
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
+    const blackListId = await validator(
+      interaction.customId.slice(customIdPrefix.length),
+      BlackListIdSchema,
+    );
+
+    if (blackListId instanceof ValidateError) {
+      return blackListId.content;
+    }
+
     await this.core.blackList.apply({
       guildId: guild.id,
-      blackListId: options.blackListId,
-      banTags: options.tags,
+      blackListId,
+      banTags: interaction.values,
     });
 
-    const pagePayload = await blackListDetailPage(this.core, guild, options.blackListId);
+    const pagePayload = await blackListDetailPage(this.core, guild, blackListId);
     const { content, components, embeds, allowedMentions, files } = pagePayload;
 
     return await interaction.update({ content, components, embeds, allowedMentions, files });

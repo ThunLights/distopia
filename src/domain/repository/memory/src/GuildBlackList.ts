@@ -4,6 +4,7 @@ export type GuildBlackListEntry = {
   guildId: string;
   blackListId: number;
   action: "Log" | "Kick" | "Ban";
+  banTags: string[];
   createdAt: Date;
   updatedAt: Date;
 };
