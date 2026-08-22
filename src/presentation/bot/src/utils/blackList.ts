@@ -38,6 +38,26 @@ export function decodeBlackListTargetRef(value: string): unknown {
   return { blackListId, userId };
 }
 
+export const BlackListTagRefSchema = z.object({
+  blackListId: z.coerce.number().int(),
+  tag: z.string().min(1).max(CHARACTER_LIMIT.tag),
+});
+
+export function encodeBlackListTagRef(blackListId: number, tag: string): string {
+  return `${blackListId}:${tag}`;
+}
+
+export function decodeBlackListTagRef(value: string): unknown {
+  const separatorIndex = value.indexOf(":");
+  if (separatorIndex === -1) {
+    return { blackListId: value, tag: "" };
+  }
+  return {
+    blackListId: value.slice(0, separatorIndex),
+    tag: value.slice(separatorIndex + 1),
+  };
+}
+
 export const BlackListTagsSchema = z
   .array(z.string().min(1).max(CHARACTER_LIMIT.tag))
   .max(NUM_BLACK_LIST_TAG_LIMIT);

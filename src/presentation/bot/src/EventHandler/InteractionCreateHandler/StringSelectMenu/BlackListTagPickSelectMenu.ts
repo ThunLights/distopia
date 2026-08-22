@@ -10,13 +10,13 @@ import z from "zod";
 
 import { ValidateError, validator } from "../../../utils/validator";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
-import { blackListTagsManagePage } from "../Page/BlackListTagsManagePage";
+import { blackListTagDetailPage } from "../Page/BlackListTagDetailPage";
 
-const customIdPrefix = "blackListTagRemove:";
+const customIdPrefix = "blackListTagPick:";
 
 const BlackListIdSchema = z.coerce.number().int();
 
-export class BlackListTagRemoveSelectMenu extends StringSelectMenuInteractionBase {
+export class BlackListTagPickSelectMenu extends StringSelectMenuInteractionBase {
   public override customId: string = customIdPrefix;
 
   public override async match(
@@ -47,15 +47,7 @@ export class BlackListTagRemoveSelectMenu extends StringSelectMenuInteractionBas
       };
     }
 
-    const list = await this.core.blackList.find(blackListId);
-    const currentTags = list?.tags ?? [];
-
-    await this.core.blackList.updateTags(
-      blackListId,
-      currentTags.filter((tag) => tag !== options.value),
-    );
-
-    const pagePayload = await blackListTagsManagePage(this.core, blackListId);
+    const pagePayload = await blackListTagDetailPage(this.core, blackListId, options.value);
     const { content, components, embeds, allowedMentions, files } = pagePayload;
 
     return await interaction.update({ content, components, embeds, allowedMentions, files });

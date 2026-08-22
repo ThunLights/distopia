@@ -34,6 +34,7 @@ import { validator, ValidateError, type ValidateResult } from "../../../utils/va
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { ModalSended } from "../Base/Modal/ModalSended";
 import { blackListShowPage } from "../Page/BlackListShowPage";
+import { blackListTagsPickListPage } from "../Page/BlackListTagsPickListPage";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
 
 const OptionsSchema = z.object({
@@ -99,16 +100,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
       {
         type: ApplicationCommandOptionType.Subcommand,
         name: "tags",
-        description: `ブラックリストのタグを設定します。(最大${NUM_BLACK_LIST_TAG_LIMIT}個、オーナーのみ)`,
-        options: [
-          blackListIdOption,
-          {
-            type: ApplicationCommandOptionType.String,
-            name: "tags",
-            description: `タグをカンマ区切りで指定 (最大${NUM_BLACK_LIST_TAG_LIMIT}個)`,
-            required: true,
-          },
-        ],
+        description: "ブラックリストのタグをメニューから管理します。(オーナーのみ)",
       },
       {
         type: ApplicationCommandOptionType.Subcommand,
@@ -401,30 +393,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "tags") {
-      if (blackListId === null || options.tags === null) {
-        return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
-      }
-
-      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
-
-      if (!isOwner) {
-        return {
-          content: "タグの設定はブラックリストのオーナーのみ行えます。",
-          flags: [MessageFlags.Ephemeral],
-        };
-      }
-
-      const tags = await validator(parseBlackListTagsInput(options.tags), BlackListTagsSchema);
-
-      if (tags instanceof ValidateError) {
-        return tags.content;
-      }
-
-      await this.core.blackList.updateTags(blackListId, tags);
-      return {
-        content: `タグを更新しました。${tags.length ? tags.join(", ") : "(タグなし)"}`,
-        flags: [MessageFlags.Ephemeral],
-      };
+      return await blackListTagsPickListPage(this.core, requesterId);
     }
 
     if (subCommand === "delete") {

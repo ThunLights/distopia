@@ -22,9 +22,11 @@ export async function blackListTagsManagePage(
   const embed = new EmbedBuilder()
     .setColor("Navy")
     .setTitle(`タグ管理: ${list?.label ?? blackListId}`)
-    .setDescription(
-      `現在のタグ (${tags.length}/${NUM_BLACK_LIST_TAG_LIMIT}): ${tags.length ? tags.join(", ") : "なし"}`,
-    );
+    .setDescription("タグを選択すると詳細・削除ができます。")
+    .addFields({
+      name: `タグ一覧 (${tags.length}/${NUM_BLACK_LIST_TAG_LIMIT})`,
+      value: tags.length ? tags.map((tag) => `\`${tag}\``).join(" ") : "なし",
+    });
 
   const components: (
     | ActionRowBuilder<StringSelectMenuBuilder>
@@ -35,8 +37,8 @@ export async function blackListTagsManagePage(
     components.push(
       new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
-          .setCustomId(`blackListTagRemove:${blackListId}`)
-          .setPlaceholder("削除するタグを選択")
+          .setCustomId(`blackListTagPick:${blackListId}`)
+          .setPlaceholder("詳細を見るタグを選択")
           .addOptions(
             tags.map((tag) =>
               new StringSelectMenuOptionBuilder()
@@ -56,7 +58,7 @@ export async function blackListTagsManagePage(
         .setStyle(ButtonStyle.Success)
         .setDisabled(tags.length >= NUM_BLACK_LIST_TAG_LIMIT),
       new ButtonBuilder()
-        .setCustomId(`backBlackListTargetManageDetail:${blackListId}`)
+        .setCustomId("backBlackListTagsPickList")
         .setLabel("戻る")
         .setStyle(ButtonStyle.Danger),
     ),
