@@ -73,6 +73,22 @@ export abstract class Base<T extends BaseInteraction, R = void> {
     );
   }
 
+  protected async checkBlackListOwnerPermission(blackListId: number, userId: string) {
+    if (await this.core.blackList.isOwner(blackListId, userId)) {
+      return new PermissionSuccess();
+    }
+
+    return new PermissionError("このブラックリストの操作はオーナーのみ行えます。");
+  }
+
+  protected async checkBlackListOwnerOrEditorPermission(blackListId: number, userId: string) {
+    if (await this.core.blackList.isOwnerOrEditor(blackListId, userId)) {
+      return new PermissionSuccess();
+    }
+
+    return new PermissionError("このブラックリストを操作する権限がありません。");
+  }
+
   protected async parseUser(interaction: T): Promise<User> {
     const { user } = interaction;
     return {

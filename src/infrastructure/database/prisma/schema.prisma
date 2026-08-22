@@ -146,6 +146,63 @@ enum WhiteListPermission {
   InviteLinkBlock
 }
 
+model UserBlackList {
+  id           Int               @id @default(autoincrement())
+  ownerId      String
+  label        String
+  tags         String[]          @default([])
+  targets      BlackListTarget[]
+  editors      BlackListEditor[]
+  applications GuildBlackList[]
+
+  @@index([ownerId])
+}
+
+model BlackListTarget {
+  userId        String
+  label         String
+  description   String
+  tags          String[]      @default([])
+  blackListId   Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userBlackList UserBlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@id([blackListId, userId])
+}
+
+model BlackListEditor {
+  blackListId    Int
+  userId         String
+  allPermissions Boolean               @default(false)
+  permissions    BlackListPermission[] @default([])
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  userBlackList  UserBlackList         @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@id([blackListId, userId])
+}
+
+enum BlackListPermission {
+  AddTarget
+  EditTarget
+  RemoveTarget
+}
+
+model GuildBlackList {
+  guildId       String
+  blackListId   Int
+  autoBan       Boolean       @default(false)
+  banTags       String[]      @default([])
+  logChannel    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userBlackList UserBlackList @relation(fields: [blackListId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, blackListId])
+  @@index([blackListId])
+}
+
 model Panel {
   guildId   String
   type      PanelType

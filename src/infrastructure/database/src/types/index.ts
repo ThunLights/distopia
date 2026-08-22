@@ -8,6 +8,7 @@ export * from "./GuildSetting";
 export * from "./GuildWhiteList";
 export * from "./JWTKey";
 export * from "./Panel";
+export * from "./UserBlackList";
 export * from "./UserDiscord";
 export * from "./User";
 export * from "./UserWeb";

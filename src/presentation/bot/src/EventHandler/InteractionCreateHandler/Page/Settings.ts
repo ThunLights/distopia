@@ -48,6 +48,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder().setLabel("荒らし対策設定").setValue("antiRaid"),
       new StringSelectMenuOptionBuilder().setLabel("ログ設定").setValue("log"),
       new StringSelectMenuOptionBuilder().setLabel("ホワイトリスト設定").setValue("whiteList"),
+      new StringSelectMenuOptionBuilder().setLabel("ブラックリスト設定").setValue("blackList"),
       new StringSelectMenuOptionBuilder().setLabel("統計チャンネル設定").setValue("statChannel"),
     );
 

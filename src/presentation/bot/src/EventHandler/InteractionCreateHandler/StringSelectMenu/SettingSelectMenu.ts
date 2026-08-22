@@ -17,6 +17,7 @@ import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 import { antiRaidPage } from "../Page/AntiRaidPage";
+import { blackListPage } from "../Page/BlackListPage";
 import { bumpPage } from "../Page/BumpPage";
 import { logPage } from "../Page/LogPage";
 import { statChannelPage } from "../Page/StatChannelPage";
@@ -139,6 +140,24 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
       const whiteListPagePayload = await whiteListPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = whiteListPagePayload;
+
+      return await interaction.update({
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
+      });
+    } else if (value === "blackList") {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const blackListPagePayload = await blackListPage(this.core, guild);
+
+      const { content, components, embeds, allowedMentions, files } = blackListPagePayload;
 
       return await interaction.update({
         content,

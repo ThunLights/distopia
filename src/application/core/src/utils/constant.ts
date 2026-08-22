@@ -79,3 +79,13 @@ export const CHARACTER_LIMIT = {
 } as const;
 
 export const NUM_TAG_LIMIT = 5;
+
+export const MAX_USER_BLACK_LIST_COUNT = 15;
+
+export const NUM_BLACK_LIST_TAG_LIMIT = 10;
+
+export const BLACK_LIST_LIMIT = {
+  label: 50,
+  description: 400,
+  tag: 25,
+} as const;

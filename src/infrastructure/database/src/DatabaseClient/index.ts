@@ -1,5 +1,8 @@
 import { Base } from "./Base";
+import { BlackListEditorTable } from "./BlackListEditorTable";
+import { BlackListTargetTable } from "./BlackListTargetTable";
 import { FriendTable } from "./FriendTable";
+import { GuildBlackListTable } from "./GuildBlackListTable";
 import { GuildRecordOneDayTable } from "./GuildRecordOneDayTable";
 import { GuildRecordTable } from "./GuildRecordTable";
 import { GuildReviewTable } from "./GuildReviewTable";
@@ -8,13 +11,17 @@ import { GuildTable } from "./GuildTable";
 import { GuildWhiteListTable } from "./GuildWhiteListTable";
 import { JWTKeyTable } from "./JWTKeyTable";
 import { PanelTable } from "./PanelTable";
+import { UserBlackListTable } from "./UserBlackListTable";
 import { UserDiscordTable } from "./UserDiscordTable";
 import { UserTable } from "./UserTable";
 import { UserWebTable } from "./UserWebTable";
 
 export class DatabaseClient extends Base {
+  public readonly blackListEditor = new BlackListEditorTable(this.prisma);
+  public readonly blackListTarget = new BlackListTargetTable(this.prisma);
   public readonly friend = new FriendTable(this.prisma);
   public readonly guild = new GuildTable(this.prisma);
+  public readonly guildBlackList = new GuildBlackListTable(this.prisma);
   public readonly guildRecord = new GuildRecordTable(this.prisma);
   public readonly guildRecordOneDay = new GuildRecordOneDayTable(this.prisma);
   public readonly guildReview = new GuildReviewTable(this.prisma);
@@ -22,6 +29,7 @@ export class DatabaseClient extends Base {
   public readonly guildWhiteList = new GuildWhiteListTable(this.prisma);
   public readonly jwtKey = new JWTKeyTable(this.prisma);
   public readonly panel = new PanelTable(this.prisma);
+  public readonly userBlackList = new UserBlackListTable(this.prisma);
   public readonly userDiscord = new UserDiscordTable(this.prisma);
   public readonly user = new UserTable(this.prisma);
   public readonly userWeb = new UserWebTable(this.prisma);

@@ -13,6 +13,7 @@ export class Memory extends Base {
 
   public async gc() {
     const mems: MapWithGC<any, any>[] = [
+      this.state.memory.guildBlackList,
       this.state.memory.guildEdit,
       this.state.memory.guildSetting,
       this.state.memory.guildWhiteList,

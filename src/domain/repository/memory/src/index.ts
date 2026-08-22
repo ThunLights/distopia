@@ -1,4 +1,5 @@
 export * from "./Friend";
+export * from "./GuildBlackList";
 export * from "./GuildEdit";
 export * from "./GuildMemberAdd";
 export * from "./GuildSetting";

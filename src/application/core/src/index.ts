@@ -1,5 +1,6 @@
 import { ActiveRate } from "./ActiveRate";
 import { Base } from "./Base";
+import { BlackList } from "./BlackList";
 import { Friend } from "./Friend";
 import { Guild } from "./Guild";
 import { JWT } from "./JWT";
@@ -20,6 +21,7 @@ export class AppCore extends Base {
   public readonly ranking = new Ranking(this.state);
   public readonly guild = new Guild(this.state, this.record, this.ranking);
   public readonly activeRate = new ActiveRate(this.state, this.guild);
+  public readonly blackList = new BlackList(this.state);
   public readonly jwt = new JWT(this.state);
   public readonly latelimit = new LateLimit(this.state);
   public readonly friend = new Friend(this.state);
