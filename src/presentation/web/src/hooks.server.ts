@@ -9,7 +9,9 @@ import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
 import { schedule } from "$lib/server/schedule";
+import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
 import { handleClient } from "presentation-bot";
 
 process.on("uncaughtException", async (error) => {
@@ -82,7 +84,7 @@ async function start() {
   );
 }
 
-export const handle = (async ({ event, resolve }) => {
+export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }) => {
   const oldToken = event.cookies.get("authorization");
   const user = await verifyToken(event.cookies);
 
@@ -105,15 +107,15 @@ export const handle = (async ({ event, resolve }) => {
   response.headers.set("Pragma", "no-cache");
 
   return response;
-}) satisfies Handle;
+}) satisfies Handle);
 
-export const handleError = (async (input) => {
+export const handleError = Sentry.handleErrorWithSentry((async (input) => {
   if (input.status === 404) {
     return { message: "Page Not found" };
   }
   if (input.status === 405) {
     return { message: "Method Not Allowed" };
   }
-}) satisfies HandleServerError;
+}) satisfies HandleServerError);
 
 await start();
