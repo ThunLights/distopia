@@ -12,6 +12,7 @@ import z from "zod";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const customIdPrefix = "blackListLogChannel:";
@@ -45,6 +46,15 @@ export class BlackListLogChannelSelectMenu extends ChannelSelectMenuInteractionB
 
     if (blackListId instanceof ValidateError) {
       return blackListId.content;
+    }
+
+    const permission = await this.checkBlackListOwnerOrEditorPermission(
+      blackListId,
+      interaction.user.id,
+    );
+
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     await this.core.blackList.apply({

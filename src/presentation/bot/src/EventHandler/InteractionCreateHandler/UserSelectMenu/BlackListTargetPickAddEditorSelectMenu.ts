@@ -12,6 +12,7 @@ import {
 import z from "zod";
 
 import { ValidateError, validator } from "../../../utils/validator";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSended } from "../Base/Modal/ModalSended";
 import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 
@@ -41,13 +42,10 @@ export class BlackListTargetPickAddEditorSelectMenu extends UserSelectMenuIntera
       return blackListId.content;
     }
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, interaction.user.id);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, interaction.user.id);
 
-    if (!isOwner) {
-      return {
-        content: "編集者の管理はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const modal = new ModalBuilder()

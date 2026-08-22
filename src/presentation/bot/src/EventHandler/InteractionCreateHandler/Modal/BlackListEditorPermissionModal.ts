@@ -9,6 +9,7 @@ import z from "zod";
 
 import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/blackList";
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManageEditorsPage } from "../Page/BlackListTargetManageEditorsPage";
 
@@ -61,13 +62,10 @@ export class BlackListEditorPermissionModal extends ModalSubmitInteractionBase<O
     const { blackListId, userId, all, add, edit, remove } = options;
     const requesterId = interaction.user.id;
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, requesterId);
 
-    if (!isOwner) {
-      return {
-        content: "編集者の管理はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     await this.core.blackList.upsertEditor({

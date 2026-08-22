@@ -15,6 +15,7 @@ import z from "zod";
 
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSended } from "../Base/Modal/ModalSended";
 
 const customIdPrefix = "blackListTagAddOpen:";
@@ -42,13 +43,10 @@ export class BlackListTagAddOpenButton extends ButtonInteractionBase {
       return blackListId.content;
     }
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, interaction.user.id);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, interaction.user.id);
 
-    if (!isOwner) {
-      return {
-        content: "タグの設定はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const list = await this.core.blackList.find(blackListId);

@@ -32,6 +32,7 @@ import {
 } from "../../../utils/blackList";
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSended } from "../Base/Modal/ModalSended";
 import { blackListShowPage } from "../Page/BlackListShowPage";
 import { blackListTagsPickListPage } from "../Page/BlackListTagsPickListPage";
@@ -329,13 +330,10 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
       }
 
-      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+      const permission = await this.checkBlackListOwnerPermission(blackListId, requesterId);
 
-      if (!isOwner) {
-        return {
-          content: "編集権限の変更はブラックリストのオーナーのみ行えます。",
-          flags: [MessageFlags.Ephemeral],
-        };
+      if (permission instanceof PermissionError) {
+        return { content: permission.message, flags: [MessageFlags.Ephemeral] };
       }
 
       if (subCommand === "add") {
@@ -401,13 +399,10 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
         return { content: "パラメーターが不足しています。", flags: [MessageFlags.Ephemeral] };
       }
 
-      const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+      const permission = await this.checkBlackListOwnerPermission(blackListId, requesterId);
 
-      if (!isOwner) {
-        return {
-          content: "削除はブラックリストのオーナーのみ行えます。",
-          flags: [MessageFlags.Ephemeral],
-        };
+      if (permission instanceof PermissionError) {
+        return { content: permission.message, flags: [MessageFlags.Ephemeral] };
       }
 
       await this.core.blackList.delete(blackListId);

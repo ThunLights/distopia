@@ -10,6 +10,7 @@ import {
 import { BlackListTagRefSchema, decodeBlackListTagRef } from "../../../utils/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { blackListTagsManagePage } from "../Page/BlackListTagsManagePage";
 
 const customIdPrefix = "blackListTagRemove:";
@@ -34,13 +35,10 @@ export class BlackListTagRemoveButton extends ButtonInteractionBase {
     }
 
     const { blackListId, tag } = ref;
-    const isOwner = await this.core.blackList.isOwner(blackListId, interaction.user.id);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, interaction.user.id);
 
-    if (!isOwner) {
-      return {
-        content: "タグの設定はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const list = await this.core.blackList.find(blackListId);

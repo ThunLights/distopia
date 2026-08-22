@@ -9,6 +9,7 @@ import {
 import z from "zod";
 
 import { validator, type ValidateResult } from "../../../utils/validator";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTagsManagePage } from "../Page/BlackListTagsManagePage";
 
@@ -47,13 +48,10 @@ export class BlackListTagAddModal extends ModalSubmitInteractionBase<Options> {
     const { blackListId, tag } = options;
     const requesterId = interaction.user.id;
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, requesterId);
 
-    if (!isOwner) {
-      return {
-        content: "タグの設定はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const list = await this.core.blackList.find(blackListId);

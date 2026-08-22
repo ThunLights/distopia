@@ -14,6 +14,7 @@ import z from "zod";
 
 import { blackListEditorPermissionSummary } from "../../../utils/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
 const customIdPrefix = "blackListTargetPickEditor:";
@@ -45,13 +46,10 @@ export class BlackListTargetPickEditorSelectMenu extends StringSelectMenuInterac
     const userId = options.value;
     const requesterId = interaction.user.id;
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, requesterId);
 
-    if (!isOwner) {
-      return {
-        content: "編集者の管理はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const editor = await this.core.blackList.findEditor(blackListId, userId);

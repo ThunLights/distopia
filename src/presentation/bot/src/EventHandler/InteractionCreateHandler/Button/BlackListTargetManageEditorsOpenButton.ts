@@ -10,6 +10,7 @@ import z from "zod";
 
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { blackListTargetManageEditorsPage } from "../Page/BlackListTargetManageEditorsPage";
 
 const customIdPrefix = "blackListTargetManageEditorsOpen:";
@@ -36,13 +37,10 @@ export class BlackListTargetManageEditorsOpenButton extends ButtonInteractionBas
     }
 
     const requesterId = interaction.user.id;
-    const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, requesterId);
 
-    if (!isOwner) {
-      return {
-        content: "編集者の管理はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const pagePayload = await blackListTargetManageEditorsPage(this.core, requesterId, blackListId);

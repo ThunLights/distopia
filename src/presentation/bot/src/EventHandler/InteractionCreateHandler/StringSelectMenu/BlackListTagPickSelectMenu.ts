@@ -9,6 +9,7 @@ import {
 import z from "zod";
 
 import { ValidateError, validator } from "../../../utils/validator";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { blackListTagDetailPage } from "../Page/BlackListTagDetailPage";
 
@@ -38,13 +39,10 @@ export class BlackListTagPickSelectMenu extends StringSelectMenuInteractionBase 
       return blackListId.content;
     }
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, interaction.user.id);
+    const permission = await this.checkBlackListOwnerPermission(blackListId, interaction.user.id);
 
-    if (!isOwner) {
-      return {
-        content: "タグの設定はブラックリストのオーナーのみ行えます。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const pagePayload = await blackListTagDetailPage(this.core, blackListId, options.value);

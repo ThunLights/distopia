@@ -4,6 +4,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  MessageFlags,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   UserSelectMenuBuilder,
@@ -22,6 +23,13 @@ export async function blackListTargetManageEditorsPage(
   blackListId: number,
   page: number = 0,
 ): Promise<InteractionReplyOptions> {
+  if (!(await core.blackList.isOwner(blackListId, userId))) {
+    return {
+      content: "編集者の管理はブラックリストのオーナーのみ行えます。",
+      flags: [MessageFlags.Ephemeral],
+    };
+  }
+
   const [list, editors] = await Promise.all([
     core.blackList.find(blackListId),
     core.blackList.listEditors(blackListId),

@@ -9,6 +9,7 @@ import z from "zod";
 
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListPage } from "../Page/BlackListPage";
 
@@ -45,14 +46,10 @@ export class BlackListApplyModal extends ModalSubmitInteractionBase<Options> {
     const { blackListId } = options;
     const requesterId = interaction.user.id;
 
-    const isOwner = await this.core.blackList.isOwner(blackListId, requesterId);
-    const editor = isOwner ? null : await this.core.blackList.findEditor(blackListId, requesterId);
+    const permission = await this.checkBlackListOwnerOrEditorPermission(blackListId, requesterId);
 
-    if (!isOwner && !editor) {
-      return {
-        content: "このブラックリストを適用する権限がありません。",
-        flags: [MessageFlags.Ephemeral],
-      };
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     await this.core.blackList.apply({ guildId: guild.id, blackListId });

@@ -12,6 +12,7 @@ import z from "zod";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
+import { PermissionError } from "../Base/Error/PermissionError";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const customIdPrefix = "blackListAutoBanOn:";
@@ -42,6 +43,15 @@ export class BlackListAutoBanOnButton extends ButtonInteractionBase {
 
     if (blackListId instanceof ValidateError) {
       return blackListId.content;
+    }
+
+    const permission = await this.checkBlackListOwnerOrEditorPermission(
+      blackListId,
+      interaction.user.id,
+    );
+
+    if (permission instanceof PermissionError) {
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     await this.core.blackList.apply({ guildId: guild.id, blackListId, autoBan: true });
