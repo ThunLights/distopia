@@ -1,5 +1,5 @@
 import {
-  CHARACTER_LIMIT,
+  BLACK_LIST_LIMIT,
   MAX_USER_BLACK_LIST_COUNT,
   NUM_BLACK_LIST_TAG_LIMIT,
 } from "app-core/constant";
@@ -44,7 +44,7 @@ export class BlackListManageCreateOpenButton extends ButtonInteractionBase {
             new TextInputBuilder()
               .setCustomId("label")
               .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.blackListLabel),
+              .setMaxLength(BLACK_LIST_LIMIT.label),
           ),
         new LabelBuilder()
           .setLabel(`タグ (最大${NUM_BLACK_LIST_TAG_LIMIT}個, 1行に1つ)`)

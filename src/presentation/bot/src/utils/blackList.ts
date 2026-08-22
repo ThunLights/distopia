@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
+import { BLACK_LIST_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import { z } from "zod";
 
 export type BlackListPermission = "AddTarget" | "EditTarget" | "RemoveTarget";
@@ -40,7 +40,7 @@ export function decodeBlackListTargetRef(value: string): unknown {
 
 export const BlackListTagRefSchema = z.object({
   blackListId: z.coerce.number().int(),
-  tag: z.string().min(1).max(CHARACTER_LIMIT.tag),
+  tag: z.string().min(1).max(BLACK_LIST_LIMIT.tag),
 });
 
 export function encodeBlackListTagRef(blackListId: number, tag: string): string {
@@ -59,7 +59,7 @@ export function decodeBlackListTagRef(value: string): unknown {
 }
 
 export const BlackListTagsSchema = z
-  .array(z.string().min(1).max(CHARACTER_LIMIT.tag))
+  .array(z.string().min(1).max(BLACK_LIST_LIMIT.tag))
   .max(NUM_BLACK_LIST_TAG_LIMIT);
 
 export function parseBlackListTagsInput(raw: string): string[] {

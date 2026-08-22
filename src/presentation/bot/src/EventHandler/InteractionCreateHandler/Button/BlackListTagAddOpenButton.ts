@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
+import { BLACK_LIST_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import {
   InteractionResponse,
   LabelBuilder,
@@ -70,7 +70,7 @@ export class BlackListTagAddOpenButton extends ButtonInteractionBase {
             new TextInputBuilder()
               .setCustomId("tag")
               .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.tag)
+              .setMaxLength(BLACK_LIST_LIMIT.tag)
               .setRequired(true),
           ),
       );

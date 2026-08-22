@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT } from "app-core/constant";
+import { BLACK_LIST_LIMIT } from "app-core/constant";
 import {
   InteractionResponse,
   LabelBuilder,
@@ -80,7 +80,7 @@ export class BlackListTargetEditOpenButton extends ButtonInteractionBase {
             new TextInputBuilder()
               .setCustomId("label")
               .setStyle(TextInputStyle.Short)
-              .setMaxLength(CHARACTER_LIMIT.blackListLabel)
+              .setMaxLength(BLACK_LIST_LIMIT.label)
               .setValue(existing.label),
           ),
         new LabelBuilder()
@@ -89,7 +89,7 @@ export class BlackListTargetEditOpenButton extends ButtonInteractionBase {
             new TextInputBuilder()
               .setCustomId("description")
               .setStyle(TextInputStyle.Paragraph)
-              .setMaxLength(CHARACTER_LIMIT.description)
+              .setMaxLength(BLACK_LIST_LIMIT.description)
               .setValue(existing.description),
           ),
       );

@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
+import { BLACK_LIST_LIMIT, NUM_BLACK_LIST_TAG_LIMIT } from "app-core/constant";
 import {
   InteractionResponse,
   MessageFlags,
@@ -16,7 +16,7 @@ const customIdPrefix = "blackListTagAdd:";
 
 const OptionsSchema = z.object({
   blackListId: z.coerce.number().int(),
-  tag: z.string().min(1).max(CHARACTER_LIMIT.tag),
+  tag: z.string().min(1).max(BLACK_LIST_LIMIT.tag),
 });
 
 type Options = z.infer<typeof OptionsSchema>;

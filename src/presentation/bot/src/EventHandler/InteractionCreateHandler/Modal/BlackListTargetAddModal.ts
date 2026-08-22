@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT } from "app-core/constant";
+import { BLACK_LIST_LIMIT } from "app-core/constant";
 import {
   InteractionResponse,
   MessageFlags,
@@ -16,8 +16,8 @@ import { blackListTargetManageDetailPage } from "../Page/BlackListTargetManageDe
 const customIdPrefix = "blackListTargetAdd:";
 
 const OptionsSchema = BlackListTargetRefSchema.extend({
-  label: z.string().max(CHARACTER_LIMIT.blackListLabel),
-  description: z.string().max(CHARACTER_LIMIT.description),
+  label: z.string().max(BLACK_LIST_LIMIT.label),
+  description: z.string().max(BLACK_LIST_LIMIT.description),
   tags: z.string().array(),
 });
 

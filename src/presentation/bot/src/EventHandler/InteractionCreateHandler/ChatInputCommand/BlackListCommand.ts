@@ -1,5 +1,5 @@
 import {
-  CHARACTER_LIMIT,
+  BLACK_LIST_LIMIT,
   MAX_USER_BLACK_LIST_COUNT,
   NUM_BLACK_LIST_TAG_LIMIT,
 } from "app-core/constant";
@@ -81,7 +81,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
             name: "label",
             description: "ブラックリストの名前",
             required: true,
-            max_length: CHARACTER_LIMIT.blackListLabel,
+            max_length: BLACK_LIST_LIMIT.label,
           },
           {
             type: ApplicationCommandOptionType.String,
@@ -264,14 +264,14 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
               new TextInputBuilder()
                 .setCustomId("label")
                 .setStyle(TextInputStyle.Short)
-                .setMaxLength(CHARACTER_LIMIT.blackListLabel)
+                .setMaxLength(BLACK_LIST_LIMIT.label)
                 .setValue(existing?.label ?? ""),
             ),
             new LabelBuilder().setLabel("説明").setTextInputComponent(
               new TextInputBuilder()
                 .setCustomId("description")
                 .setStyle(TextInputStyle.Paragraph)
-                .setMaxLength(CHARACTER_LIMIT.description)
+                .setMaxLength(BLACK_LIST_LIMIT.description)
                 .setValue(existing?.description ?? ""),
             ),
           );

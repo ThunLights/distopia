@@ -1,4 +1,4 @@
-import { CHARACTER_LIMIT, MAX_USER_BLACK_LIST_COUNT } from "app-core/constant";
+import { BLACK_LIST_LIMIT, MAX_USER_BLACK_LIST_COUNT } from "app-core/constant";
 import {
   InteractionResponse,
   MessageFlags,
@@ -14,7 +14,7 @@ import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
 
 const OptionsSchema = z.object({
-  label: z.string().max(CHARACTER_LIMIT.blackListLabel),
+  label: z.string().max(BLACK_LIST_LIMIT.label),
   tags: z.string(),
 });
 
