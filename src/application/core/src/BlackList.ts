@@ -58,6 +58,13 @@ export class BlackList extends Base {
     return await this.state.database.blackListEditor.find(blackListId, userId);
   }
 
+  public async isOwnerOrEditor(blackListId: number, userId: string): Promise<boolean> {
+    if (await this.isOwner(blackListId, userId)) {
+      return true;
+    }
+    return Boolean(await this.findEditor(blackListId, userId));
+  }
+
   public async hasPermission(
     blackListId: number,
     userId: string,
