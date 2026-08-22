@@ -49,7 +49,7 @@ export async function blackListTargetManageEditorsPage(
     .addFields({
       name: totalPages > 1 ? `編集者一覧 (${currentPage + 1}/${totalPages}ページ)` : "編集者一覧",
       value: buildBlackListFieldValue(
-        editors.map(
+        pageEditors.map(
           (editor) =>
             `<@${editor.userId}> (${editor.userId}): ${blackListEditorPermissionSummary(editor)}`,
         ),

@@ -16,7 +16,7 @@ import { blackListTargetManageDetailPage } from "../Page/BlackListTargetManageDe
 const customIdPrefix = "blackListTargetAdd:";
 
 const OptionsSchema = BlackListTargetRefSchema.extend({
-  label: z.string().max(BLACK_LIST_LIMIT.label),
+  label: z.string().min(1).max(BLACK_LIST_LIMIT.label),
   description: z.string().max(BLACK_LIST_LIMIT.description),
   tags: z.string().array(),
 });

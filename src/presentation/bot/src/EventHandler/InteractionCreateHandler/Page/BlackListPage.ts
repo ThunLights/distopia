@@ -41,7 +41,7 @@ export async function blackListPage(
           ? `適用中のブラックリスト (${currentPage + 1}/${totalPages}ページ)`
           : "適用中のブラックリスト",
       value: buildBlackListFieldValue(
-        applied.map(
+        pageApplied.map(
           (entry) =>
             `ID: \`${entry.blackListId}\`${entry.autoBan ? " [タグ自動BAN: On]" : ""}${entry.logChannel ? ` - <#${entry.logChannel}>` : ""}`,
         ),

@@ -12,6 +12,10 @@ export class GuildBlackListTable extends Base {
     return await this.prisma.guildBlackList.findMany({ where: { guildId } });
   }
 
+  public async findAllByBlackListId(blackListId: number): Promise<GuildBlackList[]> {
+    return await this.prisma.guildBlackList.findMany({ where: { blackListId } });
+  }
+
   public async upsert(input: GuildBlackListUpsertInput): Promise<GuildBlackList> {
     return await this.prisma.guildBlackList.upsert({
       where: {

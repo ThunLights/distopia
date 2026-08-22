@@ -7,24 +7,32 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
   public override async handle(member: GuildMember): Promise<void> {
     await this.core.member.addNewMember(member.guild.id, member.id);
 
+    const banned = await this.enforceBlackList(member);
+
+    if (banned) {
+      return;
+    }
+
     await this.logger.log(member.guild, "logMemberJoin", member);
     await sendWelcomeMessage(this.core, member.guild, member, "join");
-
-    await this.enforceBlackList(member);
   }
 
-  private async enforceBlackList(member: GuildMember): Promise<void> {
+  private async enforceBlackList(member: GuildMember): Promise<boolean> {
     const matches = await this.core.blackList.matchOnJoin(member.guild.id, member.id);
 
     if (!matches.length) {
-      return;
+      return false;
     }
 
     let banned = false;
 
     if (matches.some((match) => match.banned) && member.bannable) {
-      await member.ban({ reason: "ブラックリストに該当したため" });
-      banned = true;
+      try {
+        await member.ban({ reason: "ブラックリストに該当したため" });
+        banned = true;
+      } catch {
+        // BANに失敗した場合もログは記録するため、ここでは処理を継続する
+      }
     }
 
     const matchesByChannel = new Map<string, typeof matches>();
@@ -47,5 +55,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
         banned,
       );
     }
+
+    return banned;
   }
 }

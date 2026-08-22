@@ -282,6 +282,7 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
             new LabelBuilder().setLabel("タグ").setStringSelectMenuComponent(
               new StringSelectMenuBuilder()
                 .setCustomId("tags")
+                .setRequired(false)
                 .setMinValues(0)
                 .setMaxValues(list.tags.length)
                 .addOptions(
@@ -384,6 +385,14 @@ export class BlackListCommand extends ChatInputCommandBase<Options> {
       }
 
       const list = await this.core.blackList.create(requesterId, options.label, tags);
+
+      if (!list) {
+        return {
+          content: `作成できるブラックリストは${MAX_USER_BLACK_LIST_COUNT}個までです。`,
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
+
       return {
         content: `ブラックリストを作成しました。ID: \`${list.id}\` ラベル: ${list.label}`,
         flags: [MessageFlags.Ephemeral],

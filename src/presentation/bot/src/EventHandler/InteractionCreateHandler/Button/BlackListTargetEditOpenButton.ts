@@ -99,6 +99,7 @@ export class BlackListTargetEditOpenButton extends ButtonInteractionBase {
         new LabelBuilder().setLabel("タグ").setStringSelectMenuComponent(
           new StringSelectMenuBuilder()
             .setCustomId("tags")
+            .setRequired(false)
             .setMinValues(0)
             .setMaxValues(list.tags.length)
             .addOptions(

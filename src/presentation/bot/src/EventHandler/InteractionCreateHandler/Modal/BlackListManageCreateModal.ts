@@ -14,7 +14,7 @@ import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
 
 const OptionsSchema = z.object({
-  label: z.string().max(BLACK_LIST_LIMIT.label),
+  label: z.string().min(1).max(BLACK_LIST_LIMIT.label),
   tags: z.string(),
 });
 
@@ -54,7 +54,14 @@ export class BlackListManageCreateModal extends ModalSubmitInteractionBase<Optio
       return tags.content;
     }
 
-    await this.core.blackList.create(requesterId, options.label, tags);
+    const list = await this.core.blackList.create(requesterId, options.label, tags);
+
+    if (!list) {
+      return {
+        content: `作成できるブラックリストは${MAX_USER_BLACK_LIST_COUNT}個までです。`,
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
 
     if (interaction.isFromMessage()) {
       const pagePayload = await blackListTargetManagePage(this.core, requesterId);
