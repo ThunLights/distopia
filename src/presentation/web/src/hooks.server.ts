@@ -1,4 +1,4 @@
-import { BOT_TOKEN } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import {
   PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_HOME_SERVER_ID,
@@ -8,6 +8,7 @@ import {
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
+import { requireEnv } from "$lib/server/env";
 import { schedule } from "$lib/server/schedule";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
@@ -26,7 +27,7 @@ async function start() {
   await core.jwt.importDB();
   console.log("JWT keys is imported.");
 
-  await handleClient(client, core).login(BOT_TOKEN);
+  await handleClient(client, core).login(requireEnv("BOT_TOKEN", env.BOT_TOKEN));
   console.log("BOT logined.");
 
   await core.friend.updateCache();

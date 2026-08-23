@@ -1,0 +1,60 @@
+# syntax=docker/dockerfile:1
+
+ARG BUN_VERSION=1.3.14
+
+FROM oven/bun:${BUN_VERSION}-slim AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN bun install --frozen-lockfile --ignore-scripts
+
+# SvelteKit inlines $env/static/public (and $env/static/private) into the built
+# output at build time, so these have to be supplied here as build args. BOT_TOKEN,
+# BOT_SECRET and DATABASE_URL are intentionally NOT build args: the app reads them
+# via $env/dynamic/private at container start, so they never get baked into this
+# image or its published layers - only the Kubernetes Secret at runtime knows them.
+ARG PUBLIC_URL
+ARG PUBLIC_OWNER_ID
+ARG PUBLIC_HOME_SERVER_ID
+ARG PUBLIC_STAFF_ROLE_ID
+ARG PUBLIC_HONORARY_MEMBER_ROLE_ID
+ARG PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID
+ARG PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID
+ARG PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID
+ARG PUBLIC_BOT_ID
+ARG PUBLIC_SENTRY_DSN
+ARG SENTRY_ORG
+ARG SENTRY_PROJECT
+ENV PUBLIC_URL=${PUBLIC_URL} \
+  PUBLIC_OWNER_ID=${PUBLIC_OWNER_ID} \
+  PUBLIC_HOME_SERVER_ID=${PUBLIC_HOME_SERVER_ID} \
+  PUBLIC_STAFF_ROLE_ID=${PUBLIC_STAFF_ROLE_ID} \
+  PUBLIC_HONORARY_MEMBER_ROLE_ID=${PUBLIC_HONORARY_MEMBER_ROLE_ID} \
+  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID=${PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID} \
+  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID=${PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID} \
+  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID=${PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID} \
+  PUBLIC_BOT_ID=${PUBLIC_BOT_ID} \
+  PUBLIC_SENTRY_DSN=${PUBLIC_SENTRY_DSN} \
+  SENTRY_ORG=${SENTRY_ORG} \
+  SENTRY_PROJECT=${SENTRY_PROJECT}
+
+# SENTRY_AUTH_TOKEN is only used to upload source maps and the build succeeds
+# without it, so it's passed as a BuildKit secret instead of an ARG/ENV - those
+# get recorded in the image history even when the final layer doesn't use them.
+RUN --mount=type=secret,id=sentry_auth_token \
+  sh -c 'SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" bun run build'
+
+FROM oven/bun:${BUN_VERSION}-slim AS runner
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=build /app /app
+
+EXPOSE 3000
+
+USER bun
+
+CMD ["bun", "run", "src/presentation/web/build/index.js"]

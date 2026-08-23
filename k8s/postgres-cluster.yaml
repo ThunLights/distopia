@@ -1,0 +1,22 @@
+# CloudNativePG-managed PostgreSQL, replacing the plain `postgres:17` container from
+# docker-compose.yml. `instances: 1` matches the current single-instance setup - CNPG
+# still gives us managed backups/failover primitives to grow into later without a
+# second migration. It publishes a `distopia-db-app` Secret with connection details
+# (including a ready-to-use `uri` key) that the app Deployment consumes.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: distopia-db
+  namespace: distopia
+spec:
+  instances: 1
+
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  bootstrap:
+    initdb:
+      database: distopia
+      owner: distopia
+
+  storage:
+    size: 10Gi

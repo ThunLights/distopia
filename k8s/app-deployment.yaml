@@ -1,0 +1,110 @@
+# Rolling-update shape mirrors docker/docker-compose.prod.yml (single `app`
+# container talking to the `db` service), adapted for k8s:
+#
+# - `bun run build` no longer runs at container start (see docker/dockerfile.prod) -
+#   it's baked into the image, so a new pod is ready to serve as soon as it starts.
+# - Only the DB migration (`bun run deploy-db`) still needs to run before the new
+#   code serves traffic, so it's an initContainer instead of part of the image
+#   startup. With replicas: 1 and maxSurge: 1, the new pod migrates and passes its
+#   readiness probe before the old pod is terminated - zero-downtime as long as
+#   migrations stay backward-compatible with the previous release.
+# - BOT_TOKEN/BOT_SECRET/DATABASE_URL are read at runtime via $env/dynamic/private,
+#   not baked into the image. The `write-env` initContainer renders them into a
+#   `.env` file (same mechanism the app already uses locally/in CI) from the
+#   manually-applied `distopia-app` Secret and the CNPG-generated `distopia-db-app`
+#   Secret, onto an emptyDir shared with the `migrate` initContainer and the `app`
+#   container.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-app
+  namespace: distopia
+  labels:
+    app: distopia-app
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: distopia-app
+  template:
+    metadata:
+      labels:
+        app: distopia-app
+    spec:
+      # Only needed while ghcr.io/thunlights/distopia-app is a private package:
+      # kubectl create secret docker-registry ghcr-pull-secret \
+      #   --docker-server=ghcr.io --docker-username=<user> --docker-password=<PAT>
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      volumes:
+        - name: env-file
+          emptyDir: {}
+        - name: app-secret
+          secret:
+            secretName: distopia-app
+        - name: db-secret
+          secret:
+            secretName: distopia-db-app
+      initContainers:
+        - name: write-env
+          image: ghcr.io/thunlights/distopia-app:latest
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              : > /shared/.env
+              for f in /secrets/app/*; do
+                printf '%s="%s"\n' "$(basename "$f")" "$(cat "$f")" >>/shared/.env
+              done
+              printf 'DATABASE_URL="%s"\n' "$(cat /secrets/db/uri)" >>/shared/.env
+          volumeMounts:
+            - name: env-file
+              mountPath: /shared
+            - name: app-secret
+              mountPath: /secrets/app
+              readOnly: true
+            - name: db-secret
+              mountPath: /secrets/db
+              readOnly: true
+        - name: migrate
+          image: ghcr.io/thunlights/distopia-app:latest
+          workingDir: /app
+          command: ["bun", "run", "deploy-db"]
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env
+              subPath: .env
+      containers:
+        - name: app
+          image: ghcr.io/thunlights/distopia-app:latest
+          workingDir: /app
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+          volumeMounts:
+            - name: env-file
+              mountPath: /app/.env
+              subPath: .env
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
