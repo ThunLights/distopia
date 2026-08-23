@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/${env:SENTRY_ORG}/${env:SENTRY_PROJECT}",
+      "type": "http"
+    }
+  }
+}

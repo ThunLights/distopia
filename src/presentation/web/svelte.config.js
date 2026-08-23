@@ -10,8 +10,19 @@ const config = {
   },
   kit: {
     adapter: fjstSvelteKit(adapter(), [jsObf]),
+
     env: {
       dir: "../../../",
+    },
+
+    experimental: {
+      tracing: {
+        server: true,
+      },
+
+      instrumentation: {
+        server: true,
+      },
     },
   },
 };
