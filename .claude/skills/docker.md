@@ -6,12 +6,15 @@ description: Dockerfile and Docker Compose configuration, services, and operatio
 
 ## Service Overview
 
-Defined in `docker/docker-compose.yml` (base), extended by `docker-compose.dev.yml` and `docker-compose.prod.yml`.
+Defined in `docker/docker-compose.yml` (base), extended by `docker-compose.dev.yml` for the
+devcontainer. There is no prod compose file — the production image is built from
+`docker/dockerfile.prod` directly (see "Production Image" below); docker-compose is a
+dev-only concern.
 
 | Service | Container name | Image | Role |
 |---|---|---|---|
-| `db` | `distopia-db` | `postgres:17` | PostgreSQL database |
-| `app` | `distopia-dev` (dev) / `distopia` (prod) | Built from `dockerfile` | App + bot runtime |
+| `db` | `distopia-db` | `postgres:17` | PostgreSQL database (dev only — production uses CloudNativePG, see `k8s/README.md`) |
+| `app` | `distopia-dev` | Built from `dockerfile` | Devcontainer app + bot runtime |
 
 ### Volumes
 
@@ -122,28 +125,42 @@ docker compose ps
 docker volume inspect distopia-db-store
 ```
 
-## Development vs Production Compose
+## Development Compose
 
 | File | Use |
 |---|---|
 | `docker-compose.yml` | Base (shared services, volumes, networks) |
 | `docker-compose.dev.yml` | Dev: exposes ports 5173, 4173, 6006; `command: sleep infinity` |
-| `docker-compose.prod.yml` | Prod: runs `scripts/prod.sh`; only port 3000 exposed |
 
 The devcontainer (`.devcontainer/devcontainer.json`) uses `docker-compose.yml` + `docker-compose.dev.yml`.
 
-## Production Deploy
+## Production Image (`docker/dockerfile.prod`)
 
-From outside the devcontainer, on the production host:
+A separate, self-contained multi-stage Dockerfile — not part of docker-compose, and not the
+devcontainer image. Bakes `bun install` + `bun run build` at image-build time, so the
+container just runs `bun run src/presentation/web/build/index.js` on start — no
+install/build/migrate at container startup. The app reads its own config (`BOT_TOKEN`,
+`PUBLIC_*`, `DATABASE_URL`, ...) via `$env/dynamic/*` + `dotenv` (see `hooks.server.ts`),
+resolved at container start from real env vars/a mounted `.env` — none of it is baked into
+the image. The build itself still needs a *separate*, build-time-only `.env` (just
+`DATABASE_URL` + `SENTRY_*`) because `prisma generate --sql` needs to introspect a real
+database and the Sentry vite plugin needs org/project/token for sourcemap upload; that file
+is deleted before the runtime layer is created.
 
 ```bash
-production/run.sh
+# build context must be the repo root
+docker build -f docker/dockerfile.prod -t distopia:local .
 ```
 
-This runs `docker-compose.prod.yml`, which executes `scripts/prod.sh`:
-1. `scripts/setup.sh` (install deps + `bun run setup`)
-2. `bun run build`
-3. `bun run src/presentation/web/build/index.js` (start the Node.js server)
+## Production Deploy
+
+Production runs on k3s and deploys automatically via GitOps (Argo CD + Argo Workflows +
+Argo Events) on every push to `main` — the Workflow builds `docker/dockerfile.prod` with
+Kaniko, runs `prisma migrate deploy`, pushes to an in-cluster registry, and Argo CD rolls
+the Deployment. See `k8s/README.md` for the full pipeline, secrets, and one-time cluster
+bootstrap. `.github/workflows/ci.yml`'s `e2e-prod` job builds/runs the same
+`docker/dockerfile.prod` image directly with `docker build`/`docker run` (no k8s) to
+smoke-test it in CI.
 
 ## Networking
 

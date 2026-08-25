@@ -1,0 +1,23 @@
+# This is the Application the Argo Workflow's update-manifest step deploys against: it
+# watches k8s/app on main, and every `chore(deploy):` commit that bumps the pinned image
+# tag gets picked up here (auto-sync, self-heal) and rolled out.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: distopia-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/thunlights/distopia.git
+    targetRevision: main
+    path: k8s/app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: distopia
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

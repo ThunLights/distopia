@@ -1,0 +1,75 @@
+# Two identities:
+# - distopia-sensor-sa: used by the Sensor to create Workflow objects when the GitHub
+#   webhook fires.
+# - distopia-workflow-sa: used by the Workflow's own pods (clone/build-push/migrate/
+#   update-manifest) via workflowtemplate.yaml's `serviceAccountName`.
+#
+# Both are namespace-scoped to `distopia` -- neither needs cluster-wide access. If you hit
+# RBAC-denied errors on a specific verb, that's expected to happen at least once; consult
+# Argo Workflows'/Argo Events' RBAC docs for the exact verb and add it here rather than
+# widening scope broadly.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: distopia-sensor-sa
+  namespace: distopia
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: distopia-sensor-role
+  namespace: distopia
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows"]
+    verbs: ["create", "get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: distopia-sensor-rolebinding
+  namespace: distopia
+subjects:
+  - kind: ServiceAccount
+    name: distopia-sensor-sa
+    namespace: distopia
+roleRef:
+  kind: Role
+  name: distopia-sensor-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: distopia-workflow-sa
+  namespace: distopia
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: distopia-workflow-role
+  namespace: distopia
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch", "patch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["create", "get", "list", "delete"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflowtaskresults"]
+    verbs: ["create", "get", "list", "watch", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: distopia-workflow-rolebinding
+  namespace: distopia
+subjects:
+  - kind: ServiceAccount
+    name: distopia-workflow-sa
+    namespace: distopia
+roleRef:
+  kind: Role
+  name: distopia-workflow-role
+  apiGroup: rbac.authorization.k8s.io

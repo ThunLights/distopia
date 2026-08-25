@@ -1,4 +1,4 @@
-import { PUBLIC_BOT_ID, PUBLIC_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import githubIcon from "$lib/assets/service/github.webp";
 import tiktokIcon from "$lib/assets/service/tiktok.webp";
 import twitterIcon from "$lib/assets/service/twitter.webp";
@@ -92,14 +92,14 @@ function buildDiscordOAuthUrl(params: Record<string, string>): string {
 }
 
 export const PUBLIC_OAUTH_URL = buildDiscordOAuthUrl({
-  client_id: PUBLIC_BOT_ID,
+  client_id: env.PUBLIC_BOT_ID,
   response_type: "code",
-  redirect_uri: `${PUBLIC_URL}/auth`,
+  redirect_uri: `${env.PUBLIC_URL}/auth`,
   scope: "identify guilds email guilds.join",
 });
 
 export const PUBLIC_BOT_INVITE_LINK = buildDiscordOAuthUrl({
-  client_id: PUBLIC_BOT_ID,
+  client_id: env.PUBLIC_BOT_ID,
   permissions: "8",
   integration_type: "0",
   scope: "bot",

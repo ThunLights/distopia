@@ -1,0 +1,97 @@
+# The distopia web app + Discord bot (single process -- see hooks.server.ts). The app reads
+# all runtime config (BOT_TOKEN, PUBLIC_*, DATABASE_URL, ...) via $env/dynamic/* + dotenv
+# (see hooks.server.ts) -- nothing is baked into the image at build time, so every value
+# below is injected purely as a live env var at Pod start, sourced from k8s Secrets/
+# ConfigMaps that are never part of the image or the in-cluster registry.
+#
+# replicas stays at 1: the app logs into the Discord gateway and runs in-process cron jobs
+# itself (see k8s/README.md), so more than one instance running at once causes duplicate
+# event handling. RollingUpdate with maxSurge:1/maxUnavailable:0 is still used (instead of
+# Recreate) to get a zero-downtime rollout -- the brief window where the new pod is up
+# alongside the old one during a rollout is accepted.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-app
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-app
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-app
+    spec:
+      imagePullSecrets:
+        - name: distopia-registry-pull
+      containers:
+        - name: distopia
+          # Updated in place by the Argo Workflow's update-manifest step via
+          # `kustomize edit set image` -- see k8s/ci/workflowtemplate.yaml.
+          image: distopia-registry.distopia.svc.cluster.local:5000/distopia:latest
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                # PORT (default "3000") -- @sveltejs/adapter-node reads this directly.
+                # If you change it here, update `containerPort`/`service.yaml`'s
+                # targetPort to match -- plain Kubernetes YAML can't cross-reference a
+                # ConfigMap value into another field.
+                name: distopia-config
+            - secretRef:
+                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_* -- see k8s/README.md for the
+                # kubectl create secret command.
+                name: distopia-env
+          env:
+            # distopia-db-credentials is the same user-chosen username/password given to
+            # CloudNativePG's Cluster (k8s/db/cluster.yaml) -- not CNPG's auto-generated
+            # secret, since that field is what makes the DB user/password configurable.
+            # Passed as separate DB_* vars rather than a single composed DATABASE_URL
+            # (database.ts assembles it) so no connection-string-shaped literal exists
+            # here -- that shape trips secret scanners (trufflehog/gitleaks) even when the
+            # credential fields are just placeholders.
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-db-credentials
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-db-credentials
+                  key: password
+            - name: DB_HOST
+              value: distopia-db-rw.distopia.svc.cluster.local
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: distopia
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi

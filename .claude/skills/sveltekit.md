@@ -144,10 +144,13 @@ return errorJson("Something went wrong");
 | `$lib/...` | `src/lib/...` |
 | `$app/paths` | SvelteKit paths utilities (`resolve`) |
 | `$app/state` | SvelteKit reactive state (`page`) |
-| `$env/static/public` | Public env vars (`PUBLIC_*`) |
-| `$env/static/private` | Private env vars (server-only) |
+| `$env/dynamic/public` | Public env vars (`PUBLIC_*`), read from `env.PUBLIC_X` |
+| `$env/dynamic/private` | Private env vars (server-only), read from `env.X` |
 
-Env file location: `.env` at the **monorepo root** (configured via `env.dir: "../../../"` in `svelte.config.js`).
+Env file location: `.env` at the **monorepo root** (configured via `env.dir: "../../../"` in
+`svelte.config.js` for dev; in production, `hooks.server.ts`/`instrumentation.server.ts`
+explicitly `import "dotenv/config"` as their first import so the built server also loads it
+at container start — nothing is baked in at build time).
 
 ## Navigation — Always Use `resolve()`
 

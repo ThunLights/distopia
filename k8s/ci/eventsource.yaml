@@ -1,0 +1,45 @@
+# Receives GitHub's push webhook. Runs in "manual webhook" mode (no apiToken given), so it
+# does NOT auto-register itself with GitHub's API -- you register the webhook by hand in
+# the repo's Settings > Webhooks (steps + payload URL in k8s/README.md). This avoids ever
+# granting the cluster a GitHub token with repo-hook-admin scope.
+#
+# No Ingress in front of this (Traefik/ServiceLB are disabled cluster-wide -- see
+# k8s/README.md's "Cloudflare Tunnel" section). The Argo Events controller auto-creates a
+# ClusterIP Service from the `service:` block below, named `github-eventsource-svc`
+# (`<eventsource-name>-eventsource-svc`) -- host-level cloudflared reaches it via cluster
+# DNS (`github-eventsource-svc.distopia.svc.cluster.local:12000`), same as it reaches
+# distopia-app.
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github
+  namespace: distopia
+spec:
+  eventBusName: default
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
+  github:
+    push:
+      repositories:
+        - owner: thunlights
+          names:
+            - distopia
+      webhookSecret:
+        name: distopia-github-webhook
+        key: secret
+      contentType: json
+      active: true
+      insecure: false
+      events:
+        - push
+      webhook:
+        endpoint: /push
+        port: "12000"
+        method: POST
+        # Informational only since apiToken isn't set (no auto-registration) -- set this
+        # to whatever public hostname you actually put in GitHub's webhook config (the
+        # Cloudflare Tunnel hostname, e.g. https://ci.distopia.top -- Cloudflare presents
+        # this externally regardless of how traffic reaches the Service internally).
+        url: https://ci.distopia.top

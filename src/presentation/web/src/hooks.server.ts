@@ -1,10 +1,12 @@
-import { BOT_TOKEN } from "$env/static/private";
-import {
-  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
-  PUBLIC_HOME_SERVER_ID,
-  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
-  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
-} from "$env/static/public";
+// Must stay the very first import: populates process.env from .env (if present) before
+// any other module evaluates, so $env/dynamic/* below sees real values. Secrets are never
+// baked into the build -- they're only ever injected at container start, either via a
+// real .env file or real env vars (e.g. k8s Secret envFrom); dotenv does not override
+// already-set vars, so both sources work interchangeably.
+import "dotenv/config";
+
+import { env as privateEnv } from "$env/dynamic/private";
+import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
@@ -23,6 +25,14 @@ process.on("unhandledRejection", async (reason) => {
 });
 
 async function start() {
+  const { BOT_TOKEN } = privateEnv;
+  const {
+    PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
+    PUBLIC_HOME_SERVER_ID,
+    PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
+    PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
+  } = publicEnv;
+
   await core.jwt.importDB();
   console.log("JWT keys is imported.");
 

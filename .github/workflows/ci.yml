@@ -70,10 +70,15 @@ jobs:
           run: docker compose exec app sudo bun run test
 
   e2e-prod:
-    name: E2E (production build)
+    name: E2E (production build, on kind)
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
+    # Deploys the actual k8s/db and k8s/app manifests (unmodified, aside from the image
+    # tag) into a throwaway kind cluster -- the same thing Argo CD applies in real
+    # production -- rather than approximating it with a bare `docker run`. The point is to
+    # catch manifest-level bugs here too, not just Dockerfile-level ones, so "CI passed" is
+    # actually predictive of "the real rollout will work".
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -81,31 +86,147 @@ jobs:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
           persist-credentials: false
 
-      - name: Generate .env
-        run: printenv > .env
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: distopia-e2e
 
-      - name: Create distopia-db-store
-        run: docker volume create distopia-db-store
+      - name: Install kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s -- /usr/local/bin
 
-      - name: Start production stack
-        run: ./production/run.sh
+      # kind's built-in dynamic provisioner is the StorageClass "standard" (backed by
+      # rancher.io/local-path, the same provisioner k3s's "local-path" uses) -- alias it so
+      # k8s/db/cluster.yaml's storageClassName: local-path applies completely unmodified,
+      # same as it would against the real k3s cluster.
+      - name: Alias kind's storage class as local-path
+        run: |
+          kubectl apply -f - <<'EOF'
+          apiVersion: storage.k8s.io/v1
+          kind: StorageClass
+          metadata:
+            name: local-path
+          provisioner: rancher.io/local-path
+          volumeBindingMode: WaitForFirstConsumer
+          reclaimPolicy: Delete
+          EOF
 
-      - name: Wait for production server to be ready
-        run: timeout 180 bash -c 'until curl -sf http://localhost:3000/ -o /dev/null; do sleep 2; done'
+      - name: Install CloudNativePG operator
+        run: |
+          kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.24/releases/cnpg-1.24.0.yaml
+          kubectl -n cnpg-system wait --for=condition=Available deployment/cnpg-controller-manager --timeout=120s
+
+      - name: Create namespace and secrets
+        run: |
+          kubectl create namespace distopia
+          kubectl create secret generic distopia-db-credentials -n distopia \
+            --from-literal=username=distopia \
+            --from-literal=password=distopia-e2e-test
+          kubectl create secret generic distopia-env -n distopia \
+            --from-literal=PUBLIC_URL="$PUBLIC_URL" \
+            --from-literal=PUBLIC_OWNER_ID="$PUBLIC_OWNER_ID" \
+            --from-literal=PUBLIC_HOME_SERVER_ID="$PUBLIC_HOME_SERVER_ID" \
+            --from-literal=PUBLIC_STAFF_ROLE_ID="$PUBLIC_STAFF_ROLE_ID" \
+            --from-literal=PUBLIC_HONORARY_MEMBER_ROLE_ID="$PUBLIC_HONORARY_MEMBER_ROLE_ID" \
+            --from-literal=PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID="$PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID" \
+            --from-literal=PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID="$PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID" \
+            --from-literal=PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID="$PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID" \
+            --from-literal=PUBLIC_BOT_ID="$PUBLIC_BOT_ID" \
+            --from-literal=BOT_TOKEN="$BOT_TOKEN" \
+            --from-literal=BOT_SECRET="$BOT_SECRET" \
+            --from-literal=SENTRY_ORG="$SENTRY_ORG" \
+            --from-literal=SENTRY_PROJECT="$SENTRY_PROJECT" \
+            --from-literal=PUBLIC_SENTRY_DSN="$PUBLIC_SENTRY_DSN" \
+            --from-literal=SENTRY_AUTH_TOKEN="$SENTRY_AUTH_TOKEN"
+
+      - name: Deploy CloudNativePG cluster (k8s/db, unmodified)
+        run: kubectl apply -k k8s/db
+
+      - name: Wait for the database to be ready
+        run: |
+          timeout 180 bash -c '
+            until kubectl get pods -n distopia -l cnpg.io/cluster=distopia-db 2>/dev/null | grep -qE "1/1 +Running"; do
+              sleep 5
+            done
+          '
+
+      - name: Port-forward the database for migrate/build
+        run: |
+          kubectl port-forward svc/distopia-db-rw 5432:5432 -n distopia &
+          echo $! > /tmp/pf-db.pid
+          timeout 30 bash -c 'until (exec 3<>/dev/tcp/localhost/5432) 2>/dev/null; do sleep 1; done'
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.0"
+
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: postgresql://distopia:distopia-e2e-test@localhost:5432/distopia
+        run: |
+          bun install --frozen-lockfile
+          cd src/infrastructure/database
+          bunx prisma migrate deploy
+
+      # Builds the same image k8s/ci/workflowtemplate.yaml's Kaniko step builds, just with
+      # `docker build` instead. --network host lets `prisma generate --sql` reach the
+      # port-forwarded database above. Build-time-only .env (deleted before the runtime
+      # layer, same as the real pipeline) -- BOT_TOKEN/PUBLIC_*/etc. are intentionally not
+      # in here, only what `bun run build` itself needs.
+      - name: Build production image
+        env:
+          DATABASE_URL: postgresql://distopia:distopia-e2e-test@localhost:5432/distopia
+        run: |
+          cat > .env <<EOF
+          DATABASE_URL=$DATABASE_URL
+          SENTRY_ORG=$SENTRY_ORG
+          SENTRY_PROJECT=$SENTRY_PROJECT
+          SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
+          PUBLIC_SENTRY_DSN=$PUBLIC_SENTRY_DSN
+          EOF
+          docker build --network host -f docker/dockerfile.prod -t distopia:e2e .
+          rm -f .env
+
+      - name: Stop database port-forward
+        if: always()
+        run: kill "$(cat /tmp/pf-db.pid)" 2>/dev/null || true
+
+      - name: Load image into kind
+        run: kind load docker-image distopia:e2e --name distopia-e2e
+
+      - name: Deploy app (k8s/app, image tag bumped the same way the real Workflow does)
+        run: |
+          cd k8s/app
+          kustomize edit set image distopia-registry.distopia.svc.cluster.local:5000/distopia=distopia:e2e
+          cd ../..
+          kubectl apply -k k8s/app
+          kubectl rollout status deployment/distopia-app -n distopia --timeout=180s
+
+      - name: Port-forward the app
+        run: |
+          kubectl port-forward svc/distopia-app 3000:3000 -n distopia &
+          echo $! > /tmp/pf-app.pid
+          timeout 180 bash -c 'until curl -sf http://localhost:3000/ -o /dev/null; do sleep 2; done'
 
       - name: Run E2E tests against production build
-        working-directory: ./docker/
-        run: docker compose exec -T app sudo sh -c "cd src/presentation/web && bun run test:e2e:prod"
+        working-directory: ./src/presentation/web
+        run: |
+          bunx playwright install --with-deps
+          bun run test:e2e:prod
 
-      - name: Dump app logs on failure
+      - name: Dump cluster diagnostics on failure
         if: failure()
-        working-directory: ./docker/
-        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml logs app
+        run: |
+          kubectl get all -n distopia
+          kubectl describe pod -n distopia -l app.kubernetes.io/name=distopia-app
+          kubectl logs -n distopia deployment/distopia-app --tail=200
+          kubectl get events -n distopia --sort-by=.lastTimestamp
 
-      - name: Tear down production stack
+      - name: Tear down
         if: always()
-        working-directory: ./docker/
-        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+        run: |
+          kill "$(cat /tmp/pf-app.pid)" 2>/dev/null || true
+          kind delete cluster --name distopia-e2e
 
   devcontainer:
     name: Dev Container
