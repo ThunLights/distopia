@@ -91,9 +91,9 @@ jobs:
         with:
           cluster_name: distopia-e2e
 
-      - name: Install kustomize
-        run: |
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s -- /usr/local/bin
+      # kustomize is already preinstalled on GitHub's ubuntu-latest runner image at
+      # /usr/local/bin/kustomize -- no separate install step needed (and the official
+      # install script refuses to run if it finds a binary already there).
 
       # kind's built-in dynamic provisioner is the StorageClass "standard" (backed by
       # rancher.io/local-path, the same provisioner k3s's "local-path" uses) -- alias it so

@@ -1,10 +1,3 @@
-// Must stay the very first import: populates process.env from .env (if present) before
-// any other module evaluates, so $env/dynamic/* below sees real values. Secrets are never
-// baked into the build -- they're only ever injected at container start, either via a
-// real .env file or real env vars (e.g. k8s Secret envFrom); dotenv does not override
-// already-set vars, so both sources work interchangeably.
-import "dotenv/config";
-
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
@@ -77,10 +70,10 @@ async function start() {
       await core.activeRate.update();
       await core.ranking.cleanCache();
       await core.updateHomeGuildRoles(
-        PUBLIC_HOME_SERVER_ID,
-        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
-        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
-        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
+        PUBLIC_HOME_SERVER_ID!,
+        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
       );
       await core.record.update();
       await core.statChannel.update();
