@@ -158,14 +158,15 @@ jobs:
       # next one with "connection reset by peer", reproducibly, not just as a rare flake.
       # Reaching the kind node container's own bridge-network IP directly was tried next
       # and just timed out. Publishing a NodePort with a hand-guessed selector was tried
-      # after that: the TCP handshake succeeded (docker's userland-proxy on the published
-      # port accepts immediately regardless of backend) but every real connection was
-      # reset instantly and identically across 5 retries -- the signature of a Service with
-      # zero matching endpoints, not a transient drop. Instead of guessing CNPG's pod
-      # labels, copy the selector straight from the real distopia-db-rw Service that CNPG
-      # itself created (already proven correct -- it's what the earlier pg_isready check's
-      # Pod name and this whole Cluster depend on), so this can't drift from whatever
-      # labels this CNPG version actually uses.
+      # after that, then with the selector copied straight from distopia-db-rw (confirmed
+      # correct both times) -- both attempts still got zero real connections. The TCP
+      # handshake itself is not a useful readiness signal here: kind's extraPortMappings
+      # publishes the port via Docker's own proxy, which accepts the connection instantly
+      # regardless of whether kube-proxy has any Service endpoint behind it yet, so a
+      # `/dev/tcp` check passes even while `kubectl get endpoints` is still empty. Wait on
+      # the actual thing the NodePort depends on -- the Service's Endpoints/EndpointSlice
+      # having a real subset -- instead of a TCP connect that can't distinguish "routed to
+      # postgres" from "accepted by docker's proxy and then dropped".
       - name: Expose the database via NodePort for migrate/build
         run: |
           kubectl get svc distopia-db-rw -n distopia -o jsonpath='distopia-db-rw selector: {.spec.selector}{"\n"}'
@@ -182,9 +183,22 @@ jobs:
                   }
                 }' \
             | kubectl apply -f -
-          kubectl get endpoints distopia-db-ci-nodeport -n distopia
           echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@127.0.0.1:30432/distopia" >> "$GITHUB_ENV"
-          timeout 30 bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/30432) 2>/dev/null; do sleep 1; done'
+
+          echo "Waiting for distopia-db-ci-nodeport to have a real endpoint..."
+          timeout 120 bash -c '
+            until [ "$(kubectl get endpoints distopia-db-ci-nodeport -n distopia -o jsonpath="{.subsets}")" != "" ]; do
+              sleep 2
+            done
+          '
+          kubectl get endpoints distopia-db-ci-nodeport -n distopia -o wide
+
+          echo "Waiting for the NodePort to actually proxy a TCP connection through to postgres..."
+          timeout 60 bash -c '
+            until (exec 3<>/dev/tcp/127.0.0.1/30432) 2>/dev/null; do
+              sleep 2
+            done
+          '
 
       - uses: oven-sh/setup-bun@v2
         with:
