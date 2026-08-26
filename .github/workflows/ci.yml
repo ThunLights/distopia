@@ -198,9 +198,16 @@ jobs:
           '
           kubectl get endpoints distopia-db-ci-nodeport -n distopia -o wide
 
-          echo "Waiting for the NodePort to actually proxy a TCP connection through to postgres..."
+          # A raw TCP connect() is not proof the NodePort actually reaches postgres: kind's
+          # extraPortMappings hostPort is fronted by Docker's own proxy, which can complete a
+          # SYN/ACK on its own before -- or even without -- ever handing bytes through to the
+          # kube-proxy-DNAT'd backend. pg_isready does a real minimal Postgres protocol
+          # exchange (startup packet, wait for a server response), so it can't be satisfied by
+          # a handshake that dead-ends at an intermediate proxy the way a bare connect() can.
+          sudo apt-get update -y >/dev/null && sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null
+          echo "Waiting for the NodePort to actually proxy a real Postgres handshake through to the pod..."
           timeout 60 bash -c '
-            until (exec 3<>/dev/tcp/127.0.0.1/30432) 2>/dev/null; do
+            until PGCONNECT_TIMEOUT=3 pg_isready -h 127.0.0.1 -p 30432 -U distopia -d distopia; do
               sleep 2
             done
           '
