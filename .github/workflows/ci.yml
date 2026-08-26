@@ -90,6 +90,7 @@ jobs:
         uses: helm/kind-action@v1
         with:
           cluster_name: distopia-e2e
+          config: .github/kind-config.yaml
 
       # kustomize is already preinstalled on GitHub's ubuntu-latest runner image at
       # /usr/local/bin/kustomize -- no separate install step needed (and the official
@@ -155,10 +156,12 @@ jobs:
       # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
       # GitHub-hosted runners -- it accepted one connection fine and then reset the very
       # next one with "connection reset by peer", reproducibly, not just as a rare flake
-      # (confirmed by 3 identical retries against the same pod). NodePort + the kind node
-      # container's own IP sidesteps kubectl's forwarding path entirely: the runner and the
-      # kind node are both plain processes/containers on the same Docker network, so the
-      # node's container IP is directly routable from the runner without any port mapping.
+      # (confirmed by 3 identical retries against the same pod). Reaching the kind node
+      # container's own bridge-network IP directly was tried next and just timed out
+      # (bridge-IP routing from the runner process isn't guaranteed the way an explicitly
+      # published port is). This NodePort is instead published as a real host port via
+      # .github/kind-config.yaml's extraPortMappings -- the same mechanism kind itself uses
+      # to expose the API server, which is already proven reliable in this job.
       - name: Expose the database via NodePort for migrate/build
         run: |
           kubectl apply -f - <<'EOF'
@@ -177,9 +180,8 @@ jobs:
                 targetPort: 5432
                 nodePort: 30432
           EOF
-          node_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' distopia-e2e-control-plane)"
-          echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@${node_ip}:30432/distopia" >> "$GITHUB_ENV"
-          timeout 30 bash -c "until (exec 3<>/dev/tcp/${node_ip}/30432) 2>/dev/null; do sleep 1; done"
+          echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@127.0.0.1:30432/distopia" >> "$GITHUB_ENV"
+          timeout 30 bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/30432) 2>/dev/null; do sleep 1; done'
 
       - uses: oven-sh/setup-bun@v2
         with:

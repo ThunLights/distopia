@@ -1,0 +1,16 @@
+# Used only by .github/workflows/ci.yml's e2e-prod job (helm/kind-action's `config:`
+# input). Publishes the CI-only NodePort (see the "Expose the database via NodePort"
+# step) as a real host-published port, via kind's own documented mechanism for reaching
+# NodePort Services from outside the cluster -- the same mechanism kind itself relies on
+# to expose the API server (a plain `docker -p` publish), which is proven reliable on
+# GitHub-hosted runners. Connecting directly to the kind node container's own bridge-network
+# IP was tried first and timed out -- Docker bridge-IP routing from the runner process
+# isn't guaranteed the way an explicitly published port is.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30432
+        hostPort: 30432
+        protocol: TCP
