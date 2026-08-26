@@ -1,0 +1,25 @@
+# No Ingress in front of this -- Traefik/ServiceLB are disabled cluster-wide (see
+# k8s/README.md's "Cloudflare Tunnel" section) so nothing ever binds a host port. Public
+# traffic reaches this Service via a host-level cloudflared instance connecting directly
+# to its ClusterIP (find it with `kubectl get svc distopia-app -n distopia -o
+# jsonpath='{.spec.clusterIP}'`).
+#
+# Deliberately NOT pinning a specific clusterIP here: k3s's default service CIDR
+# (10.43.0.0/16) and kind's (10.96.0.0/12, used by k8s/README.md's e2e-prod CI job) don't
+# overlap, so a hardcoded address valid on one would make `kubectl apply` fail outright on
+# the other. The auto-assigned ClusterIP is stable across normal `kubectl apply`/Argo CD
+# syncs anyway (only changes if the Service object itself is deleted and recreated, which
+# neither does for a plain field change) -- same tradeoff k8s/ci/eventsource.yaml's
+# controller-managed Service already has.
+apiVersion: v1
+kind: Service
+metadata:
+  name: distopia-app
+  namespace: distopia
+spec:
+  selector:
+    app.kubernetes.io/name: distopia-app
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

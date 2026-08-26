@@ -1,0 +1,23 @@
+# Defense-in-depth: even though the registry has no Ingress/NodePort/LoadBalancer (so it's
+# already unreachable from outside the cluster in the normal case), this makes it explicit
+# at the network layer -- only pods in this namespace (Kaniko build pods, the app
+# Deployment) may reach it, nothing else.
+#
+# Requires a NetworkPolicy-enforcing CNI. k3s's default CNI (Flannel) does NOT enforce
+# NetworkPolicy -- this resource is accepted by the API but silently has no effect unless
+# you've installed Calico/Cilium or otherwise enabled policy enforcement. See the
+# "Firewall (ufw) and network exposure" section in k8s/README.md.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: distopia-registry-allow-intra-namespace
+  namespace: distopia
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-registry
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}

@@ -1,0 +1,11 @@
+# Argo Events requires an EventBus (NATS) to exist in every namespace that has
+# EventSources/Sensors. This is the default, unconfigured single-node NATS bus -- fine
+# for a single low-traffic webhook.
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+  namespace: distopia
+spec:
+  nats:
+    native: {}

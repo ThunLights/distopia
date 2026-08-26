@@ -118,11 +118,12 @@ docker compose exec app sudo bun run format       # Format
 docker compose exec app sudo bun run deploy-db    # Apply DB migrations
 ```
 
-### Production Deploy (outside devcontainer)
+### Production Deploy
 
-```bash
-production/run.sh
-```
+Production runs on k3s and is deployed via GitOps (Argo CD + Argo Workflows + Argo Events),
+not by hand. A push to `main` is detected by Argo Events, built and pushed to an in-cluster
+registry by Argo Workflows, and rolled out by Argo CD. See `k8s/README.md` for the full
+pipeline and one-time cluster bootstrap steps.
 
 ---
 

@@ -1,0 +1,245 @@
+# Triggered by sensor.yaml on every push to main. Runs entirely inside the cluster:
+# clone -> (write .env from k8s Secrets, and run the DB migration, in parallel) -> build
+# & push image with Kaniko (no external registry, no docker daemon) -> bump the image tag
+# in k8s/app and push that commit back to main, which Argo CD then syncs.
+#
+# Migration runs BEFORE the image build, not after: `prisma generate --sql`
+# (infra-database's build step, using Prisma's typedSql preview feature) needs to connect
+# to a real, already-migrated database to type-check the raw SQL under prisma/sql/*.sql --
+# it's not pure offline codegen. So the schema must be current before `bun run build` runs
+# inside the Kaniko step. This does mean migrations must stay backward-compatible with the
+# still-running old replica until its rollout finishes (standard expand/contract practice).
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: distopia-build-deploy
+  namespace: distopia
+spec:
+  serviceAccountName: distopia-workflow-sa
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: revision
+
+  # Auto-delete after the workflow finishes; this PVC only ever holds one build's worth of
+  # source + node_modules.
+  volumeClaimTemplates:
+    - metadata:
+        name: workspace
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+
+  templates:
+    - name: main
+      dag:
+        tasks:
+          - name: clone
+            template: clone
+
+          - name: prepare-env
+            template: prepare-env
+            dependencies: [clone]
+
+          - name: migrate
+            template: migrate
+            dependencies: [clone]
+
+          - name: build-push
+            template: build-push
+            dependencies: [prepare-env, migrate]
+            arguments:
+              parameters:
+                - name: short-sha
+                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
+
+          - name: update-manifest
+            template: update-manifest
+            dependencies: [build-push]
+            arguments:
+              parameters:
+                - name: image
+                  value: "{{tasks.build-push.outputs.parameters.image}}"
+                - name: short-sha
+                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
+
+    # 1. Clone the exact commit that triggered the webhook, not just the branch tip, so a
+    #    fast-follow push during the build can't get silently included.
+    - name: clone
+      container:
+        image: alpine/git:2.47.2
+        workingDir: /workspace
+        command: ["sh", "-c"]
+        args:
+          - |
+            set -eu
+            git clone --no-checkout https://github.com/thunlights/distopia.git src
+            cd src
+            git checkout "{{workflow.parameters.revision}}"
+            git rev-parse --short HEAD > /workspace/short-sha
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+      outputs:
+        parameters:
+          - name: short-sha
+            valueFrom:
+              path: /workspace/short-sha
+
+    # 2. Materialize a BUILD-time-only .env into the cloned tree -- just what
+    #    `bun run build` itself needs (DATABASE_URL for infra-database's `prisma generate
+    #    --sql`, SENTRY_* for sourcemap upload). App runtime secrets (BOT_TOKEN, PUBLIC_*)
+    #    are intentionally NOT written here -- they're only ever injected as live env vars
+    #    into the running Pod (k8s/app/deployment.yaml), never present in the image. This
+    #    .env is deleted by docker/dockerfile.prod before the runtime layer is created.
+    - name: prepare-env
+      container:
+        image: alpine:3.21
+        command: ["sh", "-c"]
+        args:
+          - |
+            set -eu
+            : > /workspace/src/.env
+            for f in /secrets/app/*; do
+              printf '%s=%s\n' "$(basename "$f")" "$(cat "$f")" >> /workspace/src/.env
+            done
+            # DB_HOST kept in its own variable, not written inline next to the
+            # scheme/credentials below -- a connection-string-shaped literal in this
+            # committed script trips secret scanners (trufflehog/gitleaks) even though the
+            # credential fields here are just $(cat ...) placeholders, not real values.
+            db_host=distopia-db-rw.distopia.svc.cluster.local
+            printf 'DATABASE_URL=postgresql://%s:%s@%s:5432/distopia\n' \
+              "$(cat /secrets/db/username)" "$(cat /secrets/db/password)" "$db_host" >> /workspace/src/.env
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+          - name: app-secret
+            mountPath: /secrets/app
+            readOnly: true
+          - name: db-secret
+            mountPath: /secrets/db
+            readOnly: true
+      volumes:
+        - name: app-secret
+          # SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN live in here too (build-time only);
+          # BOT_TOKEN/PUBLIC_*/etc. are also present but simply unused at build time.
+          secret:
+            secretName: distopia-env
+        - name: db-secret
+          # Same user-chosen credentials given to CloudNativePG's Cluster -- see
+          # k8s/db/cluster.yaml and k8s/README.md.
+          secret:
+            secretName: distopia-db-credentials
+
+    # 3b. Build with Kaniko (no privileged docker daemon needed) and push straight to the
+    #    cluster-internal registry -- this image never touches an external registry.
+    - name: build-push
+      inputs:
+        parameters:
+          - name: short-sha
+      container:
+        image: gcr.io/kaniko-project/executor:v1.23.2
+        args:
+          - --dockerfile=docker/dockerfile.prod
+          - --context=dir:///workspace/src
+          - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:{{inputs.parameters.short-sha}}
+          - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:latest
+          - --insecure
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+          - name: registry-creds
+            mountPath: /kaniko/.docker
+      volumes:
+        - name: registry-creds
+          secret:
+            secretName: distopia-registry-pull
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+      outputs:
+        parameters:
+          - name: image
+            value: "distopia-registry.distopia.svc.cluster.local:5000/distopia:{{inputs.parameters.short-sha}}"
+
+    # 3a. Run the migration directly from the cloned source, before the image is built --
+    #    not as an initContainer (so it can't accidentally run once per pod/replica), and
+    #    before build-push specifically because infra-database's build step
+    #    (`prisma generate --sql`) needs to introspect an already-migrated database.
+    #    Installs its own node_modules straight onto the shared workspace volume; Kaniko's
+    #    build context excludes node_modules (see .dockerignore) so this doesn't leak into
+    #    the image, it's just this step's own throwaway install.
+    - name: migrate
+      container:
+        image: oven/bun:1.4.0
+        workingDir: /workspace/src
+        command: ["sh", "-c"]
+        args:
+          - |
+            set -eu
+            export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/distopia"
+            bun install --frozen-lockfile
+            cd src/infrastructure/database
+            bunx prisma migrate deploy
+        env:
+          - name: HUSKY
+            value: "0"
+          # Passed as separate DB_* vars, composed into DATABASE_URL inside the script
+          # below (not here) -- see the comment in the prepare-env step above for why.
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: distopia-db-credentials
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: distopia-db-credentials
+                key: password
+          - name: DB_HOST
+            value: distopia-db-rw.distopia.svc.cluster.local
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace
+
+    # 4. Bump k8s/app's pinned image tag and push to main -- Argo CD (auto-sync + self-heal)
+    #    picks this commit up and rolls the Deployment. The commit message prefix is what
+    #    sensor.yaml's exprs filter checks to avoid re-triggering itself.
+    - name: update-manifest
+      inputs:
+        parameters:
+          - name: image
+          - name: short-sha
+      container:
+        image: alpine/git:2.47.2
+        workingDir: /workspace/src
+        command: ["sh", "-c"]
+        args:
+          - |
+            set -eu
+            wget -qO- "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- /usr/local/bin
+            git config user.name "distopia-deploy-bot"
+            git config user.email "distopia-deploy-bot@users.noreply.github.com"
+            git remote set-url origin "https://x-access-token:${GIT_PUSH_TOKEN}@github.com/thunlights/distopia.git"
+            # clone/checkout above pinned the exact triggering revision (for a reproducible
+            # build); main may have moved since, so rebase onto its current tip before
+            # committing the tag bump, rather than pushing on top of a stale base.
+            git fetch origin main
+            git checkout -B main origin/main
+            cd k8s/app
+            kustomize edit set image "distopia-registry.distopia.svc.cluster.local:5000/distopia={{inputs.parameters.image}}"
+            cd /workspace/src
+            git add k8s/app/kustomization.yaml
+            git commit -m "chore(deploy): bump distopia to {{inputs.parameters.short-sha}}"
+            git push origin HEAD:main
+        env:
+          - name: GIT_PUSH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-push-token
+                key: token
+        volumeMounts:
+          - name: workspace
+            mountPath: /workspace

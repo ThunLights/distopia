@@ -52,10 +52,7 @@ sudo bun run lint
 sudo bun run deploy-db
 ```
 
-## for Production
+## Production
 
-Execute following command outside of devcontainer.
-
-```
-production/run.sh
-```
+Production runs on k3s and deploys automatically via GitOps (Argo CD + Argo Workflows +
+Argo Events) on every push to `main`. See `k8s/README.md` for details.

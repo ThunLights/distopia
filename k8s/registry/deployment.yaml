@@ -1,0 +1,62 @@
+# Self-hosted, cluster-internal-only container registry (registry:2 + htpasswd auth).
+# No Ingress is created for this — it is only reachable from inside the cluster
+# (Kaniko build step pushes to it, the app Deployment pulls from it), so build/deploy
+# credentials never have to leave the cluster and this image is never exposed externally.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-registry
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-registry
+spec:
+  replicas: 1
+  # Backed by a ReadWriteOnce PVC -- the old pod must release the volume before
+  # the new one can mount it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-registry
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2
+          ports:
+            - name: http
+              containerPort: 5000
+          env:
+            - name: REGISTRY_AUTH
+              value: htpasswd
+            - name: REGISTRY_AUTH_HTPASSWD_REALM
+              value: Registry Realm
+            - name: REGISTRY_AUTH_HTPASSWD_PATH
+              value: /auth/htpasswd
+            - name: REGISTRY_STORAGE_DELETE_ENABLED
+              value: "true"
+          volumeMounts:
+            - name: auth
+              mountPath: /auth
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/registry
+          # registry:2 requires auth on every endpoint including /v2/, so a plain httpGet
+          # probe would see 401 and be marked unhealthy -- use TCP instead.
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: auth
+          secret:
+            # Created manually (kubectl create secret generic ...), not committed.
+            # See k8s/README.md.
+            secretName: distopia-registry-htpasswd
+        - name: data
+          persistentVolumeClaim:
+            claimName: distopia-registry-data

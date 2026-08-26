@@ -1,10 +1,5 @@
-import { BOT_TOKEN } from "$env/static/private";
-import {
-  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
-  PUBLIC_HOME_SERVER_ID,
-  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
-  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
-} from "$env/static/public";
+import { env as privateEnv } from "$env/dynamic/private";
+import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
@@ -23,6 +18,14 @@ process.on("unhandledRejection", async (reason) => {
 });
 
 async function start() {
+  const { BOT_TOKEN } = privateEnv;
+  const {
+    PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
+    PUBLIC_HOME_SERVER_ID,
+    PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
+    PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
+  } = publicEnv;
+
   await core.jwt.importDB();
   console.log("JWT keys is imported.");
 
@@ -67,10 +70,10 @@ async function start() {
       await core.activeRate.update();
       await core.ranking.cleanCache();
       await core.updateHomeGuildRoles(
-        PUBLIC_HOME_SERVER_ID,
-        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
-        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
-        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
+        PUBLIC_HOME_SERVER_ID!,
+        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
       );
       await core.record.update();
       await core.statChannel.update();
