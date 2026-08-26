@@ -143,15 +143,15 @@ jobs:
       - name: Deploy CloudNativePG cluster (k8s/db, unmodified)
         run: kubectl apply -k k8s/db
 
-      # Waits for postgres itself to answer (pg_isready via kubectl exec), not just for the
-      # pod phase to say Running.
+      # `kubectl exec ... pg_isready` only proves postgres itself answers queries inside the
+      # container -- it says nothing about the pod's Kubernetes Ready condition, which is
+      # what actually gates whether kube-proxy publishes it as a Service endpoint. That gap
+      # is exactly what let the NodePort step below see an empty/not-ready Endpoints for a
+      # good while even after this pg_isready-based check had already passed. Wait on the
+      # Ready condition directly, since that's the real dependency for every Service
+      # (distopia-db-rw and the CI-only NodePort alike) that selects this pod.
       - name: Wait for the database to be ready
-        run: |
-          timeout 180 bash -c '
-            until kubectl exec -n distopia distopia-db-1 -c postgres -- pg_isready >/dev/null 2>&1; do
-              sleep 5
-            done
-          '
+        run: kubectl wait --for=condition=Ready pod/distopia-db-1 -n distopia --timeout=180s
 
       # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
       # GitHub-hosted runners -- it accepted one connection fine and then reset the very
@@ -185,9 +185,9 @@ jobs:
             | kubectl apply -f -
           echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@127.0.0.1:30432/distopia" >> "$GITHUB_ENV"
 
-          echo "Waiting for distopia-db-ci-nodeport to have a real endpoint..."
+          echo "Waiting for distopia-db-ci-nodeport to have a real (ready) endpoint..."
           timeout 120 bash -c '
-            until [ "$(kubectl get endpoints distopia-db-ci-nodeport -n distopia -o jsonpath="{.subsets}")" != "" ]; do
+            until [ "$(kubectl get endpoints distopia-db-ci-nodeport -n distopia -o jsonpath="{.subsets[*].addresses}")" != "" ]; do
               sleep 2
             done
           '
