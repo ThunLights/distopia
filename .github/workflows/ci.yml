@@ -151,7 +151,12 @@ jobs:
       # Ready condition directly, since that's the real dependency for every Service
       # (distopia-db-rw and the CI-only NodePort alike) that selects this pod.
       - name: Wait for the database to be ready
-        run: kubectl wait --for=condition=Ready pod/distopia-db-1 -n distopia --timeout=180s
+        run: |
+          timeout 180 bash -c '
+            until kubectl wait --for=condition=Ready pod/distopia-db-1 -n distopia --timeout=10s 2>/dev/null; do
+              sleep 3
+            done
+          '
 
       # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
       # GitHub-hosted runners -- it accepted one connection fine and then reset the very
