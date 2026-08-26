@@ -161,17 +161,18 @@ jobs:
       # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
       # GitHub-hosted runners -- it accepted one connection fine and then reset the very
       # next one with "connection reset by peer", reproducibly, not just as a rare flake.
-      # Reaching the kind node container's own bridge-network IP directly was tried next
-      # and just timed out. Publishing a NodePort with a hand-guessed selector was tried
-      # after that, then with the selector copied straight from distopia-db-rw (confirmed
-      # correct both times) -- both attempts still got zero real connections. The TCP
-      # handshake itself is not a useful readiness signal here: kind's extraPortMappings
-      # publishes the port via Docker's own proxy, which accepts the connection instantly
-      # regardless of whether kube-proxy has any Service endpoint behind it yet, so a
-      # `/dev/tcp` check passes even while `kubectl get endpoints` is still empty. Wait on
-      # the actual thing the NodePort depends on -- the Service's Endpoints/EndpointSlice
-      # having a real subset -- instead of a TCP connect that can't distinguish "routed to
-      # postgres" from "accepted by docker's proxy and then dropped".
+      # Publishing a NodePort with a hand-guessed selector, then with the selector copied
+      # straight from distopia-db-rw (both confirmed correct), and reaching it via kind's
+      # documented extraPortMappings hostPort (127.0.0.1:30432) was tried next -- but even
+      # after the Service had a real, ready Endpoints address, a real Postgres protocol probe
+      # (pg_isready, not just a bare TCP connect) got "no response" for a full 60s. A bare
+      # connect() succeeding there was a false positive: this is the classic Docker hairpin-NAT
+      # gap -- a process on the SAME host connecting to its own 127.0.0.1:<published-port>
+      # can get its SYN ACKed by the DNAT rule while the backend's *response* packets fail to
+      # route back out again, so the handshake looks alive but no bytes ever actually flow.
+      # Connecting via the kind control-plane container's own Docker bridge-network IP instead
+      # of 127.0.0.1 avoids the hairpin case entirely (host -> container, not host -> itself),
+      # while still hitting the exact same NodePort that kube-proxy has already programmed.
       - name: Expose the database via NodePort for migrate/build
         run: |
           kubectl get svc distopia-db-rw -n distopia -o jsonpath='distopia-db-rw selector: {.spec.selector}{"\n"}'
@@ -188,7 +189,6 @@ jobs:
                   }
                 }' \
             | kubectl apply -f -
-          echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@127.0.0.1:30432/distopia" >> "$GITHUB_ENV"
 
           echo "Waiting for distopia-db-ci-nodeport to have a real (ready) endpoint..."
           timeout 120 bash -c '
@@ -198,19 +198,19 @@ jobs:
           '
           kubectl get endpoints distopia-db-ci-nodeport -n distopia -o wide
 
-          # A raw TCP connect() is not proof the NodePort actually reaches postgres: kind's
-          # extraPortMappings hostPort is fronted by Docker's own proxy, which can complete a
-          # SYN/ACK on its own before -- or even without -- ever handing bytes through to the
-          # kube-proxy-DNAT'd backend. pg_isready does a real minimal Postgres protocol
-          # exchange (startup packet, wait for a server response), so it can't be satisfied by
-          # a handshake that dead-ends at an intermediate proxy the way a bare connect() can.
+          CONTROL_PLANE_IP="$(docker inspect -f '{{ .NetworkSettings.Networks.kind.IPAddress }}' distopia-e2e-control-plane)"
+          echo "kind control-plane bridge IP: $CONTROL_PLANE_IP"
+          echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@${CONTROL_PLANE_IP}:30432/distopia" >> "$GITHUB_ENV"
+
+          # A real Postgres protocol exchange (not just a TCP connect) confirms the NodePort
+          # genuinely reaches postgres via this route, not just that something ACKed the SYN.
           sudo apt-get update -y >/dev/null && sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null
           echo "Waiting for the NodePort to actually proxy a real Postgres handshake through to the pod..."
-          timeout 60 bash -c '
-            until PGCONNECT_TIMEOUT=3 pg_isready -h 127.0.0.1 -p 30432 -U distopia -d distopia; do
+          timeout 60 bash -c "
+            until PGCONNECT_TIMEOUT=3 pg_isready -h '$CONTROL_PLANE_IP' -p 30432 -U distopia -d distopia; do
               sleep 2
             done
-          '
+          "
 
       - uses: oven-sh/setup-bun@v2
         with:
