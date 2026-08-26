@@ -149,28 +149,45 @@ jobs:
           kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.24/releases/cnpg-1.24.0.yaml
           kubectl -n cnpg-system wait --for=condition=Available deployment/cnpg-controller-manager --timeout=120s
 
+      # Generates the Secret manifests from this job's own env (same idea as the
+      # devcontainer/ci-dev jobs' "Generate .env" step), instead of one long
+      # --from-literal argument list -- kubectl apply -f - reads it straight off stdin, so
+      # the rendered YAML (with real secret values) never touches disk on the runner.
       - name: Create namespace and secrets
         run: |
           kubectl create namespace distopia
-          kubectl create secret generic distopia-db-credentials -n distopia \
-            --from-literal=username=distopia \
-            --from-literal=password=distopia-e2e-test
-          kubectl create secret generic distopia-env -n distopia \
-            --from-literal=PUBLIC_URL="$PUBLIC_URL" \
-            --from-literal=PUBLIC_OWNER_ID="$PUBLIC_OWNER_ID" \
-            --from-literal=PUBLIC_HOME_SERVER_ID="$PUBLIC_HOME_SERVER_ID" \
-            --from-literal=PUBLIC_STAFF_ROLE_ID="$PUBLIC_STAFF_ROLE_ID" \
-            --from-literal=PUBLIC_HONORARY_MEMBER_ROLE_ID="$PUBLIC_HONORARY_MEMBER_ROLE_ID" \
-            --from-literal=PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID="$PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID" \
-            --from-literal=PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID="$PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID" \
-            --from-literal=PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID="$PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID" \
-            --from-literal=PUBLIC_BOT_ID="$PUBLIC_BOT_ID" \
-            --from-literal=BOT_TOKEN="$BOT_TOKEN" \
-            --from-literal=BOT_SECRET="$BOT_SECRET" \
-            --from-literal=SENTRY_ORG="$SENTRY_ORG" \
-            --from-literal=SENTRY_PROJECT="$SENTRY_PROJECT" \
-            --from-literal=PUBLIC_SENTRY_DSN="$PUBLIC_SENTRY_DSN" \
-            --from-literal=SENTRY_AUTH_TOKEN="$SENTRY_AUTH_TOKEN"
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: distopia-db-credentials
+            namespace: distopia
+          stringData:
+            username: distopia
+            password: distopia-e2e-test
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: distopia-env
+            namespace: distopia
+          stringData:
+            PUBLIC_URL: "$PUBLIC_URL"
+            PUBLIC_OWNER_ID: "$PUBLIC_OWNER_ID"
+            PUBLIC_HOME_SERVER_ID: "$PUBLIC_HOME_SERVER_ID"
+            PUBLIC_STAFF_ROLE_ID: "$PUBLIC_STAFF_ROLE_ID"
+            PUBLIC_HONORARY_MEMBER_ROLE_ID: "$PUBLIC_HONORARY_MEMBER_ROLE_ID"
+            PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "$PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID"
+            PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "$PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID"
+            PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "$PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID"
+            PUBLIC_BOT_ID: "$PUBLIC_BOT_ID"
+            BOT_TOKEN: "$BOT_TOKEN"
+            BOT_SECRET: "$BOT_SECRET"
+            SENTRY_ORG: "$SENTRY_ORG"
+            SENTRY_PROJECT: "$SENTRY_PROJECT"
+            PUBLIC_SENTRY_DSN: "$PUBLIC_SENTRY_DSN"
+            SENTRY_AUTH_TOKEN: "$SENTRY_AUTH_TOKEN"
+          EOF
 
       - name: Deploy CloudNativePG cluster (k8s/db, unmodified)
         run: kubectl apply -k k8s/db
