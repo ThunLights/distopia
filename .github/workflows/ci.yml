@@ -79,6 +79,38 @@ jobs:
     # production -- rather than approximating it with a bare `docker run`. The point is to
     # catch manifest-level bugs here too, not just Dockerfile-level ones, so "CI passed" is
     # actually predictive of "the real rollout will work".
+    #
+    # Getting the database reachable from the runner (needed by `prisma migrate deploy` and
+    # by the production image build's `prisma generate --sql`) went through several failed
+    # approaches, kept here because the next person touching this will hit the same wall:
+    #   1. kubectl port-forward -- its SPDY tunnel is unreliable under kind on GitHub-hosted
+    #      runners: it accepts one connection fine, then resets the very next one with
+    #      "connection reset by peer", reproducibly, not a rare flake.
+    #   2. A NodePort Service, reached via kind's extraPortMappings hostPort (127.0.0.1) --
+    #      even with a correct selector and a real, ready Endpoints address, a genuine
+    #      Postgres protocol probe (pg_isready) got "no response" indefinitely. A bare TCP
+    #      connect() "succeeding" there was a false positive (Docker's own proxy/DNAT
+    #      completing the handshake without ever handing bytes through).
+    #   3. The same NodePort reached via the kind node container's own Docker bridge IP
+    #      instead of 127.0.0.1 (ruling out hairpin-NAT specifically) -- identical result.
+    #   4. Inspecting the node directly settled it: `iptables -t nat -L KUBE-NODEPORTS` was
+    #      completely empty -- kube-proxy in this kind/GitHub Actions environment is not
+    #      programming NodePort DNAT at all (version-specific nftables/iptables-legacy
+    #      backend mismatch is the leading suspect; the exact cause doesn't change the fix).
+    # The fix used below sidesteps kube-proxy and Kubernetes Services entirely for anything
+    # the *runner* needs to reach: a tiny hostNetwork pod (alpine/socat) does a plain
+    # OS-level bind on the node and forwards straight to a pod's own IP -- an ordinary
+    # process bind and pod-to-pod CNI routing, neither of which depend on kube-proxy at all.
+    # kind's extraPortMappings (the one part of this stack that has worked reliably
+    # throughout) then publishes that same node port out to the runner.
+    #
+    # This still leaves one real open question: the *deployed app* itself connects to
+    # Postgres via the normal ClusterIP Service DNS name (k8s/app/deployment.yaml's
+    # DB_HOST), exactly like it would in real production -- deliberately not routed around,
+    # since that's precisely the manifest-level behavior this job exists to catch. The
+    # "Verify in-cluster Service routing works" step below checks that specific path early
+    # and fails fast with a clear message if it doesn't, instead of a confusing rollout
+    # timeout several minutes later.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -98,8 +130,8 @@ jobs:
 
       # kind's built-in dynamic provisioner is the StorageClass "standard" (backed by
       # rancher.io/local-path, the same provisioner k3s's "local-path" uses) -- alias it so
-      # k8s/db/cluster.yaml's storageClassName: local-path applies completely unmodified,
-      # same as it would against the real k3s cluster.
+      # k8s/db/cluster.yaml's storageClass: local-path applies completely unmodified, same
+      # as it would against the real k3s cluster.
       - name: Alias kind's storage class as local-path
         run: |
           kubectl apply -f - <<'EOF'
@@ -145,11 +177,10 @@ jobs:
 
       # `kubectl exec ... pg_isready` only proves postgres itself answers queries inside the
       # container -- it says nothing about the pod's Kubernetes Ready condition, which is
-      # what actually gates whether kube-proxy publishes it as a Service endpoint. That gap
-      # is exactly what let the NodePort step below see an empty/not-ready Endpoints for a
-      # good while even after this pg_isready-based check had already passed. Wait on the
-      # Ready condition directly, since that's the real dependency for every Service
-      # (distopia-db-rw and the CI-only NodePort alike) that selects this pod.
+      # what actually gates whether any Service publishes it as an endpoint. Wait on the
+      # Ready condition directly. `kubectl wait` errors immediately ("not found") instead of
+      # waiting if the pod doesn't exist yet, so retry it rather than call it once --
+      # right after `kubectl apply`, the operator hasn't created the pod yet.
       - name: Wait for the database to be ready
         run: |
           timeout 180 bash -c '
@@ -158,29 +189,33 @@ jobs:
             done
           '
 
-      # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
-      # GitHub-hosted runners -- it accepted one connection fine and then reset the very
-      # next one with "connection reset by peer", reproducibly, not just as a rare flake.
-      # Every NodePort variant tried after that (hand-guessed selector, selector copied from
-      # distopia-db-rw, reached via kind's extraPortMappings 127.0.0.1:30432, reached via the
-      # kind node's own Docker bridge IP) failed identically: a bare TCP connect() succeeds
-      # but a real Postgres protocol probe (pg_isready) gets no response at all. Inspecting the
-      # node directly settled it -- `iptables -t nat -L KUBE-NODEPORTS` is completely empty, not
-      # just missing our rule -- so kube-proxy in this kind/GitHub Actions environment is not
-      # programming NodePort DNAT for *any* Service (a version-specific nftables/iptables-legacy
-      # backend mismatch is the leading suspect, but the exact cause doesn't change the fix).
-      # Bypass kube-proxy and NodePort entirely: a hostNetwork pod does a plain OS-level bind on
-      # the node, the same way any ordinary process would -- no Service, no DNAT, nothing for a
-      # broken kube-proxy to fail to program. It forwards to distopia-db-rw using the pod's own
-      # normal cluster DNS resolution, and kind's extraPortMappings (the one part of this stack
-      # that has worked reliably throughout) already publishes that same node port to the runner.
+      # Settles, early and cheaply, whether normal Kubernetes Service routing (ClusterIP,
+      # via kube-proxy) works at all in this environment -- the exact mechanism the deployed
+      # app itself will depend on for DB_HOST=distopia-db-rw.distopia.svc.cluster.local. If
+      # this fails, deploying the app later is guaranteed to fail too (it'll crashloop on
+      # its own DB connection), so fail here with a clear diagnostic instead of a confusing
+      # rollout timeout several minutes from now.
+      - name: Verify in-cluster Service routing works
+        run: |
+          kubectl run distopia-clusterip-probe -n distopia --rm -i --restart=Never \
+            --pod-running-timeout=30s --image=postgres:17-alpine --command \
+            -- pg_isready -h distopia-db-rw -p 5432 -U distopia -d distopia
+
+      # The runner (bun install/prisma migrate/docker build) still needs to reach postgres
+      # from OUTSIDE the cluster -- see the job-level comment for why NodePort doesn't work
+      # here. Connect a hostNetwork relay directly to the pod's own IP (not the Service),
+      # so this step's correctness never depends on the ClusterIP check above -- an ordinary
+      # OS-level port bind and pod-to-pod CNI routing, nothing kube-proxy has to program.
       - name: Expose the database via a hostNetwork relay pod for migrate/build
         run: |
+          DB_POD_IP="$(kubectl get pod distopia-db-1 -n distopia -o jsonpath='{.status.podIP}')"
+          echo "distopia-db-1 pod IP: $DB_POD_IP"
+
           kubectl run distopia-db-relay -n distopia \
             --image=alpine/socat \
             --restart=Never \
             --overrides='{"spec":{"hostNetwork":true,"dnsPolicy":"ClusterFirstWithHostNet"}}' \
-            -- TCP-LISTEN:30432,fork,reuseaddr TCP:distopia-db-rw:5432
+            -- "TCP-LISTEN:30432,fork,reuseaddr" "TCP:${DB_POD_IP}:5432"
 
           echo "Waiting for the relay pod to be ready..."
           timeout 60 bash -c '
@@ -205,10 +240,9 @@ jobs:
         with:
           bun-version: "1.4.0"
 
-      # The TCP-level readiness check in the previous step passing doesn't guarantee the
-      # NodePort path stays fully up a few seconds later (bun install alone takes ~7s) --
-      # retry a handful of times rather than assume the first real connection attempt
-      # succeeds just because a bare TCP probe did.
+      # The relay being reachable a moment ago doesn't guarantee it still is a few seconds
+      # later (bun install alone takes ~7s) -- retry rather than assume the first real
+      # connection attempt succeeds just because the previous step's probe did.
       - name: Apply database migrations
         run: |
           bun install --frozen-lockfile
@@ -225,7 +259,7 @@ jobs:
 
       # Builds the same image k8s/ci/workflowtemplate.yaml's Kaniko step builds, just with
       # `docker build` instead. --network host lets `prisma generate --sql` reach the
-      # NodePort-exposed database above. Build-time-only .env (deleted before the runtime
+      # relay-exposed database above. Build-time-only .env (deleted before the runtime
       # layer, same as the real pipeline) -- BOT_TOKEN/PUBLIC_*/etc. are intentionally not
       # in here, only what `bun run build` itself needs.
       - name: Build production image
@@ -251,11 +285,29 @@ jobs:
           kubectl apply -k k8s/app
           kubectl rollout status deployment/distopia-app -n distopia --timeout=180s
 
-      - name: Port-forward the app
+      # Same rationale as the database relay above: kubectl port-forward is unreliable here,
+      # and there's no NodePort/Ingress on this Service by design (k8s/app/service.yaml is
+      # ClusterIP-only, matching real production's Cloudflare-Tunnel-only exposure model).
+      - name: Expose the app via a hostNetwork relay pod
         run: |
-          kubectl port-forward svc/distopia-app 3000:3000 -n distopia &
-          echo $! > /tmp/pf-app.pid
-          timeout 180 bash -c 'until curl -sf http://localhost:3000/ -o /dev/null; do sleep 2; done'
+          APP_POD_IP="$(kubectl get pod -n distopia -l app.kubernetes.io/name=distopia-app -o jsonpath='{.items[0].status.podIP}')"
+          echo "distopia-app pod IP: $APP_POD_IP"
+
+          kubectl run distopia-app-relay -n distopia \
+            --image=alpine/socat \
+            --restart=Never \
+            --overrides='{"spec":{"hostNetwork":true,"dnsPolicy":"ClusterFirstWithHostNet"}}' \
+            -- "TCP-LISTEN:3000,fork,reuseaddr" "TCP:${APP_POD_IP}:3000"
+
+          echo "Waiting for the relay pod to be ready..."
+          timeout 60 bash -c '
+            until kubectl wait --for=condition=Ready pod/distopia-app-relay -n distopia --timeout=10s 2>/dev/null; do
+              sleep 3
+            done
+          '
+
+          echo "Waiting for the relay to actually proxy a real HTTP response through to the app..."
+          timeout 60 bash -c 'until curl -sf http://127.0.0.1:3000/ -o /dev/null; do sleep 3; done'
 
       - name: Run E2E tests against production build
         working-directory: ./src/presentation/web
@@ -269,13 +321,12 @@ jobs:
           kubectl get all -n distopia
           kubectl describe pod -n distopia -l app.kubernetes.io/name=distopia-app
           kubectl logs -n distopia deployment/distopia-app --tail=200
+          kubectl logs -n distopia pod/distopia-db-1 -c postgres --tail=100 || true
           kubectl get events -n distopia --sort-by=.lastTimestamp
 
       - name: Tear down
         if: always()
-        run: |
-          kill "$(cat /tmp/pf-app.pid)" 2>/dev/null || true
-          kind delete cluster --name distopia-e2e
+        run: kind delete cluster --name distopia-e2e
 
   devcontainer:
     name: Dev Container
