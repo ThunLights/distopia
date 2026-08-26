@@ -187,11 +187,23 @@ jobs:
         with:
           bun-version: "1.4.0"
 
+      # The TCP-level readiness check in the previous step passing doesn't guarantee the
+      # NodePort path stays fully up a few seconds later (bun install alone takes ~7s) --
+      # retry a handful of times rather than assume the first real connection attempt
+      # succeeds just because a bare TCP probe did.
       - name: Apply database migrations
         run: |
           bun install --frozen-lockfile
           cd src/infrastructure/database
-          bunx prisma migrate deploy
+
+          for attempt in 1 2 3 4 5; do
+            if bunx prisma migrate deploy; then
+              exit 0
+            fi
+            echo "migrate deploy attempt $attempt failed, retrying in 5s..." >&2
+            sleep 5
+          done
+          exit 1
 
       # Builds the same image k8s/ci/workflowtemplate.yaml's Kaniko step builds, just with
       # `docker build` instead. --network host lets `prisma generate --sql` reach the
