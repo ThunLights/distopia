@@ -1,0 +1,10 @@
+# Non-secret runtime config. Equivalent to the old docker/.env's PROD_PORT -- change the
+# value here (and containerPort/service.yaml's targetPort to match) to move the app off
+# port 3000.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: distopia-config
+  namespace: distopia
+data:
+  PORT: "3000"

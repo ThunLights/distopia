@@ -53,7 +53,7 @@ src/
 └── app.html
 ```
 
-Path aliases: `$lib` → `src/lib/`, `$env/static/private` for server env vars.
+Path aliases: `$lib` → `src/lib/`, `$env/dynamic/private` for server env vars.
 
 ---
 

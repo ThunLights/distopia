@@ -1,0 +1,93 @@
+# There is otherwise NO backup of this data at all -- a single instance (see cluster.yaml),
+# a single PVC, no WAL archiving, nothing. This CronJob is a minimal, self-contained safety
+# net: a daily pg_dump onto its own PVC, with old dumps pruned after 14 days.
+#
+# Known limitation: this PVC almost certainly lives on the same node/disk as the database's
+# own PVC (a single-node k3s host with the default local-path provisioner has no other
+# option), so it protects against operational mistakes -- a bad migration, an accidental
+# DROP TABLE, a bug that corrupts data -- but NOT against losing that disk/node entirely.
+# Once you have any S3-compatible object storage available (self-hosted MinIO or a real
+# cloud bucket), switch to CloudNativePG's native `.spec.backup.barmanObjectStore` on the
+# Cluster instead -- it gives you continuous WAL archiving and point-in-time recovery, off
+# this host, which a periodic pg_dump can't. This CronJob is meant to be replaced then, not
+# necessarily kept alongside it.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: distopia-db-backup-data
+  namespace: distopia
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # TODO: confirm this matches a StorageClass that exists on your k3s cluster.
+  # k3s ships "local-path" by default.
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: distopia-db-backup
+  namespace: distopia
+spec:
+  # Adjust to your own timezone/preference -- UTC by default (no `timeZone` field set).
+  schedule: "0 18 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # A dump that somehow hangs shouldn't be able to block every subsequent day's run
+      # forever under Forbid -- give it a generous but finite ceiling.
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: pg-dump
+              # Same image family CloudNativePG itself runs (see cluster.yaml's imageName)
+              # so pg_dump/pg_restore are guaranteed version-compatible with the server.
+              image: ghcr.io/cloudnative-pg/postgresql:17
+              command: ["sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  export PGPASSWORD="$DB_PASSWORD"
+                  dest="/backup/distopia-$(date -u +%Y%m%dT%H%M%SZ).dump"
+                  pg_dump -h "$DB_HOST" -U "$DB_USER" -d distopia --format=custom -f "$dest"
+                  echo "wrote $dest"
+                  find /backup -name 'distopia-*.dump' -mtime +14 -delete
+                  echo "current backups:"
+                  ls -lh /backup
+              env:
+                # -r ("any" instance) rather than -rw, so this keeps working unchanged if
+                # instances is ever bumped above 1 for HA -- pg_dump doesn't need the
+                # primary specifically.
+                - name: DB_HOST
+                  value: distopia-db-r.distopia.svc.cluster.local
+                - name: DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: distopia-db-credentials
+                      key: username
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: distopia-db-credentials
+                      key: password
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: backup-data
+              persistentVolumeClaim:
+                claimName: distopia-db-backup-data

@@ -1,0 +1,42 @@
+# Production image for the "presentation-web" app (SvelteKit + Discord bot, run together
+# as a single process — see hooks.server.ts).
+#
+# Unlike docker/dockerfile (the devcontainer image, which mounts source as a volume and
+# expects `bun run setup`/`bun run build` to run at container start), this image bakes the
+# full install + build at image-build time so the container can start immediately on a
+# rolling update.
+#
+# Build context MUST be the repository root (not docker/), e.g.:
+#   docker build -f docker/dockerfile.prod -t distopia:local .
+#
+# The app reads its own config (BOT_TOKEN, PUBLIC_*, DATABASE_URL, ...) via $env/dynamic/*
+# + dotenv at RUNTIME (see hooks.server.ts) -- none of that is baked in here, and no
+# private value ever ends up in this image or the registry it's pushed to.
+#
+# `bun run build` still needs a `.env` with just DATABASE_URL and SENTRY_*/SENTRY_AUTH_TOKEN
+# at BUILD time: `prisma generate --sql` (infra-database's build step, typedSql) connects
+# to a real, already-migrated database to type-check raw SQL, and the Sentry vite plugin
+# reads org/project/auth-token from process.env for sourcemap upload. Neither value ends up
+# in the compiled output -- Prisma's generated code doesn't embed the connection string,
+# and the Sentry step is a transient sourcemap upload, not something written to disk here.
+# The Argo Workflow writes this build-only `.env` from k8s Secrets into the build context
+# before invoking this Dockerfile, then pushes only to the cluster-internal registry — the
+# image is never pushed anywhere external.
+
+ARG BUN_VERSION=1.4.0
+
+FROM oven/bun:${BUN_VERSION} AS builder
+WORKDIR /app
+ENV HUSKY=0
+COPY . .
+RUN bun install --frozen-lockfile
+RUN bun run build
+# Build-time-only .env (see above) -- delete it so it never reaches the runtime layer.
+RUN rm -f .env
+
+FROM oven/bun:${BUN_VERSION}-slim AS runtime
+WORKDIR /app
+COPY --from=builder /app .
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["bun", "run", "src/presentation/web/build/index.js"]

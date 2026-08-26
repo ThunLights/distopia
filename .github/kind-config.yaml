@@ -1,0 +1,22 @@
+# Used only by .github/workflows/ci.yml's e2e-prod job. Publishes the ports that the
+# hostNetwork relay pods (see "Expose the database via a hostNetwork relay pod" and
+# "Expose the app via a hostNetwork relay pod") bind directly on the node, via kind's own
+# documented mechanism for reaching a node port from outside the cluster -- the same
+# mechanism kind itself relies on to expose the API server (a plain `docker -p` publish),
+# which is proven reliable on GitHub-hosted runners.
+#
+# 30432: the CI-only Postgres relay, used by `prisma migrate deploy` and by the production
+#   image build (`prisma generate --sql` needs a live, already-migrated database).
+# 3000: the CI-only app relay, used to run the production Playwright suite
+#   (playwright.prod.config.ts expects http://localhost:3000) against the app once deployed.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30432
+        hostPort: 30432
+        protocol: TCP
+      - containerPort: 3000
+        hostPort: 3000
+        protocol: TCP

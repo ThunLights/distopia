@@ -1,0 +1,51 @@
+# Requires the CloudNativePG operator to already be installed cluster-wide
+# (kind: Cluster is a CRD it provides -- see k8s/README.md for the one-time install).
+#
+# instances: 1 matches the single Postgres instance distopia already runs today via
+# docker-compose. Bumping to 3 later for HA is a one-line change, not required now.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: distopia-db
+  namespace: distopia
+spec:
+  instances: 1
+
+  # Official CloudNativePG Postgres image (a public base image pulled by the operator,
+  # unrelated to distopia's own build/registry pipeline).
+  imageName: ghcr.io/cloudnative-pg/postgresql:17
+
+  storage:
+    size: 10Gi
+    # TODO: confirm this matches a StorageClass that exists on your k3s cluster.
+    # k3s ships "local-path" by default. Note: CNPG's Cluster CRD field is `storageClass`,
+    # not the usual PVC-spec `storageClassName` -- confirmed via `kubectl explain
+    # cluster.spec.storage` against the real CRD.
+    storageClass: local-path
+
+  # Fresh-cluster bootstrap -- creates an empty `distopia` database. For the one-time
+  # cutover from the existing docker-compose Postgres container, leave this as-is (so the
+  # cluster comes up with an empty, correctly-owned database) and then load the old data
+  # with pg_dump/pg_restore -- see k8s/README.md.
+  bootstrap:
+    initdb:
+      database: distopia
+      owner: distopia
+      # User-chosen username/password instead of CNPG's auto-generated one -- create with
+      # `kubectl create secret generic distopia-db-credentials --from-literal=username=distopia
+      # --from-literal=password=<...>` before applying this Cluster (see k8s/README.md).
+      # `username` here must match `owner` above.
+      secret:
+        name: distopia-db-credentials
+
+  postgresql:
+    parameters:
+      max_connections: "100"
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi

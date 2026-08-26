@@ -1,0 +1,26 @@
+# prune is deliberately false, unlike distopia-app/distopia-ci: this Application owns
+# distopia-registry-data (k8s/registry/pvc.yaml), which holds every image ever pushed. If
+# that manifest were ever accidentally removed or renamed in a commit, auto-prune would
+# delete the PVC -- destroying the entire image history, not just the running Deployment.
+# With prune off, a manifest removed from git just shows up as "OutOfSync" until someone
+# deliberately runs `argo cd app sync distopia-registry --prune` by hand.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: distopia-registry
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/thunlights/distopia.git
+    targetRevision: main
+    path: k8s/registry
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: distopia
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: false
+    syncOptions:
+      - CreateNamespace=true

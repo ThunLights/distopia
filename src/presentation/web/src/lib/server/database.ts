@@ -1,4 +1,4 @@
-import { DATABASE_URL } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 import { genDatabaseClient } from "infra-database";
 
-export const database = genDatabaseClient(DATABASE_URL);
+export const database = genDatabaseClient(env.DATABASE_URL!);

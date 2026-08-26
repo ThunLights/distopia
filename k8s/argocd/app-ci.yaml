@@ -1,0 +1,22 @@
+# The pipeline's own resources (EventBus/EventSource/Sensor/WorkflowTemplate/RBAC) are also
+# GitOps-managed -- editing k8s/ci/* and pushing to main updates the pipeline itself.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: distopia-ci
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/thunlights/distopia.git
+    targetRevision: main
+    path: k8s/ci
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: distopia
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
