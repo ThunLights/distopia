@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - cluster.yaml
   - networkpolicy.yaml
+  - backup-cronjob.yaml

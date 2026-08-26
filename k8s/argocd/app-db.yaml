@@ -1,3 +1,10 @@
+# prune is deliberately false, unlike the other three Applications: this Application owns
+# the live CloudNativePG Cluster (and, transitively, its PVC). If k8s/db/cluster.yaml were
+# ever accidentally removed or renamed in a commit, auto-prune would delete the running
+# database along with it. With prune off, a manifest removed from git just shows up as
+# "OutOfSync" (extra resource) until someone deliberately runs `argo cd app sync
+# distopia-db --prune` by hand -- self-heal (drift correction on resources that DO still
+# exist in git) still works as normal.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -15,6 +22,6 @@ spec:
   syncPolicy:
     automated:
       selfHeal: true
-      prune: true
+      prune: false
     syncOptions:
       - CreateNamespace=true

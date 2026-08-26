@@ -82,6 +82,13 @@ spec:
         volumeMounts:
           - name: workspace
             mountPath: /workspace
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
       outputs:
         parameters:
           - name: short-sha
@@ -121,6 +128,13 @@ spec:
           - name: db-secret
             mountPath: /secrets/db
             readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
       volumes:
         - name: app-secret
           # SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN live in here too (build-time only);
@@ -152,6 +166,17 @@ spec:
             mountPath: /workspace
           - name: registry-creds
             mountPath: /kaniko/.docker
+        # Kaniko is the heaviest step here (it builds the full production image layer by
+        # layer without a Docker daemon) -- give it real headroom. Tune to your host's
+        # actual capacity; too tight a limit gets it OOMKilled mid-build instead of just
+        # running slower.
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 2Gi
       volumes:
         - name: registry-creds
           secret:
@@ -203,6 +228,13 @@ spec:
         volumeMounts:
           - name: workspace
             mountPath: /workspace
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
 
     # 4. Bump k8s/app's pinned image tag and push to main -- Argo CD (auto-sync + self-heal)
     #    picks this commit up and rolls the Deployment. The commit message prefix is what
@@ -243,3 +275,10 @@ spec:
         volumeMounts:
           - name: workspace
             mountPath: /workspace
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi

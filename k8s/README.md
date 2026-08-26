@@ -8,7 +8,7 @@ by you — nothing here is applied automatically by me.
 | Path | Argo CD Application | Contents |
 |---|---|---|
 | `k8s/registry/` | `distopia-registry` | Self-hosted `registry:2`, cluster-internal only |
-| `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) |
+| `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) + a daily `pg_dump` backup `CronJob` |
 | `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`) |
 | `k8s/ci/` | `distopia-ci` | Argo Events (`EventBus`/`EventSource`/`Sensor`) + Argo Workflows (`WorkflowTemplate`) that build, migrate, and deploy on every push to `main` |
 
@@ -186,6 +186,51 @@ update-manifest step pushes, add a second GitHub webhook pointed at Argo CD's ow
 install) — this is independent of the Argo Events webhook above and not required for
 correctness, just latency.
 
+## 6. Database backups
+
+`k8s/db/backup-cronjob.yaml` runs a daily `pg_dump` (custom format, same shape as the
+one-time migration dump above) onto its own PVC (`distopia-db-backup-data`), pruning dumps
+older than 14 days. This is a minimal safety net against operational mistakes (a bad
+migration, an accidental `DROP TABLE`, application bugs) — it is **not** protection against
+losing the node/disk, since that PVC almost certainly lives on the same local-path storage
+as the database's own PVC on a single-node host. Once you have any S3-compatible object
+storage available, prefer CloudNativePG's native `.spec.backup.barmanObjectStore` on the
+`Cluster` instead (continuous WAL archiving + point-in-time recovery, off this host) and
+retire this CronJob.
+
+To restore from one of these dumps, first spin up a temporary pod with the backup PVC
+mounted (there's no long-running Pod for it otherwise — CronJobs only run one on schedule):
+
+```bash
+kubectl apply -f - <<'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: distopia-db-backup-browse
+  namespace: distopia
+spec:
+  containers:
+    - name: browse
+      image: busybox
+      command: ["sleep", "3600"]
+      volumeMounts:
+        - name: backup-data
+          mountPath: /backup
+  volumes:
+    - name: backup-data
+      persistentVolumeClaim:
+        claimName: distopia-db-backup-data
+EOF
+
+kubectl exec -n distopia distopia-db-backup-browse -- ls /backup   # find the dump you want
+kubectl cp distopia/distopia-db-backup-browse:/backup/distopia-<timestamp>.dump ./restore.dump
+kubectl delete pod distopia-db-backup-browse -n distopia
+
+kubectl cp ./restore.dump distopia/distopia-db-1:/tmp/restore.dump
+kubectl exec -n distopia distopia-db-1 -- \
+  pg_restore -U distopia -d distopia --clean --no-owner --role=distopia /tmp/restore.dump
+```
+
 ## Cloudflare Tunnel and network exposure
 
 Public traffic (the site, the GitHub webhook) reaches this cluster exclusively through a
@@ -277,3 +322,12 @@ isolation, confirm enforcement is active rather than assuming from the manifest 
   standalone, not via `bun run setup`) is the only thing that still needs a rebuild-time
   action if you change DB credentials, since the Workflow's `migrate`/`prepare-env` steps
   read `distopia-db-credentials` too.
+- `distopia-db`'s and `distopia-registry`'s Argo CD Applications (`k8s/argocd/app-db.yaml`,
+  `app-registry.yaml`) run with `prune: false`, unlike `distopia-app`/`distopia-ci`. Both own
+  stateful data (the CNPG `Cluster` and its PVC; the registry's image-storage PVC) — an
+  accidental removal of either manifest from git should show up as "OutOfSync" for someone
+  to look at, not silently delete a live database or the entire image history. Pruning those
+  two, if you ever actually want to, is a deliberate `argo cd app sync <name> --prune`.
+- The Workflow's steps (`k8s/ci/workflowtemplate.yaml`) all carry resource requests/limits
+  now, most importantly `build-push` (Kaniko, the heaviest one) — tune them to your actual
+  host's capacity; too tight a limit gets a step OOMKilled mid-run rather than just slower.
