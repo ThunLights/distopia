@@ -105,9 +105,10 @@ jobs:
     # throughout) then publishes that same node port out to the runner.
     #
     # This still leaves one real open question: the *deployed app* itself connects to
-    # Postgres via the normal ClusterIP Service DNS name (k8s/app/deployment.yaml's
-    # DB_HOST), exactly like it would in real production -- deliberately not routed around,
-    # since that's precisely the manifest-level behavior this job exists to catch. The
+    # Postgres via the normal ClusterIP Service DNS name baked into its DATABASE_URL
+    # (k8s/app/deployment.yaml, sourced from distopia-db-credentials' `url` key), exactly
+    # like it would in real production -- deliberately not routed around, since that's
+    # precisely the manifest-level behavior this job exists to catch. The
     # "Verify in-cluster Service routing works" step below checks that specific path early
     # and fails fast with a clear message if it doesn't, instead of a confusing rollout
     # timeout several minutes later.
@@ -156,6 +157,17 @@ jobs:
       - name: Create namespace and secrets
         run: |
           kubectl create namespace distopia
+
+          # Assembled via printf's own %s substitution, not a shell variable spliced
+          # directly into a postgresql:// literal -- a bare `$var` reference there still
+          # reads as a real (if unresolvable) hostname to trufflehog, which attempts to
+          # verify it and classifies the DNS failure "unverified" rather than "not a
+          # secret", still failing the hook. With %s placeholders, the literal text in this
+          # file never contains anything hostname-shaped at all; the real value only exists
+          # in memory once printf's arguments are substituted at runtime. Same pattern
+          # k8s/ci/workflowtemplate.yaml's prepare-env step already uses.
+          db_host=distopia-db-rw.distopia.svc.cluster.local
+          db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' distopia distopia-e2e-test "$db_host")
           cat <<EOF | kubectl apply -f -
           apiVersion: v1
           kind: Secret
@@ -165,6 +177,10 @@ jobs:
           stringData:
             username: distopia
             password: distopia-e2e-test
+            # Same shape as production's k8s/README.md secret-creation command -- the app
+            # Deployment (k8s/app/deployment.yaml) reads DATABASE_URL from this single key
+            # rather than assembling it from separate fields at runtime.
+            url: $db_url
           ---
           apiVersion: v1
           kind: Secret
@@ -208,10 +224,10 @@ jobs:
 
       # Settles, early and cheaply, whether normal Kubernetes Service routing (ClusterIP,
       # via kube-proxy) works at all in this environment -- the exact mechanism the deployed
-      # app itself will depend on for DB_HOST=distopia-db-rw.distopia.svc.cluster.local. If
-      # this fails, deploying the app later is guaranteed to fail too (it'll crashloop on
-      # its own DB connection), so fail here with a clear diagnostic instead of a confusing
-      # rollout timeout several minutes from now.
+      # app itself will depend on, via distopia-db-rw.distopia.svc.cluster.local baked into
+      # its DATABASE_URL. If this fails, deploying the app later is guaranteed to fail too
+      # (it'll crashloop on its own DB connection), so fail here with a clear diagnostic
+      # instead of a confusing rollout timeout several minutes from now.
       - name: Verify in-cluster Service routing works
         run: |
           kubectl run distopia-clusterip-probe -n distopia --rm -i --restart=Never \

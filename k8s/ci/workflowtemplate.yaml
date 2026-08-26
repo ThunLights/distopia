@@ -112,13 +112,7 @@ spec:
             for f in /secrets/app/*; do
               printf '%s=%s\n' "$(basename "$f")" "$(cat "$f")" >> /workspace/src/.env
             done
-            # DB_HOST kept in its own variable, not written inline next to the
-            # scheme/credentials below -- a connection-string-shaped literal in this
-            # committed script trips secret scanners (trufflehog/gitleaks) even though the
-            # credential fields here are just $(cat ...) placeholders, not real values.
-            db_host=distopia-db-rw.distopia.svc.cluster.local
-            printf 'DATABASE_URL=postgresql://%s:%s@%s:5432/distopia\n' \
-              "$(cat /secrets/db/username)" "$(cat /secrets/db/password)" "$db_host" >> /workspace/src/.env
+            printf 'DATABASE_URL=%s\n' "$(cat /secrets/db/url)" >> /workspace/src/.env
         volumeMounts:
           - name: workspace
             mountPath: /workspace
@@ -204,27 +198,17 @@ spec:
         args:
           - |
             set -eu
-            export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/distopia"
             bun install --frozen-lockfile
             cd src/infrastructure/database
             bunx prisma migrate deploy
         env:
           - name: HUSKY
             value: "0"
-          # Passed as separate DB_* vars, composed into DATABASE_URL inside the script
-          # below (not here) -- see the comment in the prepare-env step above for why.
-          - name: DB_USER
+          - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
                 name: distopia-db-credentials
-                key: username
-          - name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: distopia-db-credentials
-                key: password
-          - name: DB_HOST
-            value: distopia-db-rw.distopia.svc.cluster.local
+                key: url
         volumeMounts:
           - name: workspace
             mountPath: /workspace

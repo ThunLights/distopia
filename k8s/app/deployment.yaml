@@ -53,29 +53,16 @@ spec:
                 # kubectl create secret command.
                 name: distopia-env
           env:
-            # distopia-db-credentials is the same user-chosen username/password given to
-            # CloudNativePG's Cluster (k8s/db/cluster.yaml) -- not CNPG's auto-generated
-            # secret, since that field is what makes the DB user/password configurable.
-            # Passed as separate DB_* vars rather than a single composed DATABASE_URL
-            # (database.ts assembles it) so no connection-string-shaped literal exists
-            # here -- that shape trips secret scanners (trufflehog/gitleaks) even when the
-            # credential fields are just placeholders.
-            - name: DB_USER
+            # distopia-db-credentials carries a `url` key alongside the `username`/
+            # `password` CloudNativePG's bootstrap.initdb.secret requires (k8s/db/
+            # cluster.yaml) -- see k8s/README.md's secret-creation command for how it's
+            # composed by hand, once, when the secret is created (not at runtime), so no
+            # connection-string-shaped literal has to exist in this or any other manifest.
+            - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   name: distopia-db-credentials
-                  key: username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: distopia-db-credentials
-                  key: password
-            - name: DB_HOST
-              value: distopia-db-rw.distopia.svc.cluster.local
-            - name: DB_PORT
-              value: "5432"
-            - name: DB_NAME
-              value: distopia
+                  key: url
           readinessProbe:
             httpGet:
               path: /
