@@ -143,11 +143,7 @@ jobs:
         run: kubectl apply -k k8s/db
 
       # Waits for postgres itself to answer (pg_isready via kubectl exec), not just for the
-      # pod phase to say Running -- CNPG can still be mid-restart/reconfigure for a few
-      # seconds right after the pod first turns 1/1, which is long enough to have burned a
-      # kubectl port-forward tunnel that was established too early in an earlier version of
-      # this job (P1001 "Can't reach database server" during migrate, despite the
-      # port-forward having worked seconds earlier for a plain TCP check).
+      # pod phase to say Running.
       - name: Wait for the database to be ready
         run: |
           timeout 180 bash -c '
@@ -156,56 +152,52 @@ jobs:
             done
           '
 
+      # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
+      # GitHub-hosted runners -- it accepted one connection fine and then reset the very
+      # next one with "connection reset by peer", reproducibly, not just as a rare flake
+      # (confirmed by 3 identical retries against the same pod). NodePort + the kind node
+      # container's own IP sidesteps kubectl's forwarding path entirely: the runner and the
+      # kind node are both plain processes/containers on the same Docker network, so the
+      # node's container IP is directly routable from the runner without any port mapping.
+      - name: Expose the database via NodePort for migrate/build
+        run: |
+          kubectl apply -f - <<'EOF'
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: distopia-db-ci-nodeport
+            namespace: distopia
+          spec:
+            type: NodePort
+            selector:
+              cnpg.io/cluster: distopia-db
+              cnpg.io/instanceRole: primary
+            ports:
+              - port: 5432
+                targetPort: 5432
+                nodePort: 30432
+          EOF
+          node_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' distopia-e2e-control-plane)"
+          echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@${node_ip}:30432/distopia" >> "$GITHUB_ENV"
+          timeout 30 bash -c "until (exec 3<>/dev/tcp/${node_ip}/30432) 2>/dev/null; do sleep 1; done"
+
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.0"
 
-      # ensure_db_tunnel (re)establishes the port-forward only right before it's actually
-      # needed, and re-checks/restarts it on every retry -- a long-lived port-forward held
-      # across several unrelated steps (installing bun, building a multi-minute Docker
-      # image) is exactly the kind of thing that can silently die in between.
       - name: Apply database migrations
-        env:
-          DATABASE_URL: postgresql://distopia:distopia-e2e-test@localhost:5432/distopia
         run: |
-          ensure_db_tunnel() {
-            if ! kill -0 "$(cat /tmp/pf-db.pid 2>/dev/null)" 2>/dev/null; then
-              pkill -f "port-forward svc/distopia-db-rw" 2>/dev/null || true
-              kubectl port-forward svc/distopia-db-rw 5432:5432 -n distopia &
-              echo $! > /tmp/pf-db.pid
-            fi
-            timeout 30 bash -c 'until (exec 3<>/dev/tcp/localhost/5432) 2>/dev/null; do sleep 1; done'
-          }
-
           bun install --frozen-lockfile
           cd src/infrastructure/database
-
-          for attempt in 1 2 3; do
-            ensure_db_tunnel
-            if bunx prisma migrate deploy; then
-              exit 0
-            fi
-            echo "migrate deploy attempt $attempt failed, retrying..." >&2
-            kill "$(cat /tmp/pf-db.pid)" 2>/dev/null || true
-            sleep 5
-          done
-          exit 1
+          bunx prisma migrate deploy
 
       # Builds the same image k8s/ci/workflowtemplate.yaml's Kaniko step builds, just with
       # `docker build` instead. --network host lets `prisma generate --sql` reach the
-      # port-forwarded database above. Build-time-only .env (deleted before the runtime
+      # NodePort-exposed database above. Build-time-only .env (deleted before the runtime
       # layer, same as the real pipeline) -- BOT_TOKEN/PUBLIC_*/etc. are intentionally not
       # in here, only what `bun run build` itself needs.
       - name: Build production image
-        env:
-          DATABASE_URL: postgresql://distopia:distopia-e2e-test@localhost:5432/distopia
         run: |
-          if ! kill -0 "$(cat /tmp/pf-db.pid 2>/dev/null)" 2>/dev/null; then
-            kubectl port-forward svc/distopia-db-rw 5432:5432 -n distopia &
-            echo $! > /tmp/pf-db.pid
-            timeout 30 bash -c 'until (exec 3<>/dev/tcp/localhost/5432) 2>/dev/null; do sleep 1; done'
-          fi
-
           cat > .env <<EOF
           DATABASE_URL=$DATABASE_URL
           SENTRY_ORG=$SENTRY_ORG
@@ -215,10 +207,6 @@ jobs:
           EOF
           docker build --network host -f docker/dockerfile.prod -t distopia:e2e .
           rm -f .env
-
-      - name: Stop database port-forward
-        if: always()
-        run: kill "$(cat /tmp/pf-db.pid)" 2>/dev/null || true
 
       - name: Load image into kind
         run: kind load docker-image distopia:e2e --name distopia-e2e
