@@ -155,31 +155,34 @@ jobs:
 
       # kubectl port-forward's SPDY-based tunnel is known to be unreliable under kind on
       # GitHub-hosted runners -- it accepted one connection fine and then reset the very
-      # next one with "connection reset by peer", reproducibly, not just as a rare flake
-      # (confirmed by 3 identical retries against the same pod). Reaching the kind node
-      # container's own bridge-network IP directly was tried next and just timed out
-      # (bridge-IP routing from the runner process isn't guaranteed the way an explicitly
-      # published port is). This NodePort is instead published as a real host port via
-      # .github/kind-config.yaml's extraPortMappings -- the same mechanism kind itself uses
-      # to expose the API server, which is already proven reliable in this job.
+      # next one with "connection reset by peer", reproducibly, not just as a rare flake.
+      # Reaching the kind node container's own bridge-network IP directly was tried next
+      # and just timed out. Publishing a NodePort with a hand-guessed selector was tried
+      # after that: the TCP handshake succeeded (docker's userland-proxy on the published
+      # port accepts immediately regardless of backend) but every real connection was
+      # reset instantly and identically across 5 retries -- the signature of a Service with
+      # zero matching endpoints, not a transient drop. Instead of guessing CNPG's pod
+      # labels, copy the selector straight from the real distopia-db-rw Service that CNPG
+      # itself created (already proven correct -- it's what the earlier pg_isready check's
+      # Pod name and this whole Cluster depend on), so this can't drift from whatever
+      # labels this CNPG version actually uses.
       - name: Expose the database via NodePort for migrate/build
         run: |
-          kubectl apply -f - <<'EOF'
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: distopia-db-ci-nodeport
-            namespace: distopia
-          spec:
-            type: NodePort
-            selector:
-              cnpg.io/cluster: distopia-db
-              cnpg.io/instanceRole: primary
-            ports:
-              - port: 5432
-                targetPort: 5432
-                nodePort: 30432
-          EOF
+          kubectl get svc distopia-db-rw -n distopia -o jsonpath='distopia-db-rw selector: {.spec.selector}{"\n"}'
+          kubectl get svc distopia-db-rw -n distopia -o json \
+            | jq '
+                {
+                  apiVersion: "v1",
+                  kind: "Service",
+                  metadata: { name: "distopia-db-ci-nodeport", namespace: "distopia" },
+                  spec: {
+                    type: "NodePort",
+                    selector: (.spec.selector),
+                    ports: [ { port: 5432, targetPort: 5432, nodePort: 30432 } ]
+                  }
+                }' \
+            | kubectl apply -f -
+          kubectl get endpoints distopia-db-ci-nodeport -n distopia
           echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@127.0.0.1:30432/distopia" >> "$GITHUB_ENV"
           timeout 30 bash -c 'until (exec 3<>/dev/tcp/127.0.0.1/30432) 2>/dev/null; do sleep 1; done'
 
