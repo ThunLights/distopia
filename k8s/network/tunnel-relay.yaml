@@ -1,0 +1,66 @@
+# Host-level cloudflared (see k8s/README.md's "Cloudflare Tunnel and network exposure")
+# needs to reach two in-cluster Services without any Ingress/NodePort/LoadBalancer ever
+# binding a host-facing port (Traefik/ServiceLB stay disabled -- see k8s/README.md section
+# 0). Rather than relying on the host resolving *.svc.cluster.local (an extra
+# resolvectl/systemd-resolved setup step that has to survive reboots and network changes),
+# this Deployment plain-binds two fixed loopback ports on the node itself and forwards to
+# the real Services by their normal cluster DNS names -- ordinary Kubernetes Service
+# routing (kube-proxy works fine on a real k3s cluster; the NodePort-specific issue
+# documented in the `k8s` skill / e2e-prod CI job is a kind+GitHub-Actions-only quirk, not
+# something this depends on or reproduces).
+#
+# hostNetwork means this Pod shares the node's own network namespace -- socat's `bind=`
+# option scopes each listener to 127.0.0.1 specifically, so neither port is reachable from
+# outside the node even without ufw's help (defense in depth on top of "22 is the only
+# allowed inbound port" already covering this).
+#
+#   127.0.0.1:3095 -> distopia-app:3000        (distopia.top)
+#   127.0.0.1:3096 -> github-eventsource-svc:12000  (ci.distopia.top)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-tunnel-relay
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-tunnel-relay
+spec:
+  replicas: 1
+  # hostNetwork pods bind real ports on the node -- only one copy can hold them at a time,
+  # so the old one must fully stop before a replacement starts.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-tunnel-relay
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-tunnel-relay
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: app-relay
+          image: alpine/socat
+          args:
+            - "TCP-LISTEN:3095,bind=127.0.0.1,fork,reuseaddr"
+            - "TCP:distopia-app.distopia.svc.cluster.local:3000"
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+        - name: ci-relay
+          image: alpine/socat
+          args:
+            - "TCP-LISTEN:3096,bind=127.0.0.1,fork,reuseaddr"
+            - "TCP:github-eventsource-svc.distopia.svc.cluster.local:12000"
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

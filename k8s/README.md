@@ -11,6 +11,7 @@ by you — nothing here is applied automatically by me.
 | `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) + a daily `pg_dump` backup `CronJob` |
 | `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`) |
 | `k8s/ci/` | `distopia-ci` | Argo Events (`EventBus`/`EventSource`/`Sensor`) + Argo Workflows (`WorkflowTemplate`) that build, migrate, and deploy on every push to `main` |
+| `k8s/network/` | `distopia-network` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach `distopia-app`/the webhook `EventSource` via fixed loopback ports |
 
 Nothing here ever pushes an image to an external registry (no ghcr.io, no Docker Hub) —
 build and push both happen inside the cluster, against `registry:2`, which has no Ingress
@@ -55,7 +56,7 @@ kubectl create namespace distopia
 #    creation, so creating it late means CloudNativePG has already generated (and will
 #    keep using) its own random password instead.
 
-# 3. Register the four Argo CD Applications.
+# 3. Register the five Argo CD Applications.
 kubectl apply -k k8s/argocd
 
 # 4. distopia-app will show "Degraded"/ImagePullBackOff at first -- expected, there is no
@@ -267,41 +268,35 @@ anywhere in `k8s/`, there's nothing left for that bypass to apply to.
 
 ### Pointing cloudflared at this cluster
 
-Add ingress rules to the host's existing `cloudflared` config pointing at the relevant
-Services **directly** — no `Ingress`/Traefik involved:
+`k8s/network/tunnel-relay.yaml` (Argo CD Application `distopia-network`) runs a small
+`hostNetwork` Deployment that plain-binds two fixed ports on the node's own loopback
+interface and forwards to the real Services by their normal cluster DNS names:
+
+| Loopback port | Forwards to | For |
+|---|---|---|
+| `127.0.0.1:3095` | `distopia-app.distopia.svc.cluster.local:3000` | `distopia.top` |
+| `127.0.0.1:3096` | `github-eventsource-svc.distopia.svc.cluster.local:12000` | `ci.distopia.top` |
+
+This avoids needing the host to resolve `*.svc.cluster.local` itself (no
+`resolvectl`/systemd-resolved setup to keep working across reboots) — `cloudflared` just
+points at plain `localhost` ports, the same shape as the old docker-compose setup's
+`docker/.env` `PROD_PORT`. Point the host's existing `cloudflared` config at them:
 
 ```yaml
 # in the host's cloudflared config.yml, alongside its other sites
 ingress:
   - hostname: distopia.top
-    service: http://distopia-app.distopia.svc.cluster.local:3000
+    service: http://127.0.0.1:3095
   - hostname: ci.distopia.top
-    service: http://github-eventsource-svc.distopia.svc.cluster.local:12000
+    service: http://127.0.0.1:3096
   - service: http_status:404
 ```
 
-Both Services are referenced by **cluster DNS name**, not a hardcoded ClusterIP — neither
-is pinned (see the comment in `k8s/app/service.yaml` for why: a hardcoded address valid on
-your k3s cluster's service CIDR wouldn't be valid on the CI kind cluster's, and vice
-versa), and this way the host config doesn't need updating even if an IP ever changes. This
-means the host needs to resolve `*.svc.cluster.local` to CoreDNS. On a systemd-resolved
-host (most current Ubuntu/Debian servers):
-
-```bash
-# find CoreDNS's ClusterIP (k3s default is 10.43.0.10, but confirm)
-kubectl get svc -n kube-system kube-dns -o jsonpath='{.spec.clusterIP}'
-
-# route *.svc.cluster.local (and .cluster.local generally) to it, via whichever
-# interface reaches the cluster network (for a single-node k3s host, that's usually the
-# node's own primary interface -- adjust for your setup)
-resolvectl dns <interface> <coredns-clusterip>
-resolvectl domain <interface> "~cluster.local"
-```
-
-If you'd rather not set up cluster DNS resolution on the host, reference either Service by
-its ClusterIP instead (`kubectl get svc distopia-app -n distopia -o
-jsonpath='{.spec.clusterIP}'`) — just know it isn't pinned, so re-check it if the Service
-is ever deleted and recreated (a normal `kubectl apply`/Argo CD sync does not do this).
+Each port is bound with socat's `bind=127.0.0.1` option specifically, so neither is
+reachable from outside the node even without `ufw`'s help — this is defense-in-depth on
+top of "22 is the only allowed inbound port" already covering it. The relay always
+forwards to the Services (not a specific Pod IP), so it keeps working unmodified across
+normal rollouts — only re-check anything here if you rename either Service.
 
 `k8s/registry/networkpolicy.yaml` and `k8s/db/networkpolicy.yaml` additionally restrict the
 registry and CloudNativePG to intra-namespace traffic only, as defense-in-depth beyond "no

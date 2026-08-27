@@ -7,3 +7,4 @@ resources:
   - app-db.yaml
   - app-app.yaml
   - app-ci.yaml
+  - app-network.yaml
