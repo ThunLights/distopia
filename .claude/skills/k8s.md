@@ -17,7 +17,8 @@ Full operational runbook: `k8s/README.md`.
 | `k8s/db/` | CloudNativePG `Cluster` + `NetworkPolicy` + daily backup `CronJob` |
 | `k8s/app/` | The app itself — `Deployment`/`Service`/`ConfigMap` |
 | `k8s/ci/` | Argo Events + Argo Workflows pipeline resources (see `argo` skill) |
-| `k8s/argocd/` | The four Argo CD `Application` objects |
+| `k8s/network/` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach in-cluster Services via loopback ports |
+| `k8s/argocd/` | The five Argo CD `Application` objects |
 
 Each directory is its own `kustomization.yaml` (no Helm anywhere in this repo).
 
@@ -84,8 +85,19 @@ db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' "$user" "$pass" "$db_host"
 - No `Ingress`/`NodePort`/`LoadBalancer` anywhere — `k8s/app/service.yaml` is `ClusterIP`
   only, deliberately **not pinning `clusterIP`** (k3s's and kind's service CIDRs don't
   overlap, so a hardcoded address would break one or the other). Public traffic reaches it
-  via a host-level Cloudflare Tunnel referencing the Service by cluster DNS name — see
-  `k8s/README.md`'s "Cloudflare Tunnel and network exposure" section.
+  via a host-level Cloudflare Tunnel, through the loopback relay described below.
+
+## Network Exposure (`k8s/network/tunnel-relay.yaml`)
+
+A `hostNetwork: true` Deployment (two `alpine/socat` containers) that plain-binds two
+loopback ports on the node's own interface (`bind=127.0.0.1` — not reachable from outside
+the node even without `ufw`'s help) and forwards to `distopia-app`/the webhook
+`EventSource` by their normal cluster DNS names. **The actual port numbers are never
+written in this repo** (public repo — see `k8s/README.md`'s "Cloudflare Tunnel and network
+exposure" section for why) — each container reads its port from an env var sourced from
+`distopia-tunnel-relay-config`, a Secret you create by hand with whatever numbers you
+choose. Since it forwards to Services, not a specific Pod IP, it keeps working unmodified
+across normal rollouts.
 
 ## k3s-Specific Setup
 
