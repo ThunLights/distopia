@@ -160,17 +160,13 @@ spec:
             mountPath: /workspace
           - name: registry-creds
             mountPath: /kaniko/.docker
-        # Kaniko is the heaviest step here (it builds the full production image layer by
-        # layer without a Docker daemon) -- give it real headroom. Tune to your host's
-        # actual capacity; too tight a limit gets it OOMKilled mid-build instead of just
-        # running slower.
         resources:
           requests:
             cpu: 500m
-            memory: 1Gi
+            memory: 2Gi
           limits:
             cpu: "2"
-            memory: 2Gi
+            memory: 8Gi
       volumes:
         - name: registry-creds
           secret:
