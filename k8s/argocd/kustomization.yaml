@@ -1,4 +1,4 @@
-# Not consumed by Argo CD itself -- this just lets you bootstrap all four Applications in
+# Not consumed by Argo CD itself -- this just lets you bootstrap all five Applications in
 # one shot: `kubectl apply -k k8s/argocd`. See k8s/README.md for the recommended order.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -7,3 +7,4 @@ resources:
   - app-db.yaml
   - app-app.yaml
   - app-ci.yaml
+  - app-network.yaml

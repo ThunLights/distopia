@@ -8,10 +8,10 @@ Production deploys are fully GitOps-driven, entirely inside the self-hosted k3s 
 **no GitHub-hosted CI ever holds registry push credentials**. A push to `main` is detected
 by Argo Events, built and pushed by Argo Workflows (Kaniko, no Docker daemon), and rolled
 out by Argo CD. Everything lives under `k8s/ci/` (the pipeline itself) and
-`k8s/argocd/` (the four `Application` objects). Full runbook: `k8s/README.md`. For the
+`k8s/argocd/` (the five `Application` objects). Full runbook: `k8s/README.md`. For the
 manifests the pipeline builds/deploys, see the `k8s` skill.
 
-## The Four Argo CD Applications (`k8s/argocd/`)
+## The Five Argo CD Applications (`k8s/argocd/`)
 
 | Application | Watches | `prune` |
 |---|---|---|
@@ -19,10 +19,11 @@ manifests the pipeline builds/deploys, see the `k8s` skill.
 | `distopia-db` | `k8s/db` | **false** |
 | `distopia-app` | `k8s/app` | true |
 | `distopia-ci` | `k8s/ci` (the pipeline is GitOps-managed too) | true |
+| `distopia-network` | `k8s/network` (host Cloudflare Tunnel relay, see the `k8s` skill) | true |
 
-All four use `syncPolicy.automated.selfHeal: true` and `syncOptions: [CreateNamespace=true]`.
+All five use `syncPolicy.automated.selfHeal: true` and `syncOptions: [CreateNamespace=true]`.
 `distopia-db` and `distopia-registry` are deliberately **not** auto-pruned, unlike the
-other two — they own stateful data (the live CloudNativePG `Cluster`/PVC, and every image
+other three — they own stateful data (the live CloudNativePG `Cluster`/PVC, and every image
 ever pushed to the registry PVC). If either manifest were ever accidentally removed from
 git, auto-prune would delete the live resource along with it; with prune off it just shows
 up as "OutOfSync" for a human to look at. Pruning either one for real is a deliberate

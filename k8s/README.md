@@ -11,6 +11,7 @@ by you — nothing here is applied automatically by me.
 | `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) + a daily `pg_dump` backup `CronJob` |
 | `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`) |
 | `k8s/ci/` | `distopia-ci` | Argo Events (`EventBus`/`EventSource`/`Sensor`) + Argo Workflows (`WorkflowTemplate`) that build, migrate, and deploy on every push to `main` |
+| `k8s/network/` | `distopia-network` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach `distopia-app`/the webhook `EventSource` via loopback ports you choose yourself |
 
 Nothing here ever pushes an image to an external registry (no ghcr.io, no Docker Hub) —
 build and push both happen inside the cluster, against `registry:2`, which has no Ingress
@@ -55,7 +56,7 @@ kubectl create namespace distopia
 #    creation, so creating it late means CloudNativePG has already generated (and will
 #    keep using) its own random password instead.
 
-# 3. Register the four Argo CD Applications.
+# 3. Register the five Argo CD Applications.
 kubectl apply -k k8s/argocd
 
 # 4. distopia-app will show "Degraded"/ImagePullBackOff at first -- expected, there is no
@@ -135,6 +136,14 @@ kubectl create secret generic distopia-github-webhook -n distopia \
 # is recommended so the commit author is unambiguous, but not required.
 kubectl create secret generic github-push-token -n distopia \
   --from-literal=token='<fine-grained PAT>'
+
+# --- network relay (see "Cloudflare Tunnel and network exposure" below) -- pick two
+# loopback ports of your own choosing. Never share these two specific numbers anywhere
+# outside your own server config (not in an issue, a commit, chat, etc.) -- this repo is
+# public, and unlike a real credential these can't be rotated after the fact if leaked. ---
+kubectl create secret generic distopia-tunnel-relay-config -n distopia \
+  --from-literal=app-port='<port for distopia.top, your choice>' \
+  --from-literal=ci-port='<port for ci.distopia.top, your choice>'
 ```
 
 `DATABASE_URL` is read as a single value everywhere it's needed — `k8s/app/deployment.yaml`
@@ -267,41 +276,36 @@ anywhere in `k8s/`, there's nothing left for that bypass to apply to.
 
 ### Pointing cloudflared at this cluster
 
-Add ingress rules to the host's existing `cloudflared` config pointing at the relevant
-Services **directly** — no `Ingress`/Traefik involved:
+`k8s/network/tunnel-relay.yaml` (Argo CD Application `distopia-network`) runs a small
+`hostNetwork` Deployment that plain-binds two loopback ports on the node — whichever ones
+you chose when creating `distopia-tunnel-relay-config` (section 2 above) — and forwards to
+`distopia-app`/the webhook `EventSource` by their normal cluster DNS names. This avoids
+needing the host to resolve `*.svc.cluster.local` itself (no `resolvectl`/systemd-resolved
+setup to keep working across reboots).
+
+Point the host's existing `cloudflared` config at whichever two loopback ports you chose:
 
 ```yaml
 # in the host's cloudflared config.yml, alongside its other sites
 ingress:
   - hostname: distopia.top
-    service: http://distopia-app.distopia.svc.cluster.local:3000
+    service: http://127.0.0.1:<the app-port you chose>
   - hostname: ci.distopia.top
-    service: http://github-eventsource-svc.distopia.svc.cluster.local:12000
+    service: http://127.0.0.1:<the ci-port you chose>
   - service: http_status:404
 ```
 
-Both Services are referenced by **cluster DNS name**, not a hardcoded ClusterIP — neither
-is pinned (see the comment in `k8s/app/service.yaml` for why: a hardcoded address valid on
-your k3s cluster's service CIDR wouldn't be valid on the CI kind cluster's, and vice
-versa), and this way the host config doesn't need updating even if an IP ever changes. This
-means the host needs to resolve `*.svc.cluster.local` to CoreDNS. On a systemd-resolved
-host (most current Ubuntu/Debian servers):
+**Do not commit, post, or otherwise publish the two actual port numbers anywhere** —
+this repo is public, and unlike a real credential a leaked port number can't be rotated
+after the fact the same way (traffic to it is still just loopback-only, but there's no
+reason to hand out the specific numbers either). Keep them only in your own
+`cloudflared` config and in the `distopia-tunnel-relay-config` Secret on your server.
 
-```bash
-# find CoreDNS's ClusterIP (k3s default is 10.43.0.10, but confirm)
-kubectl get svc -n kube-system kube-dns -o jsonpath='{.spec.clusterIP}'
-
-# route *.svc.cluster.local (and .cluster.local generally) to it, via whichever
-# interface reaches the cluster network (for a single-node k3s host, that's usually the
-# node's own primary interface -- adjust for your setup)
-resolvectl dns <interface> <coredns-clusterip>
-resolvectl domain <interface> "~cluster.local"
-```
-
-If you'd rather not set up cluster DNS resolution on the host, reference either Service by
-its ClusterIP instead (`kubectl get svc distopia-app -n distopia -o
-jsonpath='{.spec.clusterIP}'`) — just know it isn't pinned, so re-check it if the Service
-is ever deleted and recreated (a normal `kubectl apply`/Argo CD sync does not do this).
+Each port is bound with socat's `bind=127.0.0.1` option specifically, so neither is
+reachable from outside the node even without `ufw`'s help — this is defense-in-depth on
+top of "22 is the only allowed inbound port" already covering it. The relay always
+forwards to the Services (not a specific Pod IP), so it keeps working unmodified across
+normal rollouts — only re-check anything here if you rename either Service.
 
 `k8s/registry/networkpolicy.yaml` and `k8s/db/networkpolicy.yaml` additionally restrict the
 registry and CloudNativePG to intra-namespace traffic only, as defense-in-depth beyond "no
