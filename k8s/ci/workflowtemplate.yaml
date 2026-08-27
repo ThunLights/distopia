@@ -231,7 +231,38 @@ spec:
         args:
           - |
             set -eu
-            wget -qO- "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- /usr/local/bin
+            # The upstream install_kustomize.sh script requires bash, which the alpine/git
+            # image doesn't have (only busybox sh) -- it failed with "bash: not found" (exit
+            # 127) the first time this ran in real production. Download the pinned release
+            # tarball directly instead (wget + tar, both present via busybox), which also
+            # fixes the unrelated issue of silently tracking whatever "master" happens to
+            # be on any given run.
+            #
+            # Downloaded to a file and verified against the sha256 kustomize itself publishes
+            # for this exact release (github.com/kubernetes-sigs/kustomize/releases/.../
+            # checksums.txt), not piped straight into tar -- GIT_PUSH_TOKEN is present in
+            # this same container, so an unverified binary running here is a real risk, not
+            # just a hygiene nit.
+            KUSTOMIZE_VERSION=v5.4.3
+            case "$(uname -m)" in
+              x86_64)
+                KUSTOMIZE_ARCH=amd64
+                KUSTOMIZE_SHA256=3669470b454d865c8184d6bce78df05e977c9aea31c30df3c669317d43bcc7a7
+                ;;
+              aarch64)
+                KUSTOMIZE_ARCH=arm64
+                KUSTOMIZE_SHA256=1b515578b0af12c15d9856720066ce2fe66756d63785b2cbccaf2885beb2381c
+                ;;
+              *)
+                echo "unsupported architecture: $(uname -m)" >&2
+                exit 1
+                ;;
+            esac
+            wget -qO /tmp/kustomize.tar.gz \
+              "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_${KUSTOMIZE_ARCH}.tar.gz"
+            echo "${KUSTOMIZE_SHA256}  /tmp/kustomize.tar.gz" | sha256sum -c -
+            tar -xz -C /usr/local/bin -f /tmp/kustomize.tar.gz kustomize
+            rm -f /tmp/kustomize.tar.gz
             git config user.name "distopia-deploy-bot"
             git config user.email "distopia-deploy-bot@users.noreply.github.com"
             git remote set-url origin "https://x-access-token:${GIT_PUSH_TOKEN}@github.com/thunlights/distopia.git"
