@@ -72,17 +72,36 @@ argo submit -n distopia --from workflowtemplate/distopia-build-deploy \
 ## 2. Secrets to create by hand (none of these are committed)
 
 ```bash
-# --- registry ---
-htpasswd -Bbn <registry-user> <registry-password> > /tmp/htpasswd
+# --- registry -- choose the username/password once, into these two shell variables, then
+# derive every secret below from them. Avoids typing the same credentials twice (and
+# risking a typo-driven mismatch) across the htpasswd file and the docker-registry secret.
+registry_user='distopia'
+registry_password='<choose a password>'
+
+# distopia-registry-credentials is the source of truth -- not consumed by any manifest
+# directly (registry:2 needs the bcrypt-hashed htpasswd file below, not plain
+# username/password), but keeping one canonical copy makes rotation and lookup ("what's my
+# registry password again?") a single `kubectl get secret` instead of hunting through
+# whichever of the two derived secrets you happen to remember.
+kubectl create secret generic distopia-registry-credentials -n distopia \
+  --from-literal=username="$registry_user" \
+  --from-literal=password="$registry_password"
+
+# Derived: the bcrypt-hashed htpasswd file registry:2 actually authenticates against
+# (REGISTRY_AUTH_HTPASSWD_PATH in k8s/registry/deployment.yaml) -- registry:2 has no way to
+# read plain credentials directly, so this file can't be eliminated, only generated from
+# the same source instead of retyped.
+htpasswd -Bbn "$registry_user" "$registry_password" > /tmp/htpasswd
 kubectl create secret generic distopia-registry-htpasswd -n distopia \
   --from-file=htpasswd=/tmp/htpasswd
+rm -f /tmp/htpasswd
 
-# Used both by Kaniko (push) and by the app Deployment's imagePullSecrets (pull) --
+# Derived: used both by Kaniko (push) and by the app Deployment's imagePullSecrets (pull) --
 # same registry, same credentials, so one secret covers both.
 kubectl create secret docker-registry distopia-registry-pull -n distopia \
   --docker-server=distopia-registry.distopia.svc.cluster.local:5000 \
-  --docker-username=<registry-user> \
-  --docker-password=<registry-password>
+  --docker-username="$registry_user" \
+  --docker-password="$registry_password"
 
 # --- app runtime config -- injected as live env vars into the Pod (k8s/app/deployment.yaml
 # envFrom), never baked into the image. DATABASE_URL is not in here -- see

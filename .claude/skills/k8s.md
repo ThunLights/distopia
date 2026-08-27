@@ -121,6 +121,15 @@ every push adds a new `<short-sha>`-tagged image forever, so the 20Gi PVC will e
 fill on a long-lived project. The readiness probe is TCP, not HTTP — `registry:2` requires
 auth on every endpoint including `/v2/`, so a plain `httpGet` probe would see 401.
 
+Credentials: `distopia-registry-credentials` (`username`/`password`) is the source of
+truth, created once by hand — `distopia-registry-htpasswd` (the bcrypt-hashed file
+`registry:2` actually authenticates against) and `distopia-registry-pull`
+(`dockerconfigjson`, used by both Kaniko's push and the app's `imagePullSecrets`) are both
+*derived* from it in the same step (`k8s/README.md` section 2), rather than the same
+username/password being retyped into two separate `kubectl create secret` invocations.
+`registry:2` has no way to read plain credentials directly, so the htpasswd file itself
+can't be eliminated — only generated from one canonical place instead of typed twice.
+
 ## Testing manifests in CI: the `e2e-prod` job
 
 `.github/workflows/ci.yml`'s `e2e-prod` job deploys the **real, unmodified** `k8s/db` and
