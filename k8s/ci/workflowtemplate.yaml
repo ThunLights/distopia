@@ -231,7 +231,20 @@ spec:
         args:
           - |
             set -eu
-            wget -qO- "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash -s -- /usr/local/bin
+            # The upstream install_kustomize.sh script requires bash, which the alpine/git
+            # image doesn't have (only busybox sh) -- it failed with "bash: not found" (exit
+            # 127) the first time this ran in real production. Download the pinned release
+            # tarball directly instead (wget + tar, both present via busybox), which also
+            # fixes the unrelated issue of silently tracking whatever "master" happens to
+            # be on any given run.
+            KUSTOMIZE_VERSION=v5.4.3
+            case "$(uname -m)" in
+              x86_64) KUSTOMIZE_ARCH=amd64 ;;
+              aarch64) KUSTOMIZE_ARCH=arm64 ;;
+              *) echo "unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+            esac
+            wget -qO- "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_${KUSTOMIZE_ARCH}.tar.gz" \
+              | tar -xz -C /usr/local/bin kustomize
             git config user.name "distopia-deploy-bot"
             git config user.email "distopia-deploy-bot@users.noreply.github.com"
             git remote set-url origin "https://x-access-token:${GIT_PUSH_TOKEN}@github.com/thunlights/distopia.git"
