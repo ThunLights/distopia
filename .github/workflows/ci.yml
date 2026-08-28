@@ -234,6 +234,27 @@ jobs:
             --pod-running-timeout=30s --image=postgres:17-alpine --command \
             -- pg_isready -h distopia-db-rw -p 5432 -U distopia -d distopia
 
+      # k8s/db/kustomization.yaml deploys the backup CronJob alongside the Cluster, but a
+      # CronJob just sits there waiting for its schedule -- deploying it here was never
+      # actually exercising the backup logic itself. Manually trigger one Job from it (same
+      # thing `kubectl create job --from=cronjob/...` does for an on-demand production run)
+      # and wait for it to actually succeed, so a change to backup-cronjob.yaml's script or
+      # DB_HOST (see its own comments for why that's distopia-db-rw, not -r) gets caught here
+      # instead of only being discovered against real production data.
+      - name: Test the database backup CronJob
+        run: |
+          kubectl create job --from=cronjob/distopia-db-backup distopia-db-backup-test -n distopia
+          timeout 120 bash -c '
+            until [ "$(kubectl get job distopia-db-backup-test -n distopia -o jsonpath="{.status.succeeded}")" = "1" ]; do
+              if [ "$(kubectl get job distopia-db-backup-test -n distopia -o jsonpath="{.status.failed}")" = "1" ]; then
+                echo "backup job failed" >&2
+                exit 1
+              fi
+              sleep 3
+            done
+          '
+          kubectl logs -n distopia job/distopia-db-backup-test
+
       # The runner (bun install/prisma migrate/docker build) still needs to reach postgres
       # from OUTSIDE the cluster -- see the job-level comment for why NodePort doesn't work
       # here. Connect a hostNetwork relay directly to the pod's own IP (not the Service),
@@ -355,6 +376,7 @@ jobs:
           kubectl describe pod -n distopia -l app.kubernetes.io/name=distopia-app
           kubectl logs -n distopia deployment/distopia-app --tail=200
           kubectl logs -n distopia pod/distopia-db-1 -c postgres --tail=100 || true
+          kubectl logs -n distopia job/distopia-db-backup-test --tail=100 || true
           kubectl get events -n distopia --sort-by=.lastTimestamp
 
       - name: Tear down
