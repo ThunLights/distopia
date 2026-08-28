@@ -1,7 +1,11 @@
-# Defense-in-depth: restrict CloudNativePG pods to intra-namespace traffic only (the app
-# Deployment and the Workflow's migrate step are the only legitimate clients). Same CNI
-# caveat as k8s/registry/networkpolicy.yaml -- not enforced under k3s's default Flannel CNI
-# without Calico/Cilium or similar. See k8s/README.md.
+# Defense-in-depth: restrict CloudNativePG pods' ingress to the app/Workflow (same
+# namespace) and the CNPG operator itself (cnpg-system namespace). Unlike the note that used
+# to be here -- k3s actually DOES enforce NetworkPolicy out of the box (it runs a built-in
+# kube-router-based network policy controller alongside Flannel, unlike a bare Flannel
+# install on other distros) -- confirmed the hard way: without the cnpg-system exception,
+# the operator's own cross-namespace status/health HTTP calls to the instance manager get
+# blocked, surfacing as `Phase: Instance Status Extraction Error: HTTP communication issue`
+# on the Cluster resource even though postgres itself is healthy. See k8s/README.md.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -16,3 +20,6 @@ spec:
   ingress:
     - from:
         - podSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
