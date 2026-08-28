@@ -43,9 +43,14 @@ Each directory is its own `kustomization.yaml` (no Helm anywhere in this repo).
   loss) — see `k8s/README.md`'s "Database backups" section for the restore procedure and
   why CloudNativePG's native `barmanObjectStore` (off-host WAL archiving + PITR) is the
   real follow-up once any S3-compatible storage is available.
-- `networkpolicy.yaml` restricts CNPG to intra-namespace traffic — **not enforced** under
-  k3s's default Flannel CNI without Calico/Cilium or similar. Don't rely on it for real
-  isolation without confirming enforcement is active.
+- `networkpolicy.yaml` restricts CNPG's ingress. **k3s actually enforces `NetworkPolicy` out
+  of the box** (a built-in kube-router-based controller runs alongside Flannel, unlike a
+  bare Flannel install elsewhere) — confirmed the hard way when the original
+  same-namespace-only rule blocked the CNPG operator's own cross-namespace health checks
+  (`cnpg-system` namespace), surfacing as `Phase: Instance Status Extraction Error: HTTP
+  communication issue` on the `Cluster` even though postgres itself was healthy. The policy
+  now explicitly allows `cnpg-system` too. Don't assume a policy is a no-op just because
+  it's k3s+Flannel — verify enforcement either way.
 
 ## DATABASE_URL convention
 

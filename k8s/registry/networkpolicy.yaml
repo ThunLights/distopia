@@ -3,9 +3,12 @@
 # at the network layer -- only pods in this namespace (Kaniko build pods, the app
 # Deployment) may reach it, nothing else.
 #
-# Requires a NetworkPolicy-enforcing CNI. k3s's default CNI (Flannel) does NOT enforce
-# NetworkPolicy -- this resource is accepted by the API but silently has no effect unless
-# you've installed Calico/Cilium or otherwise enabled policy enforcement. See the
+# k3s actually enforces NetworkPolicy out of the box (it runs a built-in kube-router-based
+# network policy controller alongside Flannel, unlike a bare Flannel install on other
+# distros) -- confirmed the hard way on k8s/db/networkpolicy.yaml, where the equivalent
+# same-namespace-only rule blocked the CNPG operator's own cross-namespace health checks.
+# No cross-namespace exception is needed here, though -- unlike the CNPG operator, nothing
+# outside this namespace has a legitimate reason to reach the registry. See the
 # "Firewall (ufw) and network exposure" section in k8s/README.md.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

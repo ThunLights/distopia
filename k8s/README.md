@@ -327,11 +327,17 @@ forwards to the Services (not a specific Pod IP), so it keeps working unmodified
 normal rollouts — only re-check anything here if you rename either Service.
 
 `k8s/registry/networkpolicy.yaml` and `k8s/db/networkpolicy.yaml` additionally restrict the
-registry and CloudNativePG to intra-namespace traffic only, as defense-in-depth beyond "no
-Service exposes them." **This requires a NetworkPolicy-enforcing CNI** — k3s's default
-Flannel does not enforce `NetworkPolicy` (the resource applies but has no effect) unless
-you install Calico, Cilium, or similar. If you're relying on these policies for real
-isolation, confirm enforcement is active rather than assuming from the manifest alone.
+registry and CloudNativePG's ingress, as defense-in-depth beyond "no Service exposes them."
+**k3s actually enforces `NetworkPolicy` out of the box** — it runs a built-in
+kube-router-based network policy controller alongside Flannel, unlike a bare Flannel
+install on other distros where the resource is silently a no-op. This was confirmed the
+hard way: `distopia-db-allow-intra-namespace`'s original same-namespace-only rule blocked
+the CNPG operator's own cross-namespace health/status checks (`cnpg-system` namespace),
+surfacing as `Phase: Instance Status Extraction Error: HTTP communication issue` on the
+`Cluster` resource even though postgres itself stayed healthy — it now explicitly allows
+`cnpg-system` too. If your cluster runs a different CNI (or k3s with the policy controller
+disabled), confirm enforcement is actually active rather than assuming from the manifest
+alone either way.
 
 ## Notes / known constraints
 
