@@ -56,7 +56,25 @@ spec:
                   set -eu
                   export PGPASSWORD="$DB_PASSWORD"
                   dest="/backup/distopia-$(date -u +%Y%m%dT%H%M%SZ).dump"
-                  pg_dump -h "$DB_HOST" -U "$DB_USER" -d distopia --format=custom -f "$dest"
+
+                  # A freshly-scheduled Pod's own networking (kube-proxy/CNI route setup for
+                  # this specific Pod) isn't always fully ready the instant its container
+                  # starts -- confirmed directly: a bare first attempt got "no response" from
+                  # pg_isready, while a second attempt ~3s later succeeded, even though the
+                  # long-running app Deployment (already up, never needing to race this)
+                  # reaches the same Service without issue. Retry rather than assume the
+                  # first connection attempt lands.
+                  for attempt in 1 2 3 4 5; do
+                    if pg_dump -h "$DB_HOST" -U "$DB_USER" -d distopia --format=custom -f "$dest"; then
+                      break
+                    fi
+                    echo "pg_dump attempt $attempt failed, retrying in 3s..." >&2
+                    sleep 3
+                    if [ "$attempt" = 5 ]; then
+                      echo "pg_dump failed after 5 attempts" >&2
+                      exit 1
+                    fi
+                  done
                   echo "wrote $dest"
                   find /backup -name 'distopia-*.dump' -mtime +14 -delete
                   echo "current backups:"
