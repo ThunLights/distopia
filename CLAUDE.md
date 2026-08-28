@@ -5,6 +5,21 @@ Site: [distopia.top](https://distopia.top)
 
 ---
 
+## Git Commit/Push Policy
+
+**Never run `git commit` or `git push` unless the user's message explicitly invokes the
+`/open-pr` or `/auto-commit-and-push` slash command in that same instance.** Plain-language
+approval alone ("commit and push this", "反映してください", "yes go ahead", etc.) is **not**
+sufficient — if asked in plain language, tell the user which of the two commands to invoke
+instead of acting on the request directly. A prior invocation of either command does not
+carry forward to later turns either; each commit/push needs its own fresh invocation.
+
+- `/open-pr` (`.claude/commands/open-pr.md`) — commit, push, and open/update a pull request.
+- `/auto-commit-and-push` (`.claude/commands/auto-commit-and-push.md`) — commit and push
+  only, no PR.
+
+---
+
 ## Development Environment
 
 **Required: develop inside the devcontainer.** Running directly on the host is not supported.
@@ -29,6 +44,13 @@ sudo scripts/setup.sh
 | `docker/.env` | Container port forwarding settings |
 
 Copy `.env.example` to `.env` and fill in the values.
+
+**Never delete, overwrite, or move `.env` or `docker/.env`.** They are gitignored — once
+deleted, their real values (bot token, role IDs, DB credentials, etc.) are gone with no git
+history to recover from and no guaranteed backup elsewhere. If a change requires touching
+one of these files, edit it in place; if you need to inspect its current values first, read
+it, don't recreate it. If you ever need a clean-slate version, copy `.env.example` alongside
+it under a different name — never over the real file.
 
 ### Dev Ports
 
