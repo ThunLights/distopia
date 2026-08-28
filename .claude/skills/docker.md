@@ -72,6 +72,11 @@ cd docker && docker compose build --no-cache
 | `.env` (project root) | App runtime: bot token, DB URL, public URLs, role IDs |
 | `docker/.env` | Container port forwarding |
 
+**Never delete, overwrite, or move either file.** Both are gitignored -- there is no git
+history and no guaranteed backup to recover their real values from if lost. Edit in place;
+if you need a clean-slate copy, write it under a different filename next to
+`.env.example`, never over the real file.
+
 ### `docker/.env` variables
 
 ```

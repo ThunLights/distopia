@@ -30,6 +30,13 @@ sudo scripts/setup.sh
 
 Copy `.env.example` to `.env` and fill in the values.
 
+**Never delete, overwrite, or move `.env` or `docker/.env`.** They are gitignored — once
+deleted, their real values (bot token, role IDs, DB credentials, etc.) are gone with no git
+history to recover from and no guaranteed backup elsewhere. If a change requires touching
+one of these files, edit it in place; if you need to inspect its current values first, read
+it, don't recreate it. If you ever need a clean-slate version, copy `.env.example` alongside
+it under a different name — never over the real file.
+
 ### Dev Ports
 
 | Port | Purpose |
