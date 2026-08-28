@@ -62,11 +62,15 @@ spec:
                   echo "current backups:"
                   ls -lh /backup
               env:
-                # -r ("any" instance) rather than -rw, so this keeps working unchanged if
-                # instances is ever bumped above 1 for HA -- pg_dump doesn't need the
-                # primary specifically.
+                # Originally -r ("any" instance), on the theory that it'd keep working
+                # unchanged if instances is ever bumped above 1 for HA. In real production,
+                # distopia-db-r consistently refused connections (pg_dump: Connection
+                # refused) while distopia-db-rw kept working fine for the app the entire
+                # time -- confirmed repeatedly, not a one-off flake. Root cause not fully
+                # understood; -rw is proven reliable, so use it. Revisit -r vs -rw if
+                # instances is ever raised above 1.
                 - name: DB_HOST
-                  value: distopia-db-r.distopia.svc.cluster.local
+                  value: distopia-db-rw.distopia.svc.cluster.local
                 - name: DB_USER
                   valueFrom:
                     secretKeyRef:
