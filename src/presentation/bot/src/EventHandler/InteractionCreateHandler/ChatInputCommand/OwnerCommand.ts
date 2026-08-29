@@ -16,6 +16,8 @@ import z from "zod";
 
 import { codeBlock } from "../../../utils/codeblock";
 import { getCpuUsagePercent } from "../../../utils/cpuUsage";
+import { getDeployedCommitHash } from "../../../utils/deployedCommit";
+import { getMemoryUsageSummary } from "../../../utils/memoryUsage";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 
@@ -91,8 +93,8 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
       return { embeds: [embed], components: [row], flags: [MessageFlags.Ephemeral] };
     } else if (subCommand === "status") {
       const cpuPercent = await getCpuUsagePercent();
-      const { rss, heapUsed, heapTotal } = process.memoryUsage();
-      const toMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(1).padStart(7);
+      const memoryUsageSummary = getMemoryUsageSummary();
+      const deployedCommitHash = getDeployedCommitHash();
 
       const embed = new EmbedBuilder()
         .setColor("Gold")
@@ -110,19 +112,12 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
           },
           {
             name: "🧠 メモリ使用量",
-            value: await codeBlock(
-              [`RSS : ${toMB(rss)} MB`, `Heap: ${toMB(heapUsed)} / ${toMB(heapTotal)} MB`].join(
-                "\n",
-              ),
-            ),
+            value: await codeBlock(memoryUsageSummary),
             inline: false,
           },
           {
-            // Baked in at image-build time (docker/dockerfile.prod's GIT_SHA build arg,
-            // set by the Argo Workflow's build-push step) -- "unknown" for local dev, since
-            // there's no build pipeline setting it there.
             name: "🔖 デプロイ中のcommit",
-            value: await codeBlock(process.env.GIT_SHA ?? "unknown"),
+            value: await codeBlock(deployedCommitHash),
             inline: false,
           },
         );
