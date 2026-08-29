@@ -39,13 +39,33 @@ spec:
           - name: clone
             template: clone
 
+          # Anti-loop: the whole prepare-env/migrate/build-push/update-manifest chain is
+          # nested in the "deploy" sub-DAG below so this one `when` is the only place that
+          # needs to check is-deploy-commit -- if it's skipped, none of the nested tasks are
+          # even evaluated. See clone's comment for why this check lives here at all instead
+          # of in sensor.yaml.
+          - name: deploy
+            template: deploy
+            dependencies: [clone]
+            when: "{{tasks.clone.outputs.parameters.is-deploy-commit}} != true"
+            arguments:
+              parameters:
+                - name: short-sha
+                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
+
+    # Everything that actually builds and ships the image, run only for non-deploy-bot
+    # commits (see "deploy" task's `when` in main's dag, above).
+    - name: deploy
+      inputs:
+        parameters:
+          - name: short-sha
+      dag:
+        tasks:
           - name: prepare-env
             template: prepare-env
-            dependencies: [clone]
 
           - name: migrate
             template: migrate
-            dependencies: [clone]
 
           - name: build-push
             template: build-push
@@ -53,7 +73,7 @@ spec:
             arguments:
               parameters:
                 - name: short-sha
-                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
+                  value: "{{inputs.parameters.short-sha}}"
 
           - name: update-manifest
             template: update-manifest
@@ -63,10 +83,22 @@ spec:
                 - name: image
                   value: "{{tasks.build-push.outputs.parameters.image}}"
                 - name: short-sha
-                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
+                  value: "{{inputs.parameters.short-sha}}"
 
     # 1. Clone the exact commit that triggered the webhook, not just the branch tip, so a
     #    fast-follow push during the build can't get silently included.
+    #
+    #    Also decides here whether this revision is one of update-manifest's own
+    #    "chore(deploy):" commits (anti-loop) -- sensor.yaml used to reject those before a
+    #    Workflow was ever created, via a third data/exprs filter alongside the ref/repo
+    #    checks. Four different implementations of that filter (exprs slicing, exprs
+    #    startsWith, a comparator, a Sprig template) all silently dropped every push event
+    #    with zero log output, even though EventBus delivery to the Sensor and RBAC were
+    #    both confirmed healthy each time. Whatever's broken lives inside this Argo Events
+    #    build's filter evaluation, so the check was moved here instead, using a plain POSIX
+    #    `case` glob match -- gated via a single `when` on the "deploy" task in main's dag
+    #    (see below) -- so it depends only on Argo Workflows' own DAG engine, which has been
+    #    reliable throughout this pipeline's development.
     - name: clone
       container:
         image: alpine/git:2.47.2
@@ -79,6 +111,11 @@ spec:
             cd src
             git checkout "{{workflow.parameters.revision}}"
             git rev-parse --short HEAD > /workspace/short-sha
+            commit_message="$(git log -1 --format=%s)"
+            case "$commit_message" in
+              "chore(deploy):"*) echo true > /workspace/is-deploy-commit ;;
+              *) echo false > /workspace/is-deploy-commit ;;
+            esac
         volumeMounts:
           - name: workspace
             mountPath: /workspace
@@ -94,6 +131,9 @@ spec:
           - name: short-sha
             valueFrom:
               path: /workspace/short-sha
+          - name: is-deploy-commit
+            valueFrom:
+              path: /workspace/is-deploy-commit
 
     # 2. Materialize a BUILD-time-only .env into the cloned tree -- just what
     #    `bun run build` itself needs (DATABASE_URL for infra-database's `prisma generate
@@ -218,9 +258,9 @@ spec:
             memory: 1Gi
 
     # 4. Bump k8s/app's pinned image tag and push to main -- Argo CD (auto-sync + self-heal)
-    #    picks this commit up and rolls the Deployment. The commit message prefix is what
-    #    sensor.yaml's data filter (Sprig hasPrefix template) checks to avoid re-triggering
-    #    itself.
+    #    picks this commit up and rolls the Deployment. The commit message prefix used below
+    #    is what the "deploy" task's `when` (via clone's is-deploy-commit output, see main's
+    #    dag) checks to avoid re-triggering this whole chain on its own commit.
     - name: update-manifest
       inputs:
         parameters:

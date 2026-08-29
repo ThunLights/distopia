@@ -1,17 +1,14 @@
-# Anti-loop: the update-manifest step in workflowtemplate.yaml pushes its own commit to
-# main (to bump the image tag), which would otherwise re-trigger this same Sensor forever.
-# The data filter below rejects any push whose head commit message starts with
-# "chore(deploy):" -- the exact prefix that step always uses.
-#
-# Implemented via `template` (Sprig's hasPrefix, evaluated by Argo Events itself before the
-# match) feeding into a plain exact-match `value` list, NOT the `comparator` field -- verified
-# live that `comparator: "!="` against body.head_commit.author.email silently dropped every
-# push event with zero log output (STAN confirmed the message was actually delivered to the
-# Sensor's subscription; something in that comparison just never matched). This mirrors two
-# earlier failures on this same Sensor: an exprs filter using Python-style slicing, then one
-# using the startsWith operator, both of which failed to parse against whatever expr engine
-# build is bundled in this Argo Events install. Sprig templating is a much more standard,
-# widely-used code path (shared with Helm) than any of those, so it's the safer bet here.
+# Only ref + repo are filtered here. Anti-loop protection (skipping the update-manifest
+# step's own "chore(deploy):" commits) used to live here as a third filter, but FOUR
+# different implementations -- exprs slicing, exprs startsWith, a data filter comparator,
+# and a data filter Sprig template -- all silently dropped every push event with zero log
+# output, even though the EventSource->EventBus delivery and this Sensor's own subscription
+# were confirmed healthy each time (STAN's channelsz showed last_sent caught up to last_seq,
+# pending_count 0). Whatever's wrong lives inside this specific Argo Events build's filter
+# evaluation, not in EventBus delivery or RBAC (also verified). The anti-loop check now lives
+# in workflowtemplate.yaml's "clone" step instead, using a plain POSIX `case` glob match
+# gated by a DAG `when` condition -- Argo Workflows' own DAG engine, which has worked
+# correctly throughout this pipeline's development, unlike this Sensor's filter engine.
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -35,11 +32,6 @@ spec:
             type: string
             value:
               - thunlights/distopia
-          - path: body.head_commit.message
-            type: string
-            template: '{{ if hasPrefix "chore(deploy):" . }}skip{{ else }}allow{{ end }}'
-            value:
-              - allow
   triggers:
     - template:
         name: trigger-build-deploy
