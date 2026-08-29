@@ -26,7 +26,7 @@ spec:
             value:
               - thunlights/distopia
         exprs:
-          - expr: "headCommitMessage[0:14] != 'chore(deploy):'"
+          - expr: "!(headCommitMessage startsWith 'chore(deploy):')"
             fields:
               - name: headCommitMessage
                 path: body.head_commit.message
