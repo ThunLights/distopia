@@ -11,4 +11,4 @@ resources:
 images:
 - name: distopia-registry.distopia.svc.cluster.local:5000/distopia
   newName: distopia-registry.distopia.svc.cluster.local:5000/distopia
-  newTag: 98b40e1c
+  newTag: 6818b2b9
