@@ -1,4 +1,7 @@
+import os from "node:os";
+
 const toMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(1).padStart(7);
+const toPercent = (used: number, total: number) => ((used / total) * 100).toFixed(1);
 
 // Bundles the bot process's own health metrics (used by /owner status) behind one
 // namespace, instead of scattering each metric across its own single-function file.
@@ -20,7 +23,13 @@ export class SystemStatus {
 
   public static getMemoryUsageSummary(): string {
     const { rss, heapUsed, heapTotal } = process.memoryUsage();
-    return [`RSS : ${toMB(rss)} MB`, `Heap: ${toMB(heapUsed)} / ${toMB(heapTotal)} MB`].join("\n");
+    const rssPercent = toPercent(rss, os.totalmem());
+    const heapPercent = toPercent(heapUsed, heapTotal);
+
+    return [
+      `RSS : ${toMB(rss)} MB (${rssPercent}%)`,
+      `Heap: ${toMB(heapUsed)} / ${toMB(heapTotal)} MB (${heapPercent}%)`,
+    ].join("\n");
   }
 
   // Baked in at image-build time (docker/dockerfile.prod's GIT_SHA build arg, set by the
