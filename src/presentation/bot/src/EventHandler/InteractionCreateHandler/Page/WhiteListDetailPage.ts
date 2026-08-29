@@ -15,7 +15,7 @@ import {
   idTypeLabel,
   mention,
   type WhiteListIdType,
-} from "../../../utils/whiteList";
+} from "../../../utils/lists/whiteList";
 
 export async function whiteListDetailPage(
   core: AppCore,

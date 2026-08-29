@@ -11,7 +11,7 @@ import type {
   User,
 } from "discord.js";
 
-import { codeBlock } from "./codeblock";
+import { codeBlock } from "../codeblock";
 import type { AllLogField, ChannelLogField } from "./log";
 
 export type LogEmbedField = { name: string; value: string; inline?: boolean };

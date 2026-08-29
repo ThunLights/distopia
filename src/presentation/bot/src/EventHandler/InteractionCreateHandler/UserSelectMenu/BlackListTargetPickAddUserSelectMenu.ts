@@ -15,7 +15,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { encodeBlackListTargetRef, truncateSelectMenuLabel } from "../../../utils/blackList";
+import { encodeBlackListTargetRef, truncateSelectMenuLabel } from "../../../utils/lists/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ModalSended } from "../Base/Modal/ModalSended";
 import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";

@@ -18,7 +18,7 @@ import {
   BlackListTargetRefSchema,
   decodeBlackListTargetRef,
   truncateSelectMenuLabel,
-} from "../../../utils/blackList";
+} from "../../../utils/lists/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { ModalSended } from "../Base/Modal/ModalSended";

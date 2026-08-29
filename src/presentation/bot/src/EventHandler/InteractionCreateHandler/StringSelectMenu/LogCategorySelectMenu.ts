@@ -14,7 +14,7 @@ import {
   EmbedBuilder,
 } from "discord.js";
 
-import { isLogField, logFieldLabels } from "../../../utils/log";
+import { isLogField, logFieldLabels } from "../../../utils/logging/log";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 

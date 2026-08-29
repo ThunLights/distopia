@@ -8,8 +8,8 @@ import {
   type StringSelectMenuInteraction,
 } from "discord.js";
 
+import { WhiteListTargetSchema, decodeWhiteListTargetValue } from "../../../utils/lists/whiteList";
 import { ValidateError, validator } from "../../../utils/validator";
-import { WhiteListTargetSchema, decodeWhiteListTargetValue } from "../../../utils/whiteList";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { whiteListDetailPage } from "../Page/WhiteListDetailPage";

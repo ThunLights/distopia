@@ -8,7 +8,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 
-import { buildBlackListFieldValue, truncateSelectMenuLabel } from "../../../utils/blackList";
+import { buildBlackListFieldValue, truncateSelectMenuLabel } from "../../../utils/lists/blackList";
 
 export async function blackListTagsPickListPage(
   core: AppCore,

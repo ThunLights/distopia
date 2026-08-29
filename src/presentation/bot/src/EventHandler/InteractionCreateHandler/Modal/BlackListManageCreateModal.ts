@@ -8,7 +8,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { BlackListTagsSchema, parseBlackListTagsInput } from "../../../utils/blackList";
+import { BlackListTagsSchema, parseBlackListTagsInput } from "../../../utils/lists/blackList";
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";

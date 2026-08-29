@@ -1,7 +1,7 @@
 import type { AppCore } from "app-core";
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
 
-import type { Logger } from "./Logger";
+import type { Logger } from "../logging/Logger";
 
 export async function detectSpamMessage(
   core: AppCore,

@@ -20,7 +20,7 @@ import {
   mention,
   SELECT_MENU_MAX_OPTIONS,
   truncateSelectMenuLabel,
-} from "../../../utils/whiteList";
+} from "../../../utils/lists/whiteList";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function whiteListPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {

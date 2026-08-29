@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { blackListEditorPermissionSummary } from "../../../utils/blackList";
+import { blackListEditorPermissionSummary } from "../../../utils/lists/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { PermissionError } from "../Base/Error/PermissionError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";

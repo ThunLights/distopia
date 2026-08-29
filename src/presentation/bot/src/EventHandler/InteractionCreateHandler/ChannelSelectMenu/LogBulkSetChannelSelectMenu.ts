@@ -14,7 +14,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { LOG_FIELDS, logFieldLabels } from "../../../utils/log";
+import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
 import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 

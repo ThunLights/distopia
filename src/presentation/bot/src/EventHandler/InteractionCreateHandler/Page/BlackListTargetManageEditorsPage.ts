@@ -14,7 +14,7 @@ import {
 import {
   blackListEditorPermissionSummary,
   buildBlackListFieldValue,
-} from "../../../utils/blackList";
+} from "../../../utils/lists/blackList";
 import { encodeIdPageRef, paginate } from "../../../utils/pagination";
 
 export async function blackListTargetManageEditorsPage(

@@ -8,7 +8,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { isWelcomeMessageField, welcomeMessageLabels } from "../../../utils/welcomeMessage";
+import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
@@ -34,11 +34,11 @@ export class WelcomeMessageResetButton extends ButtonInteractionBase {
 
     const field = interaction.customId.slice(customIdPrefix.length);
 
-    if (!isWelcomeMessageField(field)) {
+    if (!WelcomeMessenger.isField(field)) {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    const label = welcomeMessageLabels[field];
+    const label = WelcomeMessenger.labels[field];
 
     await this.core.guild.saveSetting({
       guildId: guild.id,

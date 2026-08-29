@@ -10,7 +10,7 @@ import {
 import z from "zod";
 
 import { validator, type ValidateResult } from "../../../utils/validator";
-import { isWelcomeMessageField, welcomeMessageLabels } from "../../../utils/welcomeMessage";
+import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
@@ -54,11 +54,11 @@ export class WelcomeMessageContentModal extends ModalSubmitInteractionBase<Optio
 
     const field = interaction.customId.slice(customIdPrefix.length);
 
-    if (!isWelcomeMessageField(field)) {
+    if (!WelcomeMessenger.isField(field)) {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    const contentField = welcomeMessageLabels[field].contentField;
+    const contentField = WelcomeMessenger.labels[field].contentField;
 
     await this.core.guild.saveSetting({ guildId: guild.id, [contentField]: options.content });
 

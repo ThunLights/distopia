@@ -10,7 +10,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 
-import { truncateSelectMenuLabel } from "../../../utils/blackList";
+import { truncateSelectMenuLabel } from "../../../utils/lists/blackList";
 
 export async function blackListTagsManagePage(
   core: AppCore,

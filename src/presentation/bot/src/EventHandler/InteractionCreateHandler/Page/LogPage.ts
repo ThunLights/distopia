@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { LOG_FIELDS, logFieldLabels } from "../../../utils/log";
+import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function logPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
