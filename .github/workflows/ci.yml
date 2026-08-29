@@ -325,7 +325,8 @@ jobs:
           SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
           PUBLIC_SENTRY_DSN=$PUBLIC_SENTRY_DSN
           EOF
-          docker build --network host -f docker/dockerfile.prod -t distopia:e2e .
+          docker build --network host -f docker/dockerfile.prod \
+            --build-arg GIT_SHA="${GITHUB_SHA::7}" -t distopia:e2e .
           rm -f .env
 
       - name: Load image into kind
