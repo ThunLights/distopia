@@ -1,0 +1,1 @@
+@layer base{:where(.lc-text){--fill-color:var(--color-surface-content,currentColor);--stroke-color:initial}:where(.lc-layout-html .lc-text){text-box:trim-both cap alphabetic}:where(.lc-layout-html .lc-text):not([background-color]){color:var(--fill-color)}:where(.lc-layout-html .lc-text):not([border-color]){border-color:var(--stroke-color)}}
