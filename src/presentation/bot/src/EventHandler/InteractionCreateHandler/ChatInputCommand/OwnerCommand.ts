@@ -117,6 +117,14 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
             ),
             inline: false,
           },
+          {
+            // Baked in at image-build time (docker/dockerfile.prod's GIT_SHA build arg,
+            // set by the Argo Workflow's build-push step) -- "unknown" for local dev, since
+            // there's no build pipeline setting it there.
+            name: "🔖 デプロイ中のcommit",
+            value: await codeBlock(process.env.GIT_SHA ?? "unknown"),
+            inline: false,
+          },
         );
       return {
         embeds: [embed],

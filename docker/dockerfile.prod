@@ -24,6 +24,12 @@
 # image is never pushed anywhere external.
 
 ARG BUN_VERSION=1.4.0
+# Short git SHA of the commit this image was built from -- not a secret, just baked in as a
+# build-time label so the running app can report which commit is actually deployed (e.g.
+# the owner status command). Passed by the Argo Workflow's build-push step
+# (--build-arg=GIT_SHA={{tasks.clone.outputs.parameters.short-sha}}); defaults to "unknown"
+# for local `docker build` runs that don't pass it.
+ARG GIT_SHA=unknown
 
 FROM oven/bun:${BUN_VERSION} AS builder
 WORKDIR /app
@@ -38,5 +44,9 @@ FROM oven/bun:${BUN_VERSION}-slim AS runtime
 WORKDIR /app
 COPY --from=builder /app .
 ENV NODE_ENV=production
+# Redeclare -- ARGs don't cross FROM boundaries, and this needs to be an ENV (not just an
+# ARG) to actually be visible to the running process.
+ARG GIT_SHA=unknown
+ENV GIT_SHA=${GIT_SHA}
 EXPOSE 3000
 CMD ["bun", "run", "src/presentation/web/build/index.js"]

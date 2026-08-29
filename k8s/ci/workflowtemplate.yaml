@@ -154,6 +154,7 @@ spec:
           - --context=dir:///workspace/src
           - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:{{inputs.parameters.short-sha}}
           - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:latest
+          - --build-arg=GIT_SHA={{inputs.parameters.short-sha}}
           - --insecure
         volumeMounts:
           - name: workspace
