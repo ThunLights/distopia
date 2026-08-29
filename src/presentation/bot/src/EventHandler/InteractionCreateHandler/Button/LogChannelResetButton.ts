@@ -8,7 +8,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { isLogField } from "../../../utils/log";
+import { isLogField } from "../../../utils/logging/log";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { logPage } from "../Page/LogPage";

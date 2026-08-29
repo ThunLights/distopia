@@ -13,7 +13,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { isWelcomeMessageField, welcomeMessageLabels } from "../../../utils/welcomeMessage";
+import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ModalSended } from "../Base/Modal/ModalSended";
@@ -41,11 +41,11 @@ export class WelcomeMessageContentSubmitButton extends ButtonInteractionBase {
 
     const field = interaction.customId.slice(customIdPrefix.length);
 
-    if (!isWelcomeMessageField(field)) {
+    if (!WelcomeMessenger.isField(field)) {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    const label = welcomeMessageLabels[field];
+    const label = WelcomeMessenger.labels[field];
     const settings = await this.core.guild.getSetting(guild.id);
     const currentContent = settings?.[label.contentField];
 

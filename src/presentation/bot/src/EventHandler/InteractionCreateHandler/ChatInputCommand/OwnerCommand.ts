@@ -15,9 +15,7 @@ import {
 import z from "zod";
 
 import { codeBlock } from "../../../utils/codeblock";
-import { getCpuUsagePercent } from "../../../utils/cpuUsage";
-import { getDeployedCommitHash } from "../../../utils/deployedCommit";
-import { getMemoryUsageSummary } from "../../../utils/memoryUsage";
+import { SystemStatus } from "../../../utils/status/SystemStatus";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 
@@ -92,9 +90,9 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
 
       return { embeds: [embed], components: [row], flags: [MessageFlags.Ephemeral] };
     } else if (subCommand === "status") {
-      const cpuPercent = await getCpuUsagePercent();
-      const memoryUsageSummary = getMemoryUsageSummary();
-      const deployedCommitHash = getDeployedCommitHash();
+      const cpuPercent = await SystemStatus.getCpuUsagePercent();
+      const memoryUsageSummary = SystemStatus.getMemoryUsageSummary();
+      const deployedCommitHash = SystemStatus.getDeployedCommitHash();
 
       const embed = new EmbedBuilder()
         .setColor("Gold")

@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { truncateSelectMenuLabel } from "../../../utils/blackList";
+import { truncateSelectMenuLabel } from "../../../utils/lists/blackList";
 
 export async function blackListDetailPage(
   core: AppCore,

@@ -8,7 +8,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { isWelcomeMessageField, welcomeMessageLabels } from "../../../utils/welcomeMessage";
+import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
@@ -37,11 +37,11 @@ export class WelcomeMessageChannelSelectMenu extends ChannelSelectMenuInteractio
 
     const field = interaction.customId.slice(customIdPrefix.length);
 
-    if (!isWelcomeMessageField(field)) {
+    if (!WelcomeMessenger.isField(field)) {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    const channelField = welcomeMessageLabels[field].channelField;
+    const channelField = WelcomeMessenger.labels[field].channelField;
 
     await this.core.guild.saveSetting({ guildId: guild.id, [channelField]: options.channelId });
 

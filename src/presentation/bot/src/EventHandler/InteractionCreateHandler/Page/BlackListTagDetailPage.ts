@@ -7,7 +7,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 
-import { encodeBlackListTagRef } from "../../../utils/blackList";
+import { encodeBlackListTagRef } from "../../../utils/lists/blackList";
 
 export async function blackListTagDetailPage(
   core: AppCore,

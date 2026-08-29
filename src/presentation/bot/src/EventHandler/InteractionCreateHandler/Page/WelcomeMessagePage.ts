@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { WELCOME_MESSAGE_FIELDS, welcomeMessageLabels } from "../../../utils/welcomeMessage";
+import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function welcomeMessagePage(
@@ -25,8 +25,8 @@ export async function welcomeMessagePage(
       "以下から設定したい種類を選択してください。チャンネルを未設定にすると通知はOFFになります。",
     )
     .addFields(
-      WELCOME_MESSAGE_FIELDS.flatMap((field) => {
-        const label = welcomeMessageLabels[field];
+      WelcomeMessenger.FIELDS.flatMap((field) => {
+        const label = WelcomeMessenger.labels[field];
         const channelId = settings?.[label.channelField];
         const content = settings?.[label.contentField];
 
@@ -49,9 +49,9 @@ export async function welcomeMessagePage(
     .setCustomId("welcomeMessageCategory")
     .setPlaceholder("設定する種類を選択")
     .addOptions(
-      WELCOME_MESSAGE_FIELDS.map((field) =>
+      WelcomeMessenger.FIELDS.map((field) =>
         new StringSelectMenuOptionBuilder()
-          .setLabel(welcomeMessageLabels[field].shortLabel)
+          .setLabel(WelcomeMessenger.labels[field].shortLabel)
           .setValue(field),
       ),
     );

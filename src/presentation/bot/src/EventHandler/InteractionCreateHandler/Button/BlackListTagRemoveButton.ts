@@ -7,7 +7,7 @@ import {
   type MessagePayload,
 } from "discord.js";
 
-import { BlackListTagRefSchema, decodeBlackListTagRef } from "../../../utils/blackList";
+import { BlackListTagRefSchema, decodeBlackListTagRef } from "../../../utils/lists/blackList";
 import { ValidateError, validator } from "../../../utils/validator";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { PermissionError } from "../Base/Error/PermissionError";

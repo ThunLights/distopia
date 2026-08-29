@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
-import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/blackList";
+import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/lists/blackList";
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { PermissionError } from "../Base/Error/PermissionError";
 import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";

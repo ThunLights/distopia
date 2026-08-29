@@ -29,7 +29,7 @@ import {
   parseBlackListTagsInput,
   truncateSelectMenuLabel,
   type BlackListPermission,
-} from "../../../utils/blackList";
+} from "../../../utils/lists/blackList";
 import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { PermissionError } from "../Base/Error/PermissionError";

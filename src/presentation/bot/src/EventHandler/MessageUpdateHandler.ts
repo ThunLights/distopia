@@ -1,6 +1,6 @@
 import type { Message, OmitPartialGroupDMChannel, PartialMessage } from "discord.js";
 
-import { detectSpamMessage } from "../utils/message";
+import { detectSpamMessage } from "../utils/moderation/spamDetector";
 import { BaseHandler } from "./BaseHandler";
 
 export class MessageUpdateHandler extends BaseHandler<

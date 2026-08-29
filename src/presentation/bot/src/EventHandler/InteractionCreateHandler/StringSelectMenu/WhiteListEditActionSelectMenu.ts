@@ -8,11 +8,11 @@ import {
   type StringSelectMenuInteraction,
 } from "discord.js";
 
-import { ValidateError, validator } from "../../../utils/validator";
 import {
   WhiteListEditActionSchema,
   decodeWhiteListEditActionValue,
-} from "../../../utils/whiteList";
+} from "../../../utils/lists/whiteList";
+import { ValidateError, validator } from "../../../utils/validator";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { whiteListDetailPage } from "../Page/WhiteListDetailPage";

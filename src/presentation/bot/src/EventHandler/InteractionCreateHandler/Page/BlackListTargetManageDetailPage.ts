@@ -11,7 +11,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 
-import { buildBlackListFieldValue, truncateSelectMenuLabel } from "../../../utils/blackList";
+import { buildBlackListFieldValue, truncateSelectMenuLabel } from "../../../utils/lists/blackList";
 import { encodeIdPageRef, paginate } from "../../../utils/pagination";
 
 export async function blackListTargetManageDetailPage(

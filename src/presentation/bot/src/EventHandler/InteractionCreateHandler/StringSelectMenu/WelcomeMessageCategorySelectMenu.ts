@@ -14,7 +14,7 @@ import {
   EmbedBuilder,
 } from "discord.js";
 
-import { isWelcomeMessageField, welcomeMessageLabels } from "../../../utils/welcomeMessage";
+import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
@@ -34,14 +34,14 @@ export class WelcomeMessageCategorySelectMenu extends StringSelectMenuInteractio
 
     const { value } = options;
 
-    if (!isWelcomeMessageField(value)) {
+    if (!WelcomeMessenger.isField(value)) {
       return {
         content: `${value}は無効な選択肢です`,
         flags: [MessageFlags.Ephemeral],
       };
     }
 
-    const label = welcomeMessageLabels[value];
+    const label = WelcomeMessenger.labels[value];
     const settings = await this.core.guild.getSetting(guild.id);
     const currentChannelId = settings?.[label.channelField];
     const currentContent = settings?.[label.contentField];

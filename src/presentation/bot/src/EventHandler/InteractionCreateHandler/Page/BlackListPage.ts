@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 
-import { buildBlackListFieldValue } from "../../../utils/blackList";
+import { buildBlackListFieldValue } from "../../../utils/lists/blackList";
 import { paginate } from "../../../utils/pagination";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 

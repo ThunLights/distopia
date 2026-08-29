@@ -8,8 +8,8 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
+import { WhiteListTargetSchema, decodeWhiteListTargetValue } from "../../../utils/lists/whiteList";
 import { ValidateError, validator } from "../../../utils/validator";
-import { WhiteListTargetSchema, decodeWhiteListTargetValue } from "../../../utils/whiteList";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 import { whiteListPage } from "../Page/WhiteListPage";

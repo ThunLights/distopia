@@ -1,6 +1,6 @@
 import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
 
-import { findRecentAuditLogEntry } from "../utils/auditLog";
+import { findRecentAuditLogEntry } from "../utils/logging/auditLog";
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildMemberUpdateHandler extends BaseHandler<

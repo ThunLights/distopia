@@ -8,7 +8,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 
-import { buildBlackListFieldValue } from "../../../utils/blackList";
+import { buildBlackListFieldValue } from "../../../utils/lists/blackList";
 import { encodeIdPageRef, paginate } from "../../../utils/pagination";
 
 export async function blackListShowPage(
