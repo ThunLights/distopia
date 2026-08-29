@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
+  import DiscordIcon from "../Guild/DiscordIcon.svelte";
   import type { Snippet } from "svelte";
 
   type Props = {
@@ -13,16 +13,14 @@
   };
 
   const { id, name, icon, activeMemberCount, memberCount, children }: Props = $props();
+
+  const iconUrl = $derived(icon ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp` : null);
 </script>
 
 <div class="guild">
   <div>
     <a href={resolve(`/user/guilds/${id}`)}>
-      <img
-        class="icon"
-        src={icon ? `https://cdn.discordapp.com/icons/${id}/${icon}.webp` : DiscordIcon}
-        alt=""
-      />
+      <DiscordIcon {iconUrl} size={128} alt="" class="icon" />
     </a>
   </div>
   <div>
@@ -49,7 +47,7 @@
   .guild {
     margin-top: 10px;
   }
-  .guild .icon {
+  .guild :global(.icon) {
     height: 64px;
     border-radius: 50%;
   }

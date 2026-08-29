@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import { joinGuild } from "$lib/client/join";
   import type { UserAuth } from "$lib/shared/types/UserAuth";
   import LinkButton from "../Button/LinkButton.svelte";
@@ -36,12 +35,7 @@
       <a href={resolve(`/guilds/${guildId}`)} class="no-text-decoration">
         <div class="guild-info">
           <div>
-            <Icon
-              height="60px"
-              width="60px"
-              iconPath={iconUrl ?? DiscordIcon}
-              rank={rank ?? undefined}
-            />
+            <Icon height="60px" width="60px" {iconUrl} rank={rank ?? undefined} />
           </div>
           <div>
             <p class="guild-name">

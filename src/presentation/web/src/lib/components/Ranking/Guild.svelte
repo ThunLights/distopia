@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
+  import DiscordIcon from "../Guild/DiscordIcon.svelte";
   import Icon from "../Guild/Icon.svelte";
 
   type Props = {
@@ -34,9 +34,9 @@
   <div>
     <a class="white" href={resolve(`/guilds/${guildId}`)}>
       {#if useFrameIcon}
-        <Icon width="10vw" height="10vw" iconPath={iconUrl ?? DiscordIcon} rank={index + 1} />
+        <Icon width="10vw" height="10vw" {iconUrl} size={256} rank={index + 1} />
       {:else}
-        <img class="icon" src={iconUrl ?? DiscordIcon} alt="" />
+        <DiscordIcon {iconUrl} size={256} alt="" class="icon" />
       {/if}
     </a>
   </div>
@@ -63,7 +63,7 @@
     font-size: 20px;
     font-weight: 700;
   }
-  .guild .icon {
+  .guild :global(.icon) {
     border-radius: 50%;
     width: 10vw;
   }
