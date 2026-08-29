@@ -14,6 +14,8 @@ import {
 } from "discord.js";
 import z from "zod";
 
+import { codeBlock } from "../../../utils/codeblock";
+import { getCpuUsagePercent } from "../../../utils/cpuUsage";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 
@@ -88,10 +90,34 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
 
       return { embeds: [embed], components: [row], flags: [MessageFlags.Ephemeral] };
     } else if (subCommand === "status") {
+      const cpuPercent = await getCpuUsagePercent();
+      const { rss, heapUsed, heapTotal } = process.memoryUsage();
+      const toMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(1).padStart(7);
+
       const embed = new EmbedBuilder()
         .setColor("Gold")
-        .setTitle("ステータス")
-        .setDescription(`ping: ${interaction.client.ws.ping}`);
+        .setTitle("📊 ステータス")
+        .addFields(
+          {
+            name: "🏓 WebSocket Ping",
+            value: await codeBlock(`${interaction.client.ws.ping}ms`),
+            inline: true,
+          },
+          {
+            name: "⚙️ CPU使用率",
+            value: await codeBlock(`${cpuPercent}%`),
+            inline: true,
+          },
+          {
+            name: "🧠 メモリ使用量",
+            value: await codeBlock(
+              [`RSS : ${toMB(rss)} MB`, `Heap: ${toMB(heapUsed)} / ${toMB(heapTotal)} MB`].join(
+                "\n",
+              ),
+            ),
+            inline: false,
+          },
+        );
       return {
         embeds: [embed],
         flags: [MessageFlags.Ephemeral],
