@@ -1,7 +1,15 @@
 # Anti-loop: the update-manifest step in workflowtemplate.yaml pushes its own commit to
 # main (to bump the image tag), which would otherwise re-trigger this same Sensor forever.
-# The exprs filter below rejects any push whose head commit message starts with
-# "chore(deploy):" -- the exact prefix that step always uses.
+# The data filter below rejects any push whose head commit author email matches the deploy
+# bot's committer identity (git config user.email, set in workflowtemplate.yaml's
+# update-manifest step).
+#
+# This used to be an exprs filter matching a "chore(deploy):" commit-message prefix, but two
+# different expr syntaxes (Python-style slicing, then the startsWith operator) both failed
+# to parse against whatever expr engine build is actually bundled in this Argo Events
+# install ("Cannot transition token types..." lexer errors) -- which silently discarded
+# *every* push event, including legitimate ones, since Argo Events drops events on filter
+# error. Plain data filters (exact-match/comparator) are simpler and have never hit this.
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -25,11 +33,11 @@ spec:
             type: string
             value:
               - thunlights/distopia
-        exprs:
-          - expr: "!(headCommitMessage startsWith 'chore(deploy):')"
-            fields:
-              - name: headCommitMessage
-                path: body.head_commit.message
+          - path: body.head_commit.author.email
+            type: string
+            comparator: "!="
+            value:
+              - distopia-deploy-bot@users.noreply.github.com
   triggers:
     - template:
         name: trigger-build-deploy

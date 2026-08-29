@@ -218,8 +218,8 @@ spec:
             memory: 1Gi
 
     # 4. Bump k8s/app's pinned image tag and push to main -- Argo CD (auto-sync + self-heal)
-    #    picks this commit up and rolls the Deployment. The commit message prefix is what
-    #    sensor.yaml's exprs filter checks to avoid re-triggering itself.
+    #    picks this commit up and rolls the Deployment. The git committer email set below is
+    #    what sensor.yaml's data filter checks (author.email) to avoid re-triggering itself.
     - name: update-manifest
       inputs:
         parameters:
