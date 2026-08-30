@@ -2,6 +2,10 @@
 @import "tailwindcss/utilities" layer(utilities);
 
 :root {
+  /* The whole app is dark-themed; declaring this lets layerchart's own light-dark()-based
+     surface defaults (and native form control / scrollbar styling) resolve correctly. */
+  color-scheme: dark;
+
   --body-background-color: #313338;
   --a-tag-color: #6969d5;
 }
@@ -35,14 +39,18 @@ a {
 }
 
 .lc-root-container {
-  /* Default marks color when not using explicit color or color scale */
-  --color-primary: var(--color-sky-700);
+  /* Default marks color when not using explicit color or color scale -- brightened from
+     sky-700 (calibrated for a light background) so the line/area is actually visible against
+     this page's dark background instead of reading as a near-black smudge. */
+  --color-primary: var(--color-sky-400);
 
-  /* Progressively darker shades representing surfaces (backgrounds). */
-  --color-surface-100: var(--color-white);
-  --color-surface-200: var(--color-gray-100);
-  --color-surface-300: var(--color-gray-300);
+  /* Progressively more prominent shades representing surfaces (backgrounds), remapped into
+     the dark palette to match the page instead of rendering a light panel on a dark page. */
+  --color-surface-100: var(--color-gray-700);
+  --color-surface-200: var(--color-gray-800);
+  --color-surface-300: var(--color-gray-900);
 
-  /* Content (text) color */
-  --color-surface-content: var(--color-gray-400);
+  /* Content (text/number) color -- matches the rest of the page's body text color instead of
+     the low-contrast default gray-400. */
+  --color-surface-content: rgb(207, 207, 207);
 }
