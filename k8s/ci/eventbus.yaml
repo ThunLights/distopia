@@ -1,11 +1,28 @@
-# Argo Events requires an EventBus (NATS) to exist in every namespace that has
-# EventSources/Sensors. This is the default, unconfigured single-node NATS bus -- fine
-# for a single low-traffic webhook.
+# Argo Events requires an EventBus to exist in every namespace that has EventSources/Sensors.
+#
+# This used to be `nats: native: {}` (NATS Streaming / STAN, the legacy backend). Migrated to
+# JetStream after an extensive investigation: EventSource->EventBus delivery was repeatedly
+# confirmed via STAN's own /streaming/channelsz admin endpoint (last_sent caught up to
+# last_seq, pending_count 0, is_stalled false) for every single push, yet the Sensor showed
+# zero trace -- not even at LOG_LEVEL=debug -- of ever receiving those messages. RBAC,
+# NetworkPolicy, and the Sensor's filters were all separately ruled out. STAN is also formally
+# deprecated upstream and known to have connection-level flakiness (repeated heartbeat
+# timeouts / forced reconnects were observed on this exact bus throughout the investigation).
+# JetStream is Argo Events' actively maintained, recommended EventBus backend -- switching
+# requires no changes to eventsource.yaml or sensor.yaml, since they only reference this
+# EventBus by name and the client wiring is handled by the controller.
 apiVersion: argoproj.io/v1alpha1
 kind: EventBus
 metadata:
   name: default
   namespace: distopia
 spec:
-  nats:
-    native: {}
+  jetstream:
+    version: latest
+    # Matches the previous STAN setup's replica count.
+    replicas: 3
+    # Low-traffic single webhook doesn't need much storage, but JetStream (unlike STAN)
+    # always requires a persistent volume.
+    persistence:
+      storageClassName: local-path
+      volumeSize: 1Gi
