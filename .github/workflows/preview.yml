@@ -27,6 +27,11 @@ env:
 
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
+  SENTRY_ORG: thunlights
+  SENTRY_PROJECT: distopia-ci
+  PUBLIC_SENTRY_DSN: https://c00b15c8dde94b7a50f0706b6ec3d7ed@o4511148812599296.ingest.us.sentry.io/4511955775455232
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
   PAGE_DIR: pr-preview-${{ github.event.pull_request.number }}
 
 jobs:

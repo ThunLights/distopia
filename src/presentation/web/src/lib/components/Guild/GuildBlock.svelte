@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
   import Block from "$lib/components/Block.svelte";
   import type { UserAuth } from "$lib/shared/types/UserAuth";
   import BlockTitle from "./BlockTitle.svelte";
@@ -51,7 +50,7 @@
 <Block>
   <div class="guild-info">
     <div>
-      <Icon width={128} height={128} rank={activeRateRank} iconPath={iconUrl ?? DiscordIcon} />
+      <Icon width={128} height={128} rank={activeRateRank} {iconUrl} size={256} />
     </div>
     <div>
       <p class="guild-name">

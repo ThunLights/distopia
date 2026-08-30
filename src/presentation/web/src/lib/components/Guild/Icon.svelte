@@ -5,17 +5,20 @@
   import No10Frame from "$lib/assets/ranking/10.webp";
   import No30Frame from "$lib/assets/ranking/30.webp";
   import No50Frame from "$lib/assets/ranking/50.webp";
+  import type { DiscordIconSize } from "$lib/utils/discordIcon";
+  import DiscordIcon from "./DiscordIcon.svelte";
   import IconWithFrame from "./IconWithFrame.svelte";
 
   type Props = {
     height: number | string;
     width: number | string;
     rank?: number;
-    iconPath: string;
+    iconUrl: string | null | undefined;
+    size?: DiscordIconSize;
     imgStyle?: string;
   };
 
-  const { imgStyle, iconPath, rank, height, width }: Props = $props();
+  const { imgStyle, iconUrl, size = 128, rank, height, width }: Props = $props();
 
   const framePaddingRatio = 0.2;
 
@@ -30,7 +33,7 @@
 </script>
 
 {#if rank && rank <= 50}
-  <IconWithFrame {height} {width} {iconPath} {imgStyle} edgePath={genFrame(rank)} />
+  <IconWithFrame {height} {width} {iconUrl} {size} {imgStyle} edgePath={genFrame(rank)} />
 {:else}
   <div
     class="guild-icon-wrapper"
@@ -41,7 +44,7 @@
       `padding: ${framePaddingRatio * 100}%`,
     ].join("; ")}
   >
-    <img class="guild-icon" src={iconPath} alt="guild icon" />
+    <DiscordIcon {iconUrl} {size} alt="guild icon" class="guild-icon" />
   </div>
 {/if}
 
@@ -50,7 +53,7 @@
     box-sizing: border-box;
   }
 
-  .guild-icon {
+  :global(.guild-icon) {
     display: block;
     width: 100%;
     height: 100%;
