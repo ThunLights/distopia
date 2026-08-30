@@ -19,7 +19,7 @@
 
 <div class="guild">
   <div>
-    <a href={resolve(`/user/guilds/${id}`)}>
+    <a href={resolve(`/user/guilds/${id}`)} aria-label={name}>
       <DiscordIcon {iconUrl} size={128} alt="" class="icon" />
     </a>
   </div>

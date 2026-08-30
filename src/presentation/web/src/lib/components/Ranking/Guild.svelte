@@ -32,7 +32,7 @@
 
 <div class="guild">
   <div>
-    <a class="white" href={resolve(`/guilds/${guildId}`)}>
+    <a class="white" href={resolve(`/guilds/${guildId}`)} aria-label={name}>
       {#if useFrameIcon}
         <Icon width="10vw" height="10vw" {iconUrl} size={256} rank={index + 1} />
       {:else}
