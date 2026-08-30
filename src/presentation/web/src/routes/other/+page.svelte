@@ -29,4 +29,10 @@
     <SubTitle content="スタッフ一覧" />
     <a href={resolve("/staff")}>https://distopia.top/staff</a>
   </div>
+  <div>
+    <SubTitle content="GitHubリポジトリ" />
+    <a href="https://github.com/ThunLights/distopia" rel="external"
+      >https://github.com/ThunLights/distopia</a
+    >
+  </div>
 </Block>
