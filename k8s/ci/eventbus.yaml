@@ -18,11 +18,19 @@ metadata:
   namespace: distopia
 spec:
   jetstream:
-    version: latest
-    # Matches the previous STAN setup's replica count.
+    # Pinned rather than "latest": that alias is resolved through the cluster's
+    # argo-events-controller-config ConfigMap and can silently move to a different NATS
+    # server image on a future argo-events upgrade, independent of this file. "latest"
+    # happens to currently map to this exact version, so pinning it changes nothing today.
+    version: "2.10.10"
+    # Matches the previous STAN setup's replica count. This is a single-node k3s cluster
+    # (every pod so far has landed on the one node) -- pod anti-affinity for spreading these
+    # 3 replicas across nodes would just leave 2 of them permanently unschedulable, so it's
+    # intentionally omitted. Revisit if a second node is ever added.
     replicas: 3
-    # Low-traffic single webhook doesn't need much storage, but JetStream (unlike STAN)
-    # always requires a persistent volume.
+    # Persistence is optional for JetStream (it falls back to an ephemeral volume without
+    # it), but is set here so events survive a pod restart/crash instead of being lost -- a
+    # low-traffic single webhook doesn't need much storage.
     persistence:
       storageClassName: local-path
       volumeSize: 1Gi
