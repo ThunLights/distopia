@@ -76,7 +76,7 @@
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "jsonwebtoken": "9.0.3",
-    "layerchart": "2.1.0",
+    "layerchart": "2.3.1",
     "presentation-bot": "workspace:*",
     "repo-memory": "workspace:*",
     "repo-search": "workspace:*",
