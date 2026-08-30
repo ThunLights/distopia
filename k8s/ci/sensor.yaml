@@ -18,6 +18,15 @@ spec:
   eventBusName: default
   template:
     serviceAccountName: distopia-sensor-sa
+    # Diagnostic: RBAC, NetworkPolicy, and EventBus delivery have all been verified healthy
+    # (STAN's channelsz confirms messages are delivered to this Sensor's own subscription),
+    # yet no Workflow is ever created and the default "info" log level shows nothing at all
+    # for these events -- not even a trigger-execution error. Bumping to debug to see what
+    # actually happens inside trigger execution.
+    container:
+      env:
+        - name: LOG_LEVEL
+          value: debug
   dependencies:
     - name: github-push
       eventSourceName: github
