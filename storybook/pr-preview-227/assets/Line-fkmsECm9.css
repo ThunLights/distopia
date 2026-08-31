@@ -1,0 +1,1 @@
+@layer base{:where(.lc-layout-svg .lc-line,svg.lc-line):not([stroke]){stroke:var(--stroke-color)}:where(.lc-line){--stroke-color:var(--color-surface-content,currentColor)}:where(.lc-layout-html .lc-line):not([background-color]){background-color:var(--stroke-color)}}
