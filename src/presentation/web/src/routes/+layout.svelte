@@ -10,9 +10,12 @@
 <SvelteToast />
 <svelte:head>
   <script>
-    window.partytown = { forward: ["dataLayer.push"] };
+    // partytown.js defaults to its debug (unminified) build unless `debug` is explicitly false --
+    // "%partytown.debug%" (quoted so this stays valid, parseable JS) is replaced with the real
+    // boolean literal in hooks.server.ts, so production doesn't ship the debug build to visitors.
+    window.partytown = { forward: ["dataLayer.push"], debug: "%partytown.debug%" };
   </script>
-  <script src="/~partytown/partytown.js?{encodeURIComponent(data.partytownVersion)}"></script>
+  <script src="/~partytown/partytown.js?v=%partytown.version%"></script>
   <script
     async
     fetchpriority="low"
