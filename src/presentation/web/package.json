@@ -31,7 +31,7 @@
     "@storybook/addon-docs": "10.5.7",
     "@storybook/addon-svelte-csf": "5.1.2",
     "@storybook/addon-vitest": "10.5.7",
-    "@storybook/sveltekit": "10.5.7",
+    "@storybook/sveltekit": "10.5.10",
     "@sveltejs/adapter-node": "5.5.7",
     "@sveltejs/enhanced-img": "0.11.0",
     "@sveltejs/kit": "2.70.2",
