@@ -106,8 +106,12 @@ export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }
 
   const response = await resolve(event);
 
-  response.headers.set("Cache-Control", "no-store");
-  response.headers.set("Pragma", "no-cache");
+  // /~partytown/* sets its own long-lived, version-busted Cache-Control (see its +server.ts) --
+  // forcing no-store here would defeat that caching entirely.
+  if (!event.url.pathname.startsWith("/~partytown/")) {
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("Pragma", "no-cache");
+  }
 
   return response;
 }) satisfies Handle);
