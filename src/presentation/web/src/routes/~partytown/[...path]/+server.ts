@@ -1,3 +1,4 @@
+import { dev } from "$app/environment";
 import type { RequestHandler } from "./$types";
 import { libDirPath } from "@qwik.dev/partytown/utils";
 import { error } from "@sveltejs/kit";
@@ -20,7 +21,9 @@ export const GET: RequestHandler = async ({ params }) => {
     error(404, "Not found");
   }
 
-  const dir = libDirPath({ debugDir: params.path.includes("debug/") });
+  // The debug build is unminified (readable variable names, source-mappable), which is worth the
+  // extra weight while developing but not in production.
+  const dir = libDirPath({ debugDir: dev });
 
   try {
     const body = await readFile(join(dir, fileName));
