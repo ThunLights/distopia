@@ -1,4 +1,3 @@
-import { partytownVite } from "@qwik.dev/partytown/utils";
 import { sentrySvelteKit } from "@sentry/sveltekit";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { enhancedImages } from "@sveltejs/enhanced-img";
@@ -30,7 +29,6 @@ export default defineConfig({
     tailwindcss(),
     enhancedImages(),
     sveltekit(),
-    partytownVite({}),
     devtoolsJson(),
   ],
   server: {

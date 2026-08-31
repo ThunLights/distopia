@@ -1,13 +1,31 @@
+import { dev } from "$app/environment";
 import { env as privateEnv } from "$env/dynamic/private";
 import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
 import { schedule } from "$lib/server/schedule";
+import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { handleClient } from "presentation-bot";
+
+// +layout.svelte embeds these literal tokens in its partytown <script> tags; substituted below
+// so they never become part of PageData -- that would make them required fields on every route's
+// mock `data` in Storybook (see +layout.server.ts, which stays free of this on purpose).
+//
+// - PARTYTOWN_VERSION_PLACEHOLDER: the installed package version, appended as a `?v=` query
+//   param so the URL changes (safely busting the long-lived cache set by its +server.ts)
+//   whenever @qwik.dev/partytown is upgraded.
+// - PARTYTOWN_DEBUG_PLACEHOLDER: partytown.js defaults to its debug (unminified) build unless
+//   `debug` is explicitly `false` -- this keeps it in sync with the +server.ts route, which
+//   serves the debug build only when running the dev server.
+const PARTYTOWN_VERSION_PLACEHOLDER = "%partytown.version%";
+// Quoted (`"..."`) in +layout.svelte so the inline <script> stays valid, parseable JS; the quotes
+// are stripped here too so the substituted value lands as a real boolean literal, not a string.
+const PARTYTOWN_DEBUG_PLACEHOLDER = '"%partytown.debug%"';
+const partytownVersion = dependencies["@qwik.dev/partytown"];
 
 process.on("uncaughtException", async (error) => {
   console.error(error);
@@ -104,10 +122,19 @@ export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }
     }
   }
 
-  const response = await resolve(event);
+  const response = await resolve(event, {
+    transformPageChunk: ({ html }) =>
+      html
+        .replaceAll(PARTYTOWN_VERSION_PLACEHOLDER, partytownVersion)
+        .replaceAll(PARTYTOWN_DEBUG_PLACEHOLDER, String(dev)),
+  });
 
-  response.headers.set("Cache-Control", "no-store");
-  response.headers.set("Pragma", "no-cache");
+  // /~partytown/* sets its own long-lived, version-busted Cache-Control (see its +server.ts) --
+  // forcing no-store here would defeat that caching entirely.
+  if (!event.url.pathname.startsWith("/~partytown/")) {
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("Pragma", "no-cache");
+  }
 
   return response;
 }) satisfies Handle);
