@@ -1,10 +1,10 @@
 <script lang="ts">
-  import No1Frame from "$lib/assets/ranking/1.webp";
-  import No2Frame from "$lib/assets/ranking/2.webp";
-  import No3Frame from "$lib/assets/ranking/3.webp";
-  import No10Frame from "$lib/assets/ranking/10.webp";
-  import No30Frame from "$lib/assets/ranking/30.webp";
-  import No50Frame from "$lib/assets/ranking/50.webp";
+  import No1Frame from "$lib/assets/ranking/mini/1.webp";
+  import No2Frame from "$lib/assets/ranking/mini/2.webp";
+  import No3Frame from "$lib/assets/ranking/mini/3.webp";
+  import No10Frame from "$lib/assets/ranking/mini/10.webp";
+  import No30Frame from "$lib/assets/ranking/mini/30.webp";
+  import No50Frame from "$lib/assets/ranking/mini/50.webp";
   import type { DiscordIconSize } from "$lib/utils/discordIcon";
   import DiscordIcon from "./DiscordIcon.svelte";
   import IconWithFrame from "./IconWithFrame.svelte";
