@@ -1,8 +1,7 @@
 import { env } from "$env/dynamic/public";
-import { handleErrorWithSentry, replayIntegration } from "@sentry/sveltekit";
-import * as Sentry from "@sentry/sveltekit";
+import { getClient, handleErrorWithSentry, init } from "@sentry/sveltekit";
 
-Sentry.init({
+init({
   dsn: env.PUBLIC_SENTRY_DSN,
 
   tracesSampleRate: 1.0,
@@ -18,8 +17,7 @@ Sentry.init({
   // sessions when an error occurs.
   replaysOnErrorSampleRate: 1.0,
 
-  // If you don't want to use Session Replay, just remove the line below:
-  integrations: [replayIntegration()],
+  // Session Replay is added lazily below instead of listed here -- see loadReplay().
 
   dataCollection: {
     // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
@@ -28,6 +26,24 @@ Sentry.init({
     // httpBodies: [],
   },
 });
+
+// Session Replay is one of the heaviest parts of the Sentry SDK. Referencing `replayIntegration`
+// only inside this dynamic import (never via a static import elsewhere in this file) keeps it out
+// of the eagerly-loaded entry chunk that every page load has to parse and execute -- it ends up in
+// its own chunk, fetched only once the page has settled. This doesn't change which sessions
+// actually get recorded, since that's still governed by replaysSessionSampleRate/
+// replaysOnErrorSampleRate above, read whenever the integration is added.
+function loadReplay() {
+  import("@sentry/sveltekit").then(({ replayIntegration }) => {
+    getClient()?.addIntegration(replayIntegration());
+  });
+}
+
+if (typeof requestIdleCallback === "function") {
+  requestIdleCallback(loadReplay);
+} else {
+  setTimeout(loadReplay, 4000);
+}
 
 // If you have a custom error handler, pass it to `handleErrorWithSentry`
 export const handleError = handleErrorWithSentry();
