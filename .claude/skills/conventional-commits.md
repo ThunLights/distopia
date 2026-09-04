@@ -13,7 +13,7 @@ this doc is only about message *format*.
 
 ## Format
 
-```
+```text
 <type>[(scope)]: <short imperative summary>
 
 [optional body — explain WHY, not WHAT; the diff already shows what changed]
@@ -80,7 +80,7 @@ change to deploy configuration instead.
 
 Commits made via `/open-pr` or `/auto-commit-and-push` end with:
 
-```
+```text
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 

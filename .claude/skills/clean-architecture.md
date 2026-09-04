@@ -11,7 +11,7 @@ the system. See also [[ddd]], [[solid]], [[dry]].
 
 ## How distopia's directories map to this
 
-```
+```text
 src/presentation/  →  src/application/  →  src/domain/
   bot, web              core, schedule       model, repository
                                     ↑

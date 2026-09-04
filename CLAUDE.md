@@ -170,7 +170,8 @@ Turborepo manages task execution order and caching across packages. The key prin
 build     → dependsOn: ["^build"]           (dependencies build before dependents)
 test      → dependsOn: ["build", "^test"]   (same package must build first)
 typecheck → dependsOn: ["^typecheck"]
-lint / format → no dependencies
+lint      → dependsOn: ["^lint"]
+format    → dependsOn: ["^format"]
 ```
 
 To run a task scoped to one package:
@@ -193,8 +194,8 @@ bun run build -- --force
 ```bash
 cd docker
 
-# Unit tests (per package)
-docker compose exec app bun run test
+# Unit tests (per package) — sudo because "test" depends on "build" (turbo.json), which writes to the workspace
+docker compose exec app sudo bun run test
 
 # Web E2E tests (Playwright)
 docker compose exec app sh -c "cd src/presentation/web && npx playwright test"
@@ -329,7 +330,12 @@ All interaction handlers extend a base class and override `exec`. The base class
 routing, error replies, and permission checks.
 
 ```typescript
-import { MessageFlags, type ChatInputCommandInteraction, type CacheType } from "discord.js";
+import {
+  MessageFlags,
+  type ChatInputCommandInteraction,
+  type CacheType,
+  type PermissionResolvable,
+} from "discord.js";
 import { ChatInputCommandInteractionBase } from "../Base/ChatInputCommandInteractionBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 
@@ -532,13 +538,13 @@ regenerated on every `bun run build`.**
 1. **Edit the schema** — modify `prisma/schema.prisma`.
 2. **Format and validate**:
    ```bash
-   cd src/infrastructure/database && bunx prisma format
-   cd src/infrastructure/database && bunx prisma validate
+   cd src/infrastructure/database && sudo bunx prisma format
+   cd src/infrastructure/database && sudo bunx prisma validate
    ```
 3. **Generate migration** (interactive — run in a devcontainer shell):
    ```bash
    cd src/infrastructure/database
-   bunx prisma migrate dev --name <kebab-case-description>
+   sudo bunx prisma migrate dev --name <kebab-case-description>
    ```
    Examples: `add-guild-setting-bump-channel`, `add-user-web-verify-key`. This creates
    `prisma/migrations/<timestamp>_<name>/migration.sql` — commit this file to git.
@@ -618,6 +624,15 @@ if (url === null) return; // invalid — not http/https or malformed
 // NEVER: rawString as SafeUrl — bypasses all validation
 ```
 
+> **Known gap:** `validateSafeUrl` accepts `http:` and `https:` equally, and `safeFetch`/
+> `safeFetchForDiscord` forward whatever `Authorization`/`Cookie` headers the caller passes in
+> `init.headers` on the *initial* request without checking the URL's protocol (redirects are
+> handled separately — see step 7 below). Sending credential headers to a plain `http://` URL
+> means they travel in cleartext. No current call site does this, but nothing in the package
+> stops a future one from doing so. If you're adding a call that needs auth headers, use an
+> `https://` URL; hardening `safeFetch` itself to reject this combination is a real change to
+> a security-sensitive package and should be its own reviewed PR, not a docs edit.
+
 ### SSRF / DNS Rebinding Protection Architecture
 
 `safeFetch` applies these protections in order:
@@ -643,8 +658,11 @@ import {
 } from "infra-http";
 
 const result = await safeFetch(url);
-if (result instanceof LocalAddressError) { /* ... */ }
-// else: Response
+if (result instanceof Error) {
+  // LocalAddressError | HeaderError | RedirectError | BodySizeError — all extend Error directly
+  return;
+}
+// else: result is Response
 ```
 
 ### isUsedCf
