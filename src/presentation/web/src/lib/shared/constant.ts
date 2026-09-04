@@ -27,7 +27,7 @@ export type Staff = {
 
 export type Supporter = {
   name: string;
-  invite: string;
+  invite: string | null;
   icon: string;
 };
 

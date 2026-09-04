@@ -123,6 +123,10 @@ export class AppCore extends Base {
     await this.updateHomeGuildDirectorsRole(homeGuildId, directorsRoleId);
     await this.updateHomeGuildSubDirectorsRole(homeGuildId, subDirectorsRoleId);
   }
+
+  public isSupportServerId(guildId: string): boolean {
+    return guildId === this.state.supportServerId;
+  }
 }
 
 export * from "./types/UserBumpRanking";

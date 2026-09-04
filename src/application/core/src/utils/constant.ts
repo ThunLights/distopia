@@ -1,6 +1,6 @@
 export type SupporterServer = {
   name: string;
-  invite: string;
+  invite: string | null;
 };
 
 export type Staff = {
