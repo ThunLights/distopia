@@ -14,9 +14,11 @@
   </div>
   <div>
     <p>{supporter.name}</p>
-    <p>
-      <a href={supporter.invite} rel="external">{supporter.invite}</a>
-    </p>
+    {#if supporter.invite}
+      <p>
+        <a href={supporter.invite} rel="external">{supporter.invite}</a>
+      </p>
+    {/if}
   </div>
 </div>
 
