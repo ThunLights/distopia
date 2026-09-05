@@ -25,11 +25,8 @@ type Options = z.infer<typeof OptionsSchema>;
 
 export class DictionaryCommand extends ChatInputCommandBase<Options> {
   // Personal dictionary entries only matter where the read-aloud feature (TtsCommand /
-  // TtsAdminCommand) is actually available -- keep the same home/support server restriction.
-  public override availableGuildId: readonly string[] = [
-    this.core.state.homeServerId,
-    this.core.state.supportServerId,
-  ];
+  // TtsAdminCommand) is actually available -- keep the same home server restriction.
+  public override availableGuildId: string | null = this.core.state.homeServerId;
 
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "dictionary",

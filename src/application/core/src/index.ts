@@ -131,10 +131,6 @@ export class AppCore extends Base {
   public isHomeServerId(guildId: string): boolean {
     return guildId === this.state.homeServerId;
   }
-
-  public isSupportServerId(guildId: string): boolean {
-    return guildId === this.state.supportServerId;
-  }
 }
 
 export * from "./types/UserBumpRanking";

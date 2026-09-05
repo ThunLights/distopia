@@ -31,14 +31,9 @@ export type AppState = {
     id: string;
   };
   // The project's main/official Discord server (PUBLIC_HOME_SERVER_ID) -- was previously
-  // (mis)named `supportServerId` despite never having sourced from a support-server-specific
-  // env var. Kept distinct from `supportServerId` below, which is the actual dedicated
-  // user-support server.
+  // (mis)named `supportServerId`, which read confusingly close to the unrelated "Supporter"
+  // feature (app-core/constant's supportersKeyValue, third-party partner orgs' servers).
   homeServerId: string;
-  // The project's dedicated user-support Discord server (PUBLIC_SUPPORT_SERVER_ID) -- distinct
-  // from `homeServerId`. Also distinct from the unrelated "Supporter" feature
-  // (app-core/constant's supportersKeyValue), which lists third-party partner orgs, not this.
-  supportServerId: string;
   url: string;
   memory: {
     latelimit: {

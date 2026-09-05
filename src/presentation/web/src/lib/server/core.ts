@@ -16,7 +16,6 @@ export function genCore(state: AppState) {
 export const core = genCore({
   owner: { id: env.PUBLIC_OWNER_ID! },
   homeServerId: env.PUBLIC_HOME_SERVER_ID!,
-  supportServerId: env.PUBLIC_SUPPORT_SERVER_ID!,
   url: env.PUBLIC_URL!,
   memory,
   searchEngine,
