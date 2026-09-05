@@ -64,14 +64,26 @@ export function handleClient(client: Client, core: AppCore) {
       }
     }
 
-    await client.rest.put(`/applications/${client.user.id}/commands`, {
-      body: commands,
-    });
+    try {
+      await client.rest.put(`/applications/${client.user.id}/commands`, {
+        body: commands,
+      });
+    } catch (error) {
+      console.error("[commands] failed to register global commands", error);
+    }
 
     for (const [guildId, guildCommands] of specificGuildCommands) {
-      await client.rest.put(`/applications/${client.user.id}/guilds/${guildId}/commands`, {
-        body: guildCommands,
-      });
+      try {
+        await client.rest.put(`/applications/${client.user.id}/guilds/${guildId}/commands`, {
+          body: guildCommands,
+        });
+      } catch (error) {
+        // One guild's registration failing (e.g. the bot was removed from a supporter
+        // server, or was never invited with the applications.commands scope there --
+        // Discord returns 403 "Missing Access") must not abort registration for every
+        // other guild in this loop, including the home server.
+        console.error(`[commands] failed to register commands for guild ${guildId}`, error);
+      }
     }
   });
 
