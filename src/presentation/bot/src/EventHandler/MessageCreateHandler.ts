@@ -21,7 +21,14 @@ export class MessageCreateHandler extends BaseHandler<
     }
 
     if (message.guildId) {
-      await this.readAloud(message.guildId, message);
+      try {
+        await this.readAloud(message.guildId, message);
+      } catch (error) {
+        // A TTS-side failure (DB lookup, dictionary resolution, etc.) must not reject this
+        // handler -- the messageCreate listener has no catch, so an uncaught rejection here
+        // would only surface as an unlogged-context unhandledRejection at the process level.
+        console.error("[tts] failed to process message for read-aloud", error);
+      }
     }
   }
 
@@ -55,6 +62,8 @@ export class MessageCreateHandler extends BaseHandler<
     const text = this.core.tts.truncateForReading(substituted);
     const speakerId = await this.core.tts.getEffectiveSpeakerId(guildId, message.author.id);
 
-    enqueue(guildId, text, speakerId, (word, speaker) => this.core.tts.synthesize(word, speaker));
+    enqueue(guildId, message.channelId, text, speakerId, (word, speaker) =>
+      this.core.tts.synthesize(word, speaker),
+    );
   }
 }

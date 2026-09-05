@@ -5,7 +5,10 @@ export const MESSAGE_CONTENT_LIMIT = 2000;
 // an omission note naming how many lines were left out. Used for list-style replies
 // (dictionary/ignore-list entries) whose item count isn't bounded by anything else, so a
 // large server could otherwise produce a reply Discord rejects outright.
-export function joinLinesWithinLimit(lines: string[], maxLength: number = MESSAGE_CONTENT_LIMIT): string {
+export function joinLinesWithinLimit(
+  lines: string[],
+  maxLength: number = MESSAGE_CONTENT_LIMIT,
+): string {
   let result = "";
   let included = 0;
 

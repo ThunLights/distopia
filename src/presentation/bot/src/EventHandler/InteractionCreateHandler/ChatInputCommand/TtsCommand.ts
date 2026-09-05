@@ -113,7 +113,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       if (!isJoined(guild.id)) {
         return { content: "読み上げは開始されていません。", flags: [MessageFlags.Ephemeral] };
       }
-      leave(guild.id);
+      await leave(guild.id);
       return { content: "読み上げを終了しました。", flags: [MessageFlags.Ephemeral] };
     }
 

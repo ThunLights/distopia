@@ -1,3 +1,5 @@
+import { Readable } from "node:stream";
+
 import {
   type AudioPlayer,
   AudioPlayerStatus,
@@ -10,7 +12,6 @@ import {
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 import type { VoiceBasedChannel } from "discord.js";
-import { Readable } from "node:stream";
 
 // Process-local, in-memory only -- these hold live discord.js voice objects tied to this
 // process's WebSocket/UDP connections, which can't survive (or be meaningfully persisted
