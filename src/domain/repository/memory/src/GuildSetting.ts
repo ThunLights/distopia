@@ -33,6 +33,9 @@ export type GuildSettingValue = {
   statChannelBots: string | null;
   statChannelActiveRate: string | null;
   statChannelActiveRateRanking: string | null;
+  ttsDefaultSpeakerId: number | null;
+  ttsSkipUrl: boolean;
+  ttsSkipCodeBlock: boolean;
   createdAt: Date;
 };
 

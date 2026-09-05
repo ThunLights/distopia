@@ -12,7 +12,8 @@ export abstract class ChatInputCommandBase<
     RESTPostAPIChatInputApplicationCommandsJSONBody,
 > extends CommandInteractionBase<O, ChatInputCommandInteraction<CacheType>> {
   public abstract readonly register: T;
-  public readonly availableGuildId: string | null = null;
+  // A single guild ID, multiple guild IDs (registered to each), or null for a global command.
+  public readonly availableGuildId: string | readonly string[] | null = null;
 
   public override async match(
     interaction: ChatInputCommandInteraction<CacheType>,

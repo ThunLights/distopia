@@ -110,6 +110,7 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=PUBLIC_URL='https://distopia.top' \
   --from-literal=PUBLIC_OWNER_ID='...' \
   --from-literal=PUBLIC_HOME_SERVER_ID='...' \
+  --from-literal=PUBLIC_SUPPORT_SERVER_ID='...' \
   --from-literal=PUBLIC_STAFF_ROLE_ID='...' \
   --from-literal=PUBLIC_HONORARY_MEMBER_ROLE_ID='...' \
   --from-literal=PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID='...' \

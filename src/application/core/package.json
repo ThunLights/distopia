@@ -41,7 +41,9 @@
     "infra-discord": "workspace:*",
     "infra-http": "workspace:*",
     "repo-memory": "workspace:*",
-    "repo-search": "workspace:*"
+    "repo-search": "workspace:*",
+    "smol-toml": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

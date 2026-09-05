@@ -23,6 +23,7 @@ vi.mock("$env/dynamic/public", () => ({
     PUBLIC_URL: "http://localhost:3000",
     PUBLIC_OWNER_ID: "0",
     PUBLIC_HOME_SERVER_ID: "0",
+    PUBLIC_SUPPORT_SERVER_ID: "0",
     PUBLIC_STAFF_ROLE_ID: "0",
     PUBLIC_HONORARY_MEMBER_ROLE_ID: "0",
     PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "0",

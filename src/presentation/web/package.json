@@ -64,6 +64,7 @@
     "vitest-browser-svelte": "3.0.0"
   },
   "dependencies": {
+    "@discordjs/voice": "catalog:",
     "@fontsource/inter": "5.3.0",
     "@fontsource/open-sans": "5.3.0",
     "@qwik.dev/partytown": "0.14.0",
@@ -73,11 +74,14 @@
     "app-schedule": "workspace:*",
     "discord.js": "catalog:",
     "dotenv": "17.4.2",
+    "ffmpeg-static": "catalog:",
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "jsonwebtoken": "9.0.3",
     "layerchart": "2.3.1",
+    "opusscript": "catalog:",
     "presentation-bot": "workspace:*",
+    "prism-media": "catalog:",
     "repo-memory": "workspace:*",
     "repo-search": "workspace:*",
     "super-sitemap": "2.0.6",
