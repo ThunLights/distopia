@@ -52,9 +52,16 @@ export function handleClient(client: Client, core: AppCore) {
         continue;
       }
 
-      const guildCommands = specificGuildCommands.get(command.availableGuildId) ?? [];
-      guildCommands.push(command.register);
-      specificGuildCommands.set(command.availableGuildId, guildCommands);
+      const guildIds =
+        typeof command.availableGuildId === "string"
+          ? [command.availableGuildId]
+          : command.availableGuildId;
+
+      for (const guildId of guildIds) {
+        const guildCommands = specificGuildCommands.get(guildId) ?? [];
+        guildCommands.push(command.register);
+        specificGuildCommands.set(guildId, guildCommands);
+      }
     }
 
     await client.rest.put(`/applications/${client.user.id}/commands`, {

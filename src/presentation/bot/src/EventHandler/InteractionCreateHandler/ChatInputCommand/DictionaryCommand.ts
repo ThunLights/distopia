@@ -1,3 +1,4 @@
+import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import {
   ApplicationCommandOptionType,
   MessageFlags,
@@ -25,8 +26,11 @@ type Options = z.infer<typeof OptionsSchema>;
 
 export class DictionaryCommand extends ChatInputCommandBase<Options> {
   // Personal dictionary entries only matter where the read-aloud feature (TtsCommand /
-  // TtsAdminCommand) is actually available -- keep the same home server restriction.
-  public override availableGuildId: string | null = this.core.state.homeServerId;
+  // TtsAdminCommand) is actually available -- keep the same guild restriction.
+  public override availableGuildId: readonly string[] = [
+    this.core.state.homeServerId,
+    ...SUPPORTER_SERVER_GUILD_IDS,
+  ];
 
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "dictionary",

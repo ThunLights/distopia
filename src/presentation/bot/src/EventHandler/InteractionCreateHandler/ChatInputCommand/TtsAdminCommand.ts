@@ -1,3 +1,4 @@
+import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import {
   ApplicationCommandOptionType,
   AttachmentBuilder,
@@ -61,8 +62,12 @@ type Options = z.infer<typeof OptionsSchema>;
 export class TtsAdminCommand extends ChatInputCommandBase<Options> {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   // Free, unauthenticated, rate-limited VOICEVOX TTS Quest API -- restrict availability to the
-  // home server so other guilds can't exhaust the shared quota.
-  public override availableGuildId: string | null = this.core.state.homeServerId;
+  // home server and the supporter organizations' servers so other guilds can't exhaust the
+  // shared quota.
+  public override availableGuildId: readonly string[] = [
+    this.core.state.homeServerId,
+    ...SUPPORTER_SERVER_GUILD_IDS,
+  ];
 
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "tts-admin",
