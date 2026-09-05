@@ -1,5 +1,3 @@
-import { Readable } from "node:stream";
-
 import {
   type AudioPlayer,
   AudioPlayerStatus,
@@ -12,6 +10,7 @@ import {
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 import type { VoiceBasedChannel } from "discord.js";
+import { Readable } from "node:stream";
 
 // Process-local, in-memory only -- these hold live discord.js voice objects tied to this
 // process's WebSocket/UDP connections, which can't survive (or be meaningfully persisted
@@ -29,6 +28,30 @@ type TtsSession = {
 
 const sessions = new Map<string, TtsSession>();
 
+// Caps how many messages can be waiting for synthesis+playback at once. Without this, a
+// burst of messages arriving faster than the serial worker drains them (nothing upstream
+// rate-limits ordinary, non-spam-flagged messages) could grow the queue without bound.
+const MAX_QUEUE_LENGTH = 20;
+
+// Serializes join/leave for a given guild so a second `/tts join` can't start establishing a
+// new connection before a concurrent one has finished storing its session -- without this, the
+// loser's connection could be created, immediately orphaned (never entered into `sessions`,
+// never destroyed), or overwrite the winner's entry right after it's set.
+const lifecycleLocks = new Map<string, Promise<unknown>>();
+
+function withLifecycleLock<T>(guildId: string, task: () => Promise<T>): Promise<T> {
+  const previous = lifecycleLocks.get(guildId) ?? Promise.resolve();
+  const run = previous.then(task, task);
+  lifecycleLocks.set(
+    guildId,
+    run.then(
+      () => undefined,
+      () => undefined,
+    ),
+  );
+  return run;
+}
+
 export function getSession(guildId: string): TtsSession | undefined {
   return sessions.get(guildId);
 }
@@ -37,11 +60,12 @@ export function isJoined(guildId: string): boolean {
   return sessions.has(guildId);
 }
 
-export async function join(
-  voiceChannel: VoiceBasedChannel,
-  textChannelId: string,
-): Promise<boolean> {
-  leave(voiceChannel.guildId);
+export function join(voiceChannel: VoiceBasedChannel, textChannelId: string): Promise<boolean> {
+  return withLifecycleLock(voiceChannel.guildId, () => joinNow(voiceChannel, textChannelId));
+}
+
+async function joinNow(voiceChannel: VoiceBasedChannel, textChannelId: string): Promise<boolean> {
+  leaveNow(voiceChannel.guildId);
 
   const connection = joinVoiceChannel({
     channelId: voiceChannel.id,
@@ -79,7 +103,14 @@ export async function join(
   return true;
 }
 
-export function leave(guildId: string): void {
+export function leave(guildId: string): Promise<void> {
+  return withLifecycleLock(guildId, () => {
+    leaveNow(guildId);
+    return Promise.resolve();
+  });
+}
+
+function leaveNow(guildId: string): void {
   const session = sessions.get(guildId);
   if (!session) {
     return;
@@ -97,14 +128,27 @@ export type Synthesizer = (
 
 // Enqueues one message's text for synthesis+playback, preserving arrival order even though
 // synthesis takes real time -- the queue is drained strictly one item at a time.
+//
+// `expectedTextChannelId` must still match the session's binding at the moment of enqueueing,
+// not just when the caller first looked the session up -- the caller may have awaited several
+// lookups (dictionary resolution, TTS settings) in between, during which a `/tts leave` +
+// `/tts join` to a different channel could have replaced the session entirely. Without this
+// recheck, a message read under the old session's authority could get queued into a
+// different one.
 export function enqueue(
   guildId: string,
+  expectedTextChannelId: string,
   text: string,
   speakerId: number,
   synthesize: Synthesizer,
 ): void {
   const session = sessions.get(guildId);
-  if (!session) {
+  if (!session || session.textChannelId !== expectedTextChannelId) {
+    return;
+  }
+
+  if (session.queue.length >= MAX_QUEUE_LENGTH) {
+    console.error(`[tts] queue full for guild ${guildId}, dropping message`);
     return;
   }
 

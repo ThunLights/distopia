@@ -121,13 +121,19 @@ export class Dictionary extends Base {
     entries: Record<string, string>,
     mode: DictionaryImportMode,
   ): Promise<number> {
-    if (mode === "replace") {
-      await this.state.database.guildDictionary.deleteAll(guildId);
-    }
-
     const words = Object.entries(entries);
-    for (const [word, reading] of words) {
-      await this.state.database.guildDictionary.upsert({ guildId, word, reading });
+
+    if (mode === "replace") {
+      // Atomic: delete + recreate in one transaction, so a failure partway through rolls
+      // back rather than leaving the dictionary emptied with only some entries restored.
+      await this.state.database.guildDictionary.replaceAll(
+        guildId,
+        words.map(([word, reading]) => ({ word, reading })),
+      );
+    } else {
+      for (const [word, reading] of words) {
+        await this.state.database.guildDictionary.upsert({ guildId, word, reading });
+      }
     }
 
     this.state.memory.guildDictionary.delete(guildId);

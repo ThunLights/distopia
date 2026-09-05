@@ -15,6 +15,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
+import { joinLinesWithinLimit } from "../../../utils/discordLimits";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -318,7 +319,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
         return { content: "サーバー辞書は空です。", flags: [MessageFlags.Ephemeral] };
       }
       return {
-        content: entries.map(({ word: w, reading: r }) => `${w} → ${r}`).join("\n"),
+        content: joinLinesWithinLimit(entries.map(({ word: w, reading: r }) => `${w} → ${r}`)),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -394,12 +395,10 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
       if (list.length === 0) {
         return { content: "読み上げ対象外の設定はありません。", flags: [MessageFlags.Ephemeral] };
       }
-      const content = list
-        .map(
-          (entry) => `${entry.idType === "UserId" ? "ユーザー" : "チャンネル"}: ${entry.targetId}`,
-        )
-        .join("\n");
-      return { content, flags: [MessageFlags.Ephemeral] };
+      const lines = list.map(
+        (entry) => `${entry.idType === "UserId" ? "ユーザー" : "チャンネル"}: ${entry.targetId}`,
+      );
+      return { content: joinLinesWithinLimit(lines), flags: [MessageFlags.Ephemeral] };
     }
 
     return null;

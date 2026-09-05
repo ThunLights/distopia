@@ -11,6 +11,7 @@ import {
 } from "discord.js";
 import z from "zod";
 
+import { joinLinesWithinLimit } from "../../../utils/discordLimits";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 
@@ -118,8 +119,8 @@ export class DictionaryCommand extends ChatInputCommandBase<Options> {
       if (entries.length === 0) {
         return { content: "登録された単語はありません。", flags: [MessageFlags.Ephemeral] };
       }
-      const content = entries.map(({ word: w, reading: r }) => `${w} → ${r}`).join("\n");
-      return { content, flags: [MessageFlags.Ephemeral] };
+      const lines = entries.map(({ word: w, reading: r }) => `${w} → ${r}`);
+      return { content: joinLinesWithinLimit(lines), flags: [MessageFlags.Ephemeral] };
     }
 
     return { content: "コマンドが見つかりませんでした", flags: [MessageFlags.Ephemeral] };
