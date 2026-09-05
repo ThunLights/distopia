@@ -23,11 +23,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@discordjs/voice": "catalog:",
+    "@noble/ciphers": "catalog:",
     "@standard-schema/spec": "catalog:",
     "app-core": "workspace:*",
     "deepmerge": "4.3.1",
     "discord.js": "catalog:",
     "domain-model": "workspace:*",
+    "ffmpeg-static": "catalog:",
+    "opusscript": "catalog:",
+    "prism-media": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

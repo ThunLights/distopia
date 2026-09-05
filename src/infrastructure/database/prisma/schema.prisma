@@ -15,8 +15,19 @@ datasource db {
 }
 
 model User {
-  userId      String @id
-  bumpCounter Int?
+  userId       String @id
+  bumpCounter  Int?
+  ttsSpeakerId Int?
+}
+
+model UserDictionary {
+  userId    String
+  word      String
+  reading   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, word])
 }
 
 model UserWeb {
@@ -122,6 +133,33 @@ model GuildSetting {
   statChannelBots              String?
   statChannelActiveRate        String?
   statChannelActiveRateRanking String?
+  ttsDefaultSpeakerId          Int?
+  ttsSkipUrl                   Boolean @default(true)
+  ttsSkipCodeBlock             Boolean @default(true)
+}
+
+model GuildDictionary {
+  guildId   String
+  word      String
+  reading   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([guildId, word])
+}
+
+model GuildTtsIgnoreList {
+  guildId   String
+  targetId  String
+  idType    TtsIgnoreIdType
+  createdAt DateTime        @default(now())
+
+  @@id([guildId, targetId])
+}
+
+enum TtsIgnoreIdType {
+  UserId
+  ChannelId
 }
 
 model GuildWhiteList {

@@ -1,6 +1,10 @@
 export type SupporterServer = {
   name: string;
   invite: string | null;
+  // The supporter organization's own Discord server. Not a secret (guild IDs are public), and
+  // separate from `invite` since an invite link can expire/rotate independently of the guild
+  // itself.
+  guildId: string;
 };
 
 export type Staff = {
@@ -16,18 +20,22 @@ export const supportersKeyValue = {
   bread: {
     name: "クリームパンと愉快な仲間たち",
     invite: "https://discord.gg/De8T2NS74X",
+    guildId: "903952397292953630",
   },
   cappuccino: {
     name: "Cappuccino",
     invite: "https://discord.gg/cappuccino",
+    guildId: "999943767509434439",
   },
   hima: {
     name: "暇人鯖",
     invite: "https://discord.gg/8v43tgwvfQ",
+    guildId: "957886649583415296",
   },
   lemon: {
     name: "大檸檬帝国",
     invite: "https://discord.gg/BgZddsVPMH",
+    guildId: "838734004718665758",
   },
 };
 
@@ -37,6 +45,10 @@ export const supporters = [
   supportersKeyValue.hima,
   supportersKeyValue.lemon,
 ] as const satisfies Array<SupporterServer>;
+
+export const SUPPORTER_SERVER_GUILD_IDS: string[] = supporters.map(
+  (supporter) => supporter.guildId,
+);
 
 export const staffsKeyValue = {
   robot: {

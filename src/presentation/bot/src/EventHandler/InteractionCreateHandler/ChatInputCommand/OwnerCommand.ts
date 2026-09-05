@@ -43,7 +43,7 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
       },
     ],
   };
-  public override availableGuildId: string | null = this.core.state.supportServerId;
+  public override availableGuildId: string | null = this.core.state.homeServerId;
 
   public override async parseOptions(
     interaction: ChatInputCommandInteraction<CacheType>,
