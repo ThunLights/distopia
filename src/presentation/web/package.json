@@ -27,7 +27,7 @@
     "@fjst/core": "0.4.0",
     "@fjst/sveltekit": "0.4.0",
     "@playwright/test": "1.62.1",
-    "@storybook/addon-a11y": "10.5.7",
+    "@storybook/addon-a11y": "10.5.10",
     "@storybook/addon-docs": "10.5.7",
     "@storybook/addon-svelte-csf": "5.1.2",
     "@storybook/addon-vitest": "10.5.7",
