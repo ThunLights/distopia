@@ -100,11 +100,23 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
         };
       }
 
-      const joined = await join(voiceChannel, interaction.channelId);
+      // join() can take several seconds to establish the voice connection -- well past
+      // Discord's 3-second interaction-ack window. Reply immediately and report the actual
+      // outcome via a follow-up instead of awaiting join() before returning; awaiting it here
+      // previously caused "Unknown interaction" (10062) once the connection attempt ran long.
+      void join(voiceChannel, interaction.channelId)
+        .then((joined) =>
+          interaction.followUp({
+            content: joined
+              ? `${voiceChannel.name} で読み上げを開始しました。`
+              : "ボイスチャンネルへの接続に失敗しました。",
+            flags: [MessageFlags.Ephemeral],
+          }),
+        )
+        .catch((error) => console.error("[tts] failed to send join follow-up", error));
+
       return {
-        content: joined
-          ? `${voiceChannel.name} で読み上げを開始しました。`
-          : "ボイスチャンネルへの接続に失敗しました。",
+        content: `${voiceChannel.name} への接続を試みています…`,
         flags: [MessageFlags.Ephemeral],
       };
     }
