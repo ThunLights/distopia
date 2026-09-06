@@ -74,9 +74,6 @@ async function joinNow(voiceChannel: VoiceBasedChannel, textChannelId: string): 
     adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     selfDeaf: true,
     selfMute: false,
-    // Avoids depending on @snazzah/davey's native binary at runtime for E2EE we don't need --
-    // this bot only reads public channel text aloud, not anything privacy-sensitive.
-    daveEncryption: false,
   });
 
   const player = createAudioPlayer();
