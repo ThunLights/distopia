@@ -308,17 +308,60 @@ spec:
             git config user.name "distopia-deploy-bot"
             git config user.email "distopia-deploy-bot@users.noreply.github.com"
             git remote set-url origin "https://x-access-token:${GIT_PUSH_TOKEN}@github.com/thunlights/distopia.git"
-            # clone/checkout above pinned the exact triggering revision (for a reproducible
-            # build); main may have moved since, so rebase onto its current tip before
-            # committing the tag bump, rather than pushing on top of a stale base.
-            git fetch origin main
-            git checkout -B main origin/main
-            cd k8s/app
-            kustomize edit set image "distopia-registry.distopia.svc.cluster.local:5000/distopia={{inputs.parameters.image}}"
-            cd /workspace/src
-            git add k8s/app/kustomization.yaml
-            git commit -m "chore(deploy): bump distopia to {{inputs.parameters.short-sha}}"
-            git push origin HEAD:main
+            # Two commits landing on main close together (not rare -- e.g. several PRs merged
+            # back-to-back) each spawn their own Workflow instance, and build-push durations
+            # aren't ordered, so the one for the OLDER commit can finish (and reach this step)
+            # after the one for the NEWER commit already pushed. Retrying the whole
+            # fetch/rebase/edit/commit/push cycle -- instead of doing it once -- means every
+            # attempt re-evaluates against main's actual current tip rather than state a
+            # concurrent push may have already made stale.
+            attempt=1
+            while :; do
+              git fetch origin main
+              git checkout -B main origin/main
+
+              # Guards the semantic half of the same race: even once this attempt is pushing
+              # against a fresh base, main might already carry a deploy for a commit NEWER
+              # than the one this workflow is building (that other run simply finished first).
+              # Comparing ancestry, not the short-sha strings themselves, since short-shas have
+              # no ordering of their own -- a short-sha only tells you which commit, not
+              # whether it's newer.
+              current_sha="$(grep 'newTag:' k8s/app/kustomization.yaml 2>/dev/null | awk '{print $2}' || true)"
+              if [ -n "$current_sha" ] && ! git merge-base --is-ancestor "$current_sha" "{{workflow.parameters.revision}}"; then
+                echo "main already has a deploy at or ahead of this revision (currently $current_sha) -- skipping, not deploying backwards."
+                exit 0
+              fi
+
+              cd k8s/app
+              kustomize edit set image "distopia-registry.distopia.svc.cluster.local:5000/distopia={{inputs.parameters.image}}"
+              cd /workspace/src
+              git add k8s/app/kustomization.yaml
+
+              # Idempotency: a re-run for a revision that's already the deployed image tag (a
+              # manual retry, or a duplicate/delayed webhook delivery) stages no actual change
+              # here. `git commit` on a clean tree exits 1, and under `set -e` above that would
+              # fail this whole step for no real problem -- checked explicitly instead, so
+              # "nothing to deploy" is a no-op, not an error.
+              if git diff --cached --quiet; then
+                echo "kustomization.yaml already points at this image -- nothing to deploy."
+                exit 0
+              fi
+
+              git commit -m "chore(deploy): bump distopia to {{inputs.parameters.short-sha}}"
+              if git push origin HEAD:main; then
+                exit 0
+              fi
+
+              if [ "$attempt" -ge 5 ]; then
+                echo "push rejected after $attempt attempts, giving up" >&2
+                exit 1
+              fi
+              echo "push rejected (attempt $attempt) -- another run updated main first, retrying against its new tip"
+              # No explicit reset needed here: the next iteration's `git checkout -B main
+              # origin/main` already discards this attempt's local commit and re-points main
+              # at the fresh fetch.
+              attempt=$((attempt + 1))
+            done
         env:
           - name: GIT_PUSH_TOKEN
             valueFrom:
