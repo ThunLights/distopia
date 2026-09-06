@@ -10,7 +10,32 @@ import z from "zod";
 
 import { Base } from "./Base";
 
-const DictionaryRecordSchema = z.record(z.string(), z.string());
+// Shared by both the personal (/tts dictionary) and guild (/tts-admin dictionary) slash
+// command options' max_length -- a single source of truth so the two can't drift out of
+// sync (they previously did: the guild command had no cap at all). Also the authoritative
+// bound for file-based imports below, which don't go through Discord's own option
+// validation at all.
+export const DICTIONARY_WORD_MAX_LENGTH = 50;
+export const DICTIONARY_READING_MAX_LENGTH = 50;
+
+// A dictionary file (JSON/TOML) is attacker-influenceable in a way slash command options
+// aren't: it's explicitly meant to be exported from one server and imported into another
+// (see importFromUrl below), so a file that looks like a normal shared dictionary could
+// have been tampered with in transit. Without a cap, a single import could carry far more
+// entries than any real dictionary would, turning importGuildDictionary's per-entry
+// upsert loop (or replaceAll's transaction) into a long-running or oversized operation that
+// blocks the bot+web process (they're one process -- see hooks.server.ts) for every guild,
+// not just the one being imported into.
+const MAX_IMPORT_ENTRIES = 1000;
+
+const DictionaryRecordSchema = z
+  .record(
+    z.string().min(1).max(DICTIONARY_WORD_MAX_LENGTH),
+    z.string().min(1).max(DICTIONARY_READING_MAX_LENGTH),
+  )
+  .refine((record) => Object.keys(record).length <= MAX_IMPORT_ENTRIES, {
+    message: `too many entries (max ${MAX_IMPORT_ENTRIES})`,
+  });
 
 export type DictionaryExportFormat = "json" | "toml";
 export type DictionaryImportMode = "merge" | "replace";

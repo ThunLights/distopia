@@ -74,4 +74,31 @@ describe("Dictionary export/import round-trip", () => {
   test("parseImport returns null when values aren't all strings", () => {
     expect(dictionary.parseImport(JSON.stringify({ word: 123 }), "json")).toBeNull();
   });
+
+  test("parseImport returns null for a word longer than the max length", () => {
+    const oversized = { [`a`.repeat(51)]: "reading" };
+    expect(dictionary.parseImport(JSON.stringify(oversized), "json")).toBeNull();
+  });
+
+  test("parseImport returns null for a reading longer than the max length", () => {
+    const oversized = { word: "a".repeat(51) };
+    expect(dictionary.parseImport(JSON.stringify(oversized), "json")).toBeNull();
+  });
+
+  test("parseImport returns null for an empty word or reading", () => {
+    expect(dictionary.parseImport(JSON.stringify({ "": "reading" }), "json")).toBeNull();
+    expect(dictionary.parseImport(JSON.stringify({ word: "" }), "json")).toBeNull();
+  });
+
+  test("parseImport returns null when the file has more entries than the import cap", () => {
+    const tooMany = Object.fromEntries(
+      Array.from({ length: 1001 }, (_, i) => [`word${i}`, "reading"]),
+    );
+    expect(dictionary.parseImport(JSON.stringify(tooMany), "json")).toBeNull();
+  });
+
+  test("parseImport accepts a file right at the import cap", () => {
+    const atCap = Object.fromEntries(Array.from({ length: 1000 }, (_, i) => [`word${i}`, "r"]));
+    expect(dictionary.parseImport(JSON.stringify(atCap), "json")).toEqual(atCap);
+  });
 });

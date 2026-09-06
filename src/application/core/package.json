@@ -8,6 +8,9 @@
     "./AppState": {
       "import": "./src/AppState.ts"
     },
+    "./Dictionary": {
+      "import": "./src/Dictionary.ts"
+    },
     "./staff": {
       "import": "./src/utils/staff.ts"
     },

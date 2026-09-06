@@ -1,4 +1,5 @@
 import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
+import { DICTIONARY_READING_MAX_LENGTH, DICTIONARY_WORD_MAX_LENGTH } from "app-core/Dictionary";
 import {
   ApplicationCommandOptionType,
   AttachmentBuilder,
@@ -93,12 +94,14 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
                 name: "word",
                 description: "登録する単語",
                 required: true,
+                max_length: DICTIONARY_WORD_MAX_LENGTH,
               },
               {
                 type: ApplicationCommandOptionType.String,
                 name: "reading",
                 description: "読み方",
                 required: true,
+                max_length: DICTIONARY_READING_MAX_LENGTH,
               },
             ],
           },
