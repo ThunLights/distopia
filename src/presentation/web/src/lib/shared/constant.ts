@@ -5,6 +5,7 @@ import twitterIcon from "$lib/assets/service/twitter.webp";
 import robotIcon from "$lib/assets/staff/robot.webp";
 import sumireIcon from "$lib/assets/staff/sumire.webp";
 import breadIcon from "$lib/assets/supporter/bread.webp";
+import bykIcon from "$lib/assets/supporter/byk.webp";
 import cappuccinoIcon from "$lib/assets/supporter/cappuccino.webp";
 import himaIcon from "$lib/assets/supporter/hima.webp";
 import lemonIcon from "$lib/assets/supporter/lemon.webp";
@@ -64,6 +65,10 @@ export const staffs = [
 ] satisfies Staff[];
 
 export const supporters = [
+  {
+    ...baseSupporters.byk,
+    icon: bykIcon,
+  },
   {
     ...baseSupporters.bread,
     icon: breadIcon,
