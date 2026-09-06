@@ -1,10 +1,8 @@
 import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import {
   ApplicationCommandOptionType,
-  EmbedBuilder,
   type CacheType,
   type ChatInputCommandInteraction,
-  type ColorResolvable,
   type InteractionCallbackResponse,
   type InteractionReplyOptions,
   type MessagePayload,
@@ -13,6 +11,7 @@ import {
 import z from "zod";
 
 import { joinLinesWithinLimit } from "../../../utils/discordLimits";
+import { ttsEmbed as embed } from "../../../utils/tts/embed";
 import { isJoined, join, leave } from "../../../utils/tts/session";
 import { FAMOUS_SPEAKERS, speakerName } from "../../../utils/tts/speakers";
 import { validator, type ValidateResult } from "../../../utils/validator";
@@ -21,16 +20,6 @@ import { GuildParseError } from "../Base/Error/GuildParseError";
 
 const WORD_MAX_LENGTH = 50;
 const READING_MAX_LENGTH = 50;
-
-function embed(
-  color: ColorResolvable,
-  title: string,
-  description: string,
-): InteractionReplyOptions {
-  return {
-    embeds: [new EmbedBuilder().setColor(color).setTitle(title).setDescription(description)],
-  };
-}
 
 const OptionsSchema = z.object({
   subCommandGroup: z.string().nullable(),

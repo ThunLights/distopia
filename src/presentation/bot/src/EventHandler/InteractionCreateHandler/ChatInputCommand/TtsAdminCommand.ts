@@ -16,6 +16,7 @@ import {
 import z from "zod";
 
 import { joinLinesWithinLimit } from "../../../utils/discordLimits";
+import { ttsEmbed as embed } from "../../../utils/tts/embed";
 import { FAMOUS_SPEAKERS, speakerName } from "../../../utils/tts/speakers";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
@@ -265,7 +266,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
   > {
     const guild = await this.parseGuild(interaction);
     if (guild instanceof GuildParseError) {
-      return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      return embed("Red", "エラー", guild.message);
     }
 
     const guildId = guild.id;
@@ -292,7 +293,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
       }
     }
 
-    return { content: "コマンドが見つかりませんでした", flags: [MessageFlags.Ephemeral] };
+    return embed("Red", "エラー", "コマンドが見つかりませんでした");
   }
 
   private async execDictionary(
@@ -305,23 +306,33 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "add" && word && reading) {
       await this.core.dictionary.addGuildEntry({ guildId, word, reading });
       return {
-        content: `サーバー辞書に登録しました: ${word} → ${reading}`,
+        ...embed("Green", "サーバー辞書登録", `サーバー辞書に登録しました: ${word} → ${reading}`),
         flags: [MessageFlags.Ephemeral],
       };
     }
 
     if (subCommand === "remove" && word) {
       await this.core.dictionary.removeGuildEntry(guildId, word);
-      return { content: `サーバー辞書から削除しました: ${word}`, flags: [MessageFlags.Ephemeral] };
+      return {
+        ...embed("Green", "サーバー辞書削除", `サーバー辞書から削除しました: ${word}`),
+        flags: [MessageFlags.Ephemeral],
+      };
     }
 
     if (subCommand === "list") {
       const entries = await this.core.dictionary.getGuildEntries(guildId);
       if (entries.length === 0) {
-        return { content: "サーバー辞書は空です。", flags: [MessageFlags.Ephemeral] };
+        return {
+          ...embed("Yellow", "サーバー辞書", "サーバー辞書は空です。"),
+          flags: [MessageFlags.Ephemeral],
+        };
       }
       return {
-        content: joinLinesWithinLimit(entries.map(({ word: w, reading: r }) => `${w} → ${r}`)),
+        ...embed(
+          "Blurple",
+          "サーバー辞書",
+          joinLinesWithinLimit(entries.map(({ word: w, reading: r }) => `${w} → ${r}`)),
+        ),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -332,7 +343,15 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
       const attachment = new AttachmentBuilder(Buffer.from(content, "utf-8"), {
         name: `dictionary.${format}`,
       });
-      return { files: [attachment], flags: [MessageFlags.Ephemeral] };
+      return {
+        ...embed(
+          "Blurple",
+          "サーバー辞書エクスポート",
+          `${entries.length}件の単語を出力しました。`,
+        ),
+        files: [attachment],
+        flags: [MessageFlags.Ephemeral],
+      };
     }
 
     if (subCommand === "import" && fileUrl && format && mode) {
@@ -342,10 +361,10 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
           result.error === "fetch_failed"
             ? "ファイルの取得に失敗しました。"
             : "ファイルの形式が正しくありません。";
-        return { content: message, flags: [MessageFlags.Ephemeral] };
+        return { ...embed("Red", "インポート失敗", message), flags: [MessageFlags.Ephemeral] };
       }
       return {
-        content: `${result.count}件の単語を取り込みました。`,
+        ...embed("Green", "サーバー辞書インポート", `${result.count}件の単語を取り込みました。`),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -363,7 +382,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "add-user" && userId) {
       await this.core.tts.addIgnore({ guildId, targetId: userId, idType: "UserId" });
       return {
-        content: "対象ユーザーを読み上げ対象外にしました。",
+        ...embed("Green", "読み上げ対象外設定", "対象ユーザーを読み上げ対象外にしました。"),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -371,7 +390,11 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "remove-user" && userId) {
       await this.core.tts.removeIgnore(guildId, userId);
       return {
-        content: "対象ユーザーを読み上げ対象外リストから外しました。",
+        ...embed(
+          "Green",
+          "読み上げ対象外設定",
+          "対象ユーザーを読み上げ対象外リストから外しました。",
+        ),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -379,7 +402,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "add-channel" && channelId) {
       await this.core.tts.addIgnore({ guildId, targetId: channelId, idType: "ChannelId" });
       return {
-        content: "対象チャンネルを読み上げ対象外にしました。",
+        ...embed("Green", "読み上げ対象外設定", "対象チャンネルを読み上げ対象外にしました。"),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -387,7 +410,11 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "remove-channel" && channelId) {
       await this.core.tts.removeIgnore(guildId, channelId);
       return {
-        content: "対象チャンネルを読み上げ対象外リストから外しました。",
+        ...embed(
+          "Green",
+          "読み上げ対象外設定",
+          "対象チャンネルを読み上げ対象外リストから外しました。",
+        ),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -395,12 +422,18 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "list") {
       const list = await this.core.tts.getIgnoreList(guildId);
       if (list.length === 0) {
-        return { content: "読み上げ対象外の設定はありません。", flags: [MessageFlags.Ephemeral] };
+        return {
+          ...embed("Yellow", "読み上げ対象外リスト", "読み上げ対象外の設定はありません。"),
+          flags: [MessageFlags.Ephemeral],
+        };
       }
       const lines = list.map(
         (entry) => `${entry.idType === "UserId" ? "ユーザー" : "チャンネル"}: ${entry.targetId}`,
       );
-      return { content: joinLinesWithinLimit(lines), flags: [MessageFlags.Ephemeral] };
+      return {
+        ...embed("Blurple", "読み上げ対象外リスト", joinLinesWithinLimit(lines)),
+        flags: [MessageFlags.Ephemeral],
+      };
     }
 
     return null;
@@ -416,7 +449,11 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "default-voice" && typeof speakerId === "number") {
       await this.core.tts.setGuildDefaultSpeaker(guildId, speakerId);
       return {
-        content: `サーバーのデフォルト読み上げ音声を ${speakerName(speakerId)} に設定しました。`,
+        ...embed(
+          "Green",
+          "サーバー設定",
+          `サーバーのデフォルト読み上げ音声を ${speakerName(speakerId)} に設定しました。`,
+        ),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -424,7 +461,11 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "skip-url" && typeof enabled === "boolean") {
       await this.core.tts.setSkipUrl(guildId, enabled);
       return {
-        content: `URLの読み上げ除外を${enabled ? "有効" : "無効"}にしました。`,
+        ...embed(
+          "Green",
+          "サーバー設定",
+          `URLの読み上げ除外を${enabled ? "有効" : "無効"}にしました。`,
+        ),
         flags: [MessageFlags.Ephemeral],
       };
     }
@@ -432,7 +473,11 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "skip-codeblock" && typeof enabled === "boolean") {
       await this.core.tts.setSkipCodeBlock(guildId, enabled);
       return {
-        content: `コードブロックの読み上げ除外を${enabled ? "有効" : "無効"}にしました。`,
+        ...embed(
+          "Green",
+          "サーバー設定",
+          `コードブロックの読み上げ除外を${enabled ? "有効" : "無効"}にしました。`,
+        ),
         flags: [MessageFlags.Ephemeral],
       };
     }
