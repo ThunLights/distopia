@@ -18,6 +18,7 @@ import type { Guild } from "./Guild";
 // first when a key is configured; any failure there (including running out of points) falls
 // back to the free v3 flow below rather than surfacing an error, so TTS keeps working either way.
 const DEFAULT_SPEAKER_ID = 1; // fallback matching the API doc's own example
+const DEFAULT_SKIP_COMMAND = "s"; // matches GuildSetting.ttsSkipCommand's DB default
 const MAX_SYNTHESIS_RETRIES = 3;
 const MAX_POLL_ATTEMPTS = 20;
 const POLL_INTERVAL_MS = 1500;
@@ -208,6 +209,18 @@ export class Tts extends Base {
 
   public async setSkipUrl(guildId: string, enabled: boolean): Promise<void> {
     await this.guild.saveSetting({ guildId, ttsSkipUrl: enabled });
+  }
+
+  // The word a member types in the read-aloud text channel to interrupt/skip whatever the
+  // bot is currently reading -- a plain chat message, not a slash command, so it works even
+  // mid-sentence without waiting for the current message to finish being read.
+  public async getSkipCommand(guildId: string): Promise<string> {
+    const setting = await this.guild.getSetting(guildId);
+    return setting?.ttsSkipCommand ?? DEFAULT_SKIP_COMMAND;
+  }
+
+  public async setSkipCommand(guildId: string, command: string): Promise<void> {
+    await this.guild.saveSetting({ guildId, ttsSkipCommand: command });
   }
 
   public async setSkipCodeBlock(guildId: string, enabled: boolean): Promise<void> {

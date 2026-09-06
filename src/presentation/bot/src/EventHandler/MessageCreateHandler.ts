@@ -1,7 +1,7 @@
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
 
 import { detectSpamMessage } from "../utils/moderation/spamDetector";
-import { enqueue, getSession } from "../utils/tts/session";
+import { enqueue, getSession, skip as skipCurrentPlayback } from "../utils/tts/session";
 import { BaseHandler } from "./BaseHandler";
 
 export class MessageCreateHandler extends BaseHandler<
@@ -39,6 +39,18 @@ export class MessageCreateHandler extends BaseHandler<
     const session = getSession(guildId);
     if (!session || session.textChannelId !== message.channelId) {
       return;
+    }
+
+    // A plain chat message matching the guild's configured skip word (default "s"), not a
+    // slash command -- lets anyone interrupt whatever's currently being read without waiting
+    // for it to finish. Checked before the ignore-list/filter pipeline below since it's a
+    // playback control action, not content to be read aloud.
+    if (!message.author.bot) {
+      const skipCommand = await this.core.tts.getSkipCommand(guildId);
+      if (message.content.trim().toLowerCase() === skipCommand.toLowerCase()) {
+        skipCurrentPlayback(guildId);
+        return;
+      }
     }
 
     const skip = await this.core.tts.shouldSkip(

@@ -59,6 +59,7 @@ const OptionsSchema = z.object({
   channelId: z.string().nullable(),
   speakerId: z.number().nullable(),
   enabled: z.boolean().nullable(),
+  skipCommand: z.string().nullable(),
 });
 type Options = z.infer<typeof OptionsSchema>;
 
@@ -208,6 +209,21 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
           },
           {
             type: ApplicationCommandOptionType.Subcommand,
+            name: "skip-command",
+            description: "読み上げをスキップする合言葉を設定します。",
+            options: [
+              {
+                type: ApplicationCommandOptionType.String,
+                name: "command",
+                description: "この文字列だけのメッセージで読み上げをスキップします",
+                required: true,
+                min_length: 1,
+                max_length: 20,
+              },
+            ],
+          },
+          {
+            type: ApplicationCommandOptionType.Subcommand,
             name: "skip-url",
             description: "URLを読み上げ対象外にするか設定します。",
             options: [
@@ -253,6 +269,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
         channelId: interaction.options.getChannel("channel", false)?.id ?? null,
         speakerId: interaction.options.getInteger("speaker_id", false),
         enabled: interaction.options.getBoolean("enabled", false),
+        skipCommand: interaction.options.getString("command", false),
       },
       OptionsSchema,
     );
@@ -444,7 +461,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     subCommand: string,
     options: Options,
   ): Promise<InteractionReplyOptions | null> {
-    const { speakerId, enabled } = options;
+    const { speakerId, enabled, skipCommand } = options;
 
     if (subCommand === "default-voice" && typeof speakerId === "number") {
       await this.core.tts.setGuildDefaultSpeaker(guildId, speakerId);
@@ -453,6 +470,18 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
           "Green",
           "サーバー設定",
           `サーバーのデフォルト読み上げ音声を ${speakerName(speakerId)} に設定しました。`,
+        ),
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
+    if (subCommand === "skip-command" && skipCommand) {
+      await this.core.tts.setSkipCommand(guildId, skipCommand);
+      return {
+        ...embed(
+          "Green",
+          "サーバー設定",
+          `読み上げのスキップ合言葉を「${skipCommand}」に設定しました。`,
         ),
         flags: [MessageFlags.Ephemeral],
       };

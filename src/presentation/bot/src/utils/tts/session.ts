@@ -119,6 +119,19 @@ function leaveNow(guildId: string): void {
   sessions.delete(guildId);
 }
 
+// Stops whatever's currently playing so processQueue's `entersState(..., Idle, ...)` wait
+// resolves immediately and moves on to the next queued item -- there's nothing else to
+// "skip" to if the queue is otherwise empty, this just cuts the current one short.
+export function skip(guildId: string): boolean {
+  const session = sessions.get(guildId);
+  if (!session || session.player.state.status !== AudioPlayerStatus.Playing) {
+    return false;
+  }
+
+  session.player.stop(true);
+  return true;
+}
+
 export type Synthesizer = (
   text: string,
   speakerId: number,

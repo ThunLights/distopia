@@ -134,6 +134,7 @@ model GuildSetting {
   statChannelActiveRate        String?
   statChannelActiveRateRanking String?
   ttsDefaultSpeakerId          Int?
+  ttsSkipCommand               String  @default("s")
   ttsSkipUrl                   Boolean @default(true)
   ttsSkipCodeBlock             Boolean @default(true)
 }

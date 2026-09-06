@@ -212,6 +212,7 @@ describe("GuildSetting.gc()", () => {
       statChannelActiveRate: null,
       statChannelActiveRateRanking: null,
       ttsDefaultSpeakerId: null,
+      ttsSkipCommand: "s",
       ttsSkipUrl: true,
       ttsSkipCodeBlock: true,
     };
