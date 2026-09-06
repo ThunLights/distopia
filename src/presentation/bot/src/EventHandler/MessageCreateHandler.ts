@@ -65,17 +65,70 @@ export class MessageCreateHandler extends BaseHandler<
 
     const filterSetting = await this.core.tts.getFilterSetting(guildId);
     const filtered = this.core.tts.stripFilteredPatterns(message.content, filterSetting);
+
+    let text: string;
     if (filtered.trim() === "") {
-      return;
+      // No text left to read -- normally means "skip", but a message that's only image/video
+      // attachment(s) (no caption at all) still deserves an announcement so listeners know
+      // something was posted, instead of silent gaps whenever someone shares a picture.
+      if (
+        !isMediaOnlyMessage(
+          message.content,
+          message.attachments.map((attachment) => attachment.contentType),
+        )
+      ) {
+        return;
+      }
+      text = "画像が送信されました";
+    } else {
+      const dictionary = await this.core.dictionary.resolve(guildId, message.author.id);
+      const substituted = this.core.dictionary.substitute(filtered, dictionary);
+      text = this.core.tts.truncateForReading(substituted);
     }
 
-    const dictionary = await this.core.dictionary.resolve(guildId, message.author.id);
-    const substituted = this.core.dictionary.substitute(filtered, dictionary);
-    const text = this.core.tts.truncateForReading(substituted);
+    // Prepended after truncation, not before -- it's short and always the same shape, so it
+    // should never itself be the thing that gets cut off, and the omission note on a long
+    // message still reflects just that message's own length.
+    const replyPrefix = await this.resolveReplyPrefix(message);
+
     const speakerId = await this.core.tts.getEffectiveSpeakerId(guildId, message.author.id);
 
-    enqueue(guildId, message.channelId, text, speakerId, (word, speaker) =>
+    enqueue(guildId, message.channelId, `${replyPrefix}${text}`, speakerId, (word, speaker) =>
       this.core.tts.synthesize(word, speaker),
     );
   }
+
+  private async resolveReplyPrefix(
+    message: OmitPartialGroupDMChannel<Message<boolean>>,
+  ): Promise<string> {
+    const repliedUser = message.mentions.repliedUser;
+    if (!repliedUser) {
+      return "";
+    }
+
+    // Prefer the guild-specific nickname (GuildMember.displayName) over the account's own
+    // display name -- falls back to the latter if the member already left the server.
+    const repliedMember = await message.guild?.members.fetch(repliedUser.id).catch(() => null);
+    const displayName = repliedMember?.displayName ?? repliedUser.displayName;
+    return `${displayName}のメッセージに返信しました。`;
+  }
+}
+
+// Pure and independently testable: true only when the message has no caption at all (checked
+// against the raw content, not the URL/codeblock-filtered text readAloud reads from) and every
+// attachment is an image or video. A caption that stripFilteredPatterns would remove entirely
+// (e.g. a bare URL with skipUrl on) still counts as "had a caption" here -- that message should
+// be skipped silently like any other fully-filtered text message, not announced as if there
+// were no caption to begin with.
+export function isMediaOnlyMessage(
+  rawContent: string,
+  attachmentContentTypes: (string | null)[],
+): boolean {
+  if (rawContent.trim() !== "" || attachmentContentTypes.length === 0) {
+    return false;
+  }
+
+  return attachmentContentTypes.every(
+    (contentType) => contentType?.startsWith("image/") || contentType?.startsWith("video/"),
+  );
 }
