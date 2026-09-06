@@ -31,6 +31,10 @@ export type GuildSetting = {
   statChannelBots: string | null;
   statChannelActiveRate: string | null;
   statChannelActiveRateRanking: string | null;
+  ttsDefaultSpeakerId: number | null;
+  ttsSkipCommand: string;
+  ttsSkipUrl: boolean;
+  ttsSkipCodeBlock: boolean;
 };
 
 export type GuildSettingUpdateInput = Pick<GuildSetting, "guildId"> & Partial<GuildSetting>;

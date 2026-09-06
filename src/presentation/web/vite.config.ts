@@ -31,6 +31,14 @@ export default defineConfig({
     sveltekit(),
     devtoolsJson(),
   ],
+  ssr: {
+    // Voice/audio libraries pulled in transitively via presentation-bot -- native bindings
+    // (@snazzah/davey's platform .node binaries) and a spawned ffmpeg binary have no business
+    // being statically bundled by Rolldown, which fails trying to parse the .node file as
+    // source ("[UNLOADABLE_DEPENDENCY] ... stream did not contain valid UTF-8"). Left external,
+    // Bun's own require/import resolves them normally at runtime instead.
+    external: ["@discordjs/voice", "@snazzah/davey", "prism-media", "ffmpeg-static", "opusscript"],
+  },
   server: {
     watch: {
       ignored: [

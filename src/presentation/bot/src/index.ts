@@ -52,19 +52,39 @@ export function handleClient(client: Client, core: AppCore) {
         continue;
       }
 
-      const guildCommands = specificGuildCommands.get(command.availableGuildId) ?? [];
-      guildCommands.push(command.register);
-      specificGuildCommands.set(command.availableGuildId, guildCommands);
+      const guildIds =
+        typeof command.availableGuildId === "string"
+          ? [command.availableGuildId]
+          : command.availableGuildId;
+
+      for (const guildId of guildIds) {
+        const guildCommands = specificGuildCommands.get(guildId) ?? [];
+        guildCommands.push(command.register);
+        specificGuildCommands.set(guildId, guildCommands);
+      }
     }
 
-    await client.rest.put(`/applications/${client.user.id}/commands`, {
-      body: commands,
-    });
+    try {
+      await client.rest.put(`/applications/${client.user.id}/commands`, {
+        body: commands,
+      });
+    } catch (error) {
+      console.error("[commands] failed to register global commands", error);
+    }
 
     for (const [guildId, guildCommands] of specificGuildCommands) {
-      await client.rest.put(`/applications/${client.user.id}/guilds/${guildId}/commands`, {
-        body: guildCommands,
-      });
+      if (!client.guilds.cache.has(guildId)) {
+        console.error(`[commands] skipping guild ${guildId}: bot is not a member of this guild`);
+        continue;
+      }
+
+      try {
+        await client.rest.put(`/applications/${client.user.id}/guilds/${guildId}/commands`, {
+          body: guildCommands,
+        });
+      } catch (error) {
+        console.error(`[commands] failed to register commands for guild ${guildId}`, error);
+      }
     }
   });
 

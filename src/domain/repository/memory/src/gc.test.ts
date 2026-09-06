@@ -211,6 +211,10 @@ describe("GuildSetting.gc()", () => {
       statChannelBots: null,
       statChannelActiveRate: null,
       statChannelActiveRateRanking: null,
+      ttsDefaultSpeakerId: null,
+      ttsSkipCommand: "s",
+      ttsSkipUrl: true,
+      ttsSkipCodeBlock: true,
     };
 
     map.set("old", { ...base, guildId: "g1", createdAt: at(-TWELVE_HOURS - 1) });

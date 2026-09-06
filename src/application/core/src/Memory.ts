@@ -14,13 +14,16 @@ export class Memory extends Base {
   public async gc() {
     const mems: MapWithGC<any, any>[] = [
       this.state.memory.guildBlackList,
+      this.state.memory.guildDictionary,
       this.state.memory.guildEdit,
       this.state.memory.guildSetting,
+      this.state.memory.guildTtsIgnoreList,
       this.state.memory.guildWhiteList,
       this.state.memory.guildMemberAdd,
       this.state.memory.messageCreate,
       this.state.memory.oauth2PKCE,
       this.state.memory.urlCacheInMemory,
+      this.state.memory.userDictionary,
       this.state.memory.userOAuth2,
       this.state.memory.voiceChannelMember,
       this.state.memory.latelimit.button,
