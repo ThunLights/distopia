@@ -317,8 +317,17 @@ spec:
             kustomize edit set image "distopia-registry.distopia.svc.cluster.local:5000/distopia={{inputs.parameters.image}}"
             cd /workspace/src
             git add k8s/app/kustomization.yaml
-            git commit -m "chore(deploy): bump distopia to {{inputs.parameters.short-sha}}"
-            git push origin HEAD:main
+            # Idempotency: a re-run for a revision that's already the deployed image tag (a
+            # manual retry, or a duplicate/delayed webhook delivery) stages no actual change
+            # here. `git commit` on a clean tree exits 1, and under `set -e` above that would
+            # fail this whole step for no real problem -- checked explicitly instead, so
+            # "nothing to deploy" is a no-op, not an error.
+            if git diff --cached --quiet; then
+              echo "kustomization.yaml already points at this image -- nothing to deploy."
+            else
+              git commit -m "chore(deploy): bump distopia to {{inputs.parameters.short-sha}}"
+              git push origin HEAD:main
+            fi
         env:
           - name: GIT_PUSH_TOKEN
             valueFrom:
