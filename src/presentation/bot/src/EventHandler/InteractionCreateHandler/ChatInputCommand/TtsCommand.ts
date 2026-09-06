@@ -1,6 +1,7 @@
 import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import {
   ApplicationCommandOptionType,
+  MessageFlags,
   type CacheType,
   type ChatInputCommandInteraction,
   type InteractionCallbackResponse,
@@ -213,21 +214,33 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
 
     if (subCommand === "add" && word && reading) {
       await this.core.dictionary.addUserEntry({ userId, word, reading });
-      return embed("Green", "辞書登録", `辞書に登録しました: ${word} → ${reading}`);
+      return {
+        ...embed("Green", "辞書登録", `辞書に登録しました: ${word} → ${reading}`),
+        flags: [MessageFlags.Ephemeral],
+      };
     }
 
     if (subCommand === "remove" && word) {
       await this.core.dictionary.removeUserEntry(userId, word);
-      return embed("Green", "辞書削除", `辞書から削除しました: ${word}`);
+      return {
+        ...embed("Green", "辞書削除", `辞書から削除しました: ${word}`),
+        flags: [MessageFlags.Ephemeral],
+      };
     }
 
     if (subCommand === "list") {
       const entries = await this.core.dictionary.getUserEntries(userId);
       if (entries.length === 0) {
-        return embed("Yellow", "個人辞書", "登録された単語はありません。");
+        return {
+          ...embed("Yellow", "個人辞書", "登録された単語はありません。"),
+          flags: [MessageFlags.Ephemeral],
+        };
       }
       const lines = entries.map(({ word: w, reading: r }) => `${w} → ${r}`);
-      return embed("Blurple", "個人辞書", joinLinesWithinLimit(lines));
+      return {
+        ...embed("Blurple", "個人辞書", joinLinesWithinLimit(lines)),
+        flags: [MessageFlags.Ephemeral],
+      };
     }
 
     return null;
