@@ -1,3 +1,4 @@
+import { env as privateEnv } from "$env/dynamic/private";
 import { env } from "$env/dynamic/public";
 import { djsController } from "./bot";
 import { database } from "./database";
@@ -17,6 +18,7 @@ export const core = genCore({
   owner: { id: env.PUBLIC_OWNER_ID! },
   homeServerId: env.PUBLIC_HOME_SERVER_ID!,
   url: env.PUBLIC_URL!,
+  voicevoxApiKey: privateEnv.VOICEVOX_API_KEY ?? null,
   memory,
   searchEngine,
   discord: djsController,

@@ -9,6 +9,14 @@ import type { Guild } from "./Guild";
 // No API key required. Synthesis is asynchronous: the initial response only hands back status/
 // download URLs, and audioStatusUrl must be polled until isAudioReady before the download URLs
 // are actually fetchable.
+//
+// A separate, faster endpoint exists (https://voicevox.su-shiki.com/su-shikiapis/, "高速API")
+// that requires a paid API key: unlike the v3 API above, it's synchronous (the response body
+// *is* the audio, no polling) and consumes a points balance per request. Confirmed live against
+// the real API: success is 200 with Content-Type audio/x-wav; any failure (invalid key, no
+// points left, etc.) is a non-200 JSON body like {"errorMessage": "notEnoughPoints"}. Tried
+// first when a key is configured; any failure there (including running out of points) falls
+// back to the free v3 flow below rather than surfacing an error, so TTS keeps working either way.
 const DEFAULT_SPEAKER_ID = 1; // fallback matching the API doc's own example
 const MAX_SYNTHESIS_RETRIES = 3;
 const MAX_POLL_ATTEMPTS = 20;
@@ -60,7 +68,41 @@ export class Tts extends Base {
     return this.serialize(() => this.synthesizeNow(text, speakerId));
   }
 
+  private async synthesizeFast(text: string, speakerId: number): Promise<Buffer | null> {
+    const apiKey = this.state.voicevoxApiKey;
+    if (!apiKey) {
+      return null;
+    }
+
+    // No interpolation here on purpose -- safeUrl encodeURIComponent's every interpolated
+    // value, which would mangle the literal URL itself if it were substituted in.
+    const url = safeUrl`https://deprecatedapis.tts.quest/v2/voicevox/audio/`;
+    const response = await safeFetch(url, {
+      method: "POST",
+      body: new URLSearchParams({ key: apiKey, text, speaker: String(speakerId) }),
+    });
+
+    if (response instanceof Error || !response.ok) {
+      if (!(response instanceof Error)) {
+        // Best-effort only -- a failure response isn't guaranteed to be the documented
+        // {"errorMessage": "..."} shape, and this is purely for observability.
+        console.error("[tts] fast API unavailable, falling back to the free API", {
+          status: response.status,
+          body: await response.text().catch(() => undefined),
+        });
+      }
+      return null;
+    }
+
+    return Buffer.from(await response.arrayBuffer());
+  }
+
   private async synthesizeNow(text: string, speakerId: number): Promise<TtsSynthesisResult> {
+    const fastAudio = await this.synthesizeFast(text, speakerId);
+    if (fastAudio) {
+      return { audio: fastAudio };
+    }
+
     // No interpolation here on purpose -- safeUrl encodeURIComponent's every interpolated
     // value, which would mangle the literal URL itself if it were substituted in.
     const url = safeUrl`https://api.tts.quest/v3/voicevox/synthesis`;
