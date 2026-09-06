@@ -1,9 +1,10 @@
 import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import {
   ApplicationCommandOptionType,
-  MessageFlags,
+  EmbedBuilder,
   type CacheType,
   type ChatInputCommandInteraction,
+  type ColorResolvable,
   type InteractionCallbackResponse,
   type InteractionReplyOptions,
   type MessagePayload,
@@ -13,12 +14,23 @@ import z from "zod";
 
 import { joinLinesWithinLimit } from "../../../utils/discordLimits";
 import { isJoined, join, leave } from "../../../utils/tts/session";
+import { FAMOUS_SPEAKERS, speakerName } from "../../../utils/tts/speakers";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 
 const WORD_MAX_LENGTH = 50;
 const READING_MAX_LENGTH = 50;
+
+function embed(
+  color: ColorResolvable,
+  title: string,
+  description: string,
+): InteractionReplyOptions {
+  return {
+    embeds: [new EmbedBuilder().setColor(color).setTitle(title).setDescription(description)],
+  };
+}
 
 const OptionsSchema = z.object({
   subCommandGroup: z.string().nullable(),
@@ -55,13 +67,14 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       {
         type: ApplicationCommandOptionType.Subcommand,
         name: "voice",
-        description: "自分の読み上げ音声(話者ID)を設定します。",
+        description: "自分の読み上げ音声を設定します。",
         options: [
           {
             type: ApplicationCommandOptionType.Integer,
             name: "speaker_id",
-            description: "VOICEVOXの話者ID",
+            description: "読み上げ音声",
             required: true,
+            choices: [...FAMOUS_SPEAKERS],
           },
         ],
       },
@@ -143,7 +156,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
     const { subCommandGroup, subCommand, speakerId } = options;
     const guild = await this.parseGuild(interaction);
     if (guild instanceof GuildParseError) {
-      return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      return embed("Red", "エラー", guild.message);
     }
 
     if (subCommandGroup === "dictionary") {
@@ -157,10 +170,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       const member = await interaction.guild?.members.fetch(interaction.user.id);
       const voiceChannel = member?.voice.channel;
       if (!voiceChannel) {
-        return {
-          content: "先にボイスチャンネルに参加してください。",
-          flags: [MessageFlags.Ephemeral],
-        };
+        return embed("Red", "エラー", "先にボイスチャンネルに参加してください。");
       }
 
       // join() can take several seconds to establish the voice connection -- well past
@@ -169,43 +179,40 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       // previously caused "Unknown interaction" (10062) once the connection attempt ran long.
       void join(voiceChannel, interaction.channelId)
         .then((joined) =>
-          interaction.followUp({
-            content: joined
-              ? `${voiceChannel.name} で読み上げを開始しました。`
-              : "ボイスチャンネルへの接続に失敗しました。",
-            flags: [MessageFlags.Ephemeral],
-          }),
+          interaction.followUp(
+            joined
+              ? embed("Green", "読み上げ開始", `${voiceChannel.name} で読み上げを開始しました。`)
+              : embed("Red", "接続失敗", "ボイスチャンネルへの接続に失敗しました。"),
+          ),
         )
         .catch((error) => console.error("[tts] failed to send join follow-up", error));
 
-      return {
-        content: `${voiceChannel.name} への接続を試みています…`,
-        flags: [MessageFlags.Ephemeral],
-      };
+      return embed("Yellow", "接続中", `${voiceChannel.name} への接続を試みています…`);
     }
 
     if (subCommand === "leave") {
       if (!isJoined(guild.id)) {
-        return { content: "読み上げは開始されていません。", flags: [MessageFlags.Ephemeral] };
+        return embed("Red", "エラー", "読み上げは開始されていません。");
       }
       await leave(guild.id);
-      return { content: "読み上げを終了しました。", flags: [MessageFlags.Ephemeral] };
+      return embed("Green", "読み上げ終了", "読み上げを終了しました。");
     }
 
     if (subCommand === "voice" && typeof speakerId === "number") {
       await this.core.tts.setUserSpeaker(interaction.user.id, speakerId);
-      return {
-        content: `読み上げ音声を話者ID ${speakerId} に設定しました。`,
-        flags: [MessageFlags.Ephemeral],
-      };
+      return embed(
+        "Green",
+        "音声設定",
+        `読み上げ音声を ${speakerName(speakerId)} に設定しました。`,
+      );
     }
 
     if (subCommand === "voice-reset") {
       await this.core.tts.clearUserSpeaker(interaction.user.id);
-      return { content: "読み上げ音声の設定をリセットしました。", flags: [MessageFlags.Ephemeral] };
+      return embed("Green", "音声設定リセット", "読み上げ音声の設定をリセットしました。");
     }
 
-    return { content: "コマンドが見つかりませんでした", flags: [MessageFlags.Ephemeral] };
+    return embed("Red", "エラー", "コマンドが見つかりませんでした");
   }
 
   private async execDictionary(
@@ -217,24 +224,21 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
 
     if (subCommand === "add" && word && reading) {
       await this.core.dictionary.addUserEntry({ userId, word, reading });
-      return {
-        content: `辞書に登録しました: ${word} → ${reading}`,
-        flags: [MessageFlags.Ephemeral],
-      };
+      return embed("Green", "辞書登録", `辞書に登録しました: ${word} → ${reading}`);
     }
 
     if (subCommand === "remove" && word) {
       await this.core.dictionary.removeUserEntry(userId, word);
-      return { content: `辞書から削除しました: ${word}`, flags: [MessageFlags.Ephemeral] };
+      return embed("Green", "辞書削除", `辞書から削除しました: ${word}`);
     }
 
     if (subCommand === "list") {
       const entries = await this.core.dictionary.getUserEntries(userId);
       if (entries.length === 0) {
-        return { content: "登録された単語はありません。", flags: [MessageFlags.Ephemeral] };
+        return embed("Yellow", "個人辞書", "登録された単語はありません。");
       }
       const lines = entries.map(({ word: w, reading: r }) => `${w} → ${r}`);
-      return { content: joinLinesWithinLimit(lines), flags: [MessageFlags.Ephemeral] };
+      return embed("Blurple", "個人辞書", joinLinesWithinLimit(lines));
     }
 
     return null;

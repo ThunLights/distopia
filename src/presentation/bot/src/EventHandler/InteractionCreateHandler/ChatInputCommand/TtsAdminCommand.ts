@@ -16,6 +16,7 @@ import {
 import z from "zod";
 
 import { joinLinesWithinLimit } from "../../../utils/discordLimits";
+import { FAMOUS_SPEAKERS, speakerName } from "../../../utils/tts/speakers";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -193,13 +194,14 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
           {
             type: ApplicationCommandOptionType.Subcommand,
             name: "default-voice",
-            description: "サーバーのデフォルト読み上げ音声(話者ID)を設定します。",
+            description: "サーバーのデフォルト読み上げ音声を設定します。",
             options: [
               {
                 type: ApplicationCommandOptionType.Integer,
                 name: "speaker_id",
-                description: "VOICEVOXの話者ID",
+                description: "読み上げ音声",
                 required: true,
+                choices: [...FAMOUS_SPEAKERS],
               },
             ],
           },
@@ -414,7 +416,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "default-voice" && typeof speakerId === "number") {
       await this.core.tts.setGuildDefaultSpeaker(guildId, speakerId);
       return {
-        content: `サーバーのデフォルト読み上げ音声を話者ID ${speakerId} に設定しました。`,
+        content: `サーバーのデフォルト読み上げ音声を ${speakerName(speakerId)} に設定しました。`,
         flags: [MessageFlags.Ephemeral],
       };
     }
