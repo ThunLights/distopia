@@ -69,9 +69,14 @@ export class MessageCreateHandler extends BaseHandler<
     let text: string;
     if (filtered.trim() === "") {
       // No text left to read -- normally means "skip", but a message that's only image/video
-      // attachment(s) (no caption) still deserves an announcement so listeners know something
-      // was posted, instead of silent gaps whenever someone shares a picture.
-      if (!isMediaOnlyMessage(message.attachments.map((attachment) => attachment.contentType))) {
+      // attachment(s) (no caption at all) still deserves an announcement so listeners know
+      // something was posted, instead of silent gaps whenever someone shares a picture.
+      if (
+        !isMediaOnlyMessage(
+          message.content,
+          message.attachments.map((attachment) => attachment.contentType),
+        )
+      ) {
         return;
       }
       text = "画像が送信されました";
@@ -109,11 +114,17 @@ export class MessageCreateHandler extends BaseHandler<
   }
 }
 
-// Pure and independently testable: true only when the message has at least one attachment
-// and every one of them is an image or video -- an attachment-less message (nothing to
-// announce) and a message with e.g. a non-media file attached both fall through to false.
-export function isMediaOnlyMessage(attachmentContentTypes: (string | null)[]): boolean {
-  if (attachmentContentTypes.length === 0) {
+// Pure and independently testable: true only when the message has no caption at all (checked
+// against the raw content, not the URL/codeblock-filtered text readAloud reads from) and every
+// attachment is an image or video. A caption that stripFilteredPatterns would remove entirely
+// (e.g. a bare URL with skipUrl on) still counts as "had a caption" here -- that message should
+// be skipped silently like any other fully-filtered text message, not announced as if there
+// were no caption to begin with.
+export function isMediaOnlyMessage(
+  rawContent: string,
+  attachmentContentTypes: (string | null)[],
+): boolean {
+  if (rawContent.trim() !== "" || attachmentContentTypes.length === 0) {
     return false;
   }
 
