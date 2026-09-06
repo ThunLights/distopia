@@ -17,6 +17,11 @@ export type Staff = {
 };
 
 export const supportersKeyValue = {
+  byk: {
+    name: "萬游會",
+    invite: null,
+    guildId: "1423611473296490560",
+  },
   bread: {
     name: "クリームパンと愉快な仲間たち",
     invite: "https://discord.gg/De8T2NS74X",
@@ -40,6 +45,7 @@ export const supportersKeyValue = {
 };
 
 export const supporters = [
+  supportersKeyValue.byk,
   supportersKeyValue.bread,
   supportersKeyValue.cappuccino,
   supportersKeyValue.hima,
