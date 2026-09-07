@@ -9,9 +9,7 @@ export class Friend extends Base {
   public async updateCache() {
     this.sortedDatas = (
       await Promise.all(
-        (
-          await this.state.database.friend.findAllSortDate()
-        ).map(async (value) => {
+        (await this.state.database.friend.findAllSortDate()).map(async (value) => {
           const user = await this.state.discord.user.find(value.userId);
           if (!user) {
             return null;
