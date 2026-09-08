@@ -54,7 +54,7 @@ export class VoiceStateUpdateHandler extends BaseHandler<
 
     let text: string;
     if (!oldChannelId && newChannelId === session.voiceChannelId) {
-      text = "が入出しました";
+      text = "が入室しました";
     } else if (oldChannelId === session.voiceChannelId && !newChannelId) {
       text = "が退出しました";
     } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
