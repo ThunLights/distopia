@@ -3,6 +3,7 @@ import { DICTIONARY_READING_MAX_LENGTH, DICTIONARY_WORD_MAX_LENGTH } from "app-c
 import {
   ApplicationCommandOptionType,
   MessageFlags,
+  PermissionFlagsBits,
   type CacheType,
   type ChatInputCommandInteraction,
   type InteractionCallbackResponse,
@@ -166,13 +167,37 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       // outcome via a follow-up instead of awaiting join() before returning; awaiting it here
       // previously caused "Unknown interaction" (10062) once the connection attempt ran long.
       void join(voiceChannel, interaction.channelId)
-        .then((joined) =>
-          interaction.followUp(
-            joined
-              ? embed("Green", "読み上げ開始", `${voiceChannel.name} で読み上げを開始しました。`)
-              : embed("Red", "接続失敗", "ボイスチャンネルへの接続に失敗しました。"),
-          ),
-        )
+        .then(async (joined) => {
+          if (!joined) {
+            return interaction.followUp(
+              embed("Red", "接続失敗", "ボイスチャンネルへの接続に失敗しました。"),
+            );
+          }
+
+          // Checked only now, not before join(): Connect succeeding doesn't imply Speak also
+          // does -- a channel that denies the bot Speak still lets the voice connection reach
+          // Ready, so the bot sits in the channel unable to talk (looks "muted" to members)
+          // unless this catches it and backs the session out again.
+          const botMember = voiceChannel.guild.members.me;
+          const voicePermissions = botMember ? voiceChannel.permissionsFor(botMember) : null;
+          if (
+            !voicePermissions?.has(PermissionFlagsBits.Connect) ||
+            !voicePermissions.has(PermissionFlagsBits.Speak)
+          ) {
+            await leave(voiceChannel.guildId);
+            return interaction.followUp(
+              embed(
+                "Red",
+                "権限不足",
+                `${voiceChannel.name} で接続または発言する権限がありません。チャンネル権限を確認してください。`,
+              ),
+            );
+          }
+
+          return interaction.followUp(
+            embed("Green", "読み上げ開始", `${voiceChannel.name} で読み上げを開始しました。`),
+          );
+        })
         .catch((error) => console.error("[tts] failed to send join follow-up", error));
 
       return embed("Yellow", "接続中", `${voiceChannel.name} への接続を試みています…`);

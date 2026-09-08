@@ -1,6 +1,6 @@
 import type { VoiceState } from "discord.js";
 
-import { getSession, leave } from "../utils/tts/session";
+import { enqueue, getSession, leave } from "../utils/tts/session";
 import { BaseHandler } from "./BaseHandler";
 
 export class VoiceStateUpdateHandler extends BaseHandler<
@@ -13,6 +13,10 @@ export class VoiceStateUpdateHandler extends BaseHandler<
 
     const memberId = newState.id;
 
+    // Read before leaveIfVoiceChannelEmpty, which can destroy the session (and thus make
+    // getSession return undefined) when this update is the last human leaving the channel.
+    await this.announceVoiceStateChange(oldState, newState);
+
     if (oldState.channelId) {
       await this.logger.log(newState.guild, "logVoiceLeave", memberId, oldState.channelId);
       await this.leaveIfVoiceChannelEmpty(oldState);
@@ -21,6 +25,58 @@ export class VoiceStateUpdateHandler extends BaseHandler<
     if (newState.channelId) {
       await this.logger.log(newState.guild, "logVoiceJoin", memberId, newState.channelId);
     }
+  }
+
+  // Reads aloud joins/leaves/moves for the channel the bot's TTS session is bound to, so
+  // listeners in-channel hear about comings and goings without needing to watch the member
+  // list. Only events touching that specific channel matter -- voice activity elsewhere in
+  // the guild is irrelevant to people sitting in it.
+  private async announceVoiceStateChange(
+    oldState: VoiceState,
+    newState: VoiceState,
+  ): Promise<void> {
+    const memberId = newState.id;
+    if (memberId === newState.client.user.id) {
+      return;
+    }
+
+    const guildId = newState.guild.id;
+    const session = getSession(guildId);
+    if (!session) {
+      return;
+    }
+
+    const oldChannelId = oldState.channelId;
+    const newChannelId = newState.channelId;
+    if (oldChannelId !== session.voiceChannelId && newChannelId !== session.voiceChannelId) {
+      return;
+    }
+
+    let text: string;
+    if (!oldChannelId && newChannelId === session.voiceChannelId) {
+      text = "が入室しました";
+    } else if (oldChannelId === session.voiceChannelId && !newChannelId) {
+      text = "が退出しました";
+    } else if (oldChannelId && newChannelId && oldChannelId !== newChannelId) {
+      text = "が移動しました";
+    } else {
+      return;
+    }
+
+    const member =
+      newState.member ??
+      oldState.member ??
+      (await newState.guild.members.fetch(memberId).catch(() => null));
+    const displayName = member?.displayName ?? "誰か";
+
+    const speakerId = await this.core.tts.getEffectiveSpeakerId(guildId, memberId);
+    enqueue(
+      guildId,
+      session.textChannelId,
+      `${displayName}さん${text}`,
+      speakerId,
+      (word, speaker) => this.core.tts.synthesize(word, speaker),
+    );
   }
 
   // If the bot's own TTS session is bound to the channel someone just left, and no human
