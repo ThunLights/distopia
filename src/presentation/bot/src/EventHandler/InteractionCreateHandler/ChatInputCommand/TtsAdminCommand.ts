@@ -1,5 +1,6 @@
 import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import { DICTIONARY_READING_MAX_LENGTH, DICTIONARY_WORD_MAX_LENGTH } from "app-core/Dictionary";
+import { FAMOUS_SPEAKERS, speakerName } from "app-core/Tts";
 import {
   ApplicationCommandOptionType,
   AttachmentBuilder,
@@ -18,7 +19,6 @@ import z from "zod";
 
 import { joinLinesWithinLimit } from "../../../utils/discordLimits";
 import { ttsEmbed as embed } from "../../../utils/tts/embed";
-import { FAMOUS_SPEAKERS, speakerName } from "../../../utils/tts/speakers";
 import { validator, type ValidateResult } from "../../../utils/validator";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";

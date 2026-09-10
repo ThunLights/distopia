@@ -94,7 +94,8 @@ distopia/
 │   └── infrastructure/
 │       ├── database/     # Prisma + PostgreSQL
 │       ├── discord/      # Discord infrastructure
-│       └── http/         # Security-focused HTTP utilities (SSRF prevention)
+│       ├── http/         # Security-focused HTTP utilities (SSRF prevention)
+│       └── voicevox/     # VOICEVOX TTS Quest API client
 ├── lib/
 │   ├── distopia/         # Public library (npm / jsr)
 │   └── template/         # Shared lint/format config (oxlint + oxfmt)
@@ -114,6 +115,7 @@ distopia/
 | `src/infrastructure/database` | `infra-database` |
 | `src/infrastructure/discord` | `infra-discord` |
 | `src/infrastructure/http` | `infra-http` |
+| `src/infrastructure/voicevox` | `infra-voicevox` |
 | `src/domain/repository/memory` | `repo-memory` |
 | `src/domain/repository/search` | `repo-search` |
 | `src/domain/model` | `domain-model` |

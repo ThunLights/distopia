@@ -11,6 +11,9 @@
     "./Dictionary": {
       "import": "./src/Dictionary.ts"
     },
+    "./Tts": {
+      "import": "./src/Tts.ts"
+    },
     "./staff": {
       "import": "./src/utils/staff.ts"
     },
@@ -43,6 +46,7 @@
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "infra-http": "workspace:*",
+    "infra-voicevox": "workspace:*",
     "repo-memory": "workspace:*",
     "repo-search": "workspace:*",
     "smol-toml": "catalog:",

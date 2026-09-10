@@ -16,6 +16,9 @@ export const FAMOUS_SPEAKERS = [
   { name: "九州そら (ノーマル)", value: 16 },
 ] as const;
 
+// Fallback matching VOICEVOX TTS Quest's own API doc example.
+export const DEFAULT_SPEAKER_ID = 1;
+
 export function speakerName(speakerId: number): string {
   return (
     FAMOUS_SPEAKERS.find((speaker) => speaker.value === speakerId)?.name ?? `話者ID ${speakerId}`
