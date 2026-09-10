@@ -36,9 +36,9 @@ export type AppState = {
   homeServerId: string;
   url: string;
   // Optional -- VOICEVOX TTS Quest's paid, low-latency endpoint (deprecatedapis.tts.quest/v2)
-  // requires a key. Tts.ts falls back to the free, unauthenticated v3 API whenever this is
-  // null/unset or the fast endpoint itself fails (e.g. its points are exhausted), so no
-  // environment needs to set this for TTS to keep working.
+  // requires a key. infra-voicevox's synthesize() falls back to the free, unauthenticated v3
+  // API whenever this is null/unset or the fast endpoint itself fails (e.g. its points are
+  // exhausted), so no environment needs to set this for TTS to keep working.
   voicevoxApiKey: string | null;
   memory: {
     latelimit: {
