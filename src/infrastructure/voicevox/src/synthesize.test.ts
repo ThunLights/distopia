@@ -29,6 +29,19 @@ function audioResponse(bytes: number[]): Response {
   } as Response;
 }
 
+// Simulates a gateway/proxy error page: HTTP-level failure (or a 200 with a body that isn't
+// valid JSON), where .json() itself throws instead of resolving.
+function nonJsonResponse(ok: boolean, status: number): Response {
+  return {
+    ok,
+    status,
+    json: async () => {
+      throw new SyntaxError("Unexpected token < in JSON");
+    },
+    text: async () => "<html>Bad Gateway</html>",
+  } as unknown as Response;
+}
+
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -105,5 +118,39 @@ describe("synthesize", () => {
     const result = await synthesize("hello", 3, null);
 
     expect(result.error).toBe("api_error");
+  });
+
+  test("reports api_error instead of throwing when the v3 API returns a non-JSON error page", async () => {
+    mockSafeFetch.mockResolvedValue(nonJsonResponse(false, 502));
+
+    await expect(synthesize("hello", 3, null)).resolves.toEqual({ error: "api_error" });
+  });
+
+  test("reports timeout instead of throwing when status polling returns malformed responses", async () => {
+    vi.useFakeTimers();
+    try {
+      mockSafeFetch.mockImplementation(async (url) => {
+        const href = String(url);
+        if (href.includes("api.tts.quest/v3/voicevox/synthesis")) {
+          return jsonResponse({
+            success: true,
+            audioStatusUrl: "https://status.example/check",
+            wavDownloadUrl: "https://download.example/c.wav",
+          });
+        }
+        if (href.includes("status.example")) {
+          return nonJsonResponse(true, 200);
+        }
+        throw new Error(`unexpected url in test: ${href}`);
+      });
+
+      const resultPromise = synthesize("hello", 3, null);
+      await vi.runAllTimersAsync();
+      const result = await resultPromise;
+
+      expect(result.error).toBe("timeout");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

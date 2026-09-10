@@ -108,11 +108,14 @@ async function synthesizeNow(
       method: "POST",
       body: new URLSearchParams({ text, speaker: String(speakerId) }),
     });
-    if (response instanceof Error) {
+    if (response instanceof Error || !response.ok) {
       return { error: "api_error" };
     }
 
-    const body = (await response.json()) as SynthesisResponse;
+    const body = (await response.json().catch(() => null)) as SynthesisResponse | null;
+    if (!body) {
+      return { error: "api_error" };
+    }
     if (!body.success) {
       const isLastAttempt = attempt === MAX_SYNTHESIS_RETRIES - 1;
       if (typeof body.retryAfter === "number" && !isLastAttempt) {
@@ -159,9 +162,9 @@ async function pollUntilReady(statusUrl: string | undefined): Promise<boolean> {
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
     const response = await safeFetch(safeStatusUrl);
-    if (!(response instanceof Error)) {
-      const status = (await response.json()) as AudioStatusResponse;
-      if (status.isAudioReady) {
+    if (!(response instanceof Error) && response.ok) {
+      const status = (await response.json().catch(() => null)) as AudioStatusResponse | null;
+      if (status?.isAudioReady) {
         return true;
       }
     }
