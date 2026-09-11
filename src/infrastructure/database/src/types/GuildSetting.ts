@@ -1,3 +1,5 @@
+export type TtsProvider = "WebVoiceVox" | "SakuraAi";
+
 export type GuildSetting = {
   guildId: string;
   actingOwner: string | null;
@@ -35,6 +37,7 @@ export type GuildSetting = {
   ttsSkipCommand: string;
   ttsSkipUrl: boolean;
   ttsSkipCodeBlock: boolean;
+  ttsProvider: TtsProvider;
 };
 
 export type GuildSettingUpdateInput = Pick<GuildSetting, "guildId"> & Partial<GuildSetting>;

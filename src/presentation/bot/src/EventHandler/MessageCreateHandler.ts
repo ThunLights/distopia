@@ -94,7 +94,7 @@ export class MessageCreateHandler extends BaseHandler<
     const speakerId = await this.core.tts.getEffectiveSpeakerId(guildId, message.author.id);
 
     enqueue(guildId, message.channelId, `${replyPrefix}${text}`, speakerId, (word, speaker) =>
-      this.core.tts.synthesize(word, speaker),
+      this.core.tts.synthesize(word, speaker, guildId),
     );
   }
 

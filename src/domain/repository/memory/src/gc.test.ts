@@ -215,6 +215,7 @@ describe("GuildSetting.gc()", () => {
       ttsSkipCommand: "s",
       ttsSkipUrl: true,
       ttsSkipCodeBlock: true,
+      ttsProvider: "WebVoiceVox" as const,
     };
 
     map.set("old", { ...base, guildId: "g1", createdAt: at(-TWELVE_HOURS - 1) });

@@ -1,4 +1,9 @@
-import type { GuildTtsIgnoreList, GuildTtsIgnoreListUpsertInput } from "infra-database/types";
+import type {
+  GuildTtsIgnoreList,
+  GuildTtsIgnoreListUpsertInput,
+  TtsProvider,
+} from "infra-database/types";
+import { synthesize as synthesizeSakura } from "infra-sakura";
 import {
   DEFAULT_SPEAKER_ID,
   synthesize as synthesizeVoicevox,
@@ -17,6 +22,7 @@ const MAX_READING_LENGTH = 300;
 // directly.
 export { FAMOUS_SPEAKERS, speakerName } from "infra-voicevox";
 export type { TtsSynthesisResult } from "infra-voicevox";
+export type { TtsProvider } from "infra-database/types";
 
 export class Tts extends Base {
   constructor(
@@ -26,8 +32,22 @@ export class Tts extends Base {
     super(state);
   }
 
-  public synthesize(text: string, speakerId: number): Promise<TtsSynthesisResult> {
+  public async synthesize(
+    text: string,
+    speakerId: number,
+    guildId: string,
+  ): Promise<TtsSynthesisResult> {
+    const setting = await this.guild.getSetting(guildId);
+    const { sakuraApiKey } = this.state;
+    if (setting?.ttsProvider === "SakuraAi" && sakuraApiKey) {
+      return synthesizeSakura(text, speakerId, sakuraApiKey);
+    }
+
     return synthesizeVoicevox(text, speakerId, this.state.voicevoxApiKey);
+  }
+
+  public async setTtsProvider(guildId: string, provider: TtsProvider): Promise<void> {
+    await this.guild.saveSetting({ guildId, ttsProvider: provider });
   }
 
   public async getEffectiveSpeakerId(guildId: string, userId: string): Promise<number> {

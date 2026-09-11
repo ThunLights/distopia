@@ -75,7 +75,7 @@ export class VoiceStateUpdateHandler extends BaseHandler<
       session.textChannelId,
       `${displayName}さん${text}`,
       speakerId,
-      (word, speaker) => this.core.tts.synthesize(word, speaker),
+      (word, speaker) => this.core.tts.synthesize(word, speaker, guildId),
     );
   }
 

@@ -19,6 +19,7 @@ export const core = genCore({
   homeServerId: env.PUBLIC_HOME_SERVER_ID!,
   url: env.PUBLIC_URL!,
   voicevoxApiKey: privateEnv.VOICEVOX_API_KEY ?? null,
+  sakuraApiKey: privateEnv.SAKURA_AI_ENGINE_API_KEY ?? null,
   memory,
   searchEngine,
   discord: djsController,
