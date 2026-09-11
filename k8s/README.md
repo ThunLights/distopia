@@ -122,7 +122,8 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=SENTRY_PROJECT='distopia-ci' \
   --from-literal=PUBLIC_SENTRY_DSN='...' \
   --from-literal=SENTRY_AUTH_TOKEN='...' \
-  --from-literal=VOICEVOX_API_KEY='...'
+  --from-literal=VOICEVOX_API_KEY='...' \
+  --from-literal=SAKURA_AI_ENGINE_API_KEY='...'
 
 # --- DB credentials -- your own choice of username/password (equivalent to the old
 # docker/.env's DB_USER/DB_PW), given to CloudNativePG's Cluster (k8s/db/cluster.yaml) as
