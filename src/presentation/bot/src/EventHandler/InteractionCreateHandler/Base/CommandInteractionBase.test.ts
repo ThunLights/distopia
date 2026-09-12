@@ -10,7 +10,7 @@ import {
 import { describe, expect, test } from "vitest";
 
 import { ValidateError, type ValidateResult } from "../../../utils/validator";
-import { CommandInteractionBase } from "./CommanInteractionBase";
+import { CommandInteractionBase } from "./CommandInteractionBase";
 
 type Options = { value: string };
 
@@ -38,6 +38,26 @@ class InvalidOptionsCommand extends TestCommand {
     _interaction: CommandInteraction,
   ): Promise<ValidateResult<Options>> {
     return new ValidateError({ content: "invalid" });
+  }
+}
+
+// R explicitly narrowed to just `string` (unlike TestCommand above, which relies on the
+// default R union that already includes InteractionReplyOptions) -- exercises that run()'s
+// permission-denial reply is still type-safe, not force-cast, when a subclass's own success
+// type doesn't include InteractionReplyOptions.
+class StrictStringCommand extends CommandInteractionBase<Options, CommandInteraction, string> {
+  public override async match(_interaction: CommandInteraction): Promise<boolean> {
+    return true;
+  }
+
+  public override async parseOptions(
+    _interaction: CommandInteraction,
+  ): Promise<ValidateResult<Options>> {
+    return { value: "ok" };
+  }
+
+  protected override async exec(_interaction: CommandInteraction, options: Options) {
+    return options.value;
   }
 }
 
@@ -100,5 +120,17 @@ describe("CommandInteractionBase", () => {
 
     expect(result).toEqual({ content: "invalid" });
     expect(command.execCallCount).toBe(0);
+  });
+
+  test("returns an ephemeral permission error when R is narrowed to string", async () => {
+    const command = new StrictStringCommand(new AppCore({} as AppState));
+
+    const result = await command.run(buildInteraction(false));
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        flags: [MessageFlags.Ephemeral],
+      }),
+    );
   });
 });

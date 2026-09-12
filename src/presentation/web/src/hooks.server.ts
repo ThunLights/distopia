@@ -48,7 +48,7 @@ async function start() {
   console.log("JWT keys is imported.");
 
   await handleClient(client, core).login(BOT_TOKEN);
-  console.log("BOT logined.");
+  console.log("BOT logged in.");
 
   await core.friend.updateCache();
   console.log("Updated friend cache.");

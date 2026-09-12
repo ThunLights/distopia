@@ -1,5 +1,9 @@
 import type { AppCore } from "app-core";
-import { type BaseInteraction, type PermissionResolvable } from "discord.js";
+import {
+  type BaseInteraction,
+  type InteractionReplyOptions,
+  type PermissionResolvable,
+} from "discord.js";
 import type { Guild, User } from "domain-model";
 
 import { codeBlock } from "../../../utils/codeblock";
@@ -119,5 +123,9 @@ export abstract class Base<T extends BaseInteraction, R = void> {
 
   public abstract match(interaction: T): Promise<boolean>;
 
-  public abstract run(interaction: T): Promise<R>;
+  // Permission and validation failures reply with a plain InteractionReplyOptions object
+  // regardless of what R is narrowed to in a subclass -- included in the return type here
+  // (rather than force-cast to R at each call site) so that narrowing R to e.g. just
+  // `string` doesn't silently lie about what run() can actually return.
+  public abstract run(interaction: T): Promise<R | InteractionReplyOptions>;
 }

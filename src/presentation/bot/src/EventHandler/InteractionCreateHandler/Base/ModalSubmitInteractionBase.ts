@@ -20,17 +20,17 @@ export abstract class ModalSubmitInteractionBase<
     return interaction.customId === this.customId;
   }
 
-  public override async run(interaction: T): Promise<R> {
+  public override async run(interaction: T): Promise<R | InteractionReplyOptions> {
     const permission = await this.checkPermission(interaction);
 
     if (permission instanceof PermissionError) {
-      return { content: permission.message, flags: [MessageFlags.Ephemeral] } as R;
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     const options = await this.parseOptions(interaction);
 
     if (options instanceof ValidateError) {
-      return options.content as R;
+      return options.content;
     }
 
     return await this.exec(interaction, options);

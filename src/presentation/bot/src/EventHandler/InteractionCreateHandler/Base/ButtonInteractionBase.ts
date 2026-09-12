@@ -14,11 +14,11 @@ export abstract class ButtonInteractionBase<
   T extends ButtonInteraction = ButtonInteraction,
   R = string | InteractionReplyOptions | MessagePayload | InteractionResponse | ModalSended,
 > extends MessageComponentInteractionBase<T, R> {
-  public override async run(interaction: T): Promise<R> {
+  public override async run(interaction: T): Promise<R | InteractionReplyOptions> {
     const permission = await this.checkPermission(interaction);
 
     if (permission instanceof PermissionError) {
-      return { content: permission.message, flags: [MessageFlags.Ephemeral] } as R;
+      return { content: permission.message, flags: [MessageFlags.Ephemeral] };
     }
 
     return await this.exec(interaction);
