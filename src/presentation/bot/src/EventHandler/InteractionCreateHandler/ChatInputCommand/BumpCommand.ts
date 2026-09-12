@@ -7,7 +7,7 @@ import {
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
-import { LateLimitError } from "domain-model";
+import { RateLimitError } from "domain-model";
 
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
@@ -41,7 +41,7 @@ export class BumpCommand extends ChatInputCommandBase<Options> {
 
     const bumped = await this.core.guild.bump(user, guild);
 
-    if (bumped instanceof LateLimitError) {
+    if (bumped instanceof RateLimitError) {
       const embed = new EmbedBuilder()
         .setColor("Red")
         .setTitle("Distopia: Discordサーバー掲示板")

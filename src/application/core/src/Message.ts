@@ -7,8 +7,8 @@ import { formatYMD } from "./utils/date";
 
 export class Message extends Base {
   public async increase(guildId: string, memberId: string, messageContent: string) {
-    const latelimit = this.state.memory.latelimit.messageCreate;
-    const limit = latelimit.get(memberId);
+    const ratelimit = this.state.memory.ratelimit.messageCreate;
+    const limit = ratelimit.get(memberId);
 
     if (limit && limit.getTime() > Date.now()) {
       return;
@@ -20,7 +20,7 @@ export class Message extends Base {
 
     const minute = 60 * 1000;
 
-    latelimit.set(memberId, new Date(Date.now() + minute));
+    ratelimit.set(memberId, new Date(Date.now() + minute));
 
     const data = this.state.memory.messageCreate.get(guildId);
 

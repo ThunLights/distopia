@@ -1,11 +1,11 @@
 import type { DatabaseClient } from "infra-database/types";
 import type { Controller } from "infra-discord";
 import type {
-  ButtonLateLimit,
-  ChatInputCommandLateLimit,
+  ButtonRateLimit,
+  ChatInputCommandRateLimit,
   Friend,
   GuildBlackList,
-  GuildBumpLateLimit,
+  GuildBumpRateLimit,
   GuildDictionary,
   GuildEdit,
   GuildMemberAdd,
@@ -14,7 +14,7 @@ import type {
   GuildWhiteList,
   JWTKey,
   MessageCreate,
-  MessageCreateLateLimit,
+  MessageCreateRateLimit,
   OAuth2Guilds,
   OAuth2PKCE,
   UnJoinedGuild,
@@ -45,11 +45,11 @@ export type AppState = {
   // guild has SakuraAi selected but this key is unset.
   sakuraApiKey: string | null;
   memory: {
-    latelimit: {
-      button: ButtonLateLimit;
-      chatInputCommand: ChatInputCommandLateLimit;
-      messageCreate: MessageCreateLateLimit;
-      bump: GuildBumpLateLimit;
+    ratelimit: {
+      button: ButtonRateLimit;
+      chatInputCommand: ChatInputCommandRateLimit;
+      messageCreate: MessageCreateRateLimit;
+      bump: GuildBumpRateLimit;
     };
     friend: Friend;
     guildBlackList: GuildBlackList;

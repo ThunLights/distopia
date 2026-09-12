@@ -107,7 +107,7 @@ Intents must be configured when creating the `Client` instance (in `infra-discor
 
 ## Rate Limiting
 
-`LateLimit` (via `this.core.latelimit`) manages per-interaction, per-message, and per-bump cooldowns stored in memory. Check `src/application/core/src/LateLimit.ts` for available methods.
+`RateLimit` (via `this.core.ratelimit`) manages per-interaction, per-message, and per-bump cooldowns stored in memory. Check `src/application/core/src/RateLimit.ts` for available methods.
 
 ## Key discord.js Imports
 

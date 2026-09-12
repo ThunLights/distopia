@@ -27,7 +27,7 @@ new domain logic. See also [[clean-architecture]], [[solid]], [[dry]].
   ```typescript
   export type { Guild } from "infra-discord";
   ```
-  The only real domain logic here is `src/domain/model/src/Error/LateLimitError.ts`, a plain
+  The only real domain logic here is `src/domain/model/src/Error/RateLimitError.ts`, a plain
   `Error` subclass. `domain-model`'s `package.json` depends on `infra-discord` — i.e. the
   domain layer depends on infrastructure, which is backwards from DDD's intent (domain should
   have zero outward dependencies). This is an existing, accepted pattern — don't "fix" it as

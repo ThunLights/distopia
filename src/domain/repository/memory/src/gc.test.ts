@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { GuildEdit } from "./GuildEdit";
 import { GuildMemberAdd } from "./GuildMemberAdd";
 import { GuildSetting } from "./GuildSetting";
-import { LateLimitMapWithGC } from "./latelimit/LateLimitMapWithGC";
 import { MessageCreate } from "./MessageCreate";
 import { OAuth2Guilds } from "./OAuth2Guilds";
 import { OAuth2PKCE } from "./OAuth2PKCE";
+import { RateLimitMapWithGC } from "./ratelimit/RateLimitMapWithGC";
 import { UrlCacheInMemory } from "./UrlCacheInMemory";
 import { UserOAuth2 } from "./UserOAuth2";
 
@@ -280,33 +280,33 @@ describe("OAuth2Guilds.gc()", () => {
   });
 });
 
-// ── LateLimitMapWithGC ────────────────────────────────────────────────────
+// ── RateLimitMapWithGC ────────────────────────────────────────────────────
 // Condition: nowTime > value.getTime()  (limit date has passed, strictly)
 
-describe("LateLimitMapWithGC.gc()", () => {
+describe("RateLimitMapWithGC.gc()", () => {
   test("removes entries whose limit date has already passed", () => {
-    const map = new LateLimitMapWithGC();
+    const map = new RateLimitMapWithGC();
     map.set("expired", at(-1)); // 1ms before now → expired
     map.gc();
     expect(map.has("expired")).toBe(false);
   });
 
   test("keeps entries whose limit date equals now (not strictly greater)", () => {
-    const map = new LateLimitMapWithGC();
+    const map = new RateLimitMapWithGC();
     map.set("boundary", at(0)); // exactly now → kept
     map.gc();
     expect(map.has("boundary")).toBe(true);
   });
 
   test("keeps entries whose limit date is in the future", () => {
-    const map = new LateLimitMapWithGC();
+    const map = new RateLimitMapWithGC();
     map.set("future", at(60_000)); // 1 minute from now
     map.gc();
     expect(map.has("future")).toBe(true);
   });
 
   test("removes only expired entries in a mixed map", () => {
-    const map = new LateLimitMapWithGC();
+    const map = new RateLimitMapWithGC();
     map.set("past", at(-5000)); // expired
     map.set("now", at(0)); // boundary → kept
     map.set("soon", at(1000)); // future → kept
@@ -319,7 +319,7 @@ describe("LateLimitMapWithGC.gc()", () => {
   });
 
   test("all entries removed when all are expired", () => {
-    const map = new LateLimitMapWithGC();
+    const map = new RateLimitMapWithGC();
     map.set("a", at(-1));
     map.set("b", at(-1000));
     map.set("c", at(-99999));

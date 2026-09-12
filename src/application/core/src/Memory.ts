@@ -26,10 +26,10 @@ export class Memory extends Base {
       this.state.memory.userDictionary,
       this.state.memory.userOAuth2,
       this.state.memory.voiceChannelMember,
-      this.state.memory.latelimit.button,
-      this.state.memory.latelimit.bump,
-      this.state.memory.latelimit.chatInputCommand,
-      this.state.memory.latelimit.messageCreate,
+      this.state.memory.ratelimit.button,
+      this.state.memory.ratelimit.bump,
+      this.state.memory.ratelimit.chatInputCommand,
+      this.state.memory.ratelimit.messageCreate,
     ];
 
     for (const mem of mems) {
