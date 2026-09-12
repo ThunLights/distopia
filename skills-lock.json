@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/hallmark/SKILL.md",
       "computedHash": "579f86b27cdd7eb972107f7aecedd537f472891c5fd7c7c821bea15f64e0fe86"
+    },
+    "hush": {
+      "source": "ro80t/hush",
+      "sourceType": "github",
+      "skillPath": "skills/hush/SKILL.md",
+      "computedHash": "ea98bbf2a593907a093cd5facc491fbde8ba3568f1028b638d7e5d13ca313260"
     }
   }
 }
