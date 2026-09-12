@@ -1,5 +1,6 @@
-import { JWTClient } from "./JWTClient";
+import { JWTClient, type JWTPayload } from "./JWTClient";
 import { core } from "./core";
+import jsonwebtoken from "jsonwebtoken";
 import { describe, expect, suite, test } from "vitest";
 
 describe("jwt", async () => {
@@ -16,6 +17,39 @@ describe("jwt", async () => {
       const verified = await jwt.verify(token);
       expect(verified.payload).toEqual({ userId: "123" });
     }
+  });
+
+  test("renews a token expiring within 14 days but not one expiring beyond it", async () => {
+    const userId = "near-exp-boundary";
+    const userVerifyKey =
+      (await core.jwt.getUserVerifyKey(userId)) ??
+      (await core.jwt.updateNewUserVerifyKey(userId)).jwtVerifyKey;
+    const currKey = await core.jwt.getCurrKey();
+    if (!currKey) {
+      throw new Error("no current jwt key");
+    }
+
+    // Sign tokens directly (bypassing JWTClient.sign's fixed 8-week expiry) so the
+    // near-expiry boundary in JWTClient.verify can be exercised deterministically.
+    const jwtKey = Buffer.concat([currKey.value.key, userVerifyKey]);
+    const nearExpToken = jsonwebtoken.sign({ userId } satisfies JWTPayload, jwtKey, {
+      algorithm: currKey.value.alg,
+      keyid: currKey.id.toString(),
+      expiresIn: "13d",
+    });
+    const freshToken = jsonwebtoken.sign({ userId } satisfies JWTPayload, jwtKey, {
+      algorithm: currKey.value.alg,
+      keyid: currKey.id.toString(),
+      expiresIn: "15d",
+    });
+
+    const nearExpResult = await jwt.verify(nearExpToken);
+    const freshResult = await jwt.verify(freshToken);
+
+    expect(nearExpResult.payload).toEqual({ userId });
+    expect(nearExpResult.newToken).toBeDefined();
+    expect(freshResult.payload).toEqual({ userId });
+    expect(freshResult.newToken).toBeUndefined();
   });
 
   suite("vulnerability", async () => {
