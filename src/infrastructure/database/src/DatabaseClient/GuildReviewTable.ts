@@ -1,3 +1,4 @@
+import { Prisma } from "../prisma-client/client";
 import type {
   GuildReview,
   GuildReviewUpdateInput,
@@ -33,7 +34,18 @@ export class GuildReviewTable extends Base {
     });
   }
 
-  public async delete(guildId: string, userId: string): Promise<GuildReview> {
-    return await this.prisma.guildReview.delete({ where: { userId_guildId: { userId, guildId } } });
+  // Returns null (rather than throwing) when no review exists -- deleting an
+  // already-removed review is a normal "not found" outcome for callers, not a crash.
+  public async delete(guildId: string, userId: string): Promise<GuildReview | null> {
+    try {
+      return await this.prisma.guildReview.delete({
+        where: { userId_guildId: { userId, guildId } },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
+      throw error;
+    }
   }
 }

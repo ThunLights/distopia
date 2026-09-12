@@ -380,7 +380,10 @@ export class Guild extends Base {
     return entry;
   }
 
-  public async deleteWhiteListEntry(guildId: string, targetId: string): Promise<GuildWhiteList> {
+  public async deleteWhiteListEntry(
+    guildId: string,
+    targetId: string,
+  ): Promise<GuildWhiteList | null> {
     const entry = await this.state.database.guildWhiteList.delete(guildId, targetId);
     this.state.memory.guildWhiteList.delete(guildId);
     return entry;

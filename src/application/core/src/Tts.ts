@@ -150,7 +150,7 @@ export class Tts extends Base {
     return entry;
   }
 
-  public async removeIgnore(guildId: string, targetId: string): Promise<GuildTtsIgnoreList> {
+  public async removeIgnore(guildId: string, targetId: string): Promise<GuildTtsIgnoreList | null> {
     const entry = await this.state.database.guildTtsIgnoreList.delete(guildId, targetId);
     this.state.memory.guildTtsIgnoreList.delete(guildId);
     return entry;

@@ -64,7 +64,8 @@ export class OAuth2Controller extends Base {
     }
 
     if (response.status === 200) {
-      return (await response.json()) as RESTAPIPartialCurrentUserGuild[];
+      const body = await response.json().catch(() => null);
+      return body === null ? null : (body as RESTAPIPartialCurrentUserGuild[]);
     } else if (response.status === 429) {
       await sleep(1000);
       return await this.fetchGuilds(accessToken);
@@ -86,7 +87,9 @@ export class OAuth2Controller extends Base {
     }
 
     if (response.status === 200) {
-      const { id, username, email, avatar, banner } = (await response.json()) as APIUser;
+      const body = await response.json().catch(() => null);
+      if (body === null) return null;
+      const { id, username, email, avatar, banner } = body as APIUser;
       return {
         id,
         username,
@@ -124,8 +127,9 @@ export class OAuth2Controller extends Base {
     }
 
     if (response.status === 200) {
-      const { access_token, refresh_token } =
-        (await response.json()) as RESTPostOAuth2AccessTokenResult;
+      const body = await response.json().catch(() => null);
+      if (body === null) return null;
+      const { access_token, refresh_token } = body as RESTPostOAuth2AccessTokenResult;
       return {
         accessToken: access_token,
         refreshToken: refresh_token,
@@ -158,8 +162,9 @@ export class OAuth2Controller extends Base {
     }
 
     if (response.status === 200) {
-      const { access_token, refresh_token } =
-        (await response.json()) as RESTPostOAuth2AccessTokenResult;
+      const body = await response.json().catch(() => null);
+      if (body === null) return null;
+      const { access_token, refresh_token } = body as RESTPostOAuth2AccessTokenResult;
       return {
         accessToken: access_token,
         refreshToken: refresh_token,

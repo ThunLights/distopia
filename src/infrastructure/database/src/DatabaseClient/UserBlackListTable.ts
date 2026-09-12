@@ -1,3 +1,4 @@
+import { Prisma } from "../prisma-client/client";
 import type { UserBlackList } from "../types/UserBlackList";
 import { Base } from "./Base";
 
@@ -38,7 +39,16 @@ export class UserBlackListTable extends Base {
     return await this.prisma.userBlackList.update({ where: { id }, data: { tags } });
   }
 
-  public async delete(id: number): Promise<UserBlackList> {
-    return await this.prisma.userBlackList.delete({ where: { id } });
+  // Returns null (rather than throwing) when the list doesn't exist -- deleting an
+  // already-deleted blacklist is a normal "not found" outcome for callers, not a crash.
+  public async delete(id: number): Promise<UserBlackList | null> {
+    try {
+      return await this.prisma.userBlackList.delete({ where: { id } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
+      throw error;
+    }
   }
 }
