@@ -60,21 +60,18 @@ export class InteractionCreateHandler extends BaseHandler<
 
   public override async handle(interaction: Interaction<CacheType>): Promise<void> {
     if (interaction.isChatInputCommand()) {
-      const limit = await this.core.ratelimit.getChatInputCommand(interaction.user.id);
-
       for (const command of this.commands.chatInput) {
         if (await command.match(interaction)) {
-          const res = await command.run(interaction);
-
+          const limit = await this.core.ratelimit.getChatInputCommand(interaction.user.id);
           if (limit) {
             return void (await interaction.reply({
               embeds: [rateLimitEmbed],
               flags: [MessageFlags.Ephemeral],
             }));
           }
-
           await this.core.ratelimit.saveChatInputCommand(interaction.user.id);
 
+          const res = await command.run(interaction);
           if (res instanceof InteractionCallbackResponse || res instanceof ModalSended) {
             return;
           } else {
@@ -83,21 +80,18 @@ export class InteractionCreateHandler extends BaseHandler<
         }
       }
     } else if (interaction.isButton()) {
-      const limit = await this.core.ratelimit.getButton(interaction.user.id);
-
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
-          const res = await command.run(interaction);
-
+          const limit = await this.core.ratelimit.getButton(interaction.user.id);
           if (limit) {
             return void (await interaction.reply({
               embeds: [rateLimitEmbed],
               flags: [MessageFlags.Ephemeral],
             }));
           }
-
           await this.core.ratelimit.saveButton(interaction.user.id);
 
+          const res = await command.run(interaction);
           if (res instanceof InteractionResponse || res instanceof ModalSended) {
             return;
           } else {
