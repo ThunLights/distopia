@@ -68,6 +68,9 @@ export async function authAndValidateHandler<
     const { user } = e.locals;
     const body = await schema["~standard"].validate(await e.request.json());
 
+    // Checked before body.issues so an unauthenticated request always gets
+    // "Invalid User", even with an invalid body -- callers rely on this order
+    // to distinguish auth failures from validation failures (see join.e2e.ts).
     if (!user) {
       return errorJson("Invalid User");
     }

@@ -21,6 +21,8 @@ export class UserBlackListTable extends Base {
     tags: string[],
     maxCount: number,
   ): Promise<UserBlackList | null> {
+    // Serializable isolation so two concurrent calls can't both read a count under
+    // maxCount and both insert, letting the owner end up over the limit.
     return await this.prisma.$transaction(
       async (tx) => {
         const count = await tx.userBlackList.count({ where: { ownerId } });

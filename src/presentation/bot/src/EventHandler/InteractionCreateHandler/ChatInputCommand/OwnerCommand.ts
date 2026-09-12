@@ -68,7 +68,6 @@ export class OwnerCommand extends ChatInputCommandBase<Options> {
         .setDescription("何を設置するか選んでください")
         .setColor("Gold");
 
-      // It's not grammatically correct, but I went with this customId because it's easier to read.
       const levelButton = new ButtonBuilder()
         .setCustomId("panelRankingLevel")
         .setLabel("レベル")

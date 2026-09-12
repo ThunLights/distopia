@@ -30,7 +30,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
         await member.ban({ reason: "ブラックリストに該当したため" });
         banned = true;
       } catch {
-        // BANに失敗した場合もログは記録するため、ここでは処理を継続する
+        // Ban failed, but the match should still be logged below -- swallow and continue.
       }
     }
 

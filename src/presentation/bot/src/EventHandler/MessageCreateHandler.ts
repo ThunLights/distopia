@@ -114,12 +114,10 @@ export class MessageCreateHandler extends BaseHandler<
   }
 }
 
-// Pure and independently testable: true only when the message has no caption at all (checked
-// against the raw content, not the URL/codeblock-filtered text readAloud reads from) and every
-// attachment is an image or video. A caption that stripFilteredPatterns would remove entirely
-// (e.g. a bare URL with skipUrl on) still counts as "had a caption" here -- that message should
-// be skipped silently like any other fully-filtered text message, not announced as if there
-// were no caption to begin with.
+// True only when the message has no caption at all -- checked against the raw content, not
+// the filtered text readAloud reads. A caption stripFilteredPatterns would remove entirely
+// (e.g. a bare URL with skipUrl on) still counts as "had a caption": that message is skipped
+// silently like any other fully-filtered text, not announced as captionless.
 export function isMediaOnlyMessage(
   rawContent: string,
   attachmentContentTypes: (string | null)[],

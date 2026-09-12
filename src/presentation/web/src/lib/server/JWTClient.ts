@@ -22,6 +22,16 @@ export type VerifyResult = {
 
 const fourteenDays = 14 * 24 * 60 * 60 * 1000;
 
+/**
+ * Signs and verifies session JWTs. Each token is HMAC'd with the current
+ * server-wide signing key concatenated with the target user's own
+ * "verify key" (`core.jwt`), so rotating a single user's verify key
+ * invalidates only that user's outstanding tokens, not everyone's.
+ *
+ * `verify()` also silently re-signs (rotates) a payload into a fresh
+ * 8-week token whenever the presented one is within 14 days of expiry;
+ * callers should persist `VerifyResult.newToken` when present.
+ */
 export class JWTClient {
   constructor() {
     core.jwt.importDB();

@@ -10,22 +10,16 @@ import z from "zod";
 
 import { Base } from "./Base";
 
-// Shared by both the personal (/tts dictionary) and guild (/tts-admin dictionary) slash
-// command options' max_length -- a single source of truth so the two can't drift out of
-// sync (they previously did: the guild command had no cap at all). Also the authoritative
-// bound for file-based imports below, which don't go through Discord's own option
-// validation at all.
+// Shared by the personal and guild dictionary slash command options' max_length, and also
+// the bound enforced on file-based imports below, which never go through Discord's own
+// option validation.
 export const DICTIONARY_WORD_MAX_LENGTH = 50;
 export const DICTIONARY_READING_MAX_LENGTH = 50;
 
-// A dictionary file (JSON/TOML) is attacker-influenceable in a way slash command options
-// aren't: it's explicitly meant to be exported from one server and imported into another
-// (see importFromUrl below), so a file that looks like a normal shared dictionary could
-// have been tampered with in transit. Without a cap, a single import could carry far more
-// entries than any real dictionary would, turning importGuildDictionary's per-entry
-// upsert loop (or replaceAll's transaction) into a long-running or oversized operation that
-// blocks the bot+web process (they're one process -- see hooks.server.ts) for every guild,
-// not just the one being imported into.
+// A dictionary file is meant to be exported from one server and imported into another, so
+// it could have been tampered with in transit. Without a cap, one import could carry enough
+// entries to turn the upsert loop/transaction below into a long-running operation that
+// blocks the shared bot+web process (see hooks.server.ts) for every guild, not just this one.
 const MAX_IMPORT_ENTRIES = 1000;
 
 const DictionaryRecordSchema = z
@@ -165,9 +159,6 @@ export class Dictionary extends Base {
     return words.length;
   }
 
-  // Fetches an admin-uploaded dictionary file (a Discord CDN attachment URL, not user-typed
-  // input) via safeFetch -- keeps the actual network request inside app-core rather than
-  // handing a raw URL to presentation-bot, matching how Tts.ts fetches synthesis audio.
   public async importFromUrl(
     guildId: string,
     url: string,

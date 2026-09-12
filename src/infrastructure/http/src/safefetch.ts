@@ -10,7 +10,13 @@ import { isValidSize } from "./size";
 import { DEFAULT_TIMEOUT, DISCORD_TIMEOUT } from "./timeout";
 import { isHttpProtocol, isLocalIPv4, isLocalIPv6 } from "./url";
 
+/** Options for {@link safeFetch}. */
 export type SafeFetchOptions = {
+  /**
+   * When true, a redirect to a `discord://` URL is returned as-is instead
+   * of being rejected as a non-http(s) redirect target, so callers can
+   * detect Discord deep-link redirects (e.g. invite link resolution).
+   */
   detectDiscordProtocol?: boolean;
 };
 
@@ -21,10 +27,9 @@ type PinnedRequest = {
   init: RequestInit;
 };
 
-// Resolves a URL to a pinned IP to prevent DNS rebinding attacks.
-// For hostname URLs: resolves DNS once, validates all IPs, and replaces the hostname
-// with the resolved IP in the URL so fetch() never performs a second DNS lookup.
-// The original Host header and TLS SNI are preserved for correct server routing.
+// Resolves the hostname to a pinned IP up front (fetch() never re-resolves DNS, closing
+// the rebinding window) while preserving the original Host header and TLS SNI so the
+// pinned request still routes to the right virtual host.
 async function resolveToPinnedUrl(
   url: string,
   init: RequestInit,
@@ -72,6 +77,23 @@ async function resolveToPinnedUrl(
   return { url: pinnedUrlObj.href, init: pinnedInit };
 }
 
+/**
+ * Fetches a URL restricted to Discord's own domains (`discord.com`,
+ * `discordapp.com`, `discord.gg`), with DNS-pinned SSRF protection.
+ * Redirects are not followed — the response is returned as-is with
+ * `redirect: "manual"`.
+ *
+ * @param input - A {@link SafeUrl} whose hostname must be a Discord domain.
+ * @param init - Standard `fetch` options; the `Host` header and TLS SNI
+ * are preserved automatically after IP pinning.
+ * @returns The `Response`, or:
+ * - {@link InvalidDomainError} if the hostname isn't an allowed Discord domain.
+ * - {@link LocalAddressError} if the hostname resolves to a private/local IP.
+ *
+ * @example
+ * const res = await safeFetchForDiscord(safeUrl`https://discord.com/api/...`);
+ * if (res instanceof Error) return;
+ */
 export async function safeFetchForDiscord(
   input: SafeUrl,
   init?: RequestInit,
@@ -92,6 +114,29 @@ export async function safeFetchForDiscord(
   });
 }
 
+/**
+ * SSRF-safe `fetch` wrapper: resolves and pins DNS before connecting,
+ * rejects private/local IPs, caps the response body size, and follows
+ * redirects manually — stripping `Authorization`/`Cookie` on cross-origin
+ * hops — up to {@link DEFAULT_MAX_REDIRECT} hops.
+ *
+ * @param input - A {@link SafeUrl} to fetch.
+ * @param init - Standard `fetch` options.
+ * @param options - See {@link SafeFetchOptions}.
+ * @returns The final `Response` — its `.url` reflects the original
+ * hostname, not the pinned IP — or:
+ * - {@link LocalAddressError} if any hop resolves to a private/local IP.
+ * - {@link HeaderError} if a redirect response is missing its `Location`
+ *   header, the header isn't a parseable URL, or the redirect target isn't
+ *   an http(s) URL.
+ * - {@link RedirectError} if the redirect chain exceeds {@link DEFAULT_MAX_REDIRECT}.
+ * - {@link BodySizeError} if the response body exceeds the size limit.
+ *
+ * @example
+ * const res = await safeFetch(safeUrl`https://example.com/${path}`);
+ * if (res instanceof Error) return;
+ * const text = await res.text();
+ */
 export async function safeFetch(
   input: SafeUrl,
   init?: RequestInit,

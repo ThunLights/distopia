@@ -1,5 +1,9 @@
 import { isLocalHostname } from "./dns";
 
+/**
+ * Returns true if `host` is an IPv4 literal in a private/reserved range
+ * (loopback, RFC 1918, CGNAT, link-local). Non-IPv4 input returns false.
+ */
 export function isLocalIPv4(host: string): boolean {
   const parts = host.split(".");
   if (parts.length !== 4) return false;
@@ -25,6 +29,11 @@ export function isLocalIPv4(host: string): boolean {
   );
 }
 
+/**
+ * Returns true if `addr` is an IPv6 literal in a private/reserved range
+ * (loopback, unspecified, link-local, unique-local), or an IPv4-mapped
+ * address (`::ffff:a.b.c.d`) whose embedded IPv4 is private.
+ */
 export function isLocalIPv6(addr: string): boolean {
   const h = addr.toLowerCase();
 
@@ -50,6 +59,14 @@ export function isLocalIPv6(addr: string): boolean {
   return false;
 }
 
+/**
+ * Returns true if `url` (with or without a scheme) resolves to a
+ * local/private address — `localhost`, a private IPv4/IPv6 literal, or a
+ * hostname whose DNS records are all private.
+ *
+ * @example
+ * await isLocalUrl("http://169.254.169.254/"); // true — link-local
+ */
 export async function isLocalUrl(url: string): Promise<boolean> {
   let s = url.replace(/\\/g, "/");
   if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) s = "http://" + s;
@@ -64,6 +81,7 @@ export async function isLocalUrl(url: string): Promise<boolean> {
   return await isLocalHostname(hostname);
 }
 
+/** Returns true if `url` parses with an `http:` or `https:` protocol. */
 export async function isHttpProtocol(url: string | URL): Promise<boolean> {
   const protocol = URL.parse(url.toString())?.protocol;
 

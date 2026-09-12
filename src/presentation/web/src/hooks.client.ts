@@ -6,25 +6,15 @@ init({
 
   tracesSampleRate: 1.0,
 
-  // Enable logs to be sent to Sentry
   enableLogs: true,
 
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
   replaysSessionSampleRate: 0.1,
 
-  // If the entire session is not sampled, use the below sample rate to sample
-  // sessions when an error occurs.
   replaysOnErrorSampleRate: 1.0,
 
   // Session Replay is added lazily below instead of listed here -- see loadReplay().
 
-  dataCollection: {
-    // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
-    // https://docs.sentry.io/platforms/javascript/guides/sveltekit/configuration/options/#dataCollection
-    // userInfo: false,
-    // httpBodies: [],
-  },
+  dataCollection: {},
 });
 
 // Session Replay is one of the heaviest parts of the Sentry SDK. Referencing `replayIntegration`
@@ -52,5 +42,4 @@ if (typeof requestIdleCallback === "function") {
   setTimeout(loadReplay, 4000);
 }
 
-// If you have a custom error handler, pass it to `handleErrorWithSentry`
 export const handleError = handleErrorWithSentry();

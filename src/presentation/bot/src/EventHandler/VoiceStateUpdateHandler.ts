@@ -27,10 +27,6 @@ export class VoiceStateUpdateHandler extends BaseHandler<
     }
   }
 
-  // Reads aloud joins/leaves/moves for the channel the bot's TTS session is bound to, so
-  // listeners in-channel hear about comings and goings without needing to watch the member
-  // list. Only events touching that specific channel matter -- voice activity elsewhere in
-  // the guild is irrelevant to people sitting in it.
   private async announceVoiceStateChange(
     oldState: VoiceState,
     newState: VoiceState,
@@ -94,12 +90,10 @@ export class VoiceStateUpdateHandler extends BaseHandler<
       return;
     }
 
-    // `channel.members` is derived from the guild's member cache, which can miss members
-    // whose full GuildMember object hasn't been cached even though their voice state is
-    // known (voice states are authoritative via the GuildVoiceStates intent regardless of
-    // member caching). If the resolved member count doesn't match the raw voice-state count
-    // for this channel, at least one occupant couldn't be checked for bot-ness -- treat that
-    // as "might still have a human" rather than risk disconnecting while someone's present.
+    // `channel.members` (member cache) can miss occupants whose voice state is known -- voice
+    // states are authoritative via GuildVoiceStates regardless of member caching. A mismatch
+    // between resolved member count and raw voice-state count means an occupant's bot-ness is
+    // unverifiable -- assume a human is present rather than risk disconnecting.
     const voiceStateCount = oldState.guild.voiceStates.cache.filter(
       (voiceState) => voiceState.channelId === channel.id,
     ).size;

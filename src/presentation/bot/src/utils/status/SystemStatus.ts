@@ -3,8 +3,6 @@ import os from "node:os";
 const toMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(1).padStart(7);
 const toPercent = (used: number, total: number) => ((used / total) * 100).toFixed(1);
 
-// Bundles the bot process's own health metrics (used by /owner status) behind one
-// namespace, instead of scattering each metric across its own single-function file.
 export class SystemStatus {
   // process.cpuUsage() alone only reports cumulative CPU time since process start, not a
   // live rate -- sample it across a short interval to get an actual instantaneous percentage

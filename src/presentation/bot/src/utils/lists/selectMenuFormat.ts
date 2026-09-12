@@ -1,5 +1,3 @@
-// Shared by blackList.ts and whiteList.ts, which previously each carried an identical
-// copy of both functions below.
 const SELECT_MENU_LABEL_MAX_LENGTH = 100;
 
 export function truncateSelectMenuLabel(label: string): string {

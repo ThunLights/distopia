@@ -137,15 +137,11 @@ export type Synthesizer = (
   speakerId: number,
 ) => Promise<{ audio?: Buffer; error?: string }>;
 
-// Enqueues one message's text for synthesis+playback, preserving arrival order even though
-// synthesis takes real time -- the queue is drained strictly one item at a time.
-//
-// `expectedTextChannelId` must still match the session's binding at the moment of enqueueing,
-// not just when the caller first looked the session up -- the caller may have awaited several
-// lookups (dictionary resolution, TTS settings) in between, during which a `/tts leave` +
-// `/tts join` to a different channel could have replaced the session entirely. Without this
-// recheck, a message read under the old session's authority could get queued into a
-// different one.
+// Preserves arrival order (drained strictly one item at a time) even though synthesis takes
+// real time. `expectedTextChannelId` must still match the session's binding at enqueue time,
+// not just when the caller first looked it up -- awaited lookups in between (dictionary,
+// settings) could let a `/tts leave` + `/tts join` swap the session, so without this recheck
+// a message could land in the wrong channel's queue.
 export function enqueue(
   guildId: string,
   expectedTextChannelId: string,
