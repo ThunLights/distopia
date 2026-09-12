@@ -1,1 +1,0 @@
-import{n as e}from"./rolldown-runtime-DkW27tQK.js";function t(e,t){return[(t=+t)*Math.cos(e-=Math.PI/2),t*Math.sin(e)]}function n(){return(n=e((()=>{})))()}export{t as n,n as t};
