@@ -5,16 +5,16 @@ import { ScheduleTaskManager } from "./ScheduleTaskManager";
 describe("ScheduleTaskManager", () => {
   test("add", async () => {
     const manager = new ScheduleTaskManager();
-    let excuted = 0;
+    let executed = 0;
     const taskId = await manager.add("* * * * * *", () => {
-      excuted += 1;
+      executed += 1;
     });
 
     await new Promise((r) => {
       setTimeout(r, 1000);
     });
 
-    expect(excuted).toBeGreaterThanOrEqual(1);
+    expect(executed).toBeGreaterThanOrEqual(1);
 
     manager.delete(taskId);
   });

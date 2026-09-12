@@ -10,7 +10,7 @@ import {
 import { describe, expect, test } from "vitest";
 
 import { ValidateError, type ValidateResult } from "../../../utils/validator";
-import { CommandInteractionBase } from "./CommanInteractionBase";
+import { CommandInteractionBase } from "./CommandInteractionBase";
 
 type Options = { value: string };
 

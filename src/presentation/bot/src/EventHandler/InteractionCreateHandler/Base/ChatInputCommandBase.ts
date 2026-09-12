@@ -4,7 +4,7 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 
-import { CommandInteractionBase } from "./CommanInteractionBase";
+import { CommandInteractionBase } from "./CommandInteractionBase";
 
 export abstract class ChatInputCommandBase<
   O extends {} = {},

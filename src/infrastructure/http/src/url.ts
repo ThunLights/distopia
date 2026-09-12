@@ -16,7 +16,7 @@ export function isLocalIPv4(host: string): boolean {
 
   return (
     a === 0 || // 0.0.0.0/8
-    a === 127 || // 127.0.0.0/8 loop back
+    a === 127 || // 127.0.0.0/8 loopback
     a === 10 || // 10.0.0.0/8
     (a === 100 && b >= 64 && b <= 127) || // 100.64.0.0/10 CGNAT (RFC 6598)
     (a === 172 && b >= 16 && b <= 31) || // 172.16.0.0/12
