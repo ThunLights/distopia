@@ -70,7 +70,7 @@ export class BlackList extends Base {
     return updated;
   }
 
-  public async delete(id: number): Promise<UserBlackList> {
+  public async delete(id: number): Promise<UserBlackList | null> {
     const applications = await this.state.database.guildBlackList.findAllByBlackListId(id);
     const deleted = await this.state.database.userBlackList.delete(id);
 
@@ -141,7 +141,7 @@ export class BlackList extends Base {
     return await this.state.database.blackListTarget.upsert(input);
   }
 
-  public async deleteTarget(blackListId: number, userId: string): Promise<BlackListTarget> {
+  public async deleteTarget(blackListId: number, userId: string): Promise<BlackListTarget | null> {
     return await this.state.database.blackListTarget.delete(blackListId, userId);
   }
 
@@ -153,7 +153,7 @@ export class BlackList extends Base {
     return await this.state.database.blackListEditor.upsert(input);
   }
 
-  public async deleteEditor(blackListId: number, userId: string): Promise<BlackListEditor> {
+  public async deleteEditor(blackListId: number, userId: string): Promise<BlackListEditor | null> {
     return await this.state.database.blackListEditor.delete(blackListId, userId);
   }
 
@@ -182,7 +182,7 @@ export class BlackList extends Base {
     return entry;
   }
 
-  public async unapply(guildId: string, blackListId: number): Promise<GuildBlackList> {
+  public async unapply(guildId: string, blackListId: number): Promise<GuildBlackList | null> {
     const entry = await this.state.database.guildBlackList.delete(guildId, blackListId);
     this.state.memory.guildBlackList.delete(guildId);
     return entry;

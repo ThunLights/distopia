@@ -1,3 +1,4 @@
+import { Prisma } from "../prisma-client/client";
 import type {
   GuildTtsIgnoreList,
   GuildTtsIgnoreListUpsertInput,
@@ -25,9 +26,18 @@ export class GuildTtsIgnoreListTable extends Base {
     });
   }
 
-  public async delete(guildId: string, targetId: string): Promise<GuildTtsIgnoreList> {
-    return await this.prisma.guildTtsIgnoreList.delete({
-      where: { guildId_targetId: { guildId, targetId } },
-    });
+  // Returns null (rather than throwing) when the entry doesn't exist -- removing an
+  // already-removed ignore entry is a normal "not found" outcome for callers, not a crash.
+  public async delete(guildId: string, targetId: string): Promise<GuildTtsIgnoreList | null> {
+    try {
+      return await this.prisma.guildTtsIgnoreList.delete({
+        where: { guildId_targetId: { guildId, targetId } },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
+      throw error;
+    }
   }
 }

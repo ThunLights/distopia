@@ -1,3 +1,4 @@
+import { Prisma } from "../prisma-client/client";
 import type { GuildWhiteList, GuildWhiteListUpsertInput } from "../types/GuildWhiteList";
 import { Base } from "./Base";
 
@@ -22,9 +23,18 @@ export class GuildWhiteListTable extends Base {
     });
   }
 
-  public async delete(guildId: string, targetId: string): Promise<GuildWhiteList> {
-    return await this.prisma.guildWhiteList.delete({
-      where: { guildId_targetId: { guildId, targetId } },
-    });
+  // Returns null (rather than throwing) when the entry doesn't exist -- removing an
+  // already-removed whitelist entry is a normal "not found" outcome for callers, not a crash.
+  public async delete(guildId: string, targetId: string): Promise<GuildWhiteList | null> {
+    try {
+      return await this.prisma.guildWhiteList.delete({
+        where: { guildId_targetId: { guildId, targetId } },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
+      throw error;
+    }
   }
 }

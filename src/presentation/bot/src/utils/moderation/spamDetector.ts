@@ -30,7 +30,9 @@ export async function detectSpamMessage(
     const inviteLinks = await core.message.includeInviteLink(content);
     if (inviteLinks.length) {
       if (message.deletable) {
-        await message.delete();
+        // deletable only reflects cached permissions at read time -- another mod/bot could
+        // have already deleted this message by the time the API call lands, which throws.
+        await message.delete().catch(() => undefined);
       }
       if (message.guild) {
         await logger.log(message.guild, "logAntiRaid", message, inviteLinks);
@@ -48,13 +50,13 @@ export async function detectSpamMessage(
       for (const msg of messages) {
         for (const inviteLink of embedInviteLinks) {
           if (msg.content.includes(inviteLink) && msg.deletable) {
-            await msg.delete();
+            await msg.delete().catch(() => undefined);
           }
         }
       }
 
       if (message.deletable) {
-        await message.delete();
+        await message.delete().catch(() => undefined);
       }
 
       if (message.guild) {
