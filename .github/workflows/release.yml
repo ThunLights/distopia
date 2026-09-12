@@ -55,23 +55,28 @@ jobs:
 
       - name: Version script
         if: github.event_name == 'pull_request'
-        run: npm run version
+        # changeset version (CLI v3) now exits 1 when there are no unreleased changesets --
+        # normal for a PR that doesn't add one (see CLAUDE.md) -- so only run version:jsr
+        # when there was actually something to version, instead of failing every PR.
+        run: |
+          if npx changeset version; then
+            turbo run version:jsr
+          fi
 
       - name: Create Tag
         if: github.event_name == 'push'
         run: |
-          npx changeset tag
+          npx changeset git-tag
           git push --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release Pull Request
         if: github.event_name == 'push'
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: npm run version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-script: npm run version
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   npm:
     name: npmjs.com
