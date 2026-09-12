@@ -1,3 +1,4 @@
+import { Prisma } from "../prisma-client/client";
 import type { UserDictionary, UserDictionaryUpsertInput } from "../types/UserDictionary";
 import { Base } from "./Base";
 
@@ -14,10 +15,20 @@ export class UserDictionaryTable extends Base {
     });
   }
 
-  public async delete(userId: string, word: string): Promise<UserDictionary> {
-    return await this.prisma.userDictionary.delete({
-      where: { userId_word: { userId, word } },
-    });
+  // Returns null (rather than throwing) when the word doesn't exist -- deleting an
+  // already-removed or never-registered word is a normal "not found" outcome for callers,
+  // not a crash.
+  public async delete(userId: string, word: string): Promise<UserDictionary | null> {
+    try {
+      return await this.prisma.userDictionary.delete({
+        where: { userId_word: { userId, word } },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
+      throw error;
+    }
   }
 
   public async deleteAll(userId: string): Promise<void> {

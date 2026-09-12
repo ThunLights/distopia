@@ -1,4 +1,8 @@
 import type { Guild, GuildUpdateInput, GuildUpsertInput } from "../types/Guild";
+import type { GuildRecord } from "../types/GuildRecord";
+import type { GuildRecordOneDay } from "../types/GuildRecordOneDay";
+import type { GuildReview } from "../types/GuildReview";
+import type { GuildSetting } from "../types/GuildSetting";
 import { Base } from "./Base";
 
 export class GuildTable extends Base {
@@ -25,7 +29,16 @@ export class GuildTable extends Base {
     };
   }
 
-  public async findWithAllRefData(guildId: string, recordOneDaysSince?: Date) {
+  public async findWithAllRefData(
+    guildId: string,
+    recordOneDaysSince?: Date,
+  ): Promise<{
+    guild: Guild | null;
+    record: GuildRecord | null;
+    settings: GuildSetting | null;
+    recordOneDays: GuildRecordOneDay[];
+    reviews: GuildReview[];
+  }> {
     const [guild, record, settings, recordOneDays, reviews] = await this.prisma.$transaction([
       this.prisma.guild.findUnique({ where: { guildId } }),
       this.prisma.guildRecord.findUnique({ where: { guildId } }),

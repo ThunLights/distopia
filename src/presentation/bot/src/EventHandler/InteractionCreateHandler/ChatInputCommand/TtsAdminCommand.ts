@@ -61,6 +61,7 @@ const OptionsSchema = z.object({
   speakerId: z.number().nullable(),
   enabled: z.boolean().nullable(),
   skipCommand: z.string().nullable(),
+  ttsProvider: z.enum(["WebVoiceVox", "SakuraAi"]).nullable(),
 });
 type Options = z.infer<typeof OptionsSchema>;
 
@@ -251,6 +252,23 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
               },
             ],
           },
+          {
+            type: ApplicationCommandOptionType.Subcommand,
+            name: "tts-provider",
+            description: "読み上げに使用するTTSエンジンを設定します。",
+            options: [
+              {
+                type: ApplicationCommandOptionType.String,
+                name: "provider",
+                description: "TTSエンジン",
+                required: true,
+                choices: [
+                  { name: "VOICEVOX (無料)", value: "WebVoiceVox" },
+                  { name: "さくらインターネット AIエンジン", value: "SakuraAi" },
+                ],
+              },
+            ],
+          },
         ],
       },
     ],
@@ -273,6 +291,10 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
         speakerId: interaction.options.getInteger("speaker_id", false),
         enabled: interaction.options.getBoolean("enabled", false),
         skipCommand: interaction.options.getString("command", false),
+        ttsProvider: interaction.options.getString("provider", false) as
+          | "WebVoiceVox"
+          | "SakuraAi"
+          | null,
       },
       OptionsSchema,
     );
@@ -332,7 +354,13 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "remove" && word) {
-      await this.core.dictionary.removeGuildEntry(guildId, word);
+      const entry = await this.core.dictionary.removeGuildEntry(guildId, word);
+      if (!entry) {
+        return {
+          ...embed("Red", "エラー", `サーバー辞書に登録されていません: ${word}`),
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
       return {
         ...embed("Green", "サーバー辞書削除", `サーバー辞書から削除しました: ${word}`),
         flags: [MessageFlags.Ephemeral],
@@ -464,7 +492,7 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     subCommand: string,
     options: Options,
   ): Promise<InteractionReplyOptions | null> {
-    const { speakerId, enabled, skipCommand } = options;
+    const { speakerId, enabled, skipCommand, ttsProvider } = options;
 
     if (subCommand === "default-voice" && typeof speakerId === "number") {
       await this.core.tts.setGuildDefaultSpeaker(guildId, speakerId);
@@ -510,6 +538,16 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
           "サーバー設定",
           `コードブロックの読み上げ除外を${enabled ? "有効" : "無効"}にしました。`,
         ),
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
+    if (subCommand === "tts-provider" && ttsProvider) {
+      await this.core.tts.setTtsProvider(guildId, ttsProvider);
+      const providerName =
+        ttsProvider === "SakuraAi" ? "さくらインターネット AIエンジン" : "VOICEVOX";
+      return {
+        ...embed("Green", "サーバー設定", `読み上げエンジンを ${providerName} に設定しました。`),
         flags: [MessageFlags.Ephemeral],
       };
     }

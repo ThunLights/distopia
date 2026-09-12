@@ -37,6 +37,7 @@ export type GuildSettingValue = {
   ttsSkipCommand: string;
   ttsSkipUrl: boolean;
   ttsSkipCodeBlock: boolean;
+  ttsProvider: "WebVoiceVox" | "SakuraAi";
   createdAt: Date;
 };
 

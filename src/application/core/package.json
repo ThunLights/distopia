@@ -46,6 +46,7 @@
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "infra-http": "workspace:*",
+    "infra-sakura": "workspace:*",
     "infra-voicevox": "workspace:*",
     "repo-memory": "workspace:*",
     "repo-search": "workspace:*",

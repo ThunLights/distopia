@@ -244,7 +244,13 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "remove" && word) {
-      await this.core.dictionary.removeUserEntry(userId, word);
+      const entry = await this.core.dictionary.removeUserEntry(userId, word);
+      if (!entry) {
+        return {
+          ...embed("Red", "エラー", `辞書に登録されていません: ${word}`),
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
       return {
         ...embed("Green", "辞書削除", `辞書から削除しました: ${word}`),
         flags: [MessageFlags.Ephemeral],

@@ -70,7 +70,7 @@ export class Dictionary extends Base {
     return entry;
   }
 
-  public async removeUserEntry(userId: string, word: string): Promise<UserDictionary> {
+  public async removeUserEntry(userId: string, word: string): Promise<UserDictionary | null> {
     const entry = await this.state.database.userDictionary.delete(userId, word);
     this.state.memory.userDictionary.delete(userId);
     return entry;
@@ -82,7 +82,7 @@ export class Dictionary extends Base {
     return entry;
   }
 
-  public async removeGuildEntry(guildId: string, word: string): Promise<GuildDictionary> {
+  public async removeGuildEntry(guildId: string, word: string): Promise<GuildDictionary | null> {
     const entry = await this.state.database.guildDictionary.delete(guildId, word);
     this.state.memory.guildDictionary.delete(guildId);
     return entry;

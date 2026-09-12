@@ -40,6 +40,10 @@ export type AppState = {
   // API whenever this is null/unset or the fast endpoint itself fails (e.g. its points are
   // exhausted), so no environment needs to set this for TTS to keep working.
   voicevoxApiKey: string | null;
+  // Optional -- Sakura Internet's AI Engine TTS, selectable per-guild as an alternative to
+  // VOICEVOX (GuildSetting.ttsProvider). Tts.synthesize() falls back to VOICEVOX whenever a
+  // guild has SakuraAi selected but this key is unset.
+  sakuraApiKey: string | null;
   memory: {
     latelimit: {
       button: ButtonLateLimit;
