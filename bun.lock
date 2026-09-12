@@ -10,7 +10,7 @@
         "husky": "9.1.7",
         "oxfmt": "catalog:",
         "oxlint": "catalog:",
-        "skills": "1.5.24",
+        "skills": "1.5.25",
         "turbo": "2.10.12",
       },
       "peerDependencies": {
@@ -2446,7 +2446,7 @@
 
     "sisteransi": ["sisteransi@1.0.5", "", {}, "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg=="],
 
-    "skills": ["skills@1.5.24", "", { "dependencies": { "tar": "^7.5.20", "yaml": "^2.8.3" }, "bin": { "skills": "bin/cli.mjs", "add-skill": "bin/cli.mjs" } }, "sha512-kTt1JKrNTvblLS2cdNOkXXPiyYlkqjlja3/wc5yenDDZuh2lyu2B6oTzNzvEotik5FiFBzXDfAT/MGYHdd6+9Q=="],
+    "skills": ["skills@1.5.25", "", { "dependencies": { "tar": "^7.5.20", "yaml": "^2.8.3" }, "bin": { "skills": "bin/cli.mjs", "add-skill": "bin/cli.mjs" } }, "sha512-E4iBTLaeih3uwzajrlvXd55dWw9/ihxxaIPePB5OoN5GOQ0HrDF2CXhwYM+LpJQ/8Zbk/IA69A0B9C27/sMCbw=="],
 
     "smol-toml": ["smol-toml@1.8.0", "", {}, "sha512-kCZr2V3ch9i00x8zXRhjUNVcjG9ijES5dDudkXvUVCT5QlJNQWElSJdZqyPemffHoLNUYwOcou0Fy+ojN0uHSQ=="],
 
