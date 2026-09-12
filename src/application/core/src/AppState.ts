@@ -30,19 +30,13 @@ export type AppState = {
   owner: {
     id: string;
   };
-  // The project's main/official Discord server (PUBLIC_HOME_SERVER_ID) -- was previously
-  // (mis)named `supportServerId`, which read confusingly close to the unrelated "Supporter"
-  // feature (app-core/constant's supportersKeyValue, third-party partner orgs' servers).
   homeServerId: string;
   url: string;
-  // Optional -- VOICEVOX TTS Quest's paid, low-latency endpoint (deprecatedapis.tts.quest/v2)
-  // requires a key. infra-voicevox's synthesize() falls back to the free, unauthenticated v3
-  // API whenever this is null/unset or the fast endpoint itself fails (e.g. its points are
-  // exhausted), so no environment needs to set this for TTS to keep working.
+  // Optional -- infra-voicevox falls back to the free, unauthenticated API whenever this is
+  // unset or the paid endpoint itself fails, so no environment needs to set it for TTS to work.
   voicevoxApiKey: string | null;
-  // Optional -- Sakura Internet's AI Engine TTS, selectable per-guild as an alternative to
-  // VOICEVOX (GuildSetting.ttsProvider). Tts.synthesize() falls back to VOICEVOX whenever a
-  // guild has SakuraAi selected but this key is unset.
+  // Optional -- Tts.synthesize() falls back to VOICEVOX whenever a guild has SakuraAi
+  // selected (GuildSetting.ttsProvider) but this key is unset.
   sakuraApiKey: string | null;
   memory: {
     ratelimit: {

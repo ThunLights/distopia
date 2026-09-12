@@ -1,4 +1,4 @@
-export const MAX_BYTES = 1024 * 1024; // 1MB
+export const MAX_BYTES = 1024 * 1024;
 
 export async function isValidSize(response: Response) {
   const body = response.body;

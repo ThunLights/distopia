@@ -67,15 +67,15 @@ export class SpecialChar {
     if (a == null) {
       return "";
     }
-    // 例外文字の対応
+    // Explicitly mapped exception characters
     if (char in this.exceptionChars) {
       return this.exceptionChars[char] as string;
     }
-    // 全角文字対応
+    // Fullwidth Latin letters (U+FF21-U+FF5A)
     if (0xff21 <= a && a <= 0xff5a) {
       a -= 0xfee0;
     }
-    // 数学用英数字記号対応 英文字
+    // Mathematical alphanumeric symbols - letters (U+1D400-U+1D6A3)
     if (0x1d400 <= a && a <= 0x1d6a3) {
       a -= 0x1d400;
       a %= 2 * 26;
@@ -84,7 +84,7 @@ export class SpecialChar {
       }
       a += 0x41;
     }
-    // 数学用英数字記号対応 数字
+    // Mathematical alphanumeric symbols - digits (U+1D7CE-U+1D7FF)
     if (0x1d7ce <= a && a <= 0x1d7ff) {
       a -= 0x1d7ce;
       a %= 10;

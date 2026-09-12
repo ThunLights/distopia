@@ -1,4 +1,3 @@
-// Discord embed field values are capped at 1024 characters.
 const DEFAULT_MAX_LENGTH = 1024;
 const TRUNCATION_MARKER = "…";
 

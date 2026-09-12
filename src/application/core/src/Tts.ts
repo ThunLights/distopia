@@ -17,9 +17,6 @@ import type { Guild } from "./Guild";
 const DEFAULT_SKIP_COMMAND = "s"; // matches GuildSetting.ttsSkipCommand's DB default
 const MAX_READING_LENGTH = 300;
 
-// Re-exported so presentation-bot can reach VOICEVOX's speaker catalog through app-core
-// (matching the app-core/Dictionary re-export pattern) instead of depending on infra-voicevox
-// directly.
 export { FAMOUS_SPEAKERS, speakerName } from "infra-voicevox";
 export type { TtsSynthesisResult } from "infra-voicevox";
 export type { TtsProvider } from "infra-database/types";
@@ -86,9 +83,6 @@ export class Tts extends Base {
     await this.guild.saveSetting({ guildId, ttsSkipUrl: enabled });
   }
 
-  // The word a member types in the read-aloud text channel to interrupt/skip whatever the
-  // bot is currently reading -- a plain chat message, not a slash command, so it works even
-  // mid-sentence without waiting for the current message to finish being read.
   public async getSkipCommand(guildId: string): Promise<string> {
     const setting = await this.guild.getSetting(guildId);
     return setting?.ttsSkipCommand ?? DEFAULT_SKIP_COMMAND;
@@ -102,10 +96,9 @@ export class Tts extends Base {
     await this.guild.saveSetting({ guildId, ttsSkipCodeBlock: enabled });
   }
 
-  // Caps how much text ever reaches synthesis -- an unbounded wall of text would mean a very
-  // long synthesis request and a very long audio clip blocking the queue for everyone else in
-  // the voice channel. Applied to the final text right before synthesis (after dictionary
-  // substitution), not to the raw Discord message, so it bounds what actually gets read aloud.
+  // Caps how much text reaches synthesis so one long message can't block the read-aloud
+  // queue for the whole voice channel. Apply to the text right before synthesis (after
+  // dictionary substitution), not to the raw Discord message.
   public truncateForReading(text: string, maxLength: number = MAX_READING_LENGTH): string {
     if (text.length <= maxLength) {
       return text;
@@ -115,10 +108,8 @@ export class Tts extends Base {
     return `${text.slice(0, maxLength)} 以下${omitted}文字を省略`;
   }
 
-  // Strips fenced code blocks and bare URLs before dictionary substitution / synthesis, per
-  // the guild's filter settings. Does not attempt partial cleanup of mixed content beyond
-  // removing the matched spans -- if that leaves only whitespace, the caller should skip the
-  // message entirely rather than synthesize empty/near-empty audio.
+  // If this leaves only whitespace, the caller should skip the message rather than
+  // synthesize empty audio.
   public stripFilteredPatterns(
     text: string,
     setting: { skipUrl: boolean; skipCodeBlock: boolean },

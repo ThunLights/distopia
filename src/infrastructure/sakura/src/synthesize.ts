@@ -1,8 +1,7 @@
 import { AiEngine } from "mankai";
 
-// Sakura Internet's AI Engine exposes a VOICEVOX-compatible TTS endpoint (audio query, then
-// synthesis) -- reusing that flow lets this provider share VOICEVOX speaker IDs with
-// infra-voicevox instead of needing its own voice catalog wired through the app.
+// Sakura's AI Engine exposes a VOICEVOX-compatible TTS endpoint (audio query, then
+// synthesis), so speaker IDs here match infra-voicevox's catalog rather than a separate one.
 export type TtsSynthesisResult =
   | { audio: Buffer; error?: undefined }
   | { audio?: undefined; error: "api_error" };

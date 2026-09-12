@@ -1,9 +1,8 @@
 export type SupporterServer = {
   name: string;
   invite: string | null;
-  // The supporter organization's own Discord server. Not a secret (guild IDs are public), and
-  // separate from `invite` since an invite link can expire/rotate independently of the guild
-  // itself.
+  // guildId isn't sensitive (guild IDs are public) and isn't derived from invite -- invite
+  // links can expire/rotate independently of the guild itself.
   guildId: string;
 };
 

@@ -14,9 +14,6 @@ export type WelcomeMessageLabel = {
   defaultContent: string;
 };
 
-// Mirrors Logger's shape (injected core, resolves the guild's configured channel, sends,
-// swallows/logs failures) since it's the same "guild announcement" responsibility, just for
-// join/leave messages instead of moderation log events.
 export class WelcomeMessenger {
   public static readonly FIELDS = WELCOME_MESSAGE_FIELDS;
 

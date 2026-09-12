@@ -1,17 +1,11 @@
 import { safeFetch, safeUrl, validateSafeUrl } from "infra-http";
 
-// VOICEVOX TTS Quest -- https://voicevox.su-shiki.com/su-shikiapis/ttsquest/
-// No API key required. Synthesis is asynchronous: the initial response only hands back status/
-// download URLs, and audioStatusUrl must be polled until isAudioReady before the download URLs
-// are actually fetchable.
+// VOICEVOX TTS Quest v3 (https://api.tts.quest/v3/voicevox/synthesis) needs no key but is
+// async: audioStatusUrl must be polled until isAudioReady before the download URLs work.
 //
-// A separate, faster endpoint exists (https://voicevox.su-shiki.com/su-shikiapis/, "高速API")
-// that requires a paid API key: unlike the v3 API above, it's synchronous (the response body
-// *is* the audio, no polling) and consumes a points balance per request. Confirmed live against
-// the real API: success is 200 with Content-Type audio/x-wav; any failure (invalid key, no
-// points left, etc.) is a non-200 JSON body like {"errorMessage": "notEnoughPoints"}. Tried
-// first when a key is configured; any failure there (including running out of points) falls
-// back to the free v3 flow below rather than surfacing an error, so TTS keeps working either way.
+// The paid, keyed endpoint (deprecatedapis.tts.quest/v2) is synchronous instead -- the
+// response body *is* the audio (200, audio/x-wav) or a JSON error otherwise -- and is tried
+// first when a key is set, falling back to v3 on any failure (including exhausted points).
 const MAX_SYNTHESIS_RETRIES = 3;
 const MAX_POLL_ATTEMPTS = 20;
 const POLL_INTERVAL_MS = 1500;
@@ -76,8 +70,6 @@ async function synthesizeFast(
 
   if (response instanceof Error || !response.ok) {
     if (!(response instanceof Error)) {
-      // Best-effort only -- a failure response isn't guaranteed to be the documented
-      // {"errorMessage": "..."} shape, and this is purely for observability.
       console.error("[voicevox] fast API unavailable, falling back to the free API", {
         status: response.status,
         body: await response.text().catch(() => undefined),

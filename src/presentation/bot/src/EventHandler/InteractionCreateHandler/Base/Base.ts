@@ -121,11 +121,25 @@ export abstract class Base<T extends BaseInteraction, R = void> {
     };
   }
 
+  /**
+   * Called by the interaction dispatcher (`EventHandler/InteractionCreateHandler/index.ts`)
+   * for every registered handler of the interaction's kind, in order, until one returns true;
+   * that handler's `run` is then invoked. Typically compares `interaction.commandName` or
+   * `interaction.customId` against a field the concrete handler declares.
+   */
   public abstract match(interaction: T): Promise<boolean>;
 
-  // Permission and validation failures reply with a plain InteractionReplyOptions object
-  // regardless of what R is narrowed to in a subclass -- included in the return type here
-  // (rather than force-cast to R at each call site) so that narrowing R to e.g. just
-  // `string` doesn't silently lie about what run() can actually return.
+  /**
+   * Called by the dispatcher once `match` returns true. Implemented as a template method by
+   * the concrete base classes (`CommandInteractionBase`, `MessageComponentInteractionBase`,
+   * `ModalSubmitInteractionBase`, ...): check permissions, parse/validate options, then call
+   * the leaf handler's `exec`. Leaf handlers implement `exec` (and `parseOptions` where
+   * applicable) rather than overriding `run` directly.
+   *
+   * Permission and validation failures reply with a plain InteractionReplyOptions object
+   * regardless of what R is narrowed to in a subclass -- included in the return type here
+   * (rather than force-cast to R at each call site) so that narrowing R to e.g. just
+   * `string` doesn't silently lie about what run() can actually return.
+   */
   public abstract run(interaction: T): Promise<R | InteractionReplyOptions>;
 }
