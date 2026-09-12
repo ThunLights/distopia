@@ -354,7 +354,13 @@ export class TtsAdminCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "remove" && word) {
-      await this.core.dictionary.removeGuildEntry(guildId, word);
+      const entry = await this.core.dictionary.removeGuildEntry(guildId, word);
+      if (!entry) {
+        return {
+          ...embed("Red", "エラー", `サーバー辞書に登録されていません: ${word}`),
+          flags: [MessageFlags.Ephemeral],
+        };
+      }
       return {
         ...embed("Green", "サーバー辞書削除", `サーバー辞書から削除しました: ${word}`),
         flags: [MessageFlags.Ephemeral],

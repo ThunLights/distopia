@@ -1,3 +1,4 @@
+import { Prisma } from "../prisma-client/client";
 import type { GuildDictionary, GuildDictionaryUpsertInput } from "../types/GuildDictionary";
 import { Base } from "./Base";
 
@@ -14,10 +15,20 @@ export class GuildDictionaryTable extends Base {
     });
   }
 
-  public async delete(guildId: string, word: string): Promise<GuildDictionary> {
-    return await this.prisma.guildDictionary.delete({
-      where: { guildId_word: { guildId, word } },
-    });
+  // Returns null (rather than throwing) when the word doesn't exist -- deleting an
+  // already-removed or never-registered word is a normal "not found" outcome for callers,
+  // not a crash.
+  public async delete(guildId: string, word: string): Promise<GuildDictionary | null> {
+    try {
+      return await this.prisma.guildDictionary.delete({
+        where: { guildId_word: { guildId, word } },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        return null;
+      }
+      throw error;
+    }
   }
 
   public async deleteAll(guildId: string): Promise<void> {
