@@ -1,10 +1,10 @@
 import type { AppState } from "app-core/AppState";
 import {
-  ButtonLateLimit,
-  ChatInputCommandLateLimit,
+  ButtonRateLimit,
+  ChatInputCommandRateLimit,
   Friend,
   GuildBlackList,
-  GuildBumpLateLimit,
+  GuildBumpRateLimit,
   GuildDictionary,
   GuildEdit,
   GuildMemberAdd,
@@ -13,7 +13,7 @@ import {
   GuildWhiteList,
   JWTKey,
   MessageCreate,
-  MessageCreateLateLimit,
+  MessageCreateRateLimit,
   OAuth2Guilds,
   OAuth2PKCE,
   UnJoinedGuild,
@@ -25,11 +25,11 @@ import {
 } from "repo-memory";
 
 export const memory: AppState["memory"] = {
-  latelimit: {
-    messageCreate: new MessageCreateLateLimit(),
-    bump: new GuildBumpLateLimit(),
-    button: new ButtonLateLimit(),
-    chatInputCommand: new ChatInputCommandLateLimit(),
+  ratelimit: {
+    messageCreate: new MessageCreateRateLimit(),
+    bump: new GuildBumpRateLimit(),
+    button: new ButtonRateLimit(),
+    chatInputCommand: new ChatInputCommandRateLimit(),
   },
   friend: new Friend(),
   guildBlackList: new GuildBlackList(),

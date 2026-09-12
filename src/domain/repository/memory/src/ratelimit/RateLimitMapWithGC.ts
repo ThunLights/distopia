@@ -1,7 +1,7 @@
 import { MapWithGC } from "../MapWithGC";
 import type { LimitDate } from "./LimitDate";
 
-export class LateLimitMapWithGC<
+export class RateLimitMapWithGC<
   K extends string = string,
   V extends LimitDate = LimitDate,
 > extends MapWithGC<K, V> {

@@ -1,4 +1,4 @@
-import { type User, type Guild as GuildModel, LateLimitError } from "domain-model";
+import { type User, type Guild as GuildModel, RateLimitError } from "domain-model";
 import type {
   GuildRecordRanking,
   GuildReviewUpsertInput,
@@ -121,7 +121,7 @@ export class Guild extends Base {
   public async bump(user: User, guild: GuildModel) {
     const twoHours = 2 * 60 * 60 * 1000;
     const { database, memory } = this.state;
-    const latelimit = memory.latelimit.bump;
+    const ratelimit = memory.ratelimit.bump;
     const nowDate = new Date();
 
     const dbGuildData = await this.state.database.guild.find(guild.id);
@@ -130,13 +130,13 @@ export class Guild extends Base {
       return null;
     }
 
-    const limit = latelimit.get(guild.id);
+    const limit = ratelimit.get(guild.id);
 
     if (limit && limit.getTime() > Date.now()) {
-      return new LateLimitError(limit);
+      return new RateLimitError(limit);
     }
 
-    latelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
+    ratelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
 
     const updatedGuild = await database.guild.update({
       guildId: guild.id,
