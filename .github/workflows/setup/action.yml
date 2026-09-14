@@ -16,6 +16,7 @@ runs:
       with:
         ref: ${{ inputs.ref }}
         persist-credentials: false
+        allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}
 
     - name: Generate .env
       shell: bash
