@@ -48,6 +48,7 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
           persist-credentials: false
+          allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
