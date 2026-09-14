@@ -64,8 +64,6 @@ export class InteractionCreateHandler extends BaseHandler<
 
       for (const command of this.commands.chatInput) {
         if (await command.match(interaction)) {
-          const res = await command.run(interaction);
-
           if (limit) {
             return void (await interaction.reply({
               embeds: [rateLimitEmbed],
@@ -74,6 +72,8 @@ export class InteractionCreateHandler extends BaseHandler<
           }
 
           await this.core.ratelimit.saveChatInputCommand(interaction.user.id);
+
+          const res = await command.run(interaction);
 
           if (res instanceof InteractionCallbackResponse || res instanceof ModalSended) {
             return;
@@ -87,8 +87,6 @@ export class InteractionCreateHandler extends BaseHandler<
 
       for (const command of this.commands.button) {
         if (await command.match(interaction)) {
-          const res = await command.run(interaction);
-
           if (limit) {
             return void (await interaction.reply({
               embeds: [rateLimitEmbed],
@@ -97,6 +95,8 @@ export class InteractionCreateHandler extends BaseHandler<
           }
 
           await this.core.ratelimit.saveButton(interaction.user.id);
+
+          const res = await command.run(interaction);
 
           if (res instanceof InteractionResponse || res instanceof ModalSended) {
             return;
