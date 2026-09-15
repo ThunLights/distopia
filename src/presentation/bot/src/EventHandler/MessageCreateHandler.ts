@@ -120,7 +120,7 @@ export class MessageCreateHandler extends BaseHandler<
     // display name -- falls back to the latter if the member already left the server.
     const repliedMember = await message.guild?.members.fetch(repliedUser.id).catch(() => null);
     const displayName = repliedMember?.displayName ?? repliedUser.displayName;
-    return `${displayName}のメッセージに返信しました。`;
+    return `${displayName}への返信`;
   }
 }
 
