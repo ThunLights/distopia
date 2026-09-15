@@ -164,14 +164,14 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
 
       // join() can take several seconds to establish the voice connection -- well past
       // Discord's 3-second interaction-ack window. Reply immediately and report the actual
-      // outcome via a follow-up instead of awaiting join() before returning; awaiting it here
-      // previously caused "Unknown interaction" (10062) once the connection attempt ran long.
+      // outcome by editing that reply instead of awaiting join() before returning; awaiting it
+      // here previously caused "Unknown interaction" (10062) once the connection attempt ran long.
       void join(voiceChannel, interaction.channelId)
         .then(async (joined) => {
           if (!joined) {
-            return interaction.followUp(
-              embed("Red", "接続失敗", "ボイスチャンネルへの接続に失敗しました。"),
-            );
+            return interaction.editReply({
+              embeds: embed("Red", "接続失敗", "ボイスチャンネルへの接続に失敗しました。").embeds,
+            });
           }
 
           // Checked only now, not before join(): Connect succeeding doesn't imply Speak also
@@ -185,20 +185,24 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
             !voicePermissions.has(PermissionFlagsBits.Speak)
           ) {
             await leave(voiceChannel.guildId);
-            return interaction.followUp(
-              embed(
+            return interaction.editReply({
+              embeds: embed(
                 "Red",
                 "権限不足",
                 `${voiceChannel.name} で接続または発言する権限がありません。チャンネル権限を確認してください。`,
-              ),
-            );
+              ).embeds,
+            });
           }
 
-          return interaction.followUp(
-            embed("Green", "読み上げ開始", `${voiceChannel.name} で読み上げを開始しました。`),
-          );
+          return interaction.editReply({
+            embeds: embed(
+              "Green",
+              "読み上げ開始",
+              `${voiceChannel.name} で読み上げを開始しました。`,
+            ).embeds,
+          });
         })
-        .catch((error) => console.error("[tts] failed to send join follow-up", error));
+        .catch((error) => console.error("[tts] failed to edit join reply", error));
 
       return embed("Yellow", "接続中", `${voiceChannel.name} への接続を試みています…`);
     }
