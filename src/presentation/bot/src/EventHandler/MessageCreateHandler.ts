@@ -63,8 +63,18 @@ export class MessageCreateHandler extends BaseHandler<
       return;
     }
 
+    const withResolvedMentions = resolveMentions(message.content, {
+      getUserName: (id) =>
+        message.mentions.members?.get(id)?.displayName ?? message.mentions.users.get(id)?.username,
+      getRoleName: (id) => message.mentions.roles.get(id)?.name,
+      getChannelName: (id) => {
+        const channel = message.mentions.channels.get(id);
+        return channel && "name" in channel ? (channel.name ?? undefined) : undefined;
+      },
+    });
+
     const filterSetting = await this.core.tts.getFilterSetting(guildId);
-    const filtered = this.core.tts.stripFilteredPatterns(message.content, filterSetting);
+    const filtered = this.core.tts.stripFilteredPatterns(withResolvedMentions, filterSetting);
 
     let text: string;
     if (filtered.trim() === "") {
@@ -110,8 +120,37 @@ export class MessageCreateHandler extends BaseHandler<
     // display name -- falls back to the latter if the member already left the server.
     const repliedMember = await message.guild?.members.fetch(repliedUser.id).catch(() => null);
     const displayName = repliedMember?.displayName ?? repliedUser.displayName;
-    return `${displayName}のメッセージに返信しました。`;
+    return `${displayName}への返信`;
   }
+}
+
+// Discord mention tokens (<@id>, <@&id>, <#id>) are read aloud as their raw numeric ID
+// otherwise -- replace each with the mentioned user/role/channel's name before the message
+// reaches stripFilteredPatterns/dictionary substitution. A lookup that returns undefined
+// (e.g. the member already left) leaves the original token untouched rather than dropping it.
+export function resolveMentions(
+  content: string,
+  mentions: {
+    getUserName: (id: string) => string | undefined;
+    getRoleName: (id: string) => string | undefined;
+    getChannelName: (id: string) => string | undefined;
+  },
+): string {
+  return content.replace(
+    /<@!?(\d+)>|<@&(\d+)>|<#(\d+)>/g,
+    (match, userId?: string, roleId?: string, channelId?: string) => {
+      if (userId) {
+        return mentions.getUserName(userId) ?? match;
+      }
+      if (roleId) {
+        return mentions.getRoleName(roleId) ?? match;
+      }
+      if (channelId) {
+        return mentions.getChannelName(channelId) ?? match;
+      }
+      return match;
+    },
+  );
 }
 
 // True only when the message has no caption at all -- checked against the raw content, not
