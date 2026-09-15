@@ -166,6 +166,15 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       // Discord's 3-second interaction-ack window. Reply immediately and report the actual
       // outcome by editing that reply instead of awaiting join() before returning; awaiting it
       // here previously caused "Unknown interaction" (10062) once the connection attempt ran long.
+      //
+      // Reply here (not by returning the embed for the dispatcher to send) and only start
+      // join() once that reply has actually round-tripped to Discord -- otherwise a fast
+      // join() could call editReply() before the initial reply is acknowledged, which fails.
+      const response = await interaction.reply({
+        ...embed("Yellow", "接続中", `${voiceChannel.name} への接続を試みています…`),
+        withResponse: true,
+      });
+
       void join(voiceChannel, interaction.channelId)
         .then(async (joined) => {
           if (!joined) {
@@ -204,7 +213,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
         })
         .catch((error) => console.error("[tts] failed to edit join reply", error));
 
-      return embed("Yellow", "接続中", `${voiceChannel.name} への接続を試みています…`);
+      return response;
     }
 
     if (subCommand === "leave") {
