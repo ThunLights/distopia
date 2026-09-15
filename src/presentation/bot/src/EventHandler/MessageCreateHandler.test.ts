@@ -1,6 +1,42 @@
 import { describe, expect, test } from "vitest";
 
-import { isMediaOnlyMessage } from "./MessageCreateHandler";
+import { isMediaOnlyMessage, resolveMentions } from "./MessageCreateHandler";
+
+describe("resolveMentions", () => {
+  const mentions = {
+    getUserName: (id: string) => (id === "1" ? "たなかたろう" : undefined),
+    getRoleName: (id: string) => (id === "2" ? "モデレーター" : undefined),
+    getChannelName: (id: string) => (id === "3" ? "一般" : undefined),
+  };
+
+  test("replaces a user mention with the resolved display name", () => {
+    expect(resolveMentions("<@1> おはよう", mentions)).toBe("たなかたろう おはよう");
+  });
+
+  test("replaces a legacy nickname-mention (<@!id>) the same as <@id>", () => {
+    expect(resolveMentions("<@!1> おはよう", mentions)).toBe("たなかたろう おはよう");
+  });
+
+  test("replaces a role mention with the resolved role name", () => {
+    expect(resolveMentions("<@&2> です", mentions)).toBe("モデレーター です");
+  });
+
+  test("replaces a channel mention with the resolved channel name", () => {
+    expect(resolveMentions("<#3> を見て", mentions)).toBe("一般 を見て");
+  });
+
+  test("replaces multiple mentions in one message", () => {
+    expect(resolveMentions("<@1> <@&2> <#3>", mentions)).toBe("たなかたろう モデレーター 一般");
+  });
+
+  test("leaves an unresolvable mention token untouched (e.g. member already left)", () => {
+    expect(resolveMentions("<@999> おはよう", mentions)).toBe("<@999> おはよう");
+  });
+
+  test("leaves text with no mention tokens untouched", () => {
+    expect(resolveMentions("こんにちは", mentions)).toBe("こんにちは");
+  });
+});
 
 describe("isMediaOnlyMessage", () => {
   test("false when there are no attachments", () => {
