@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "app-core": "workspace:*"
   },
   "devDependencies": {
     "bun": "catalog:",

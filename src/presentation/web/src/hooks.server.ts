@@ -4,11 +4,11 @@ import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
-import { schedule } from "$lib/server/schedule";
 import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
+import { setScheduleTask } from "app-schedule";
 import { handleClient } from "presentation-bot";
 
 // +layout.svelte embeds these literal tokens in its partytown <script> tags; substituted below
@@ -62,47 +62,14 @@ async function start() {
   await core.guild.loadSearchEngine();
   console.log("Loaded SearchEngine.");
 
-  schedule.add(
-    "*/5 * * * *",
-    async () => {
-      await core.jwt.update();
-      await core.message.syncDB();
-      await core.member.syncDB();
-      await core.memory.gcForShortInterval();
-    },
-    // Prevent a slow run from overlapping the next tick, which caused
-    // concurrent guildRecordOneDay upserts to deadlock (Postgres 40P01)
-    // with the */20 job below.
-    { noOverlap: true },
-  );
-
-  schedule.add(
-    "*/20 * * * *",
-    async () => {
-      await core.oauth2.updateTokens();
-      await core.friend.updateCache();
-
-      await core.memory.gc();
-      await core.guild.removeUnJoinedGuildData();
-      await core.voice.update();
-      await core.activeRate.update();
-      await core.ranking.cleanCache();
-      await core.updateHomeGuildRoles(
-        PUBLIC_HOME_SERVER_ID!,
-        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
-        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
-        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
-      );
-      await core.record.update();
-      await core.statChannel.update();
-      await updatePanels();
-      await core.user.setActivity();
-    },
-    // This job's runtime scales with guild count (sequential Discord API
-    // calls); without noOverlap a slow run can still be executing when the
-    // next tick fires, causing concurrent guildRecord upserts to deadlock.
-    { noOverlap: true },
-  );
+  setScheduleTask({
+    core,
+    updatePanels,
+    homeServerId: PUBLIC_HOME_SERVER_ID!,
+    specialDirectorsRoleId: PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
+    directorsRoleId: PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
+    subDirectorsRoleId: PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
+  });
 }
 
 export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }) => {
