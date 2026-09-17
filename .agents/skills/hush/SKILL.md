@@ -15,7 +15,7 @@ Before writing or keeping a comment, run it down this list and stop at the first
 
 1. **Can a rename remove the need for this comment?** Rename, delete the comment. A comment restating what `isExpired` already says is noise; a variable called `flag` needing a comment to explain it is a naming bug, not a documentation gap.
 2. **Is this a public/exported surface** (library entry point, exported function/class/method, public API)? Write a full doc comment with a usage example. No length cap — see *Public API docs* below.
-3. **Would misreading this line cause a bug** — a non-obvious side effect, an invariant the type system can't express, a workaround for a specific library/platform quirk, a "don't reorder this" constraint? Comment it. This applies **regardless of public or private** visibility.
+3. **Would misreading this line cause a bug** — a non-obvious side effect, an invariant the type system can't express, a workaround for a specific library/platform quirk, a "don't reorder this" constraint, or a tempting-looking alternative that was deliberately rejected? Comment it. This applies **regardless of public or private** visibility.
 4. **Is this a branch** (`if`/`for`/`while`/`switch`/`case`) whose condition or body can't be inferred from the names of the variables/functions/methods it uses? Write one short comment on *why*, not *what*.
 5. **None of the above** → no comment.
 
@@ -33,9 +33,13 @@ When writing new code, name for the reader who has no comment to lean on: a func
 
 Exported functions, classes, methods, and other library-boundary surfaces are exempt from the length cap. Include what a caller needs to use it without reading the implementation — parameters, return value, thrown/rejected errors, and a short usage example. Running past 3 lines here is expected, not a violation.
 
+Write it in the language's standard doc-comment format — JSDoc in JS/TS, Javadoc in Java, docstrings in Python, rustdoc in Rust, godoc in Go, XML doc comments in C# — whenever the language has one. That's what makes the LSP surface it as hover/autocomplete instead of leaving it as a comment only a source reader ever sees.
+
+Don't restate what the type system already guarantees — skip type tags like `@param {string} name` in a language with static types. A doc that duplicates the signature rots the moment the signature changes and the doc doesn't; keep it to what the types can't say: behavior, constraints, an example.
+
 ## What always gets a comment, public or private
 
-Non-obvious side effects, invariants the type system can't express, workarounds for a specific bug or library quirk, ordering constraints, anything a careful reader could misread and break.
+Non-obvious side effects, invariants the type system can't express, workarounds for a specific bug or library quirk, ordering constraints, a rejected alternative worth warning off, anything a careful reader could misread and break.
 
 ## What never gets a comment
 
