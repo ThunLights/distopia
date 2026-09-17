@@ -79,6 +79,7 @@
       "name": "app-schedule",
       "dependencies": {
         "@types/node": "catalog:",
+        "app-core": "workspace:*",
       },
       "devDependencies": {
         "bun": "catalog:",
