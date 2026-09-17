@@ -23,7 +23,7 @@
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "skills": "1.5.26",
-    "turbo": "2.10.12"
+    "turbo": "2.10.13"
   },
   "peerDependencies": {
     "typescript": "catalog:"
