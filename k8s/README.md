@@ -374,3 +374,11 @@ alone either way.
 - The Workflow's steps (`k8s/ci/workflowtemplate.yaml`) all carry resource requests/limits
   now, most importantly `build-push` (Kaniko, the heaviest one) — tune them to your actual
   host's capacity; too tight a limit gets a step OOMKilled mid-run rather than just slower.
+- Its own `update-manifest` commits (`chore(deploy): bump distopia to <sha>`) are filtered
+  out before the deploy sub-DAG runs at all (the `clone` step's `is-deploy-commit` output),
+  so the pipeline doesn't retrigger itself. Two pushes landing on `main` close together each
+  spawn their own unordered Workflow run; `update-manifest` retries its fetch/rebase/push
+  cycle against `main`'s live tip and checks ancestry (not short-sha ordering) before
+  pushing, so a slower run for an older commit can't overwrite a faster run's newer deploy —
+  it detects that and skips instead. A run whose target image tag is already what's deployed
+  (a manual retry, a duplicate webhook delivery) is also a no-op, not a failure.
