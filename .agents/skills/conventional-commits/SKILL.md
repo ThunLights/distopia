@@ -1,6 +1,6 @@
 ---
 name: conventional-commits
-description: Conventional Commits format as actually used in distopia's git history — types, scopes, and the chore(deploy) prefix the CI pipeline parses
+description: Conventional Commits format as actually used in distopia's git history — types and scopes
 ---
 
 # Conventional Commits
@@ -37,7 +37,6 @@ this doc is only about message *format*.
 | `feat` | New feature | Second most common |
 | `chore` | Maintenance, no source behavior change | Includes dependency/tooling upkeep |
 | `chore(deps)` | Dependency version bump | Dependabot and manual bumps alike |
-| `chore(deploy)` | **Reserved — see below, do not use manually** | Written only by the automated deploy pipeline |
 | `refactor` | Code change with no behavior change | |
 | `perf` | Performance improvement | |
 | `docs` | Documentation only | |
@@ -53,29 +52,6 @@ No `!` (breaking-change) marker or `BREAKING CHANGE:` footer has been used in th
 history — there's no established convention for it here. If you do introduce a real breaking
 change, `type!: summary` with a `BREAKING CHANGE: <explanation>` footer is the spec-correct
 way to flag it.
-
-## `chore(deploy):` is a reserved, machine-parsed prefix — never write it by hand
-
-`k8s/ci/workflowtemplate.yaml`'s `clone` step checks the triggering commit's subject with a
-literal prefix match:
-
-```sh
-case "$commit_message" in
-  "chore(deploy):"*) echo true > /workspace/is-deploy-commit ;;
-  *) echo false > /workspace/is-deploy-commit ;;
-esac
-```
-
-When `is-deploy-commit` is `true`, the whole build/migrate/push/update-manifest chain is
-**skipped** — this is the anti-loop guard that stops the deploy bot's own
-`k8s/app/kustomization.yaml` image-tag-bump commit from re-triggering itself. It's written
-automatically by the `update-manifest` step (`git commit -m "chore(deploy): bump distopia to
-<short-sha>"`), never by a human or by Claude/Codex.
-
-**If you (or an agent) manually write a commit starting with `chore(deploy):`, CI will treat
-it as the bot's own commit and silently skip building/deploying it** — even though it's a
-real, unbuilt change. Use `chore(deploy-config)`, `chore(k8s)`, or similar for any manual
-change to deploy configuration instead.
 
 ## Footer: `Co-Authored-By`
 

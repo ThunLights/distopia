@@ -35,8 +35,9 @@ spec:
         - name: distopia-registry-pull
       containers:
         - name: distopia
-          # Updated in place by the Argo Workflow's update-manifest step via
-          # `kustomize edit set image` -- see k8s/ci/workflowtemplate.yaml.
+          # This :latest is only the bootstrap fallback -- Argo CD Image Updater overrides
+          # it with the actual deployed tag at the Application level (no git write-back).
+          # See the annotations on k8s/argocd/app-app.yaml and k8s/README.md.
           image: distopia-registry.distopia.svc.cluster.local:5000/distopia:latest
           ports:
             - name: http

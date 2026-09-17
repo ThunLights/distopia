@@ -1,4 +1,4 @@
-# distopia GitOps pipeline (Argo CD + Argo Workflows + Argo Events + CloudNativePG)
+# distopia GitOps pipeline (Argo CD + Argo CD Image Updater + Argo Workflows + Argo Events + CloudNativePG)
 
 Operational runbook for everything under `k8s/`. This is applied to your own k3s cluster
 by you — nothing here is applied automatically by me.
@@ -9,8 +9,8 @@ by you — nothing here is applied automatically by me.
 |---|---|---|
 | `k8s/registry/` | `distopia-registry` | Self-hosted `registry:2`, cluster-internal only |
 | `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) + a daily `pg_dump` backup `CronJob` |
-| `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`) |
-| `k8s/ci/` | `distopia-ci` | Argo Events (`EventBus`/`EventSource`/`Sensor`) + Argo Workflows (`WorkflowTemplate`) that build, migrate, and deploy on every push to `main` |
+| `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`); the `Application`'s annotations also drive Argo CD Image Updater |
+| `k8s/ci/` | `distopia-ci` | Argo Events (`EventBus`/`EventSource`/`Sensor`) + Argo Workflows (`WorkflowTemplate`) that build, migrate, and push an image on every push to `main` — nothing here deploys it, see "Shipping a new build" below |
 | `k8s/network/` | `distopia-network` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach `distopia-app`/the webhook `EventSource` via loopback ports you choose yourself |
 
 Nothing here ever pushes an image to an external registry (no ghcr.io, no Docker Hub) —
@@ -19,12 +19,36 @@ and is not reachable from outside the cluster.
 
 ## 0. Prerequisites (cluster-level, not managed by this repo)
 
-Argo CD, Argo Workflows, Argo Events, and the CloudNativePG operator must already be
-installed cluster-wide. Install commands for these were relayed separately in chat rather
-than committed here, since they're one-time cluster bootstrap, not app-specific config.
-In short: Argo Workflows and Argo Events need to be installed in **cluster** (not
-namespace-scoped) mode so they pick up the `WorkflowTemplate`/`EventSource`/`Sensor`
-resources living in the `distopia` namespace below.
+Argo CD, Argo CD Image Updater, Argo Workflows, Argo Events, and the CloudNativePG operator
+must already be installed cluster-wide. Install commands for these were relayed separately
+in chat rather than committed here, since they're one-time cluster bootstrap, not
+app-specific config. In short: Argo Workflows and Argo Events need to be installed in
+**cluster** (not namespace-scoped) mode so they pick up the
+`WorkflowTemplate`/`EventSource`/`Sensor` resources living in the `distopia` namespace
+below.
+
+Argo CD Image Updater also needs to know `distopia-registry` is a plain-HTTP internal
+registry (no TLS at all, same as Kaniko's `--insecure` flag assumes) — add an entry to its
+`registries.conf` ConfigMap (usually `argocd-image-updater-config` in the `argocd`
+namespace) after installing it:
+
+```bash
+kubectl patch configmap argocd-image-updater-config -n argocd --type merge -p '
+data:
+  registries.conf: |
+    registries:
+      - name: distopia-internal
+        prefix: distopia-registry.distopia.svc.cluster.local:5000
+        api_url: http://distopia-registry.distopia.svc.cluster.local:5000
+        insecure: true
+        credentials: pullsecret:distopia/distopia-registry-pull
+        default: false
+'
+kubectl rollout restart deployment/argocd-image-updater -n argocd
+```
+
+(`distopia-registry-pull` must already exist — see section 2 below — since Image Updater
+reads image creation timestamps from the registry itself, and this registry requires auth.)
 
 **Also disable k3s's built-in Traefik and ServiceLB.** Public traffic reaches this cluster
 exclusively through a host-level Cloudflare Tunnel (see "Cloudflare Tunnel and network
@@ -60,13 +84,16 @@ kubectl create namespace distopia
 kubectl apply -k k8s/argocd
 
 # 4. distopia-app will show "Degraded"/ImagePullBackOff at first -- expected, there is no
-#    image in the registry yet. Trigger one build by hand:
+#    image in the registry yet (deployment.yaml's own :latest doesn't exist until the
+#    first build). Trigger one build by hand:
 argo submit -n distopia --from workflowtemplate/distopia-build-deploy \
   -p revision=$(git rev-parse HEAD)
 
-# 5. Once that Workflow finishes (`argo watch -n distopia @latest`), distopia-app will
-#    have a real image tag committed to k8s/app/kustomization.yaml and Argo CD will sync
-#    it automatically. From here on, every push to main does this for you.
+# 5. Once that Workflow finishes (`argo watch -n distopia @latest`), :latest exists and
+#    distopia-app comes up. Argo CD Image Updater then notices the tagged image
+#    (distopia:<short-sha>) on its own polling cycle (a few minutes) and switches the
+#    Deployment to it automatically -- see "Shipping a new build" below. From here on,
+#    every push to main does this for you with no manual step.
 ```
 
 ## 2. Secrets to create by hand (none of these are committed)
@@ -151,13 +178,6 @@ kubectl create secret generic distopia-db-credentials -n distopia \
 kubectl create secret generic distopia-github-webhook -n distopia \
   --from-literal=secret="$(openssl rand -hex 20)"
 
-# Fine-grained GitHub PAT scoped to ONLY the thunlights/distopia repo, permission
-# "Contents: Read and write", nothing else. Used solely by the update-manifest step to
-# push the image-tag bump commit. A dedicated bot account (rather than a personal PAT)
-# is recommended so the commit author is unambiguous, but not required.
-kubectl create secret generic github-push-token -n distopia \
-  --from-literal=token='<fine-grained PAT>'
-
 # --- network relay (see "Cloudflare Tunnel and network exposure" below) -- pick two
 # loopback ports of your own choosing. Never share these two specific numbers anywhere
 # outside your own server config (not in an issue, a commit, chat, etc.) -- this repo is
@@ -222,11 +242,45 @@ Once confirmed, the old `docker compose` Postgres container/volume can be decomm
 
 ## 5. Faster Argo CD sync (optional)
 
-Argo CD polls git every ~3 minutes by default. For near-instant syncs after the
-update-manifest step pushes, add a second GitHub webhook pointed at Argo CD's own
-`/api/webhook` endpoint (see Argo CD's docs for the exact payload URL/secret for your
-install) — this is independent of the Argo Events webhook above and not required for
-correctness, just latency.
+Argo CD polls git every ~3 minutes by default. This only matters for actual manifest edits
+in `k8s/` now (a `Deployment` change, a new Secret reference, etc.) — shipping a new app
+build no longer touches git at all (see "Shipping a new build" below). For near-instant
+syncs of real manifest edits, add a GitHub webhook pointed at Argo CD's own `/api/webhook`
+endpoint (see Argo CD's docs for the exact payload URL/secret for your install) — this is
+independent of the Argo Events webhook above and not required for correctness, just
+latency.
+
+## Shipping a new build
+
+Every push to `main` runs `k8s/ci/workflowtemplate.yaml`: clone the exact pushed commit,
+migrate the DB, build with Kaniko, and push `distopia:<short-sha>` (and `distopia:latest`)
+to `distopia-registry`. That Workflow never touches git — nothing commits an image tag
+anywhere.
+
+Instead, **Argo CD Image Updater** (installed per section 0, configured via the annotations
+on `k8s/argocd/app-app.yaml`) polls `distopia-registry` directly, on its own interval
+(default ~2 minutes), for tags matching `distopia.allow-tags`'s regexp (the `<short-sha>`
+tags only — `latest` is excluded so it isn't mistaken for a real candidate). Its
+`update-strategy: newest-build` picks whichever matching tag the registry reports as most
+recently *built* (not most recently pushed) and, since `write-back-method` is `argocd`
+rather than `git`, patches that tag straight into the `distopia-app` `Application`'s
+`spec.source.kustomize.images` — a live object in the `argocd` namespace, not a git commit.
+Argo CD's normal auto-sync then rolls `distopia-app`'s `Deployment` to that image, same as
+it would for any other spec change.
+
+Sorting by build time rather than push-completion order matters because two pushes landing
+on `main` close together spawn separate Workflow runs with unordered build durations — the
+older commit's image can finish building (and get pushed) after the newer commit's. Since
+Image Updater re-evaluates "which matching tag was actually built most recently" on every
+poll rather than reacting to a one-shot event, it converges on the truly newest image within
+one more polling interval even if it briefly deployed an out-of-order one — no in-workflow
+locking or ancestry check is needed the way a git-push-based rollout would require.
+
+To change the poll interval or inspect what Image Updater is doing:
+
+```bash
+kubectl logs -n argocd deployment/argocd-image-updater -f
+```
 
 ## 6. Database backups
 
@@ -374,11 +428,5 @@ alone either way.
 - The Workflow's steps (`k8s/ci/workflowtemplate.yaml`) all carry resource requests/limits
   now, most importantly `build-push` (Kaniko, the heaviest one) — tune them to your actual
   host's capacity; too tight a limit gets a step OOMKilled mid-run rather than just slower.
-- Its own `update-manifest` commits (`chore(deploy): bump distopia to <sha>`) are filtered
-  out before the deploy sub-DAG runs at all (the `clone` step's `is-deploy-commit` output),
-  so the pipeline doesn't retrigger itself. Two pushes landing on `main` close together each
-  spawn their own unordered Workflow run; `update-manifest` retries its fetch/rebase/push
-  cycle against `main`'s live tip and checks ancestry (not short-sha ordering) before
-  pushing, so a slower run for an older commit can't overwrite a faster run's newer deploy —
-  it detects that and skips instead. A run whose target image tag is already what's deployed
-  (a manual retry, a duplicate webhook delivery) is also a no-op, not a failure.
+- The Workflow never writes back to git or needs a GitHub push token — see "Shipping a new
+  build" above for how Argo CD Image Updater picks up and deploys each build instead.

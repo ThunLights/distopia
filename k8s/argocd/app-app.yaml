@@ -1,11 +1,20 @@
-# This is the Application the Argo Workflow's update-manifest step deploys against: it
-# watches k8s/app on main, and every `chore(deploy):` commit that bumps the pinned image
-# tag gets picked up here (auto-sync, self-heal) and rolled out.
+# This Application watches k8s/app on main for real manifest changes (Deployment/Service/
+# ConfigMap edits), AND carries the Argo CD Image Updater annotations below, which are what
+# actually ship a new build -- Image Updater polls the in-cluster registry directly and
+# patches this Application's `spec.source.kustomize.images` in place (write-back-method:
+# argocd) whenever a newer image shows up, with no git commit involved. See "Shipping a new
+# build" in k8s/README.md for the full flow and why `newest-build` is the update strategy.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: distopia-app
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: distopia=distopia-registry.distopia.svc.cluster.local:5000/distopia
+    argocd-image-updater.argoproj.io/distopia.update-strategy: newest-build
+    argocd-image-updater.argoproj.io/distopia.allow-tags: regexp:^[0-9a-f]{7,10}$
+    argocd-image-updater.argoproj.io/distopia.pull-secret: pullsecret:distopia/distopia-registry-pull
+    argocd-image-updater.argoproj.io/write-back-method: argocd
 spec:
   project: default
   source:

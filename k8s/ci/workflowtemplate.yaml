@@ -1,7 +1,9 @@
 # Triggered by sensor.yaml on every push to main. Runs entirely inside the cluster:
 # clone -> (write .env from k8s Secrets, and run the DB migration, in parallel) -> build
-# & push image with Kaniko (no external registry, no docker daemon) -> bump the image tag
-# in k8s/app and push that commit back to main, which Argo CD then syncs.
+# & push image with Kaniko (no external registry, no docker daemon). No step here ever
+# writes back to git -- Argo CD Image Updater (see k8s/argocd/app-app.yaml's annotations)
+# polls the registry directly and rolls the Deployment once it sees a newer image, so there
+# is also no self-triggering commit here for anything to filter out.
 #
 # Migration runs BEFORE the image build, not after: `prisma generate --sql`
 # (infra-database's build step, using Prisma's typedSql preview feature) needs to connect
@@ -39,33 +41,13 @@ spec:
           - name: clone
             template: clone
 
-          # Anti-loop: the whole prepare-env/migrate/build-push/update-manifest chain is
-          # nested in the "deploy" sub-DAG below so this one `when` is the only place that
-          # needs to check is-deploy-commit -- if it's skipped, none of the nested tasks are
-          # even evaluated. See clone's comment for why this check lives here at all instead
-          # of in sensor.yaml.
-          - name: deploy
-            template: deploy
-            dependencies: [clone]
-            when: "{{tasks.clone.outputs.parameters.is-deploy-commit}} != true"
-            arguments:
-              parameters:
-                - name: short-sha
-                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
-
-    # Everything that actually builds and ships the image, run only for non-deploy-bot
-    # commits (see "deploy" task's `when` in main's dag, above).
-    - name: deploy
-      inputs:
-        parameters:
-          - name: short-sha
-      dag:
-        tasks:
           - name: prepare-env
             template: prepare-env
+            dependencies: [clone]
 
           - name: migrate
             template: migrate
+            dependencies: [clone]
 
           - name: build-push
             template: build-push
@@ -73,32 +55,10 @@ spec:
             arguments:
               parameters:
                 - name: short-sha
-                  value: "{{inputs.parameters.short-sha}}"
-
-          - name: update-manifest
-            template: update-manifest
-            dependencies: [build-push]
-            arguments:
-              parameters:
-                - name: image
-                  value: "{{tasks.build-push.outputs.parameters.image}}"
-                - name: short-sha
-                  value: "{{inputs.parameters.short-sha}}"
+                  value: "{{tasks.clone.outputs.parameters.short-sha}}"
 
     # 1. Clone the exact commit that triggered the webhook, not just the branch tip, so a
     #    fast-follow push during the build can't get silently included.
-    #
-    #    Also decides here whether this revision is one of update-manifest's own
-    #    "chore(deploy):" commits (anti-loop) -- sensor.yaml used to reject those before a
-    #    Workflow was ever created, via a third data/exprs filter alongside the ref/repo
-    #    checks. Four different implementations of that filter (exprs slicing, exprs
-    #    startsWith, a comparator, a Sprig template) all silently dropped every push event
-    #    with zero log output, even though EventBus delivery to the Sensor and RBAC were
-    #    both confirmed healthy each time. Whatever's broken lives inside this Argo Events
-    #    build's filter evaluation, so the check was moved here instead, using a plain POSIX
-    #    `case` glob match -- gated via a single `when` on the "deploy" task in main's dag
-    #    (see below) -- so it depends only on Argo Workflows' own DAG engine, which has been
-    #    reliable throughout this pipeline's development.
     - name: clone
       container:
         image: alpine/git:2.47.2
@@ -111,11 +71,6 @@ spec:
             cd src
             git checkout "{{workflow.parameters.revision}}"
             git rev-parse --short HEAD > /workspace/short-sha
-            commit_message="$(git log -1 --format=%s)"
-            case "$commit_message" in
-              "chore(deploy):"*) echo true > /workspace/is-deploy-commit ;;
-              *) echo false > /workspace/is-deploy-commit ;;
-            esac
         volumeMounts:
           - name: workspace
             mountPath: /workspace
@@ -131,9 +86,6 @@ spec:
           - name: short-sha
             valueFrom:
               path: /workspace/short-sha
-          - name: is-deploy-commit
-            valueFrom:
-              path: /workspace/is-deploy-commit
 
     # 2. Materialize a BUILD-time-only .env into the cloned tree -- just what
     #    `bun run build` itself needs (DATABASE_URL for infra-database's `prisma generate
@@ -215,10 +167,6 @@ spec:
             items:
               - key: .dockerconfigjson
                 path: config.json
-      outputs:
-        parameters:
-          - name: image
-            value: "distopia-registry.distopia.svc.cluster.local:5000/distopia:{{inputs.parameters.short-sha}}"
 
     # 3a. Run the migration directly from the cloned source, before the image is built --
     #    not as an initContainer (so it can't accidentally run once per pod/replica), and
@@ -256,125 +204,3 @@ spec:
           limits:
             cpu: "1"
             memory: 1Gi
-
-    # 4. Bump k8s/app's pinned image tag and push to main -- Argo CD (auto-sync + self-heal)
-    #    picks this commit up and rolls the Deployment. The commit message prefix used below
-    #    is what the "deploy" task's `when` (via clone's is-deploy-commit output, see main's
-    #    dag) checks to avoid re-triggering this whole chain on its own commit.
-    - name: update-manifest
-      inputs:
-        parameters:
-          - name: image
-          - name: short-sha
-      container:
-        image: alpine/git:2.47.2
-        workingDir: /workspace/src
-        command: ["sh", "-c"]
-        args:
-          - |
-            set -eu
-            # The upstream install_kustomize.sh script requires bash, which the alpine/git
-            # image doesn't have (only busybox sh) -- it failed with "bash: not found" (exit
-            # 127) the first time this ran in real production. Download the pinned release
-            # tarball directly instead (wget + tar, both present via busybox), which also
-            # fixes the unrelated issue of silently tracking whatever "master" happens to
-            # be on any given run.
-            #
-            # Downloaded to a file and verified against the sha256 kustomize itself publishes
-            # for this exact release (github.com/kubernetes-sigs/kustomize/releases/.../
-            # checksums.txt), not piped straight into tar -- GIT_PUSH_TOKEN is present in
-            # this same container, so an unverified binary running here is a real risk, not
-            # just a hygiene nit.
-            KUSTOMIZE_VERSION=v5.4.3
-            case "$(uname -m)" in
-              x86_64)
-                KUSTOMIZE_ARCH=amd64
-                KUSTOMIZE_SHA256=3669470b454d865c8184d6bce78df05e977c9aea31c30df3c669317d43bcc7a7
-                ;;
-              aarch64)
-                KUSTOMIZE_ARCH=arm64
-                KUSTOMIZE_SHA256=1b515578b0af12c15d9856720066ce2fe66756d63785b2cbccaf2885beb2381c
-                ;;
-              *)
-                echo "unsupported architecture: $(uname -m)" >&2
-                exit 1
-                ;;
-            esac
-            wget -qO /tmp/kustomize.tar.gz \
-              "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_${KUSTOMIZE_ARCH}.tar.gz"
-            echo "${KUSTOMIZE_SHA256}  /tmp/kustomize.tar.gz" | sha256sum -c -
-            tar -xz -C /usr/local/bin -f /tmp/kustomize.tar.gz kustomize
-            rm -f /tmp/kustomize.tar.gz
-            git config user.name "distopia-deploy-bot"
-            git config user.email "distopia-deploy-bot@users.noreply.github.com"
-            git remote set-url origin "https://x-access-token:${GIT_PUSH_TOKEN}@github.com/thunlights/distopia.git"
-            # Two commits landing on main close together (not rare -- e.g. several PRs merged
-            # back-to-back) each spawn their own Workflow instance, and build-push durations
-            # aren't ordered, so the one for the OLDER commit can finish (and reach this step)
-            # after the one for the NEWER commit already pushed. Retrying the whole
-            # fetch/rebase/edit/commit/push cycle -- instead of doing it once -- means every
-            # attempt re-evaluates against main's actual current tip rather than state a
-            # concurrent push may have already made stale.
-            attempt=1
-            while :; do
-              git fetch origin main
-              git checkout -B main origin/main
-
-              # Guards the semantic half of the same race: even once this attempt is pushing
-              # against a fresh base, main might already carry a deploy for a commit NEWER
-              # than the one this workflow is building (that other run simply finished first).
-              # Comparing ancestry, not the short-sha strings themselves, since short-shas have
-              # no ordering of their own -- a short-sha only tells you which commit, not
-              # whether it's newer.
-              current_sha="$(grep 'newTag:' k8s/app/kustomization.yaml 2>/dev/null | awk '{print $2}' || true)"
-              if [ -n "$current_sha" ] && ! git merge-base --is-ancestor "$current_sha" "{{workflow.parameters.revision}}"; then
-                echo "main already has a deploy at or ahead of this revision (currently $current_sha) -- skipping, not deploying backwards."
-                exit 0
-              fi
-
-              cd k8s/app
-              kustomize edit set image "distopia-registry.distopia.svc.cluster.local:5000/distopia={{inputs.parameters.image}}"
-              cd /workspace/src
-              git add k8s/app/kustomization.yaml
-
-              # Idempotency: a re-run for a revision that's already the deployed image tag (a
-              # manual retry, or a duplicate/delayed webhook delivery) stages no actual change
-              # here. `git commit` on a clean tree exits 1, and under `set -e` above that would
-              # fail this whole step for no real problem -- checked explicitly instead, so
-              # "nothing to deploy" is a no-op, not an error.
-              if git diff --cached --quiet; then
-                echo "kustomization.yaml already points at this image -- nothing to deploy."
-                exit 0
-              fi
-
-              git commit -m "chore(deploy): bump distopia to {{inputs.parameters.short-sha}}"
-              if git push origin HEAD:main; then
-                exit 0
-              fi
-
-              if [ "$attempt" -ge 5 ]; then
-                echo "push rejected after $attempt attempts, giving up" >&2
-                exit 1
-              fi
-              echo "push rejected (attempt $attempt) -- another run updated main first, retrying against its new tip"
-              # No explicit reset needed here: the next iteration's `git checkout -B main
-              # origin/main` already discards this attempt's local commit and re-points main
-              # at the fresh fetch.
-              attempt=$((attempt + 1))
-            done
-        env:
-          - name: GIT_PUSH_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: github-push-token
-                key: token
-        volumeMounts:
-          - name: workspace
-            mountPath: /workspace
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 250m
-            memory: 256Mi

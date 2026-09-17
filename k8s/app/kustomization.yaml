@@ -1,14 +1,10 @@
+# No `images:` override here on purpose -- deployment.yaml's own image field (currently
+# `:latest`) is the bootstrap fallback. Argo CD Image Updater (see the annotations on
+# k8s/argocd/app-app.yaml) patches the actual running tag into that Application's
+# `spec.source.kustomize.images` directly, in the cluster, never by editing this file.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - configmap.yaml
 - deployment.yaml
 - service.yaml
-
-# The Argo Workflow's update-manifest step runs, from this directory:
-#   kustomize edit set image distopia-registry.distopia.svc.cluster.local:5000/distopia=distopia-registry.distopia.svc.cluster.local:5000/distopia:<short-sha>
-# which rewrites the entry below (present once the first bump has happened).
-images:
-- name: distopia-registry.distopia.svc.cluster.local:5000/distopia
-  newName: distopia-registry.distopia.svc.cluster.local:5000/distopia
-  newTag: aa326268

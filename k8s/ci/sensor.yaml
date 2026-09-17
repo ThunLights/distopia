@@ -1,14 +1,8 @@
-# Only ref + repo are filtered here. Anti-loop protection (skipping the update-manifest
-# step's own "chore(deploy):" commits) used to live here as a third filter, but FOUR
-# different implementations -- exprs slicing, exprs startsWith, a data filter comparator,
-# and a data filter Sprig template -- all silently dropped every push event with zero log
-# output, even though the EventSource->EventBus delivery and this Sensor's own subscription
-# were confirmed healthy each time (STAN's channelsz showed last_sent caught up to last_seq,
-# pending_count 0). Whatever's wrong lives inside this specific Argo Events build's filter
-# evaluation, not in EventBus delivery or RBAC (also verified). The anti-loop check now lives
-# in workflowtemplate.yaml's "clone" step instead, using a plain POSIX `case` glob match
-# gated by a DAG `when` condition -- Argo Workflows' own DAG engine, which has worked
-# correctly throughout this pipeline's development, unlike this Sensor's filter engine.
+# Only ref + repo are filtered here. No anti-loop filter is needed: the triggered Workflow
+# (workflowtemplate.yaml) only ever builds and pushes an image, it never commits back to
+# git, so there's no self-triggering commit to exclude in the first place. Argo CD Image
+# Updater (see k8s/argocd/app-app.yaml) is what actually ships the build, by polling the
+# registry directly rather than reacting to a git push.
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:

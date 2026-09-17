@@ -333,7 +333,7 @@ jobs:
       - name: Load image into kind
         run: kind load docker-image distopia:e2e --name distopia-e2e
 
-      - name: Deploy app (k8s/app, image tag bumped the same way the real Workflow does)
+      - name: Deploy app (k8s/app, image tag set directly -- no Argo CD Image Updater in this kind cluster)
         run: |
           cd k8s/app
           kustomize edit set image distopia-registry.distopia.svc.cluster.local:5000/distopia=distopia:e2e
