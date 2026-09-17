@@ -56,9 +56,20 @@ spec:
               parameters:
                 - name: short-sha
                   value: "{{tasks.clone.outputs.parameters.short-sha}}"
+                - name: image-tag
+                  value: "{{tasks.clone.outputs.parameters.image-tag}}"
 
     # 1. Clone the exact commit that triggered the webhook, not just the branch tip, so a
     #    fast-follow push during the build can't get silently included.
+    #
+    #    Also writes image-tag = "<committer-epoch>-<short-sha>". The committer timestamp
+    #    (not build time) is what Argo CD Image Updater's `alphabetical` strategy sorts on
+    #    (see k8s/argocd/app-app.yaml) -- two pushes landing on main close together spawn
+    #    unordered Workflow runs, so an older commit's build can finish after a newer
+    #    commit's. Sorting by build completion time (the `newest-build` strategy) would
+    #    then deploy the OLDER commit, since it happened to finish building last -- sorting
+    #    by each commit's own timestamp instead is immune to build-duration variance
+    #    entirely, since it never depends on when the build finished.
     - name: clone
       container:
         image: alpine/git:2.47.2
@@ -71,6 +82,8 @@ spec:
             cd src
             git checkout "{{workflow.parameters.revision}}"
             git rev-parse --short HEAD > /workspace/short-sha
+            printf '%s-%s' "$(git show -s --format=%ct HEAD)" "$(cat /workspace/short-sha)" \
+              > /workspace/image-tag
         volumeMounts:
           - name: workspace
             mountPath: /workspace
@@ -86,6 +99,9 @@ spec:
           - name: short-sha
             valueFrom:
               path: /workspace/short-sha
+          - name: image-tag
+            valueFrom:
+              path: /workspace/image-tag
 
     # 2. Materialize a BUILD-time-only .env into the cloned tree -- just what
     #    `bun run build` itself needs (DATABASE_URL for infra-database's `prisma generate
@@ -134,17 +150,21 @@ spec:
             secretName: distopia-db-credentials
 
     # 3b. Build with Kaniko (no privileged docker daemon needed) and push straight to the
-    #    cluster-internal registry -- this image never touches an external registry.
+    #    cluster-internal registry -- this image never touches an external registry. Tagged
+    #    with image-tag (see clone's comment for why it's "<committer-epoch>-<short-sha>",
+    #    not just the short-sha alone) -- this is the tag Argo CD Image Updater's
+    #    `allow-tags` regexp matches on (see k8s/argocd/app-app.yaml).
     - name: build-push
       inputs:
         parameters:
           - name: short-sha
+          - name: image-tag
       container:
         image: gcr.io/kaniko-project/executor:v1.23.2
         args:
           - --dockerfile=docker/dockerfile.prod
           - --context=dir:///workspace/src
-          - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:{{inputs.parameters.short-sha}}
+          - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:{{inputs.parameters.image-tag}}
           - --destination=distopia-registry.distopia.svc.cluster.local:5000/distopia:latest
           - --build-arg=GIT_SHA={{inputs.parameters.short-sha}}
           - --insecure

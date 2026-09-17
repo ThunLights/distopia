@@ -28,7 +28,9 @@ app-specific config. In short: Argo Workflows and Argo Events need to be install
 below.
 
 Argo CD Image Updater also needs to know `distopia-registry` is a plain-HTTP internal
-registry (no TLS at all, same as Kaniko's `--insecure` flag assumes) — add an entry to its
+registry (no TLS at all, same as Kaniko's `--insecure` flag already assumes elsewhere in
+this pipeline — this registry has never had a certificate, cluster-internal-only and with
+no Ingress since day one, not something this change introduces) — add an entry to its
 `registries.conf` ConfigMap (usually `argocd-image-updater-config` in the `argocd`
 namespace) after installing it:
 
@@ -47,8 +49,8 @@ data:
 kubectl rollout restart deployment/argocd-image-updater -n argocd
 ```
 
-(`distopia-registry-pull` must already exist — see section 2 below — since Image Updater
-reads image creation timestamps from the registry itself, and this registry requires auth.)
+(`distopia-registry-pull` must already exist — see section 2 below — since this registry
+requires auth even for listing tags, which is all Image Updater's polling does.)
 
 **Also disable k3s's built-in Traefik and ServiceLB.** Public traffic reaches this cluster
 exclusively through a host-level Cloudflare Tunnel (see "Cloudflare Tunnel and network
@@ -253,28 +255,30 @@ latency.
 ## Shipping a new build
 
 Every push to `main` runs `k8s/ci/workflowtemplate.yaml`: clone the exact pushed commit,
-migrate the DB, build with Kaniko, and push `distopia:<short-sha>` (and `distopia:latest`)
-to `distopia-registry`. That Workflow never touches git — nothing commits an image tag
-anywhere.
+migrate the DB, build with Kaniko, and push `distopia:<committer-epoch>-<short-sha>` (and
+`distopia:latest`) to `distopia-registry`. That Workflow never touches git — nothing commits
+an image tag anywhere.
 
 Instead, **Argo CD Image Updater** (installed per section 0, configured via the annotations
 on `k8s/argocd/app-app.yaml`) polls `distopia-registry` directly, on its own interval
-(default ~2 minutes), for tags matching `distopia.allow-tags`'s regexp (the `<short-sha>`
-tags only — `latest` is excluded so it isn't mistaken for a real candidate). Its
-`update-strategy: newest-build` picks whichever matching tag the registry reports as most
-recently *built* (not most recently pushed) and, since `write-back-method` is `argocd`
-rather than `git`, patches that tag straight into the `distopia-app` `Application`'s
-`spec.source.kustomize.images` — a live object in the `argocd` namespace, not a git commit.
-Argo CD's normal auto-sync then rolls `distopia-app`'s `Deployment` to that image, same as
-it would for any other spec change.
+(default ~2 minutes), for tags matching `distopia.allow-tags`'s regexp (the
+`<epoch>-<short-sha>` tags only — `latest` is excluded so it isn't mistaken for a real
+candidate). Its `update-strategy: alphabetical` picks whichever matching tag sorts highest
+and, since `write-back-method` is `argocd` rather than `git`, patches that tag straight into
+the `distopia-app` `Application`'s `spec.source.kustomize.images` — a live object in the
+`argocd` namespace, not a git commit. Argo CD's normal auto-sync then rolls `distopia-app`'s
+`Deployment` to that image, same as it would for any other spec change.
 
-Sorting by build time rather than push-completion order matters because two pushes landing
-on `main` close together spawn separate Workflow runs with unordered build durations — the
-older commit's image can finish building (and get pushed) after the newer commit's. Since
-Image Updater re-evaluates "which matching tag was actually built most recently" on every
-poll rather than reacting to a one-shot event, it converges on the truly newest image within
-one more polling interval even if it briefly deployed an out-of-order one — no in-workflow
-locking or ancestry check is needed the way a git-push-based rollout would require.
+The tag's leading `<committer-epoch>` (the pushed commit's own committer timestamp, written
+by the `clone` step, not by anything build-related) is what makes this safe against two
+pushes landing on `main` close together, which spawn separate Workflow runs with unordered
+build durations — an older commit's image can finish building (and get pushed) after a
+newer commit's. Sorting alphabetically on each commit's own timestamp is immune to that:
+unlike an `update-strategy: newest-build` (which sorts by build-*completion* time and would
+wrongly pick the older commit if its build happened to finish last), the epoch prefix here
+never changes based on how long the build took, so whichever tag Image Updater sees as
+highest is always the actual newest source commit — on the very next poll if not
+immediately, with no in-workflow locking or git ancestry check required.
 
 To change the poll interval or inspect what Image Updater is doing:
 
@@ -391,7 +395,11 @@ hard way: `distopia-db-allow-intra-namespace`'s original same-namespace-only rul
 the CNPG operator's own cross-namespace health/status checks (`cnpg-system` namespace),
 surfacing as `Phase: Instance Status Extraction Error: HTTP communication issue` on the
 `Cluster` resource even though postgres itself stayed healthy — it now explicitly allows
-`cnpg-system` too. If your cluster runs a different CNI (or k3s with the policy controller
+`cnpg-system` too. The registry policy has the same shape of exception for the `argocd`
+namespace, since Argo CD Image Updater (see "Shipping a new build" above) polls the
+registry directly from there — easy to miss since nothing points an error at it the way
+CNPG's status field does; it just fails silently and Image Updater never sees a new tag. If
+your cluster runs a different CNI (or k3s with the policy controller
 disabled), confirm enforcement is actually active rather than assuming from the manifest
 alone either way.
 
