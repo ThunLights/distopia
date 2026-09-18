@@ -1,8 +1,8 @@
 # Two identities:
 # - distopia-sensor-sa: used by the Sensor to create Workflow objects when the GitHub
 #   webhook fires.
-# - distopia-workflow-sa: used by the Workflow's own pods (clone/build-push/migrate/
-#   update-manifest) via workflowtemplate.yaml's `serviceAccountName`.
+# - distopia-workflow-sa: used by the Workflow's own pods (clone/prepare-env/migrate/
+#   build-push) via workflowtemplate.yaml's `serviceAccountName`.
 #
 # Both are namespace-scoped to `distopia` -- neither needs cluster-wide access. If you hit
 # RBAC-denied errors on a specific verb, that's expected to happen at least once; consult

@@ -1,15 +1,15 @@
 # Defense-in-depth: even though the registry has no Ingress/NodePort/LoadBalancer (so it's
 # already unreachable from outside the cluster in the normal case), this makes it explicit
 # at the network layer -- only pods in this namespace (Kaniko build pods, the app
-# Deployment) may reach it, nothing else.
+# Deployment) plus Argo CD Image Updater (argocd namespace, polls this registry directly to
+# discover new tags -- see k8s/argocd/app-app.yaml's annotations) may reach it, nothing else.
 #
 # k3s actually enforces NetworkPolicy out of the box (it runs a built-in kube-router-based
 # network policy controller alongside Flannel, unlike a bare Flannel install on other
 # distros) -- confirmed the hard way on k8s/db/networkpolicy.yaml, where the equivalent
-# same-namespace-only rule blocked the CNPG operator's own cross-namespace health checks.
-# No cross-namespace exception is needed here, though -- unlike the CNPG operator, nothing
-# outside this namespace has a legitimate reason to reach the registry. See the
-# "Firewall (ufw) and network exposure" section in k8s/README.md.
+# same-namespace-only rule blocked the CNPG operator's own cross-namespace health checks; the
+# same class of bug would silently break Image Updater here without the argocd exception
+# below. See the "Firewall (ufw) and network exposure" section in k8s/README.md.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -24,3 +24,6 @@ spec:
   ingress:
     - from:
         - podSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: argocd

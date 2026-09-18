@@ -1,16 +1,18 @@
 ---
 name: argo
-description: Argo CD + Argo Workflows + Argo Events GitOps pipeline (push to main -> build -> deploy)
+description: Argo CD + Argo CD Image Updater + Argo Workflows + Argo Events GitOps pipeline (push to main -> build -> deploy)
 ---
 
-# Argo (CD + Workflows + Events) GitOps Guide
+# Argo (CD + Image Updater + Workflows + Events) GitOps Guide
 
 Production deploys are fully GitOps-driven, entirely inside the self-hosted k3s cluster —
 **no GitHub-hosted CI ever holds registry push credentials**. A push to `main` is detected
-by Argo Events, built and pushed by Argo Workflows (Kaniko, no Docker daemon), and rolled
-out by Argo CD. Everything lives under `k8s/ci/` (the pipeline itself) and
-`k8s/argocd/` (the five `Application` objects). Full runbook: `k8s/README.md`. For the
-manifests the pipeline builds/deploys, see the `k8s` skill.
+by Argo Events and built/pushed by Argo Workflows (Kaniko, no Docker daemon) — that's the
+whole Workflow, it never writes back to git. Argo CD Image Updater then polls the registry
+directly and rolls out the new image via Argo CD, with no commit involved anywhere.
+Everything lives under `k8s/ci/` (the pipeline itself) and `k8s/argocd/` (the five
+`Application` objects). Full runbook: `k8s/README.md`. For the manifests the pipeline
+builds/deploys, see the `k8s` skill.
 
 ## The Five Argo CD Applications (`k8s/argocd/`)
 
@@ -18,7 +20,7 @@ manifests the pipeline builds/deploys, see the `k8s` skill.
 |---|---|---|
 | `distopia-registry` | `k8s/registry` | **false** |
 | `distopia-db` | `k8s/db` | **false** |
-| `distopia-app` | `k8s/app` | true |
+| `distopia-app` | `k8s/app` (annotated for Argo CD Image Updater, see below) | true |
 | `distopia-ci` | `k8s/ci` (the pipeline is GitOps-managed too) | true |
 | `distopia-network` | `k8s/network` (host Cloudflare Tunnel relay, see the `k8s` skill) | true |
 
@@ -51,33 +53,18 @@ exist before `distopia-db`'s `Cluster` first initializes, since
   creates a `Workflow` from the `distopia-build-deploy` `WorkflowTemplate`, passing
   `body.after` (the pushed commit SHA) as the `revision` parameter.
 
-### Anti-loop filter
-
-The Workflow's own `update-manifest` step pushes a commit back to `main` (to bump the
-image tag) — without a guard, that would re-trigger the same Sensor forever. `sensor.yaml`
-rejects any push whose head commit message starts with `chore(deploy):`, the exact prefix
-`update-manifest` always uses:
-
-```yaml
-exprs:
-  - expr: "headCommitMessage[0:14] != 'chore(deploy):'"
-    fields:
-      - name: headCommitMessage
-        path: body.head_commit.message
-```
-
-This is a string-prefix match, not a real identity check — if the commit-message
-convention in `workflowtemplate.yaml`'s `update-manifest` step ever changes, update this
-filter in the same change, or the loop guard silently stops working.
+No anti-loop filter is needed on `sensor.yaml`: the Workflow it triggers only builds and
+pushes an image, it never commits back to git, so there is no self-triggering commit to
+exclude in the first place.
 
 ## Argo Workflows: `distopia-build-deploy` (`k8s/ci/workflowtemplate.yaml`)
 
-A `WorkflowTemplate` with a 5-task DAG, all running inside a single shared
+A `WorkflowTemplate` with a 4-task DAG, all running inside a single shared
 `volumeClaimTemplates` PVC (`workspace`, auto-deleted when the Workflow completes):
 
 ```
 clone ──┬─→ prepare-env ─┐
-        └─→ migrate ─────┴─→ build-push ─→ update-manifest
+        └─→ migrate ─────┴─→ build-push
 ```
 
 | Task | Image | Does |
@@ -85,8 +72,46 @@ clone ──┬─→ prepare-env ─┐
 | `clone` | `alpine/git` | Shallow-clones and checks out the **exact triggering revision** (not just the branch tip — a fast-follow push during the build can't get silently included) |
 | `prepare-env` | `alpine` | Writes a build-time-only `.env` from `distopia-env` + `distopia-db-credentials`' `url` key — just what `bun run build` needs |
 | `migrate` | `oven/bun` | `bun install` + `bunx prisma migrate deploy`, reading `DATABASE_URL` directly via `secretKeyRef` (see the `k8s` skill's DATABASE_URL convention) |
-| `build-push` | `gcr.io/kaniko-project/executor` | Builds `docker/dockerfile.prod` with Kaniko (no privileged Docker daemon) and pushes to the in-cluster registry, tagged both `<short-sha>` and `latest` |
-| `update-manifest` | `alpine/git` | Installs `kustomize`, bumps `k8s/app`'s pinned image tag, commits as `chore(deploy): bump distopia to <short-sha>`, pushes to `main` |
+| `build-push` | `gcr.io/kaniko-project/executor` | Builds `docker/dockerfile.prod` with Kaniko (no privileged Docker daemon) and pushes to the in-cluster registry, tagged both `<committer-epoch>-<short-sha>` and `latest` — the last task, nothing deploys from here |
+
+`clone` writes `image-tag` as `<committer-epoch>-<short-sha>` — the pushed commit's own
+committer timestamp (`git show -s --format=%ct`), not a build timestamp. This exact value,
+not the short-sha alone, is what `build-push` tags the image with and what Image Updater
+sorts on below — see why in the next section.
+
+## Argo CD Image Updater: shipping the build (no git write-back)
+
+`build-push` is the end of the Workflow — deploying from the new image is Argo CD Image
+Updater's job, driven entirely by annotations on `k8s/argocd/app-app.yaml`:
+
+```yaml
+argocd-image-updater.argoproj.io/image-list: distopia=distopia-registry.distopia.svc.cluster.local:5000/distopia
+argocd-image-updater.argoproj.io/distopia.update-strategy: alphabetical
+argocd-image-updater.argoproj.io/distopia.allow-tags: regexp:^[0-9]{10}-[0-9a-f]{7,10}$
+argocd-image-updater.argoproj.io/distopia.pull-secret: pullsecret:distopia/distopia-registry-pull
+argocd-image-updater.argoproj.io/write-back-method: argocd
+```
+
+Image Updater polls the registry on its own interval (default ~2 min), picks whichever
+matching tag sorts alphabetically highest, and patches that tag into the `distopia-app`
+`Application`'s `spec.source.kustomize.images` directly (`write-back-method: argocd` — a
+live object in the `argocd` namespace, not a git commit). Argo CD's normal auto-sync then
+rolls the `Deployment`.
+
+**`update-strategy: alphabetical` on the epoch-prefixed tag, not `newest-build`, is
+deliberate.** `newest-build` sorts by each image's *build-completion* timestamp — which is
+exactly what raced under the old git-based design: two pushes landing on `main` close
+together spawn separate Workflow runs with unordered build durations, so an older commit's
+image can finish building (and get pushed) after a newer commit's. Under `newest-build`
+that would deploy the OLDER commit, since its build happened to finish last — the same class
+of bug the old design's `git merge-base --is-ancestor` check existed to prevent. Sorting
+alphabetically on `<committer-epoch>-<short-sha>` sidesteps this entirely: the epoch only
+depends on the commit itself, never on how long its build took, so the alphabetically
+highest tag is always the true newest source commit, on the very next poll if not sooner —
+no in-workflow locking or git ancestry check needed.
+
+`k8s/app/kustomization.yaml` deliberately has no `images:` override — `deployment.yaml`'s
+own `:latest` is just the bootstrap fallback before the first Image Updater patch lands.
 
 **Why `migrate` runs before `build-push`, not after**: `infra-database`'s build step
 (`prisma generate --sql`, Prisma's typedSql preview feature) needs to connect to a real,
@@ -127,7 +152,10 @@ All created by hand, never committed (`k8s/README.md` section 2 has the exact co
 | `distopia-env` | `prepare-env` (build-time `.env`) and the app Deployment (`envFrom`) |
 | `distopia-db-credentials` | CNPG's `bootstrap.initdb.secret`, `prepare-env`/`migrate` (via its `url` key), and the app Deployment |
 | `distopia-github-webhook` | The EventSource, to validate GitHub's webhook signature |
-| `github-push-token` | `update-manifest`, to push the tag-bump commit — a fine-grained PAT scoped to only this repo, `Contents: Read and write` |
+
+Argo CD Image Updater also reads `distopia-registry-pull` directly (referenced via its
+`pull-secret` annotation, not created separately) to authenticate against the registry when
+polling for new tags.
 
 ## Common Commands
 
@@ -152,14 +180,19 @@ argocd app sync distopia-db --prune   # only if you actually want to delete drif
 
 ## Notes
 
-- Argo CD polls git every ~3 minutes by default. For near-instant syncs after
-  `update-manifest` pushes, add a second GitHub webhook pointed at Argo CD's own
-  `/api/webhook` endpoint — independent of the Argo Events webhook above, optional
-  (latency only, not correctness).
-- `update-manifest` installs `kustomize` via `wget | bash` against the `master` branch's
-  install script on every single run — works, but is an unpinned, per-run network
-  dependency. Worth pinning to a specific release or switching to a base image with
-  `kustomize` already baked in if you're touching this step anyway.
+- Argo CD polls git every ~3 minutes by default. This only matters for actual manifest
+  edits under `k8s/` now, since shipping a new app build no longer touches git at all — add
+  a GitHub webhook pointed at Argo CD's own `/api/webhook` endpoint for near-instant syncs
+  of real manifest edits if you want it; independent of the Argo Events webhook above,
+  optional (latency only, not correctness).
+- Argo CD Image Updater must be installed cluster-wide (see `k8s/README.md` section 0) and
+  configured with a `registries.conf` entry for `distopia-registry`, since it's a plain-HTTP
+  internal registry that also requires auth (`insecure: true` + `credentials:
+  pullsecret:...`).
+- `k8s/registry/networkpolicy.yaml` explicitly allows ingress from the `argocd` namespace
+  for exactly this reason — Image Updater polls the registry cross-namespace, and k3s
+  actually enforces `NetworkPolicy` (see the `k8s` skill), so without that exception the
+  poll would just silently fail with no error surfaced anywhere obvious.
 - Rotating `distopia-env`/`distopia-db-credentials`/the registry secrets takes effect on
   the next Pod restart (`kubectl rollout restart deployment/distopia-app -n distopia`) — no
   rebuild needed. Changing DB credentials is the one exception: `migrate`/`prepare-env`

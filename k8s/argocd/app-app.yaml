@@ -1,11 +1,29 @@
-# This is the Application the Argo Workflow's update-manifest step deploys against: it
-# watches k8s/app on main, and every `chore(deploy):` commit that bumps the pinned image
-# tag gets picked up here (auto-sync, self-heal) and rolled out.
+# This Application watches k8s/app on main for real manifest changes (Deployment/Service/
+# ConfigMap edits), AND carries the Argo CD Image Updater annotations below, which are what
+# actually ship a new build -- Image Updater polls the in-cluster registry directly and
+# patches this Application's `spec.source.kustomize.images` in place (write-back-method:
+# argocd) whenever a newer image shows up, with no git commit involved. See "Shipping a new
+# build" in k8s/README.md for the full flow.
+#
+# update-strategy is `alphabetical`, not `newest-build`: `newest-build` sorts by each
+# image's build-completion timestamp, which is exactly what raced under the old git-based
+# design -- two pushes landing on main close together spawn unordered Workflow runs, so an
+# older commit's build can finish after a newer commit's, and `newest-build` would then
+# deploy the OLDER commit. k8s/ci/workflowtemplate.yaml's `clone` step instead tags each
+# image "<committer-epoch>-<short-sha>", a value that only depends on the commit itself, not
+# on how long its build happened to take -- `alphabetical` sorting on that tag always
+# recovers true source order regardless of build duration.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: distopia-app
   namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: distopia=distopia-registry.distopia.svc.cluster.local:5000/distopia
+    argocd-image-updater.argoproj.io/distopia.update-strategy: alphabetical
+    argocd-image-updater.argoproj.io/distopia.allow-tags: regexp:^[0-9]{10}-[0-9a-f]{7,10}$
+    argocd-image-updater.argoproj.io/distopia.pull-secret: pullsecret:distopia/distopia-registry-pull
+    argocd-image-updater.argoproj.io/write-back-method: argocd
 spec:
   project: default
   source:
