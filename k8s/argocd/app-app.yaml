@@ -23,7 +23,10 @@
 # pull-secret is namespaced to `argocd`, not `distopia`, on purpose -- v1.x refuses to read
 # a pull secret from any namespace other than the Application's own (`argocd` here), even
 # though `distopia-registry-pull` originally only existed in `distopia`. A copy of that
-# secret must also exist in `argocd` (see k8s/README.md).
+# secret must also exist in `argocd` (see k8s/README.md). Those credentials still cross the
+# wire in cleartext either way -- see the "Known gap" callout in k8s/README.md's
+# Prerequisites section for why that's an accepted, pre-existing, out-of-scope tradeoff
+# rather than something to fix by adding TLS here.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

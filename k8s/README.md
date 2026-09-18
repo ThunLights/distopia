@@ -78,8 +78,11 @@ requires auth even for listing tags, which is all Image Updater's polling does.)
 > ```
 >
 > If your installed version turns out to be the older annotation-only controller instead,
-> skip `imageupdater.yaml` (`kubectl delete -f k8s/argocd/imageupdater.yaml` is harmless if
-> the CRD isn't installed) — the annotations on `app-app.yaml` are sufficient by themselves.
+> also remove `imageupdater.yaml` from `k8s/argocd/kustomization.yaml`'s `resources` list —
+> deleting the live object alone (`kubectl delete -f k8s/argocd/imageupdater.yaml`) isn't
+> enough, since the next `kubectl apply -k k8s/argocd` would just try to apply the
+> `ImageUpdater` kind again and fail if the CRD isn't installed. The annotations on
+> `app-app.yaml` are sufficient by themselves once it's removed from both places.
 
 **Also disable k3s's built-in Traefik and ServiceLB.** Public traffic reaches this cluster
 exclusively through a host-level Cloudflare Tunnel (see "Cloudflare Tunnel and network
