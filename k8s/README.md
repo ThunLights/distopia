@@ -7,7 +7,7 @@ by you — nothing here is applied automatically by me.
 
 | Path | Argo CD Application | Contents |
 |---|---|---|
-| `k8s/registry/` | `distopia-registry` | Self-hosted `registry:2`, cluster-internal only |
+| `k8s/registry/` | `distopia-registry` | Self-hosted `registry:2`, cluster-internal only + a daily retention/GC `CronJob` (see "Registry image retention" below) |
 | `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) + a daily `pg_dump` backup `CronJob` |
 | `k8s/redis/` | `distopia-redis` | Cluster-internal Redis (no auth, no PVC) — persists which guild's TTS session is bound to which voice/text channel, so a rolling update's new pod can rejoin where the old one left off; see "TTS session persistence" below |
 | `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`); the `Application`'s annotations also drive Argo CD Image Updater |
@@ -140,11 +140,12 @@ argo submit -n distopia --from workflowtemplate/distopia-build-deploy \
 registry_user='distopia'
 registry_password='<choose a password>'
 
-# distopia-registry-credentials is the source of truth -- not consumed by any manifest
-# directly (registry:2 needs the bcrypt-hashed htpasswd file below, not plain
-# username/password), but keeping one canonical copy makes rotation and lookup ("what's my
-# registry password again?") a single `kubectl get secret` instead of hunting through
-# whichever of the two derived secrets you happen to remember.
+# distopia-registry-credentials is the source of truth -- registry:2 itself needs the
+# bcrypt-hashed htpasswd file below, not plain username/password, but keeping one canonical
+# copy makes rotation and lookup ("what's my registry password again?") a single `kubectl
+# get secret` instead of hunting through whichever of the two derived secrets you happen to
+# remember. Also consumed directly (its plain username/password, for Basic auth against the
+# registry's HTTP API) by k8s/registry/gc-cronjob.yaml's `delete-old-tags` step.
 kubectl create secret generic distopia-registry-credentials -n distopia \
   --from-literal=username="$registry_user" \
   --from-literal=password="$registry_password"
@@ -317,6 +318,32 @@ To change the poll interval or inspect what Image Updater is doing:
 
 ```bash
 kubectl logs -n argocd deployment/argocd-image-updater -f
+```
+
+## Registry image retention
+
+Every push to `main` adds a new `<epoch>-<short-sha>` tag and re-pushes `latest` — nothing
+in "Shipping a new build" above ever deletes one, so `distopia-registry`'s 20Gi PVC
+(`k8s/registry/pvc.yaml`) grows without bound on its own. `distopia-registry-gc`
+(`k8s/registry/gc-cronjob.yaml`), a daily `CronJob`, is the retention policy:
+
+1. `get-current-tag` reads `distopia-app`'s live `Deployment` to find out which tag is
+   actually running right now.
+2. `delete-old-tags` lists every `<epoch>-<short-sha>` tag, keeps the newest `KEEP_COUNT`
+   (10 by default) plus whatever step 1 found — **never** the currently-deployed tag, even
+   if it's outside that window — and deletes the rest via the registry's own HTTP API.
+   Deleting a manifest only unreferences it; the underlying blobs stay on disk until GC runs.
+3. `gc` runs `registry garbage-collect` (via `kubectl exec` into the running
+   `distopia-registry` Pod) to actually reclaim that disk space. Online GC — safe to run
+   without taking the registry offline — has been the default since distribution v2.7; see
+   `gc-cronjob.yaml`'s own comment if you ever pin an older `registry:2` version explicitly.
+
+Adjust `KEEP_COUNT` (an env var on the `delete-old-tags` container) or the `schedule` to
+your own retention needs. Check what it actually did:
+
+```bash
+kubectl get jobs -n distopia | grep distopia-registry-gc
+kubectl logs -n distopia job/<job-name-from-above> --all-containers --tail=200
 ```
 
 ## 6. Database backups
