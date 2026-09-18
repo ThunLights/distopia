@@ -28,11 +28,20 @@ app-specific config. In short: Argo Workflows and Argo Events need to be install
 below.
 
 Argo CD Image Updater also needs to know `distopia-registry` is a plain-HTTP internal
-registry (no TLS at all, same as Kaniko's `--insecure` flag already assumes elsewhere in
-this pipeline — this registry has never had a certificate, cluster-internal-only and with
-no Ingress since day one, not something this change introduces) — add an entry to its
-`registries.conf` ConfigMap (usually `argocd-image-updater-config` in the `argocd`
-namespace) after installing it:
+registry — add an entry to its `registries.conf` ConfigMap (usually
+`argocd-image-updater-config` in the `argocd` namespace) after installing it:
+
+> **Known gap:** `insecure: true` below means Image Updater's pull-secret credentials (and
+> the image layers themselves) travel unencrypted between the `argocd` namespace and
+> `distopia-registry`. This isn't new — Kaniko's own `--insecure` push in
+> `workflowtemplate.yaml` already assumes the same thing, since this registry has never had
+> a certificate, is cluster-internal-only, and has had no Ingress since day one. The
+> NetworkPolicy (`k8s/registry/networkpolicy.yaml`) limits *who* can reach the registry but
+> doesn't encrypt that traffic. Issuing the registry a real certificate (cert-manager +
+> private CA, or similar) and dropping every `insecure:`/`--insecure` reference across
+> Image Updater, Kaniko, and the app's `imagePullSecrets` is real cluster-bootstrap work —
+> out of scope here (see "not managed by this repo" above) and should be its own reviewed
+> change, not folded into this one.
 
 ```bash
 kubectl patch configmap argocd-image-updater-config -n argocd --type merge -p '
