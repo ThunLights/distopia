@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - app-registry.yaml
   - app-db.yaml
+  - app-redis.yaml
   - app-app.yaml
   - app-ci.yaml
   - app-network.yaml

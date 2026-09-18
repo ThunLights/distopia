@@ -1,0 +1,45 @@
+# Self-hosted, cluster-internal-only Redis (no Ingress, no NodePort -- same posture as
+# distopia-registry). Holds only ephemeral, best-effort state: which guild's TTS session was
+# bound to which voice/text channel, so a rolling update's new pod can rejoin where the old
+# one left off (see Tts.saveVoiceSession in app-core and presentation-bot's session.ts). No
+# PVC on purpose -- losing this on a Redis restart just means one missed auto-resume, not
+# real data loss, so it isn't worth the extra operational weight of persistent storage here.
+#
+# No AUTH configured either: unlike distopia-registry (which needs per-caller credentials to
+# audit/restrict who pushes images), this cache has nothing sensitive in it and is already
+# unreachable from outside the cluster -- the NetworkPolicy below is the actual boundary.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-redis
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

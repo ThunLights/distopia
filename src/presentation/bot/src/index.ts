@@ -17,6 +17,7 @@ import { RoleCreateHandler } from "./EventHandler/RoleCreateHandler";
 import { RoleDeleteHandler } from "./EventHandler/RoleDeleteHandler";
 import { RoleUpdateHandler } from "./EventHandler/RoleUpdateHandler";
 import { VoiceStateUpdateHandler } from "./EventHandler/VoiceStateUpdateHandler";
+import { restoreSessions } from "./utils/tts/session";
 
 export function handleClient(client: Client, core: AppCore) {
   const interactionCreateHandler = new InteractionCreateHandler(core);
@@ -38,6 +39,12 @@ export function handleClient(client: Client, core: AppCore) {
 
   client.on("clientReady", async (client) => {
     await core.user.setActivity();
+
+    // Fire-and-forget: rejoining voice channels can take a few seconds per guild and must
+    // not block (or fail) command registration below.
+    void restoreSessions(client, core).catch((error) =>
+      console.error("[tts] failed to restore voice sessions", error),
+    );
 
     const commands = interactionCreateHandler.commands.chatInput
       .filter((command) => command.availableGuildId === null)

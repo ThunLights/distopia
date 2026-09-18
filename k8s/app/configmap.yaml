@@ -1,6 +1,9 @@
 # Non-secret runtime config. Equivalent to the old docker/.env's PROD_PORT -- change the
 # value here (and containerPort/service.yaml's targetPort to match) to move the app off
 # port 3000.
+#
+# REDIS_URL has no credentials in it (see k8s/redis/deployment.yaml -- no AUTH configured),
+# which is why it lives here rather than in the distopia-env Secret.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,3 +11,4 @@ metadata:
   namespace: distopia
 data:
   PORT: "3000"
+  REDIS_URL: "redis://distopia-redis.distopia.svc.cluster.local:6379"

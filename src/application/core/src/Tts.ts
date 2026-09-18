@@ -16,10 +16,20 @@ import type { Guild } from "./Guild";
 
 const DEFAULT_SKIP_COMMAND = "s"; // matches GuildSetting.ttsSkipCommand's DB default
 const MAX_READING_LENGTH = 300;
+const VOICE_SESSION_KEY_PREFIX = "tts:voice-session:";
 
 export { FAMOUS_SPEAKERS, speakerName } from "infra-voicevox";
 export type { TtsSynthesisResult } from "infra-voicevox";
 export type { TtsProvider } from "infra-database/types";
+
+// A pointer to which voice/text channel a guild's TTS session is bound to -- not the live
+// discord.js voice connection itself (that's process-local, see presentation-bot's
+// session.ts), just enough to rejoin after a restart.
+export type TtsVoiceSession = {
+  guildId: string;
+  voiceChannelId: string;
+  textChannelId: string;
+};
 
 export class Tts extends Base {
   constructor(
@@ -165,6 +175,40 @@ export class Tts extends Base {
     const entry = await this.state.database.guildTtsIgnoreList.delete(guildId, targetId);
     this.state.memory.guildTtsIgnoreList.delete(guildId);
     return entry;
+  }
+
+  // Called from presentation-bot's session.ts right alongside establishing the live voice
+  // connection -- keeps Redis in sync with the in-memory session regardless of which caller
+  // (a /tts join, or VoiceStateUpdateHandler's auto-leave) triggers the change.
+  public async saveVoiceSession(session: TtsVoiceSession): Promise<void> {
+    await this.state.redis.set(
+      `${VOICE_SESSION_KEY_PREFIX}${session.guildId}`,
+      JSON.stringify(session),
+    );
+  }
+
+  public async clearVoiceSession(guildId: string): Promise<void> {
+    await this.state.redis.del(`${VOICE_SESSION_KEY_PREFIX}${guildId}`);
+  }
+
+  // Read once at startup (see presentation-bot's session.ts restoreSessions) to rejoin every
+  // guild that was connected before the process restarted. A corrupt entry is skipped rather
+  // than thrown -- one bad key shouldn't block every other guild's session from restoring.
+  public async getAllVoiceSessions(): Promise<TtsVoiceSession[]> {
+    const keys = await this.state.redis.keys(`${VOICE_SESSION_KEY_PREFIX}*`);
+    const sessions: TtsVoiceSession[] = [];
+    for (const key of keys) {
+      const raw = await this.state.redis.get(key);
+      if (!raw) {
+        continue;
+      }
+      try {
+        sessions.push(JSON.parse(raw) as TtsVoiceSession);
+      } catch (error) {
+        console.error(`[tts] failed to parse persisted voice session for key ${key}`, error);
+      }
+    }
+    return sessions;
   }
 
   public async shouldSkip(

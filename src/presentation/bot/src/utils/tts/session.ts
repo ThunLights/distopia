@@ -11,7 +11,8 @@ import {
   type VoiceConnection,
   VoiceConnectionStatus,
 } from "@discordjs/voice";
-import type { VoiceBasedChannel } from "discord.js";
+import type { AppCore } from "app-core";
+import { PermissionFlagsBits, type Client, type VoiceBasedChannel } from "discord.js";
 
 // Process-local, in-memory only -- these hold live discord.js voice objects tied to this
 // process's WebSocket/UDP connections, which can't survive (or be meaningfully persisted
@@ -61,12 +62,20 @@ export function isJoined(guildId: string): boolean {
   return sessions.has(guildId);
 }
 
-export function join(voiceChannel: VoiceBasedChannel, textChannelId: string): Promise<boolean> {
-  return withLifecycleLock(voiceChannel.guildId, () => joinNow(voiceChannel, textChannelId));
+export function join(
+  voiceChannel: VoiceBasedChannel,
+  textChannelId: string,
+  core: AppCore,
+): Promise<boolean> {
+  return withLifecycleLock(voiceChannel.guildId, () => joinNow(voiceChannel, textChannelId, core));
 }
 
-async function joinNow(voiceChannel: VoiceBasedChannel, textChannelId: string): Promise<boolean> {
-  leaveNow(voiceChannel.guildId);
+async function joinNow(
+  voiceChannel: VoiceBasedChannel,
+  textChannelId: string,
+  core: AppCore,
+): Promise<boolean> {
+  await leaveNow(voiceChannel.guildId, core);
 
   const connection = joinVoiceChannel({
     channelId: voiceChannel.id,
@@ -98,17 +107,22 @@ async function joinNow(voiceChannel: VoiceBasedChannel, textChannelId: string): 
     queue: [],
     processing: false,
   });
+  // Persisted after the in-memory session, not before -- a crash between the two would just
+  // leave nothing to restore (safe), whereas the reverse order could persist a session that
+  // never actually got a live connection.
+  await core.tts.saveVoiceSession({
+    guildId: voiceChannel.guildId,
+    voiceChannelId: voiceChannel.id,
+    textChannelId,
+  });
   return true;
 }
 
-export function leave(guildId: string): Promise<void> {
-  return withLifecycleLock(guildId, () => {
-    leaveNow(guildId);
-    return Promise.resolve();
-  });
+export function leave(guildId: string, core: AppCore): Promise<void> {
+  return withLifecycleLock(guildId, () => leaveNow(guildId, core));
 }
 
-function leaveNow(guildId: string): void {
+async function leaveNow(guildId: string, core: AppCore): Promise<void> {
   const session = sessions.get(guildId);
   if (!session) {
     return;
@@ -117,6 +131,50 @@ function leaveNow(guildId: string): void {
   session.player.stop(true);
   session.connection.destroy();
   sessions.delete(guildId);
+  await core.tts.clearVoiceSession(guildId);
+}
+
+// Called once from index.ts's `clientReady` handler to rejoin every guild's TTS session
+// that survived a restart -- a rolling update kills the old pod's process (and with it every
+// live voice connection), but the Redis-backed pointer (see Tts.saveVoiceSession) tells the
+// new pod who to rejoin. Uses fetch() rather than the cache for both guild and channel: this
+// runs right after `clientReady` fires, before every guild's channel list is necessarily
+// cached yet.
+export async function restoreSessions(client: Client<true>, core: AppCore): Promise<void> {
+  const persisted = await core.tts.getAllVoiceSessions();
+
+  for (const { guildId, voiceChannelId, textChannelId } of persisted) {
+    try {
+      const guild = await client.guilds.fetch(guildId);
+      const channel = await guild.channels.fetch(voiceChannelId);
+      if (!channel || !channel.isVoiceBased()) {
+        await core.tts.clearVoiceSession(guildId);
+        continue;
+      }
+
+      const joined = await join(channel, textChannelId, core);
+      if (!joined) {
+        // Transient failure (e.g. a voice server hiccup) -- leave the pointer in place so
+        // the next restart gets another chance, rather than giving up on this guild for good.
+        continue;
+      }
+
+      // Mirrors the permission check TtsCommand's own /tts join does: entering Ready only
+      // requires Connect, so a channel that also denies Speak still lets the bot sit there
+      // silently unless this catches it and backs the session out again.
+      const botMember = channel.guild.members.me;
+      const voicePermissions = botMember ? channel.permissionsFor(botMember) : null;
+      if (
+        !voicePermissions?.has(PermissionFlagsBits.Connect) ||
+        !voicePermissions.has(PermissionFlagsBits.Speak)
+      ) {
+        await leave(guildId, core);
+      }
+    } catch (error) {
+      console.error(`[tts] failed to restore voice session for guild ${guildId}`, error);
+      await core.tts.clearVoiceSession(guildId).catch(() => undefined);
+    }
+  }
 }
 
 // Stops whatever's currently playing so processQueue's `entersState(..., Idle, ...)` wait

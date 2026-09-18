@@ -1,0 +1,17 @@
+# Defense-in-depth: even with no Ingress/NodePort/LoadBalancer, restrict ingress to pods in
+# this namespace (only the app Deployment ever talks to this Redis) -- no cross-namespace
+# exception needed, unlike k8s/registry/networkpolicy.yaml's Image Updater case.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: distopia-redis-allow-intra-namespace
+  namespace: distopia
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}

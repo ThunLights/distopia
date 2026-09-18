@@ -175,7 +175,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
         withResponse: true,
       });
 
-      void join(voiceChannel, interaction.channelId)
+      void join(voiceChannel, interaction.channelId, this.core)
         .then(async (joined) => {
           if (!joined) {
             return interaction.editReply({
@@ -193,7 +193,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
             !voicePermissions?.has(PermissionFlagsBits.Connect) ||
             !voicePermissions.has(PermissionFlagsBits.Speak)
           ) {
-            await leave(voiceChannel.guildId);
+            await leave(voiceChannel.guildId, this.core);
             return interaction.editReply({
               embeds: embed(
                 "Red",
@@ -220,7 +220,7 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       if (!isJoined(guild.id)) {
         return embed("Red", "エラー", "読み上げは開始されていません。");
       }
-      await leave(guild.id);
+      await leave(guild.id, this.core);
       return embed("Green", "読み上げ終了", "読み上げを終了しました。");
     }
 
