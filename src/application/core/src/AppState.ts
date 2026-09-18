@@ -17,6 +17,7 @@ import type {
   MessageCreateRateLimit,
   OAuth2Guilds,
   OAuth2PKCE,
+  TtsSynthesisCache,
   UnJoinedGuild,
   UrlCacheInMemory,
   UserDictionary,
@@ -57,6 +58,7 @@ export type AppState = {
     messageCreate: MessageCreate;
     oauth2PKCE: OAuth2PKCE;
     oauth2Guilds: OAuth2Guilds;
+    ttsSynthesisCache: TtsSynthesisCache;
     unJoinedGuild: UnJoinedGuild;
     urlCacheInMemory: UrlCacheInMemory;
     userDictionary: UserDictionary;

@@ -7,6 +7,7 @@ import { MessageCreate } from "./MessageCreate";
 import { OAuth2Guilds } from "./OAuth2Guilds";
 import { OAuth2PKCE } from "./OAuth2PKCE";
 import { RateLimitMapWithGC } from "./ratelimit/RateLimitMapWithGC";
+import { TtsSynthesisCache } from "./TtsSynthesisCache";
 import { UrlCacheInMemory } from "./UrlCacheInMemory";
 import { UserOAuth2 } from "./UserOAuth2";
 
@@ -256,6 +257,42 @@ describe("UrlCacheInMemory.gc()", () => {
     map.gc();
 
     expect(map.size).toBe(1);
+  });
+});
+
+// ── TtsSynthesisCache (1-hour TTL, also enforced on get()) ───────────────
+// Condition: now - 1h > createdAt  (strictly)
+
+describe("TtsSynthesisCache", () => {
+  const ONE_HOUR = 60 * 60 * 1000;
+
+  test("gc() removes entries strictly older than 1 hour", () => {
+    const map = new TtsSynthesisCache();
+    map.set("old", { audio: Buffer.from("a"), createdAt: at(-ONE_HOUR - 1) });
+    map.set("exact", { audio: Buffer.from("b"), createdAt: at(-ONE_HOUR) });
+    map.set("fresh", { audio: Buffer.from("c"), createdAt: at(-ONE_HOUR + 1) });
+
+    map.gc();
+
+    expect(map.has("old")).toBe(false);
+    expect(map.has("exact")).toBe(true);
+    expect(map.has("fresh")).toBe(true);
+  });
+
+  test("get() treats an expired entry as a miss even before gc() runs", () => {
+    const map = new TtsSynthesisCache();
+    map.set("stale", { audio: Buffer.from("a"), createdAt: at(-ONE_HOUR - 1) });
+
+    expect(map.get("stale")).toBeUndefined();
+    // Also removed as a side effect, not just hidden from get().
+    expect(map.has("stale")).toBe(false);
+  });
+
+  test("get() still returns a fresh entry", () => {
+    const map = new TtsSynthesisCache();
+    map.set("fresh", { audio: Buffer.from("a"), createdAt: at(-60 * 1000) }); // 1 min
+
+    expect(map.get("fresh")).toEqual({ audio: Buffer.from("a"), createdAt: at(-60 * 1000) });
   });
 });
 

@@ -1,8 +1,15 @@
-import { describe, expect, test } from "vitest";
+import { TtsSynthesisCache } from "repo-memory";
+import { describe, expect, test, vi } from "vitest";
 
 import type { AppState } from "./AppState";
 import type { Guild } from "./Guild";
 import { Tts } from "./Tts";
+
+vi.mock("infra-voicevox", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("infra-voicevox")>();
+  return { ...actual, synthesize: vi.fn() };
+});
+vi.mock("infra-sakura", () => ({ synthesize: vi.fn() }));
 
 // stripFilteredPatterns touches neither this.state nor this.guild, so casting empty objects
 // is safe here -- the other methods on this class need real state/guild collaborators.
@@ -77,5 +84,27 @@ describe("Tts.truncateForReading", () => {
 
   test("leaves short text untouched", () => {
     expect(tts.truncateForReading("短いメッセージ")).toBe("短いメッセージ");
+  });
+});
+
+describe("Tts.synthesize caching", () => {
+  test("reuses a cached buffer instead of calling the synthesis API again", async () => {
+    const { synthesize: synthesizeVoicevox } = await import("infra-voicevox");
+    vi.mocked(synthesizeVoicevox).mockResolvedValue({ audio: Buffer.from("audio") });
+
+    const state = {
+      voicevoxApiKey: null,
+      sakuraApiKey: null,
+      memory: { ttsSynthesisCache: new TtsSynthesisCache() },
+    } as unknown as AppState;
+    const guild = { getSetting: vi.fn().mockResolvedValue(null) } as unknown as Guild;
+    const cachedTts = new Tts(state, guild);
+
+    const first = await cachedTts.synthesize("こんにちは", 1, "guild-1");
+    const second = await cachedTts.synthesize("こんにちは", 1, "guild-1");
+
+    expect(first).toEqual({ audio: Buffer.from("audio") });
+    expect(second).toEqual({ audio: Buffer.from("audio") });
+    expect(synthesizeVoicevox).toHaveBeenCalledTimes(1);
   });
 });

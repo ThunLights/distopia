@@ -17,6 +17,7 @@ export * from "./MapWithGC";
 export * from "./MessageCreate";
 export * from "./OAuth2Guilds";
 export * from "./OAuth2PKCE";
+export * from "./TtsSynthesisCache";
 export * from "./UnJoinedGuild";
 export * from "./UrlCacheInMemory";
 export * from "./UserDictionary";
