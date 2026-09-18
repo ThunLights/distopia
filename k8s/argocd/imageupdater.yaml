@@ -1,0 +1,13 @@
+# Argo CD Image Updater v1.x reconciles this CR, not bare Application annotations -- it
+# only reads the argocd-image-updater.argoproj.io/* annotations on app-app.yaml because
+# useAnnotations is true below. Without this CR, the controller logs "No ImageUpdater CRs
+# to process" and never touches distopia-app, no matter what annotations are present.
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: distopia
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: distopia-app
+      useAnnotations: true
