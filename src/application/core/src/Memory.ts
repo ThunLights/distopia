@@ -22,6 +22,7 @@ export class Memory extends Base {
       this.state.memory.guildMemberAdd,
       this.state.memory.messageCreate,
       this.state.memory.oauth2PKCE,
+      this.state.memory.ttsSynthesisCache,
       this.state.memory.urlCacheInMemory,
       this.state.memory.userDictionary,
       this.state.memory.userOAuth2,

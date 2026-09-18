@@ -36,11 +36,31 @@ export class Tts extends Base {
   ): Promise<TtsSynthesisResult> {
     const setting = await this.guild.getSetting(guildId);
     const { sakuraApiKey } = this.state;
-    if (setting?.ttsProvider === "SakuraAi" && sakuraApiKey) {
-      return synthesizeSakura(text, speakerId, sakuraApiKey);
+    const useSakura = setting?.ttsProvider === "SakuraAi" && !!sakuraApiKey;
+
+    // Cache key includes the provider -- same text/speakerId synthesized by different
+    // engines produces different audio (see infra-sakura/synthesize.ts's comment on shared
+    // speaker IDs), so they can't share a cache entry.
+    const cacheKey = `${useSakura ? "sakura" : "voicevox"}:${speakerId}:${text}`;
+    const cached = this.state.memory.ttsSynthesisCache.get(cacheKey);
+    if (cached) {
+      return { audio: cached.audio };
     }
 
-    return synthesizeVoicevox(text, speakerId, this.state.voicevoxApiKey);
+    const result = useSakura
+      ? await synthesizeSakura(text, speakerId, sakuraApiKey as string)
+      : await synthesizeVoicevox(text, speakerId, this.state.voicevoxApiKey);
+
+    // Only successful synthesis is cached -- an error (rate limit, timeout, API error) is
+    // transient and shouldn't be replayed as a false "no audio" result later.
+    if (result.audio) {
+      this.state.memory.ttsSynthesisCache.set(cacheKey, {
+        audio: result.audio,
+        createdAt: new Date(),
+      });
+    }
+
+    return result;
   }
 
   public async setTtsProvider(guildId: string, provider: TtsProvider): Promise<void> {
