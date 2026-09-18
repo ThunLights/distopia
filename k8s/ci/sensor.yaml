@@ -12,15 +12,6 @@ spec:
   eventBusName: default
   template:
     serviceAccountName: distopia-sensor-sa
-    # Diagnostic: RBAC, NetworkPolicy, and EventBus delivery have all been verified healthy
-    # (STAN's channelsz confirms messages are delivered to this Sensor's own subscription),
-    # yet no Workflow is ever created and the default "info" log level shows nothing at all
-    # for these events -- not even a trigger-execution error. Bumping to debug to see what
-    # actually happens inside trigger execution.
-    container:
-      env:
-        - name: LOG_LEVEL
-          value: debug
   dependencies:
     - name: github-push
       eventSourceName: github
@@ -31,10 +22,15 @@ spec:
             type: string
             value:
               - refs/heads/main
+          # This data filter does an exact, case-sensitive string match. Was "thunlights/distopia"
+          # (lowercase) since this pipeline's very first commit -- GitHub's webhook payload always
+          # sends the repo's real casing ("ThunLights/distopia"), so every genuine push silently
+          # failed this filter and no Workflow was ever auto-triggered by a real push; every
+          # "Succeeded" Workflow run up to this fix came from a manual `argo submit`, not the Sensor.
           - path: body.repository.full_name
             type: string
             value:
-              - thunlights/distopia
+              - ThunLights/distopia
   triggers:
     - template:
         name: trigger-build-deploy
