@@ -170,4 +170,14 @@ describe("Tts voice session persistence", () => {
 
     await expect(tts.getAllVoiceSessions()).resolves.toEqual([]);
   });
+
+  test("getAllVoiceSessions skips a wrong-shaped entry instead of returning it", async () => {
+    const redis = fakeRedis();
+    // Valid JSON, wrong shape -- JSON.parse alone wouldn't catch this.
+    redis.store.set("tts:voice-session:wrong-shape", JSON.stringify({ guildId: "guild-1" }));
+    const state = { redis } as unknown as AppState;
+    const tts = new Tts(state, {} as Guild);
+
+    await expect(tts.getAllVoiceSessions()).resolves.toEqual([]);
+  });
 });

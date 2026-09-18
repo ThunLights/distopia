@@ -31,6 +31,21 @@ export type TtsVoiceSession = {
   textChannelId: string;
 };
 
+// JSON.parse alone only proves the value is valid JSON, not that it has this shape --
+// getAllVoiceSessions writes it as JSON itself, but a hand-edited/wrong-version key would
+// otherwise pass through as a TtsVoiceSession via the type assertion, and restoreSessions
+// destructures it before its own try block, so one bad-shaped entry could reach discord.js
+// API calls with `undefined` fields instead of being skipped here.
+function isTtsVoiceSession(value: unknown): value is TtsVoiceSession {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).guildId === "string" &&
+    typeof (value as Record<string, unknown>).voiceChannelId === "string" &&
+    typeof (value as Record<string, unknown>).textChannelId === "string"
+  );
+}
+
 export class Tts extends Base {
   constructor(
     state: AppState,
@@ -203,7 +218,12 @@ export class Tts extends Base {
         continue;
       }
       try {
-        sessions.push(JSON.parse(raw) as TtsVoiceSession);
+        const parsed: unknown = JSON.parse(raw);
+        if (!isTtsVoiceSession(parsed)) {
+          console.error(`[tts] persisted voice session for key ${key} has an unexpected shape`);
+          continue;
+        }
+        sessions.push(parsed);
       } catch (error) {
         console.error(`[tts] failed to parse persisted voice session for key ${key}`, error);
       }

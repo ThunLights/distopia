@@ -442,15 +442,26 @@ alone either way.
 holds every live Discord voice connection for the read-aloud (`/tts join`) feature — the new
 pod starts with no memory of who it should be connected to. `distopia-redis` closes that gap:
 
-- `Tts.saveVoiceSession`/`clearVoiceSession` (`app-core/src/Tts.ts`) keep a `tts:voice-session:
-  <guildId>` key in Redis in sync with the in-memory session, on every join/leave, regardless
-  of which caller triggers it (`/tts join`, `/tts leave`, or `VoiceStateUpdateHandler`'s
-  auto-leave when a channel empties out) — see `presentation-bot/src/utils/tts/session.ts`.
+- `Tts.saveVoiceSession`/`clearVoiceSession` (`src/application/core/src/Tts.ts`) keep a
+  `tts:voice-session:<guildId>` key in Redis in sync with the in-memory session, on every
+  join/leave, regardless of which caller triggers it (`/tts join`, `/tts leave`, or
+  `VoiceStateUpdateHandler`'s auto-leave when a channel empties out) — see
+  `src/presentation/bot/src/utils/tts/session.ts`.
 - On `clientReady`, `restoreSessions` reads every persisted session from Redis and rejoins
   each one (re-checking Connect/Speak permissions, same as a fresh `/tts join`) — fire-and-
   forget, so a slow voice reconnect never blocks command registration.
 - No PVC, no AUTH (see `k8s/redis/deployment.yaml`'s own comment for why) — losing this
   Redis's data on its own restart just means one missed auto-resume, not real data loss.
+
+> **Known gap:** `clearVoiceSession` deletes `tts:voice-session:<guildId>` unconditionally,
+> with no owner/lease check. During the old-pod/new-pod overlap `RollingUpdate` already
+> accepts (see "Notes" below), it's possible for the old pod's `VoiceStateUpdateHandler` to
+> delete a pointer the new pod just wrote (e.g. the old pod's channel empties out right after
+> the new pod already rejoined and persisted). Worst case, that one guild simply doesn't
+> auto-resume on the *next* restart — the same already-accepted "no PVC" degradation above,
+> not data corruption or a crash. A Redis lease/compare-and-delete would close this
+> narrow, rollout-window-only race, but is real added complexity for a low-probability,
+> low-impact case — out of scope here; revisit if it turns out to matter in practice.
 
 ## Notes / known constraints
 

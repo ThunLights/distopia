@@ -99,22 +99,36 @@ async function joinNow(
     return false;
   }
 
-  sessions.set(voiceChannel.guildId, {
+  const session: TtsSession = {
     voiceChannelId: voiceChannel.id,
     textChannelId,
     connection,
     player,
     queue: [],
     processing: false,
-  });
+  };
+  sessions.set(voiceChannel.guildId, session);
   // Persisted after the in-memory session, not before -- a crash between the two would just
   // leave nothing to restore (safe), whereas the reverse order could persist a session that
   // never actually got a live connection.
-  await core.tts.saveVoiceSession({
-    guildId: voiceChannel.guildId,
-    voiceChannelId: voiceChannel.id,
-    textChannelId,
-  });
+  try {
+    await core.tts.saveVoiceSession({
+      guildId: voiceChannel.guildId,
+      voiceChannelId: voiceChannel.id,
+      textChannelId,
+    });
+  } catch (error) {
+    // Without this, a rejected save leaves a live connection in `sessions` that Redis never
+    // learns about -- indistinguishable from a successful join to every caller (TtsCommand's
+    // `.then` only branches on the returned boolean), so the caller would report success
+    // while this guild silently can't be restored after the next restart. Tear down and
+    // report failure instead, same as the entersState(Ready) failure path above.
+    console.error("[tts] failed to persist voice session", error);
+    session.player.stop(true);
+    session.connection.destroy();
+    sessions.delete(voiceChannel.guildId);
+    return false;
+  }
   return true;
 }
 
@@ -128,10 +142,19 @@ async function leaveNow(guildId: string, core: AppCore): Promise<void> {
     return;
   }
 
+  // Cleared before local teardown, not after -- clearing it after meant a rejection here
+  // (Redis unreachable) left a stale pointer behind even though the connection was already
+  // torn down locally, so a later restart would wrongly rejoin a channel the user explicitly
+  // left. Teardown still proceeds either way, so leave() stays responsive even if this fails.
+  try {
+    await core.tts.clearVoiceSession(guildId);
+  } catch (error) {
+    console.error(`[tts] failed to clear persisted voice session for guild ${guildId}`, error);
+  }
+
   session.player.stop(true);
   session.connection.destroy();
   sessions.delete(guildId);
-  await core.tts.clearVoiceSession(guildId);
 }
 
 // Called once from index.ts's `clientReady` handler to rejoin every guild's TTS session
@@ -152,6 +175,18 @@ export async function restoreSessions(client: Client<true>, core: AppCore): Prom
         continue;
       }
 
+      // Checked before attempting the connection, not just after: entersState(Ready) doesn't
+      // fail fast on a missing Connect permission, it times out after join()'s own 15s wait --
+      // checking first avoids that wasted wait, and lets a permanently-missing Connect be
+      // treated the same as a deleted channel (clear the pointer) rather than as a transient
+      // failure worth retrying forever.
+      const botMember = channel.guild.members.me;
+      const voicePermissions = botMember ? channel.permissionsFor(botMember) : null;
+      if (!voicePermissions?.has(PermissionFlagsBits.Connect)) {
+        await core.tts.clearVoiceSession(guildId);
+        continue;
+      }
+
       const joined = await join(channel, textChannelId, core);
       if (!joined) {
         // Transient failure (e.g. a voice server hiccup) -- leave the pointer in place so
@@ -159,20 +194,19 @@ export async function restoreSessions(client: Client<true>, core: AppCore): Prom
         continue;
       }
 
-      // Mirrors the permission check TtsCommand's own /tts join does: entering Ready only
-      // requires Connect, so a channel that also denies Speak still lets the bot sit there
-      // silently unless this catches it and backs the session out again.
-      const botMember = channel.guild.members.me;
-      const voicePermissions = botMember ? channel.permissionsFor(botMember) : null;
-      if (
-        !voicePermissions?.has(PermissionFlagsBits.Connect) ||
-        !voicePermissions.has(PermissionFlagsBits.Speak)
-      ) {
+      // Speak can't be checked before entersState(Ready) the same way Connect can -- Ready
+      // only requires Connect -- so this still needs a check after joining, same as a fresh
+      // /tts join. Reuses the permissions snapshot taken before join() rather than
+      // re-fetching; permissions changing mid-join is rare enough not to be worth it.
+      if (!voicePermissions.has(PermissionFlagsBits.Speak)) {
         await leave(guildId, core);
       }
     } catch (error) {
+      // Does NOT clear the persisted pointer here -- only the confirmed-invalid cases above
+      // (missing channel, missing Connect) do that. An error reaching this catch is an
+      // unexpected one (e.g. a transient Discord API blip from guilds.fetch/channels.fetch),
+      // exactly the kind that should get retried on the next restart, not treated as permanent.
       console.error(`[tts] failed to restore voice session for guild ${guildId}`, error);
-      await core.tts.clearVoiceSession(guildId).catch(() => undefined);
     }
   }
 }
