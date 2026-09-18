@@ -61,6 +61,29 @@ kubectl rollout restart deployment/argocd-image-updater -n argocd
 (`distopia-registry-pull` must already exist — see section 2 below — since this registry
 requires auth even for listing tags, which is all Image Updater's polling does.)
 
+> **Version note:** Image Updater v1.x (the `ImageUpdater` CRD, not the older
+> annotation-only controller) reconciles a separate `ImageUpdater` resource
+> (`k8s/argocd/imageupdater.yaml`) and otherwise does nothing — confirmed the hard way, the
+> controller logs "No ImageUpdater CRs to process" and never looks at any Application until
+> that CR exists. That CR's `useAnnotations: true` is what makes it fall back to reading
+> the `argocd-image-updater.argoproj.io/*` annotations on `k8s/argocd/app-app.yaml`, same as
+> the older annotation-only versions. Also, v1.x refuses to read a pull secret from any
+> namespace other than the Application's own (`argocd`), so `distopia-registry-pull` must
+> be copied into `argocd` too, not just `distopia`:
+>
+> ```bash
+> kubectl get secret distopia-registry-pull -n distopia -o json | \
+>   jq 'del(.metadata.namespace, .metadata.resourceVersion, .metadata.uid, .metadata.creationTimestamp, .metadata.selfLink) | .metadata.namespace="argocd"' | \
+>   kubectl apply -f -
+> ```
+>
+> If your installed version turns out to be the older annotation-only controller instead,
+> also remove `imageupdater.yaml` from `k8s/argocd/kustomization.yaml`'s `resources` list —
+> deleting the live object alone (`kubectl delete -f k8s/argocd/imageupdater.yaml`) isn't
+> enough, since the next `kubectl apply -k k8s/argocd` would just try to apply the
+> `ImageUpdater` kind again and fail if the CRD isn't installed. The annotations on
+> `app-app.yaml` are sufficient by themselves once it's removed from both places.
+
 **Also disable k3s's built-in Traefik and ServiceLB.** Public traffic reaches this cluster
 exclusively through a host-level Cloudflare Tunnel (see "Cloudflare Tunnel and network
 exposure" below) — nothing here should ever bind a host-facing port, and k3s's default
