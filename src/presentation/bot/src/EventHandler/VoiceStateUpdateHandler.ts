@@ -86,7 +86,7 @@ export class VoiceStateUpdateHandler extends BaseHandler<
 
     const channel = oldState.channel;
     if (!channel) {
-      await leave(oldState.guild.id);
+      await leave(oldState.guild.id, this.core);
       return;
     }
 
@@ -100,7 +100,7 @@ export class VoiceStateUpdateHandler extends BaseHandler<
     const memberFlags = channel.members.map((member) => ({ bot: member.user.bot }));
 
     if (isConfirmedEmptyOfHumans(memberFlags, voiceStateCount)) {
-      await leave(oldState.guild.id);
+      await leave(oldState.guild.id, this.core);
     }
   }
 }

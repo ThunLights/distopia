@@ -108,3 +108,76 @@ describe("Tts.synthesize caching", () => {
     expect(synthesizeVoicevox).toHaveBeenCalledTimes(1);
   });
 });
+
+// Fake backed by a plain Map -- only the four RedisClient methods Tts actually calls.
+function fakeRedis() {
+  const store = new Map<string, string>();
+  return {
+    store,
+    set: vi.fn(async (key: string, value: string) => {
+      store.set(key, value);
+      return "OK";
+    }),
+    get: vi.fn(async (key: string) => store.get(key) ?? null),
+    del: vi.fn(async (key: string) => {
+      const existed = store.delete(key);
+      return existed ? 1 : 0;
+    }),
+    keys: vi.fn(async (pattern: string) => {
+      const prefix = pattern.replace(/\*$/, "");
+      return Array.from(store.keys()).filter((key) => key.startsWith(prefix));
+    }),
+  };
+}
+
+describe("Tts voice session persistence", () => {
+  test("saveVoiceSession then getAllVoiceSessions round-trips the session", async () => {
+    const redis = fakeRedis();
+    const state = { redis } as unknown as AppState;
+    const tts = new Tts(state, {} as Guild);
+
+    await tts.saveVoiceSession({
+      guildId: "guild-1",
+      voiceChannelId: "voice-1",
+      textChannelId: "text-1",
+    });
+
+    expect(await tts.getAllVoiceSessions()).toEqual([
+      { guildId: "guild-1", voiceChannelId: "voice-1", textChannelId: "text-1" },
+    ]);
+  });
+
+  test("clearVoiceSession removes it from getAllVoiceSessions", async () => {
+    const redis = fakeRedis();
+    const state = { redis } as unknown as AppState;
+    const tts = new Tts(state, {} as Guild);
+
+    await tts.saveVoiceSession({
+      guildId: "guild-1",
+      voiceChannelId: "voice-1",
+      textChannelId: "text-1",
+    });
+    await tts.clearVoiceSession("guild-1");
+
+    expect(await tts.getAllVoiceSessions()).toEqual([]);
+  });
+
+  test("getAllVoiceSessions skips a corrupt entry instead of throwing", async () => {
+    const redis = fakeRedis();
+    redis.store.set("tts:voice-session:broken", "not json");
+    const state = { redis } as unknown as AppState;
+    const tts = new Tts(state, {} as Guild);
+
+    await expect(tts.getAllVoiceSessions()).resolves.toEqual([]);
+  });
+
+  test("getAllVoiceSessions skips a wrong-shaped entry instead of returning it", async () => {
+    const redis = fakeRedis();
+    // Valid JSON, wrong shape -- JSON.parse alone wouldn't catch this.
+    redis.store.set("tts:voice-session:wrong-shape", JSON.stringify({ guildId: "guild-1" }));
+    const state = { redis } as unknown as AppState;
+    const tts = new Tts(state, {} as Guild);
+
+    await expect(tts.getAllVoiceSessions()).resolves.toEqual([]);
+  });
+});

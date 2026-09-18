@@ -6,6 +6,7 @@ import { memory } from "./memory";
 import { searchEngine } from "./search";
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
+import { createRedisClient } from "infra-redis";
 import { page as levelRatePage } from "presentation-bot/page/Ranking/Level";
 import { page as activeRatePage } from "presentation-bot/page/Ranking/Rate";
 import { page as userBumpPage } from "presentation-bot/page/Ranking/UserBump";
@@ -24,6 +25,7 @@ export const core = genCore({
   searchEngine,
   discord: djsController,
   database,
+  redis: createRedisClient(privateEnv.REDIS_URL!),
 });
 
 export async function updatePanels() {

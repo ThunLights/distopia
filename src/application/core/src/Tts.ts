@@ -16,10 +16,35 @@ import type { Guild } from "./Guild";
 
 const DEFAULT_SKIP_COMMAND = "s"; // matches GuildSetting.ttsSkipCommand's DB default
 const MAX_READING_LENGTH = 300;
+const VOICE_SESSION_KEY_PREFIX = "tts:voice-session:";
 
 export { FAMOUS_SPEAKERS, speakerName } from "infra-voicevox";
 export type { TtsSynthesisResult } from "infra-voicevox";
 export type { TtsProvider } from "infra-database/types";
+
+// A pointer to which voice/text channel a guild's TTS session is bound to -- not the live
+// discord.js voice connection itself (that's process-local, see presentation-bot's
+// session.ts), just enough to rejoin after a restart.
+export type TtsVoiceSession = {
+  guildId: string;
+  voiceChannelId: string;
+  textChannelId: string;
+};
+
+// JSON.parse alone only proves the value is valid JSON, not that it has this shape --
+// getAllVoiceSessions writes it as JSON itself, but a hand-edited/wrong-version key would
+// otherwise pass through as a TtsVoiceSession via the type assertion, and restoreSessions
+// destructures it before its own try block, so one bad-shaped entry could reach discord.js
+// API calls with `undefined` fields instead of being skipped here.
+function isTtsVoiceSession(value: unknown): value is TtsVoiceSession {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).guildId === "string" &&
+    typeof (value as Record<string, unknown>).voiceChannelId === "string" &&
+    typeof (value as Record<string, unknown>).textChannelId === "string"
+  );
+}
 
 export class Tts extends Base {
   constructor(
@@ -165,6 +190,45 @@ export class Tts extends Base {
     const entry = await this.state.database.guildTtsIgnoreList.delete(guildId, targetId);
     this.state.memory.guildTtsIgnoreList.delete(guildId);
     return entry;
+  }
+
+  // Called from presentation-bot's session.ts right alongside establishing the live voice
+  // connection -- keeps Redis in sync with the in-memory session regardless of which caller
+  // (a /tts join, or VoiceStateUpdateHandler's auto-leave) triggers the change.
+  public async saveVoiceSession(session: TtsVoiceSession): Promise<void> {
+    await this.state.redis.set(
+      `${VOICE_SESSION_KEY_PREFIX}${session.guildId}`,
+      JSON.stringify(session),
+    );
+  }
+
+  public async clearVoiceSession(guildId: string): Promise<void> {
+    await this.state.redis.del(`${VOICE_SESSION_KEY_PREFIX}${guildId}`);
+  }
+
+  // Read once at startup (see presentation-bot's session.ts restoreSessions) to rejoin every
+  // guild that was connected before the process restarted. A corrupt entry is skipped rather
+  // than thrown -- one bad key shouldn't block every other guild's session from restoring.
+  public async getAllVoiceSessions(): Promise<TtsVoiceSession[]> {
+    const keys = await this.state.redis.keys(`${VOICE_SESSION_KEY_PREFIX}*`);
+    const sessions: TtsVoiceSession[] = [];
+    for (const key of keys) {
+      const raw = await this.state.redis.get(key);
+      if (!raw) {
+        continue;
+      }
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        if (!isTtsVoiceSession(parsed)) {
+          console.error(`[tts] persisted voice session for key ${key} has an unexpected shape`);
+          continue;
+        }
+        sessions.push(parsed);
+      } catch (error) {
+        console.error(`[tts] failed to parse persisted voice session for key ${key}`, error);
+      }
+    }
+    return sessions;
   }
 
   public async shouldSkip(

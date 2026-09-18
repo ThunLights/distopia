@@ -1,5 +1,6 @@
 import type { DatabaseClient } from "infra-database/types";
 import type { Controller } from "infra-discord";
+import type { RedisClient } from "infra-redis";
 import type {
   ButtonRateLimit,
   ChatInputCommandRateLimit,
@@ -69,4 +70,9 @@ export type AppState = {
   searchEngine: SearchEngine;
   discord: Controller;
   database: DatabaseClient;
+  // Durable (survives a process restart, unlike `memory` above) -- used to persist which
+  // guild's TTS session is bound to which voice/text channel, so a rolling update's brief
+  // old-pod/new-pod overlap doesn't lose track of who the bot should rejoin. See
+  // Tts.saveVoiceSession/getAllVoiceSessions and presentation-bot's session.ts.
+  redis: RedisClient;
 };

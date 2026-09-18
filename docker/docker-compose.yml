@@ -15,10 +15,31 @@ services:
       POSTGRES_PASSWORD: ${DB_PW:-0000}
       POSTGRES_DB: ${DB_NAME:-distopia}
 
+  redis:
+    container_name: distopia-redis
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - distopia-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   app:
     container_name: distopia-app
     depends_on:
-      - db
+      db:
+        condition: service_started
+      redis:
+        # Unlike `db` (nothing here waits on Postgres readiness beyond container start),
+        # this actually matters: ioredis's own reconnect/offline-queue behavior covers a
+        # Redis that becomes unavailable *after* startup, but not one that was never reachable
+        # in the first place if the app happens to need it (see Tts.getAllVoiceSessions'
+        # restoreSessions caller) before Redis has finished starting.
+        condition: service_healthy
     restart: always
     build:
       context: ./

@@ -1,0 +1,21 @@
+# Defense-in-depth: even with no Ingress/NodePort/LoadBalancer, restrict ingress to only the
+# app Deployment -- the one workload that ever talks to this Redis -- rather than every pod
+# in the namespace. distopia-ci's Workflow/Sensor/EventSource pods, the CNPG-managed
+# database, and the registry have no reason to reach an unauthenticated Redis holding TTS
+# session pointers, so they're deliberately not included here.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: distopia-redis-allow-intra-namespace
+  namespace: distopia
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: distopia-app
