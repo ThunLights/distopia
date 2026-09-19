@@ -111,6 +111,13 @@ async function joinNow(
   // Persisted after the in-memory session, not before -- a crash between the two would just
   // leave nothing to restore (safe), whereas the reverse order could persist a session that
   // never actually got a live connection.
+  //
+  // Best-effort, not fatal: confirmed live in production that treating a rejected save as a
+  // join failure (tearing down an already-successful voice connection over it) makes every
+  // /tts join fail whenever Redis is merely unreachable, even though the actual TTS feature
+  // never needed Redis for anything but restart recovery. Losing sync with Redis here only
+  // means this one guild won't auto-restore after the next restart -- a much smaller
+  // degradation than /tts join not working at all.
   try {
     await core.tts.saveVoiceSession({
       guildId: voiceChannel.guildId,
@@ -118,16 +125,7 @@ async function joinNow(
       textChannelId,
     });
   } catch (error) {
-    // Without this, a rejected save leaves a live connection in `sessions` that Redis never
-    // learns about -- indistinguishable from a successful join to every caller (TtsCommand's
-    // `.then` only branches on the returned boolean), so the caller would report success
-    // while this guild silently can't be restored after the next restart. Tear down and
-    // report failure instead, same as the entersState(Ready) failure path above.
-    console.error("[tts] failed to persist voice session", error);
-    session.player.stop(true);
-    session.connection.destroy();
-    sessions.delete(voiceChannel.guildId);
-    return false;
+    console.error("[tts] failed to persist voice session (join still succeeded)", error);
   }
   return true;
 }
