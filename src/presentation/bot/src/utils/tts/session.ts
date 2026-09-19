@@ -125,7 +125,10 @@ async function joinNow(
       textChannelId,
     });
   } catch (error) {
-    console.error("[tts] failed to persist voice session (join still succeeded)", error);
+    console.error(
+      `[tts] failed to persist voice session for guild ${voiceChannel.guildId} (join still succeeded)`,
+      error,
+    );
   }
   return true;
 }
