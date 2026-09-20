@@ -1,16 +1,18 @@
 # There is otherwise NO backup of this data at all -- a single instance (see cluster.yaml),
 # a single PVC, no WAL archiving, nothing. This CronJob is a minimal, self-contained safety
-# net: a daily pg_dump onto its own PVC, with old dumps pruned after 14 days.
+# net: a daily pg_dump onto its own PVC (old dumps pruned after 14 days), then mirrored
+# off-host to a Cloudflare R2 bucket so a lost node/disk doesn't take the only copy with it.
 #
-# Known limitation: this PVC almost certainly lives on the same node/disk as the database's
-# own PVC (a single-node k3s host with the default local-path provisioner has no other
-# option), so it protects against operational mistakes -- a bad migration, an accidental
-# DROP TABLE, a bug that corrupts data -- but NOT against losing that disk/node entirely.
-# Once you have any S3-compatible object storage available (self-hosted MinIO or a real
-# cloud bucket), switch to CloudNativePG's native `.spec.backup.barmanObjectStore` on the
-# Cluster instead -- it gives you continuous WAL archiving and point-in-time recovery, off
-# this host, which a periodic pg_dump can't. This CronJob is meant to be replaced then, not
-# necessarily kept alongside it.
+# `upload-r2`'s `aws s3 sync --delete` mirrors the *entire* /backup directory to R2 on every
+# run, rather than uploading just the new file -- this piggybacks on `pg-dump`'s existing
+# 14-day `find -mtime +14 -delete` for retention, so R2 ends up with the same 14-day window
+# with no separate remote-pruning logic to keep in sync.
+#
+# Known remaining limitation: this is still periodic pg_dump snapshots, not continuous WAL
+# archiving -- up to a day of data can be lost between dumps, and there's no point-in-time
+# recovery. If that ever matters more than the simplicity here, switch to CloudNativePG's
+# native `.spec.backup.barmanObjectStore` on the Cluster instead (it can point at the same R2
+# bucket) and retire this CronJob.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -45,7 +47,9 @@ spec:
       template:
         spec:
           restartPolicy: Never
-          containers:
+          # 1. Dump to the local PVC first (initContainers run sequentially, before the
+          #    main containers below) -- upload-r2 needs a finished dump to sync.
+          initContainers:
             - name: pg-dump
               # Same image family CloudNativePG itself runs (see cluster.yaml's imageName)
               # so pg_dump/pg_restore are guaranteed version-compatible with the server.
@@ -99,6 +103,53 @@ spec:
                     secretKeyRef:
                       name: distopia-db-credentials
                       key: password
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backup
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          # 2. Mirror the whole (already-pruned) /backup directory to R2. `--delete` removes
+          #    anything on R2 that's no longer in /backup, so pg-dump's 14-day local pruning
+          #    above is the only retention logic needed -- R2 just follows it.
+          containers:
+            - name: upload-r2
+              image: amazon/aws-cli:2.31.13
+              command: ["sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  aws s3 sync /backup "s3://${R2_BUCKET}/distopia-db-backups" \
+                    --delete --endpoint-url "$R2_ENDPOINT"
+              env:
+                # R2 has no concept of regions, but the aws-cli SDK still requires this to be
+                # set to something -- "auto" is Cloudflare's documented value.
+                - name: AWS_DEFAULT_REGION
+                  value: auto
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: distopia-db-r2-credentials
+                      key: access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: distopia-db-r2-credentials
+                      key: secret-access-key
+                - name: R2_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      name: distopia-db-r2-credentials
+                      key: endpoint
+                - name: R2_BUCKET
+                  valueFrom:
+                    secretKeyRef:
+                      name: distopia-db-r2-credentials
+                      key: bucket
               volumeMounts:
                 - name: backup-data
                   mountPath: /backup

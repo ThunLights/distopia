@@ -235,6 +235,74 @@ jobs:
             --pod-running-timeout=30s --image=postgres:17-alpine --command \
             -- pg_isready -h distopia-db-rw -p 5432 -U distopia -d distopia
 
+      # backup-cronjob.yaml's upload-r2 container reads distopia-db-r2-credentials, which in
+      # real production points at a Cloudflare R2 bucket -- there is no such secret here, so
+      # without this step the Job below would just sit in CreateContainerConfigError until
+      # the timeout. A real R2 bucket for CI would mean putting live cloud credentials in a
+      # GitHub secret and leaving test objects behind on every run; a throwaway MinIO Pod
+      # inside this already-throwaway kind cluster exercises the exact same `aws s3 sync`
+      # command with no external dependency and nothing to clean up afterwards.
+      - name: Start a mock S3 endpoint for the backup CronJob's R2 upload step
+        run: |
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: distopia-r2-mock
+            namespace: distopia
+          spec:
+            replicas: 1
+            selector:
+              matchLabels: { app: distopia-r2-mock }
+            template:
+              metadata:
+                labels: { app: distopia-r2-mock }
+              spec:
+                containers:
+                  - name: minio
+                    # quay.io, not Docker Hub's minio/minio -- confirmed directly: Docker Hub
+                    # now gates that repository behind a login (MinIO restricted it there in
+                    # 2025), so an anonymous pull fails with "pull access denied" even for a
+                    # real, existing tag. quay.io/minio/minio is MinIO's own unauthenticated
+                    # mirror and pulls fine.
+                    image: quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z
+                    args: ["server", "/data"]
+                    env:
+                      - name: MINIO_ROOT_USER
+                        value: distopia-ci
+                      - name: MINIO_ROOT_PASSWORD
+                        value: distopia-ci-test
+                    ports:
+                      - containerPort: 9000
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: distopia-r2-mock
+            namespace: distopia
+          spec:
+            selector: { app: distopia-r2-mock }
+            ports:
+              - port: 9000
+                targetPort: 9000
+          EOF
+          kubectl wait --for=condition=Available deployment/distopia-r2-mock -n distopia --timeout=60s
+
+          kubectl create secret generic distopia-db-r2-credentials -n distopia \
+            --from-literal=access-key-id=distopia-ci \
+            --from-literal=secret-access-key=distopia-ci-test \
+            --from-literal=endpoint=http://distopia-r2-mock.distopia.svc.cluster.local:9000 \
+            --from-literal=bucket=distopia-db-backup-test
+
+          # aws s3 sync assumes the destination bucket already exists (same as real R2 --
+          # creating buckets isn't something the CronJob itself should ever do), so create it
+          # here the same way you would once, by hand, for a real bucket.
+          kubectl run distopia-r2-mock-mb -n distopia --rm -i --restart=Never \
+            --image=amazon/aws-cli:2.31.13 \
+            --env=AWS_ACCESS_KEY_ID=distopia-ci --env=AWS_SECRET_ACCESS_KEY=distopia-ci-test \
+            --command -- aws --endpoint-url http://distopia-r2-mock.distopia.svc.cluster.local:9000 \
+            s3 mb s3://distopia-db-backup-test
+
       # k8s/db/kustomization.yaml deploys the backup CronJob alongside the Cluster, but a
       # CronJob just sits there waiting for its schedule -- deploying it here was never
       # actually exercising the backup logic itself. Manually trigger one Job from it (same
@@ -379,6 +447,7 @@ jobs:
           kubectl logs -n distopia deployment/distopia-app --tail=200
           kubectl logs -n distopia pod/distopia-db-1 -c postgres --tail=100 || true
           kubectl logs -n distopia job/distopia-db-backup-test --tail=100 || true
+          kubectl logs -n distopia deployment/distopia-r2-mock --tail=100 || true
           kubectl get events -n distopia --sort-by=.lastTimestamp
 
       - name: Tear down

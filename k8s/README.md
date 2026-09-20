@@ -210,6 +210,16 @@ kubectl create secret generic distopia-db-credentials -n distopia \
   --from-literal=password="$db_password" \
   --from-literal=url="$db_url"
 
+# --- DB backup off-site copy (Cloudflare R2) -- consumed by k8s/db/backup-cronjob.yaml's
+# upload-r2 step, which mirrors the daily pg_dump PVC to this bucket via the S3-compatible
+# API. Create an R2 bucket and an API token scoped to just that bucket in the Cloudflare
+# dashboard first; `endpoint` is `https://<account-id>.r2.cloudflarestorage.com`. ---
+kubectl create secret generic distopia-db-r2-credentials -n distopia \
+  --from-literal=access-key-id='<R2 API token access key id>' \
+  --from-literal=secret-access-key='<R2 API token secret access key>' \
+  --from-literal=endpoint='https://<account-id>.r2.cloudflarestorage.com' \
+  --from-literal=bucket='<R2 bucket name>'
+
 # --- pipeline ---
 kubectl create secret generic distopia-github-webhook -n distopia \
   --from-literal=secret="$(openssl rand -hex 20)"
@@ -350,13 +360,16 @@ kubectl logs -n distopia job/<job-name-from-above> --all-containers --tail=200
 
 `k8s/db/backup-cronjob.yaml` runs a daily `pg_dump` (custom format, same shape as the
 one-time migration dump above) onto its own PVC (`distopia-db-backup-data`), pruning dumps
-older than 14 days. This is a minimal safety net against operational mistakes (a bad
-migration, an accidental `DROP TABLE`, application bugs) — it is **not** protection against
-losing the node/disk, since that PVC almost certainly lives on the same local-path storage
-as the database's own PVC on a single-node host. Once you have any S3-compatible object
-storage available, prefer CloudNativePG's native `.spec.backup.barmanObjectStore` on the
-`Cluster` instead (continuous WAL archiving + point-in-time recovery, off this host) and
-retire this CronJob.
+older than 14 days, then mirrors that PVC to a Cloudflare R2 bucket (`upload-r2`, via
+`aws s3 sync --delete`) so the same 14-day retention applies off-host too — without a
+separate remote-pruning step, since `--delete` just makes R2 match whatever pg-dump already
+pruned locally. This is a minimal safety net against operational mistakes (a bad migration,
+an accidental `DROP TABLE`, application bugs) *and* against losing the node/disk entirely,
+now that a copy also lives outside the cluster. It is **not** point-in-time recovery — up to
+a day of writes between dumps can still be lost. If that ever matters more than the
+simplicity here, prefer CloudNativePG's native `.spec.backup.barmanObjectStore` on the
+`Cluster` instead (continuous WAL archiving, can point at the same R2 bucket) and retire this
+CronJob.
 
 To restore from one of these dumps, first spin up a temporary pod with the backup PVC
 mounted (there's no long-running Pod for it otherwise — CronJobs only run one on schedule):
