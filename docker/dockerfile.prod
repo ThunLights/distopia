@@ -23,7 +23,7 @@
 # before invoking this Dockerfile, then pushes only to the cluster-internal registry — the
 # image is never pushed anywhere external.
 
-ARG BUN_VERSION=1.4.0
+ARG BUN_VERSION=1.4.2
 # Short git SHA of the commit this image was built from -- not a secret, just baked in as a
 # build-time label so the running app can report which commit is actually deployed (e.g.
 # the owner status command). Passed by the Argo Workflow's build-push step
