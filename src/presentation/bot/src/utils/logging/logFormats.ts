@@ -11,7 +11,7 @@ import type {
   User,
 } from "discord.js";
 
-import { codeBlock } from "../codeblock";
+import { codeBlock, codeBlockPages } from "../codeblock";
 import type { AllLogField, ChannelLogField } from "./log";
 
 export type LogEmbedField = { name: string; value: string; inline?: boolean };
@@ -20,6 +20,8 @@ export type LogContent = {
   description: string;
   image?: string;
   fields?: LogEmbedField[];
+  /** Fields too long to fit alongside `fields` — sent as a follow-up message. */
+  overflowFields?: LogEmbedField[];
 };
 
 type AttachmentCollection = OmitPartialGroupDMChannel<Message<boolean>>["attachments"];
@@ -162,6 +164,13 @@ export const logFormats = {
         (attachment) => !message.attachments.has(attachment.id),
       );
 
+      const [oldValue, oldOverflow] = codeBlockPages(oldContent);
+      const [newValue, newOverflow] = codeBlockPages(newContent);
+      const overflowFields: LogEmbedField[] = [
+        ...(oldOverflow ? [{ name: "編集前 (続き)", value: oldOverflow }] : []),
+        ...(newOverflow ? [{ name: "編集後 (続き)", value: newOverflow }] : []),
+      ];
+
       return {
         description: [
           `<@${message.author.id}> (${message.author.id}) がメッセージを編集しました。`,
@@ -169,8 +178,8 @@ export const logFormats = {
         ].join("\n"),
         image,
         fields: [
-          { name: "編集前", value: await codeBlock(oldContent) },
-          { name: "編集後", value: await codeBlock(newContent) },
+          { name: "編集前", value: oldValue },
+          { name: "編集後", value: newValue },
           ...attachmentFields,
           ...(removedAttachments?.size
             ? [
@@ -183,6 +192,7 @@ export const logFormats = {
               ]
             : []),
         ],
+        ...(overflowFields.length ? { overflowFields } : {}),
       };
     },
   },
@@ -190,6 +200,7 @@ export const logFormats = {
     title: "メッセージ削除",
     build: async (message: OmitPartialGroupDMChannel<Message<boolean>>, content: string) => {
       const { image, fields: attachmentFields } = summarizeAttachments(message.attachments);
+      const [value, overflow] = codeBlockPages(content);
 
       return {
         description: [
@@ -197,7 +208,8 @@ export const logFormats = {
           `チャンネル: <#${message.channelId}>`,
         ].join("\n"),
         image,
-        fields: [{ name: "内容", value: await codeBlock(content) }, ...attachmentFields],
+        fields: [{ name: "内容", value }, ...attachmentFields],
+        ...(overflow ? { overflowFields: [{ name: "内容 (続き)", value: overflow }] } : {}),
       };
     },
   },
