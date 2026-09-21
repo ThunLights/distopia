@@ -1,6 +1,15 @@
 import { describe, expect, test } from "vitest";
 
-import { codeBlockPages } from "./codeblock";
+import { codeBlock, codeBlockPages } from "./codeblock";
+
+describe("codeBlock", () => {
+  test("returns a single truncated block for oversized content", async () => {
+    const content = "a".repeat(2000);
+    const result = await codeBlock(content, undefined, 1024);
+    expect(result.length).toBeLessThanOrEqual(1024);
+    expect(result).toContain("…");
+  });
+});
 
 describe("codeBlockPages", () => {
   test("returns a single page when content fits", () => {
@@ -27,5 +36,14 @@ describe("codeBlockPages", () => {
       expect(page.length).toBeLessThanOrEqual(1024);
     }
     expect(pages[1]).toContain("…");
+  });
+
+  test("rejects a maxLength too small to hold the fence", () => {
+    expect(() => codeBlockPages("hello", undefined, 4)).toThrow(RangeError);
+  });
+
+  test("allows a maxLength equal to the fence overhead for empty content", () => {
+    const pages = codeBlockPages("", undefined, 8);
+    expect(pages).toHaveLength(1);
   });
 });

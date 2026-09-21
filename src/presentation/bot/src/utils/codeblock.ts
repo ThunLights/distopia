@@ -2,7 +2,21 @@ const DEFAULT_MAX_LENGTH = 1024;
 const TRUNCATION_MARKER = "…";
 
 export async function codeBlock(content: string, lang?: string, maxLength = DEFAULT_MAX_LENGTH) {
-  return codeBlockPages(content, lang, maxLength)[0];
+  const codeBlockLang = lang ?? "";
+  const escaped = content.replaceAll("`", "\\`");
+  const fenceOpen = `\`\`\`${codeBlockLang}\n`;
+  const fenceClose = "```\n";
+
+  if (fenceOpen.length + escaped.length + fenceClose.length <= maxLength) {
+    return fenceOpen + escaped + fenceClose;
+  }
+
+  const available = Math.max(
+    0,
+    maxLength - fenceOpen.length - fenceClose.length - TRUNCATION_MARKER.length,
+  );
+
+  return fenceOpen + escaped.slice(0, available) + TRUNCATION_MARKER + fenceClose;
 }
 
 /**
@@ -24,6 +38,10 @@ export function codeBlockPages(
 
   if (overhead + escaped.length <= maxLength) {
     return [fenceOpen + escaped + fenceClose];
+  }
+
+  if (maxLength < overhead || (maxLength === overhead && escaped.length > 0)) {
+    throw new RangeError("maxLength cannot hold the fenced content");
   }
 
   const pageSize = Math.max(0, maxLength - overhead);
