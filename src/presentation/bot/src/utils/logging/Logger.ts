@@ -61,6 +61,16 @@ export class Logger {
       }
 
       await channel.send({ embeds: [embed] });
+
+      if (content.overflowFields?.length) {
+        const overflowEmbed = new EmbedBuilder()
+          .setColor(format.color ?? "Navy")
+          .setTitle(`${format.title} (続き)`)
+          .addFields(content.overflowFields)
+          .setTimestamp();
+
+        await channel.send({ embeds: [overflowEmbed] });
+      }
     } catch (error) {
       console.error(`Failed to send log for ${field}:`, error);
     }
