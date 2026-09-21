@@ -44,6 +44,9 @@ export class UserTable extends Base {
 
   public async ranking(rankingType: "userBump", num: number): Promise<User[]> {
     return await this.prisma.user.findMany({
+      where: {
+        bumpCounter: rankingType === "userBump" ? { not: null } : undefined,
+      },
       orderBy: {
         bumpCounter: rankingType === "userBump" ? "desc" : undefined,
       },
