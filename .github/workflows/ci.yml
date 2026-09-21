@@ -361,7 +361,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.4.2"
+          bun-version: "1.4.0"
 
       # The relay being reachable a moment ago doesn't guarantee it still is a few seconds
       # later (bun install alone takes ~7s) -- retry rather than assume the first real
