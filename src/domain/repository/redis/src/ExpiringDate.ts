@@ -34,6 +34,16 @@ export class ExpiringDate {
     await this.redis.set(this.key(id), limit.toISOString(), "EX", ttlSeconds);
   }
 
+  // Atomic "acquire if absent" -- unlike get()-then-set(), which leaves a window between the
+  // read and the write for a second concurrent caller to also read "no limit yet" and also
+  // proceed, this succeeds for at most one caller per id. Callers that need to gate an action
+  // on "was a limit already active" (e.g. Guild.bump) should use this instead of get()+set().
+  public async acquire(id: string, limit: Date): Promise<boolean> {
+    const ttlSeconds = Math.max(1, Math.ceil((limit.getTime() - Date.now()) / 1000));
+    const result = await this.redis.set(this.key(id), limit.toISOString(), "EX", ttlSeconds, "NX");
+    return result === "OK";
+  }
+
   public async get(id: string): Promise<Date | undefined> {
     const raw = await this.redis.get(this.key(id));
     return raw ? new Date(raw) : undefined;

@@ -14,6 +14,11 @@ export type UpsertQuery = {
 }[];
 
 export class VoiceChannel extends Base {
+  // Known gap: VoiceChannelMember.pushMemberCounts does its own get()-then-set() internally
+  // (see VoiceChannelMember.ts) -- same class of race as Message.increase(). update() only
+  // calls it once per guild per run here, so in practice this would require two overlapping
+  // update() runs, which setScheduleTask's cron already serializes -- listed for
+  // completeness, not because it's currently reachable.
   public async update() {
     const upsertVcMemberUpperTwoQuery: string[] = [];
     const upsertVcMembersQuery: UpsertVcMembersQuery = [];

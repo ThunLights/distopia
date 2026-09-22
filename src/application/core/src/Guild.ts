@@ -133,13 +133,12 @@ export class Guild extends Base {
       return null;
     }
 
-    const limit = await ratelimit.get(guild.id);
+    const acquired = await ratelimit.acquire(guild.id, new Date(nowDate.getTime() + twoHours));
 
-    if (limit && limit.getTime() > Date.now()) {
-      return new RateLimitError(limit);
+    if (!acquired) {
+      const limit = await ratelimit.get(guild.id);
+      return new RateLimitError(limit ?? nowDate);
     }
-
-    await ratelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
 
     const updatedGuild = await database.guild.update({
       guildId: guild.id,

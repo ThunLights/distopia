@@ -80,6 +80,37 @@ describe("ExpiringDate", () => {
     expect(del).toHaveBeenCalledWith("bot:unJoinedGuild:guild-1");
   });
 
+  test("acquire() returns true and sets NX+EX when no limit is active yet", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-06-01T12:00:00.000Z"));
+
+    const set = vi.fn().mockResolvedValue("OK");
+    const store = new ExpiringDate(fakeRedis({ set }), "bot", "ratelimit:bump");
+
+    const limit = new Date("2024-06-01T12:00:00.500Z");
+    const acquired = await store.acquire("guild-1", limit);
+
+    expect(set).toHaveBeenCalledWith(
+      "bot:ratelimit:bump:guild-1",
+      limit.toISOString(),
+      "EX",
+      1,
+      "NX",
+    );
+    expect(acquired).toBe(true);
+
+    vi.useRealTimers();
+  });
+
+  test("acquire() returns false when a limit is already active (NX conflict)", async () => {
+    const set = vi.fn().mockResolvedValue(null);
+    const store = new ExpiringDate(fakeRedis({ set }), "bot", "ratelimit:bump");
+
+    const acquired = await store.acquire("guild-1", new Date(Date.now() + 1000));
+
+    expect(acquired).toBe(false);
+  });
+
   test("{ reset: true } namespaces the key under <owner>:ephemeral:<store>", async () => {
     const get = vi.fn().mockResolvedValue(null);
     const store = new ExpiringDate(fakeRedis({ get }), "bot", "ratelimit:button", {

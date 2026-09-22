@@ -20,6 +20,7 @@ function fakeRedis(overrides: Partial<RedisClient> = {}): RedisClient {
 }
 
 type Value = { memberCounts: number[] };
+type ValueWithDate = { memberIds: string[]; updatedAt: Date };
 
 describe("RedisHashMap", () => {
   test("set() writes a JSON-encoded field under the owner:store hash key", async () => {
@@ -86,6 +87,22 @@ describe("RedisHashMap", () => {
     await map.clear();
 
     expect(del).toHaveBeenCalledWith("bot:messageCreate");
+  });
+
+  test("get() revives an updatedAt field as a Date instance, not a string", async () => {
+    const updatedAt = new Date("2024-06-01T12:00:00.000Z");
+    const map = new RedisHashMap<ValueWithDate>(
+      fakeRedis({
+        hget: vi.fn().mockResolvedValue(JSON.stringify({ memberIds: ["u1"], updatedAt })),
+      }),
+      "bot",
+      "guildMemberAdd",
+    );
+
+    const result = await map.get("guild-1");
+
+    expect(result?.updatedAt).toBeInstanceOf(Date);
+    expect(result?.updatedAt).toEqual(updatedAt);
   });
 
   test("{ reset: true } namespaces the hash key under <owner>:ephemeral:<store>", async () => {

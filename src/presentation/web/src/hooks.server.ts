@@ -51,6 +51,17 @@ async function start() {
   // below reads/writes them. Resets both "web:*" and "bot:*" here because this one process
   // still plays both roles (see lib/server/memory.ts's ratelimit comment) -- once
   // presentation-bot gets its own entrypoint, move the "bot" call there and drop it from here.
+  //
+  // Known gap: k8s/app/deployment.yaml's RollingUpdate briefly runs the old and new pod
+  // side by side (maxSurge: 1, maxUnavailable: 0, see k8s/README.md's "Notes / known
+  // constraints"). Since these stores now live in shared Redis rather than per-process
+  // memory, this reset can delete state the still-serving old pod just wrote (an
+  // in-flight rate limit, an unflushed message/member/voice-channel buffer). Bounded to
+  // that brief overlap window and to `replicas: 1` -- worst case is a few seconds of
+  // under-counted stats or one rate limit reset early, never a crash or lasting
+  // corruption. Same accepted-risk shape as clearVoiceSession's documented gap in
+  // k8s/README.md's "TTS session persistence" section; a real fix (pre-deploy job, or a
+  // versioned key namespace) is out of scope here -- revisit if it turns out to matter.
   await resetEphemeralMemory(redis, "web");
   await resetEphemeralMemory(redis, "bot");
   console.log("Reset ephemeral web/bot memory.");

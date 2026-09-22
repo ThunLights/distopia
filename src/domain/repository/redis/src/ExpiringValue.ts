@@ -2,6 +2,23 @@ import type { RedisClient } from "infra-redis";
 
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 
+// Field-name convention this whole repo already follows (Prisma's own `@updatedAt`, see
+// CLAUDE.md) -- every timestamp field here is named createdAt/updatedAt. JSON.stringify
+// serializes a Date as an ISO string with no marker to tell it apart from a plain string on
+// the way back in, so a bare JSON.parse (still used by encode/decode overrides that need
+// non-JSON-safe types, e.g. TtsSynthesisCache's Buffer) would hand callers a string where V's
+// type declares Date. This reviver re-inflates exactly those two field names, at any depth
+// (JSON.parse calls the reviver bottom-up for every key), back into real Date instances.
+const DATE_FIELD_NAMES = new Set(["createdAt", "updatedAt"]);
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+
+export function reviveDates(key: string, value: unknown): unknown {
+  if (typeof value === "string" && DATE_FIELD_NAMES.has(key) && ISO_DATE_RE.test(value)) {
+    return new Date(value);
+  }
+  return value;
+}
+
 export type ExpiringValueOptions = {
   // Opts this store into resetEphemeralMemory's boot-time wipe. Defaults to false: most
   // stores here are read-through caches (Postgres- or Discord-API-backed) where a stale
@@ -50,7 +67,7 @@ export class ExpiringValue<V> {
   }
 
   protected decode(raw: string): V {
-    return JSON.parse(raw) as V;
+    return JSON.parse(raw, reviveDates) as V;
   }
 
   public async set(id: string, value: V): Promise<void> {

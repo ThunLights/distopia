@@ -20,6 +20,7 @@ function fakeRedis(overrides: Partial<RedisClient> = {}): RedisClient {
 }
 
 type Value = { username: string };
+type ValueWithDates = { username: string; createdAt: Date; updatedAt: Date };
 
 describe("ExpiringValue", () => {
   test("set() stores the value JSON-encoded with the configured TTL", async () => {
@@ -84,6 +85,26 @@ describe("ExpiringValue", () => {
 
     expect(set).toHaveBeenCalledWith("bot:friend:user-1", JSON.stringify({ username: "alice" }));
     expect(set).toHaveBeenCalledTimes(1);
+  });
+
+  test("get() revives createdAt/updatedAt fields as Date instances, not strings", async () => {
+    const createdAt = new Date("2024-06-01T12:00:00.000Z");
+    const updatedAt = new Date("2024-06-02T08:30:00.000Z");
+    const store = new ExpiringValue<ValueWithDates>(
+      fakeRedis({
+        get: vi.fn().mockResolvedValue(JSON.stringify({ username: "bob", createdAt, updatedAt })),
+      }),
+      "web",
+      "userOAuth2",
+      600,
+    );
+
+    const result = await store.get("user-1");
+
+    expect(result?.createdAt).toBeInstanceOf(Date);
+    expect(result?.updatedAt).toBeInstanceOf(Date);
+    expect(result?.createdAt).toEqual(createdAt);
+    expect(result?.updatedAt).toEqual(updatedAt);
   });
 
   test("{ reset: true } namespaces the key under <owner>:ephemeral:<store>", async () => {

@@ -9,6 +9,17 @@ export type RedisClient = {
   // Atomic set-with-expiry (SET key value EX seconds) -- one round trip instead of a
   // separate set()+expire() pair, for TTL'd caches migrated off repo-memory's Map-based gc().
   set(key: string, value: string, exToken: "EX", seconds: number): Promise<"OK">;
+  // Atomic "set only if absent" with expiry (SET key value EX seconds NX) -- returns null
+  // instead of "OK" when the key already exists, so a caller can use one round trip to both
+  // check and acquire a rate-limit-style lock instead of a get()-then-set() pair a concurrent
+  // request could race between.
+  set(
+    key: string,
+    value: string,
+    exToken: "EX",
+    seconds: number,
+    nxToken: "NX",
+  ): Promise<"OK" | null>;
   del(key: string): Promise<number>;
   keys(pattern: string): Promise<string[]>;
   // Cursor-based iteration -- unlike keys(), safe to use against a Redis holding a

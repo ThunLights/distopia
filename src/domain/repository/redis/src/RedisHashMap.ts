@@ -1,6 +1,6 @@
 import type { RedisClient } from "infra-redis";
 
-import type { ExpiringValueOptions } from "./ExpiringValue";
+import { reviveDates, type ExpiringValueOptions } from "./ExpiringValue";
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 
 // Backs stores that need to iterate every entry in one pass (Message.syncDB's per-guild
@@ -37,7 +37,7 @@ export class RedisHashMap<V, K extends string | number = string> {
   }
 
   protected decode(raw: string): V {
-    return JSON.parse(raw) as V;
+    return JSON.parse(raw, reviveDates) as V;
   }
 
   protected decodeField(field: string): K {
