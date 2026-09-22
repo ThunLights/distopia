@@ -67,7 +67,7 @@ export class Tts extends Base {
     // engines produces different audio (see infra-sakura/synthesize.ts's comment on shared
     // speaker IDs), so they can't share a cache entry.
     const cacheKey = `${useSakura ? "sakura" : "voicevox"}:${speakerId}:${text}`;
-    const cached = this.state.memory.ttsSynthesisCache.get(cacheKey);
+    const cached = await this.state.memory.ttsSynthesisCache.get(cacheKey);
     if (cached) {
       return { audio: cached.audio };
     }
@@ -79,7 +79,7 @@ export class Tts extends Base {
     // Only successful synthesis is cached -- an error (rate limit, timeout, API error) is
     // transient and shouldn't be replayed as a false "no audio" result later.
     if (result.audio) {
-      this.state.memory.ttsSynthesisCache.set(cacheKey, {
+      await this.state.memory.ttsSynthesisCache.set(cacheKey, {
         audio: result.audio,
         createdAt: new Date(),
       });
@@ -170,25 +170,25 @@ export class Tts extends Base {
   }
 
   public async getIgnoreList(guildId: string): Promise<GuildTtsIgnoreList[]> {
-    const cached = this.state.memory.guildTtsIgnoreList.get(guildId);
+    const cached = await this.state.memory.guildTtsIgnoreList.get(guildId);
     if (cached) {
       return cached.entries;
     }
 
     const entries = await this.state.database.guildTtsIgnoreList.findAll(guildId);
-    this.state.memory.guildTtsIgnoreList.set(guildId, { entries, createdAt: new Date() });
+    await this.state.memory.guildTtsIgnoreList.set(guildId, { entries, createdAt: new Date() });
     return entries;
   }
 
   public async addIgnore(input: GuildTtsIgnoreListUpsertInput): Promise<GuildTtsIgnoreList> {
     const entry = await this.state.database.guildTtsIgnoreList.upsert(input);
-    this.state.memory.guildTtsIgnoreList.delete(input.guildId);
+    await this.state.memory.guildTtsIgnoreList.delete(input.guildId);
     return entry;
   }
 
   public async removeIgnore(guildId: string, targetId: string): Promise<GuildTtsIgnoreList | null> {
     const entry = await this.state.database.guildTtsIgnoreList.delete(guildId, targetId);
-    this.state.memory.guildTtsIgnoreList.delete(guildId);
+    await this.state.memory.guildTtsIgnoreList.delete(guildId);
     return entry;
   }
 

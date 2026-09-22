@@ -8,7 +8,7 @@ import { formatYMD } from "./utils/date";
 export class Message extends Base {
   public async increase(guildId: string, memberId: string, messageContent: string) {
     const ratelimit = this.state.memory.ratelimit.messageCreate;
-    const limit = ratelimit.get(memberId);
+    const limit = await ratelimit.get(memberId);
 
     if (limit && limit.getTime() > Date.now()) {
       return;
@@ -20,11 +20,11 @@ export class Message extends Base {
 
     const minute = 60 * 1000;
 
-    ratelimit.set(memberId, new Date(Date.now() + minute));
+    await ratelimit.set(memberId, new Date(Date.now() + minute));
 
-    const data = this.state.memory.messageCreate.get(guildId);
+    const data = await this.state.memory.messageCreate.get(guildId);
 
-    this.state.memory.messageCreate.set(guildId, {
+    await this.state.memory.messageCreate.set(guildId, {
       messageLens: [...(data?.messageLens ?? []), messageContent.length],
       updatedAt: new Date(),
     });
@@ -43,7 +43,7 @@ export class Message extends Base {
       ]),
     );
 
-    for (const [guildId, value] of this.state.memory.messageCreate.entries()) {
+    for (const [guildId, value] of await this.state.memory.messageCreate.entries()) {
       const guild = guilds.get(guildId);
       const record = records.get(guildId);
       let level = guild?.level ?? 0n,
@@ -62,7 +62,7 @@ export class Message extends Base {
       });
     }
 
-    this.state.memory.messageCreate.clear();
+    await this.state.memory.messageCreate.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
   }
@@ -71,7 +71,7 @@ export class Message extends Base {
     const { inviteLinks, normalUrls } = await findUrls(content);
 
     for (const url of normalUrls) {
-      const memoryCache = this.state.memory.urlCacheInMemory.get(url)?.isInviteLink;
+      const memoryCache = (await this.state.memory.urlCacheInMemory.get(url))?.isInviteLink;
       if (memoryCache !== undefined) {
         if (memoryCache) {
           inviteLinks.push(url);
@@ -86,7 +86,7 @@ export class Message extends Base {
       }
 
       if (!response.isUsedCf) {
-        this.state.memory.urlCacheInMemory.set(url, {
+        await this.state.memory.urlCacheInMemory.set(url, {
           isInviteLink: response.content,
           createdAt: new Date(),
         });

@@ -31,10 +31,10 @@ export class VoiceChannel extends Base {
         });
       }
 
-      this.state.memory.voiceChannelMember.pushMemberCounts(vc.guildId, vc.activeMemberCount);
+      await this.state.memory.voiceChannelMember.pushMemberCounts(vc.guildId, vc.activeMemberCount);
     }
 
-    for (const [guildId, value] of this.state.memory.voiceChannelMember.entries()) {
+    for (const [guildId, value] of await this.state.memory.voiceChannelMember.entries()) {
       if (voiceChannels.map(({ guildId }) => guildId).includes(guildId)) {
         const plusPoint =
           value.memberCounts.reduce((sum, e) => sum + e, 0) / value.memberCounts.length;
@@ -44,7 +44,7 @@ export class VoiceChannel extends Base {
           plusPoint,
         });
       } else {
-        this.state.memory.voiceChannelMember.delete(guildId);
+        await this.state.memory.voiceChannelMember.delete(guildId);
       }
     }
 

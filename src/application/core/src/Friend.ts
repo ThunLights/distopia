@@ -1,5 +1,5 @@
 import type { FriendUpsertInput } from "infra-database/types";
-import type { FriendValue as FriendModel } from "repo-memory";
+import type { FriendValue as FriendModel } from "repo-redis";
 
 import { Base } from "./Base";
 
@@ -25,7 +25,7 @@ export class Friend extends Base {
   }
 
   public async delete(userId: string) {
-    this.state.memory.friend.delete(userId);
+    await this.state.memory.friend.delete(userId);
     await this.state.database.friend.delete(userId);
     await this.updateCache();
   }
@@ -34,7 +34,7 @@ export class Friend extends Base {
     const user = await this.state.discord.user.find(input.userId);
     if (user) {
       const data = await this.state.database.friend.upsert(input);
-      this.state.memory.friend.set(input.userId, {
+      await this.state.memory.friend.set(input.userId, {
         ...data,
         avatarUrl: user.avatarUrl ?? null,
         username: user.name,
@@ -47,7 +47,7 @@ export class Friend extends Base {
   }
 
   public async find(userId: string) {
-    const memCache = this.state.memory.friend.get(userId);
+    const memCache = await this.state.memory.friend.get(userId);
 
     if (memCache) {
       return memCache;
@@ -60,7 +60,7 @@ export class Friend extends Base {
       if (!user) {
         return null;
       }
-      this.state.memory.friend.set(dbData.userId, {
+      await this.state.memory.friend.set(dbData.userId, {
         ...dbData,
         avatarUrl: user.avatarUrl ?? null,
         username: user.name,

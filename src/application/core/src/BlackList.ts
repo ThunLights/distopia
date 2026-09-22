@@ -64,7 +64,7 @@ export class BlackList extends Base {
     );
 
     for (const application of applications) {
-      this.state.memory.guildBlackList.delete(application.guildId);
+      await this.state.memory.guildBlackList.delete(application.guildId);
     }
 
     return updated;
@@ -75,7 +75,7 @@ export class BlackList extends Base {
     const deleted = await this.state.database.userBlackList.delete(id);
 
     for (const application of applications) {
-      this.state.memory.guildBlackList.delete(application.guildId);
+      await this.state.memory.guildBlackList.delete(application.guildId);
     }
 
     return deleted;
@@ -158,13 +158,13 @@ export class BlackList extends Base {
   }
 
   public async getApplied(guildId: string): Promise<GuildBlackList[]> {
-    const cached = this.state.memory.guildBlackList.get(guildId);
+    const cached = await this.state.memory.guildBlackList.get(guildId);
     if (cached) {
       return cached.entries;
     }
 
     const entries = await this.state.database.guildBlackList.findAll(guildId);
-    this.state.memory.guildBlackList.set(guildId, { entries, createdAt: new Date() });
+    await this.state.memory.guildBlackList.set(guildId, { entries, createdAt: new Date() });
     return entries;
   }
 
@@ -178,13 +178,13 @@ export class BlackList extends Base {
 
   public async apply(input: GuildBlackListUpsertInput): Promise<GuildBlackList> {
     const entry = await this.state.database.guildBlackList.upsert(input);
-    this.state.memory.guildBlackList.delete(input.guildId);
+    await this.state.memory.guildBlackList.delete(input.guildId);
     return entry;
   }
 
   public async unapply(guildId: string, blackListId: number): Promise<GuildBlackList | null> {
     const entry = await this.state.database.guildBlackList.delete(guildId, blackListId);
-    this.state.memory.guildBlackList.delete(guildId);
+    await this.state.memory.guildBlackList.delete(guildId);
     return entry;
   }
 

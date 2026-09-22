@@ -1,0 +1,46 @@
+# Standalone Redis managed by OT-CONTAINER-KIT/redis-operator (see k8s/README.md's
+# "Prerequisites" for the one-time operator install). Replaces the old bare
+# Deployment/Service -- the operator generates both from this CR, using the CR's own
+# `metadata.name` as the Service name, so the connection string
+# (distopia-redis.distopia.svc.cluster.local:6379) is unchanged for every existing caller
+# (infra-redis, Tts.saveVoiceSession/session.ts).
+#
+# Single instance on purpose, same reasoning as k8s/db/cluster.yaml's `instances: 1` --
+# this k3s cluster is single-node (see storageClass below), so a replicated/Sentinel Redis
+# wouldn't survive a node failure any better than this does; it would only add operational
+# weight. Bump to the operator's RedisReplication/RedisSentinel CRDs later if the cluster
+# itself ever goes multi-node.
+#
+# A PVC is new here (the old Deployment had none) -- now that repo-memory's caches/session
+# state are moving onto this Redis (see the memory-repository migration work), losing
+# everything on every pod restart is no longer acceptable the way it was for TTS-session-only
+# use. Redis's own default RDB save points (enabled out of the box once /data is writable)
+# are enough here -- no custom redis.conf needed.
+apiVersion: redis.redis.opstreelabs.in/v1beta2
+kind: Redis
+metadata:
+  name: distopia-redis
+  namespace: distopia
+spec:
+  kubernetesConfig:
+    image: quay.io/opstree/redis:v8.10.1
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 50m
+        memory: 32Mi
+      limits:
+        cpu: 250m
+        memory: 128Mi
+  redisExporter:
+    enabled: false
+  storage:
+    volumeClaimTemplate:
+      spec:
+        # TODO: confirm this matches a StorageClass that exists on your k3s cluster (see the
+        # same TODO in k8s/db/cluster.yaml -- k3s ships "local-path" by default).
+        storageClassName: local-path
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

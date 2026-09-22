@@ -83,7 +83,7 @@
     "opusscript": "catalog:",
     "presentation-bot": "workspace:*",
     "prism-media": "catalog:",
-    "repo-memory": "workspace:*",
+    "repo-redis": "workspace:*",
     "repo-search": "workspace:*",
     "super-sitemap": "2.0.6",
     "svelte-exmarkdown": "5.0.2",

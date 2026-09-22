@@ -4,12 +4,14 @@ import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
+import { redis } from "$lib/server/redis";
 import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { setScheduleTask } from "app-schedule";
 import { handleClient } from "presentation-bot";
+import { resetEphemeralMemory } from "repo-redis";
 
 // +layout.svelte embeds these literal tokens in its partytown <script> tags; substituted below
 // so they never become part of PageData -- that would make them required fields on every route's
@@ -43,6 +45,15 @@ async function start() {
     PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
     PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
   } = publicEnv;
+
+  // Reproduces "fresh Map on every process start" for the repo-memory stores that have
+  // moved to Redis (see repo-redis's resetEphemeralMemory) -- must run before anything
+  // below reads/writes them. Resets both "web:*" and "bot:*" here because this one process
+  // still plays both roles (see lib/server/memory.ts's ratelimit comment) -- once
+  // presentation-bot gets its own entrypoint, move the "bot" call there and drop it from here.
+  await resetEphemeralMemory(redis, "web");
+  await resetEphemeralMemory(redis, "bot");
+  console.log("Reset ephemeral web/bot memory.");
 
   await core.jwt.importDB();
   console.log("JWT keys is imported.");

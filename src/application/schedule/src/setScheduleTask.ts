@@ -28,7 +28,6 @@ export function setScheduleTask(args: SetScheduleTaskArgs) {
       await core.jwt.update();
       await core.message.syncDB();
       await core.member.syncDB();
-      await core.memory.gcForShortInterval();
     },
     // Prevent a slow run from overlapping the next tick, which caused
     // concurrent guildRecordOneDay upserts to deadlock (Postgres 40P01)
@@ -42,7 +41,6 @@ export function setScheduleTask(args: SetScheduleTaskArgs) {
       await core.oauth2.updateTokens();
       await core.friend.updateCache();
 
-      await core.memory.gc();
       await core.guild.removeUnJoinedGuildData();
       await core.voice.update();
       await core.activeRate.update();

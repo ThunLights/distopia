@@ -5,8 +5,8 @@ import { formatYMD } from "./utils/date";
 
 export class Member extends Base {
   public async addNewMember(guildId: string, memberId: string) {
-    const data = this.state.memory.guildMemberAdd.get(guildId);
-    this.state.memory.guildMemberAdd.set(guildId, {
+    const data = await this.state.memory.guildMemberAdd.get(guildId);
+    await this.state.memory.guildMemberAdd.set(guildId, {
       memberIds: Array.from(new Set([...(data?.memberIds ?? []), memberId])),
       updatedAt: new Date(),
     });
@@ -22,7 +22,7 @@ export class Member extends Base {
       ]),
     );
 
-    for (const [guildId, value] of this.state.memory.guildMemberAdd.entries()) {
+    for (const [guildId, value] of await this.state.memory.guildMemberAdd.entries()) {
       const record = records.get(guildId);
 
       query.push({
@@ -32,7 +32,7 @@ export class Member extends Base {
       });
     }
 
-    this.state.memory.guildMemberAdd.clear();
+    await this.state.memory.guildMemberAdd.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
   }

@@ -1,9 +1,39 @@
-import { TtsSynthesisCache } from "repo-memory";
+import type { RedisClient } from "infra-redis";
+import { TtsSynthesisCache } from "repo-redis";
 import { describe, expect, test, vi } from "vitest";
 
 import type { AppState } from "./AppState";
 import type { Guild } from "./Guild";
 import { Tts } from "./Tts";
+
+// Fake backed by a plain Map -- Tts (directly, or transitively via repo-redis's
+// TtsSynthesisCache) only ever calls get/set/del/keys; the rest are unused stubs required to
+// structurally satisfy RedisClient.
+function fakeRedis(): RedisClient & { store: Map<string, string> } {
+  const store = new Map<string, string>();
+  return {
+    store,
+    set: vi.fn(async (key: string, value: string) => {
+      store.set(key, value);
+      return "OK" as const;
+    }),
+    get: vi.fn(async (key: string) => store.get(key) ?? null),
+    del: vi.fn(async (key: string) => {
+      const existed = store.delete(key);
+      return existed ? 1 : 0;
+    }),
+    keys: vi.fn(async (pattern: string) => {
+      const prefix = pattern.replace(/\*$/, "");
+      return Array.from(store.keys()).filter((key) => key.startsWith(prefix));
+    }),
+    scan: vi.fn(async () => ["0", []] as [string, string[]]),
+    expire: vi.fn(async () => 1),
+    hset: vi.fn(async () => 1),
+    hget: vi.fn(async () => null),
+    hgetall: vi.fn(async () => ({})),
+    hdel: vi.fn(async () => 1),
+  };
+}
 
 vi.mock("infra-voicevox", async (importOriginal) => {
   const actual = await importOriginal<typeof import("infra-voicevox")>();
@@ -95,7 +125,7 @@ describe("Tts.synthesize caching", () => {
     const state = {
       voicevoxApiKey: null,
       sakuraApiKey: null,
-      memory: { ttsSynthesisCache: new TtsSynthesisCache() },
+      memory: { ttsSynthesisCache: new TtsSynthesisCache(fakeRedis(), "bot") },
     } as unknown as AppState;
     const guild = { getSetting: vi.fn().mockResolvedValue(null) } as unknown as Guild;
     const cachedTts = new Tts(state, guild);
@@ -108,27 +138,6 @@ describe("Tts.synthesize caching", () => {
     expect(synthesizeVoicevox).toHaveBeenCalledTimes(1);
   });
 });
-
-// Fake backed by a plain Map -- only the four RedisClient methods Tts actually calls.
-function fakeRedis() {
-  const store = new Map<string, string>();
-  return {
-    store,
-    set: vi.fn(async (key: string, value: string) => {
-      store.set(key, value);
-      return "OK";
-    }),
-    get: vi.fn(async (key: string) => store.get(key) ?? null),
-    del: vi.fn(async (key: string) => {
-      const existed = store.delete(key);
-      return existed ? 1 : 0;
-    }),
-    keys: vi.fn(async (pattern: string) => {
-      const prefix = pattern.replace(/\*$/, "");
-      return Array.from(store.keys()).filter((key) => key.startsWith(prefix));
-    }),
-  };
-}
 
 describe("Tts voice session persistence", () => {
   test("saveVoiceSession then getAllVoiceSessions round-trips the session", async () => {
