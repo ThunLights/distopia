@@ -301,6 +301,14 @@ jobs:
                         value: distopia-db-backup-test
                     ports:
                       - containerPort: 9090
+                    # Deployment "Available" only reflects the container starting, not
+                    # Spring Boot finishing startup (~4s) -- without this, the backup Job
+                    # below could start its upload before S3Mock is actually accepting
+                    # connections on 9090.
+                    readinessProbe:
+                      httpGet:
+                        path: /favicon.ico
+                        port: 9090
           ---
           apiVersion: v1
           kind: Service
