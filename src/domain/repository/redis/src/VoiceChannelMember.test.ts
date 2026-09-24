@@ -30,7 +30,7 @@ describe("VoiceChannelMember", () => {
     await store.pushMemberCounts("guild-1", 5);
 
     expect(hset).toHaveBeenCalledWith(
-      "bot:ephemeral:voiceChannelMember",
+      "bot:voiceChannelMember",
       "guild-1",
       JSON.stringify({ memberCounts: [5] }),
     );
@@ -44,7 +44,7 @@ describe("VoiceChannelMember", () => {
     await store.pushMemberCounts("guild-1", 3);
 
     expect(hset).toHaveBeenCalledWith(
-      "bot:ephemeral:voiceChannelMember",
+      "bot:voiceChannelMember",
       "guild-1",
       JSON.stringify({ memberCounts: [1, 2, 3] }),
     );
@@ -78,6 +78,6 @@ describe("VoiceChannelMember", () => {
 
     await store.delete("guild-1");
 
-    expect(hdel).toHaveBeenCalledWith("bot:ephemeral:voiceChannelMember", "guild-1");
+    expect(hdel).toHaveBeenCalledWith("bot:voiceChannelMember", "guild-1");
   });
 });

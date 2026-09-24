@@ -20,10 +20,7 @@ const MAX_SAMPLES = 40;
 
 export class VoiceChannelMember extends RedisHashMap<VoiceChannelMemberValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "voiceChannelMember", {
-      reset: true,
-      schema: VoiceChannelMemberValueSchema,
-    });
+    super(redis, owner, "voiceChannelMember", { schema: VoiceChannelMemberValueSchema });
   }
 
   public async pushMemberCounts(guildId: string, num: number): Promise<void> {

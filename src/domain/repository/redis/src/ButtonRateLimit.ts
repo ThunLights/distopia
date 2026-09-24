@@ -5,6 +5,6 @@ import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 
 export class ButtonRateLimit extends ExpiringDate {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "ratelimit:button", { reset: true });
+    super(redis, owner, "ratelimit:button");
   }
 }

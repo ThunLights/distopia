@@ -16,6 +16,6 @@ const GuildMemberAddValueSchema = z.object({
 
 export class GuildMemberAdd extends RedisHashMap<GuildMemberAddValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "guildMemberAdd", { reset: true, schema: GuildMemberAddValueSchema });
+    super(redis, owner, "guildMemberAdd", { schema: GuildMemberAddValueSchema });
   }
 }

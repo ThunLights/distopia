@@ -46,22 +46,22 @@ async function start() {
     PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
   } = publicEnv;
 
-  // Reproduces "fresh Map on every process start" for the repo-memory stores that have
-  // moved to Redis (see repo-redis's resetEphemeralMemory) -- must run before anything
-  // below reads/writes them. Resets both "web:*" and "bot:*" here because this one process
-  // still plays both roles (see lib/server/memory.ts's ratelimit comment) -- once
-  // presentation-bot gets its own entrypoint, move the "bot" call there and drop it from here.
+  // Wipes each owner's `<owner>:ephemeral:*` namespace (see repo-redis's
+  // resetEphemeralMemory) -- must run before anything below reads/writes affected stores.
+  // Resets both "web:*" and "bot:*" here because this one process still plays both roles
+  // (see lib/server/memory.ts's ratelimit comment) -- once presentation-bot gets its own
+  // entrypoint, move the "bot" call there and drop it from here.
   //
-  // Known gap: k8s/app/deployment.yaml's RollingUpdate briefly runs the old and new pod
-  // side by side (maxSurge: 1, maxUnavailable: 0, see k8s/README.md's "Notes / known
-  // constraints"). Since these stores now live in shared Redis rather than per-process
-  // memory, this reset can delete state the still-serving old pod just wrote (an
-  // in-flight rate limit, an unflushed message/member/voice-channel buffer). Bounded to
-  // that brief overlap window and to `replicas: 1` -- worst case is a few seconds of
-  // under-counted stats or one rate limit reset early, never a crash or lasting
-  // corruption. Same accepted-risk shape as clearVoiceSession's documented gap in
-  // k8s/README.md's "TTS session persistence" section; a real fix (pre-deploy job, or a
-  // versioned key namespace) is out of scope here -- revisit if it turns out to matter.
+  // Only OAuth2PKCE currently opts into that namespace (a stray PKCE session id from before
+  // a deploy should never authenticate a later /auth callback -- an in-flight login is
+  // treated as invalidated by a redeploy, not silently carried across it), and it's
+  // web-owned -- so the "bot" call below currently has nothing to delete. Every other
+  // repo-redis store (rate limits, the message/member/voice-channel buffers, the URL safety
+  // cache, ...) deliberately persists across a redeploy rather than resetting: unlike the
+  // in-process `Map`s these replaced, they now live in shared Redis and survive a pod
+  // restart on their own, so there's no "fresh Map" to reproduce, and wiping them here would
+  // only race against a still-serving old pod during k8s/app/deployment.yaml's RollingUpdate
+  // overlap (maxSurge: 1, maxUnavailable: 0) for no benefit.
   await resetEphemeralMemory(redis, "web");
   await resetEphemeralMemory(redis, "bot");
   console.log("Reset ephemeral web/bot memory.");

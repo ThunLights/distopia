@@ -18,9 +18,6 @@ const TWELVE_HOURS = 12 * 60 * 60;
 
 export class UrlCacheInMemory extends ExpiringValue<UrlCacheInMemoryValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "urlCacheInMemory", TWELVE_HOURS, {
-      reset: true,
-      schema: UrlCacheInMemoryValueSchema,
-    });
+    super(redis, owner, "urlCacheInMemory", TWELVE_HOURS, { schema: UrlCacheInMemoryValueSchema });
   }
 }

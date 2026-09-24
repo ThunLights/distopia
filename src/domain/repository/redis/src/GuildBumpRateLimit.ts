@@ -5,6 +5,6 @@ import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 
 export class GuildBumpRateLimit extends ExpiringDate {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "ratelimit:bump", { reset: true });
+    super(redis, owner, "ratelimit:bump");
   }
 }

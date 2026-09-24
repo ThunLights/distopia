@@ -16,6 +16,6 @@ const MessageCreateValueSchema = z.object({
 
 export class MessageCreate extends RedisHashMap<MessageCreateValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "messageCreate", { reset: true, schema: MessageCreateValueSchema });
+    super(redis, owner, "messageCreate", { schema: MessageCreateValueSchema });
   }
 }
