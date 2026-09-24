@@ -265,9 +265,18 @@ jobs:
       # real production points at a Cloudflare R2 bucket -- there is no such secret here, so
       # without this step the Job below would just sit in CreateContainerConfigError until
       # the timeout. A real R2 bucket for CI would mean putting live cloud credentials in a
-      # GitHub secret and leaving test objects behind on every run; a throwaway MinIO Pod
+      # GitHub secret and leaving test objects behind on every run; a throwaway S3Mock Pod
       # inside this already-throwaway kind cluster exercises the exact same `aws s3 sync`
       # command with no external dependency and nothing to clean up afterwards.
+      #
+      # adobe/s3mock, not MinIO -- confirmed directly: quay.io/minio/minio (the previous
+      # mock here) now 401s on an anonymous pull of any tag, the same way Docker Hub's
+      # minio/minio already did (see git blame on this step for that history) -- MinIO has
+      # locked down anonymous pulls everywhere, not just Docker Hub. adobe/s3mock is a
+      # dedicated S3-API test double (no real storage backend, in-memory), pulls
+      # anonymously, and needs no credentials at all -- COM_ADOBE_TESTING_S3MOCK_STORE_
+      # INITIAL_BUCKETS creates the bucket at startup, so the separate "create the bucket by
+      # hand" step this used to need against MinIO is gone too.
       - name: Start a mock S3 endpoint for the backup CronJob's R2 upload step
         run: |
           cat <<'EOF' | kubectl apply -f -
@@ -285,21 +294,13 @@ jobs:
                 labels: { app: distopia-r2-mock }
               spec:
                 containers:
-                  - name: minio
-                    # quay.io, not Docker Hub's minio/minio -- confirmed directly: Docker Hub
-                    # now gates that repository behind a login (MinIO restricted it there in
-                    # 2025), so an anonymous pull fails with "pull access denied" even for a
-                    # real, existing tag. quay.io/minio/minio is MinIO's own unauthenticated
-                    # mirror and pulls fine.
-                    image: quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z
-                    args: ["server", "/data"]
+                  - name: s3mock
+                    image: adobe/s3mock:5.2.3
                     env:
-                      - name: MINIO_ROOT_USER
-                        value: distopia-ci
-                      - name: MINIO_ROOT_PASSWORD
-                        value: distopia-ci-test
+                      - name: COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS
+                        value: distopia-db-backup-test
                     ports:
-                      - containerPort: 9000
+                      - containerPort: 9090
           ---
           apiVersion: v1
           kind: Service
@@ -309,25 +310,19 @@ jobs:
           spec:
             selector: { app: distopia-r2-mock }
             ports:
-              - port: 9000
-                targetPort: 9000
+              - port: 9090
+                targetPort: 9090
           EOF
           kubectl wait --for=condition=Available deployment/distopia-r2-mock -n distopia --timeout=60s
 
+          # S3Mock ignores these values (no auth by default) -- the aws-cli in
+          # backup-cronjob.yaml's upload-r2 container still requires *some* access
+          # key/secret to be set, so these are dummy placeholders, not real credentials.
           kubectl create secret generic distopia-db-r2-credentials -n distopia \
             --from-literal=access-key-id=distopia-ci \
             --from-literal=secret-access-key=distopia-ci-test \
-            --from-literal=endpoint=http://distopia-r2-mock.distopia.svc.cluster.local:9000 \
+            --from-literal=endpoint=http://distopia-r2-mock.distopia.svc.cluster.local:9090 \
             --from-literal=bucket=distopia-db-backup-test
-
-          # aws s3 sync assumes the destination bucket already exists (same as real R2 --
-          # creating buckets isn't something the CronJob itself should ever do), so create it
-          # here the same way you would once, by hand, for a real bucket.
-          kubectl run distopia-r2-mock-mb -n distopia --rm -i --restart=Never \
-            --image=amazon/aws-cli:2.31.13 \
-            --env=AWS_ACCESS_KEY_ID=distopia-ci --env=AWS_SECRET_ACCESS_KEY=distopia-ci-test \
-            --command -- aws --endpoint-url http://distopia-r2-mock.distopia.svc.cluster.local:9000 \
-            s3 mb s3://distopia-db-backup-test
 
       # k8s/db/kustomization.yaml deploys the backup CronJob alongside the Cluster, but a
       # CronJob just sits there waiting for its schedule -- deploying it here was never
