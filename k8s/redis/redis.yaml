@@ -32,8 +32,13 @@ spec:
       limits:
         cpu: 250m
         memory: 128Mi
-  redisExporter:
-    enabled: false
+  # Omitted entirely rather than `enabled: false` -- the CRD's OpenAPI schema marks
+  # `redisExporter.image` required whenever the `redisExporter` object is present at all,
+  # regardless of `enabled` (confirmed against the operator's own CRD:
+  # config/crd/bases/redis.redis.opstreelabs.in_redis.yaml), so `enabled: false` alone still
+  # fails `kubectl apply` with "spec.redisExporter.image: Required value". `redisExporter`
+  # itself isn't required at the spec level (only `kubernetesConfig` is), so leaving it out
+  # keeps the exporter off without needing a throwaway image value.
   storage:
     volumeClaimTemplate:
       spec:
