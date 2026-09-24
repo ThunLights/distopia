@@ -10,11 +10,16 @@ export type JWTKeyValue = {
   createdAt: Date;
 };
 
-const JWTKeyValueSchema = z.object({
-  alg: z.literal("HS256"),
-  key: z.instanceof(Buffer),
-  createdAt: z.date(),
-}) satisfies z.ZodType<JWTKeyValue>;
+// z.compile() AOT-compiles the schema into a fast-path validator (falls back to the plain
+// runtime parser for anything it can't model, never changes behavior) -- worth it here since
+// every JWTKey.get()/entries() call runs this on every request that touches a JWT.
+const JWTKeyValueSchema = z.compile(
+  z.object({
+    alg: z.literal("HS256"),
+    key: z.instanceof(Buffer),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<JWTKeyValue>,
+);
 
 type EncodedJWTKeyValue = {
   alg: "HS256";

@@ -4,7 +4,7 @@ import z from "zod";
 import { ExpiringValue } from "./ExpiringValue";
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 
-const UserJWTVerifyKeySchema = z.instanceof(Uint8Array) satisfies z.ZodType<Uint8Array>;
+const UserJWTVerifyKeySchema = z.compile(z.instanceof(Uint8Array) satisfies z.ZodType<Uint8Array>);
 
 // Per-user JWT verify key (invalidates that user's existing tokens when rotated, see
 // JWT.updateNewUserVerifyKey / routes/api/user/logout/all). No TTL: the original was a plain

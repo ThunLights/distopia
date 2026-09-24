@@ -15,16 +15,18 @@ export type FriendValue = {
   tags: string[];
 };
 
-const FriendValueSchema = z.object({
-  userId: z.string(),
-  username: z.string(),
-  description: z.string(),
-  nsfw: z.boolean(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  avatarUrl: z.string().nullable(),
-  tags: z.array(z.string()),
-}) satisfies z.ZodType<FriendValue>;
+const FriendValueSchema = z.compile(
+  z.object({
+    userId: z.string(),
+    username: z.string(),
+    description: z.string(),
+    nsfw: z.boolean(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    avatarUrl: z.string().nullable(),
+    tags: z.array(z.string()),
+  }) satisfies z.ZodType<FriendValue>,
+);
 
 // No TTL -- repo-memory's original had no gc() at all.
 export class Friend extends ExpiringValue<FriendValue> {

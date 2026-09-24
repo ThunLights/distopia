@@ -25,10 +25,12 @@ const GuildDictionaryEntrySchema = z.object({
   updatedAt: z.date(),
 }) satisfies z.ZodType<GuildDictionaryEntry>;
 
-const GuildDictionaryValueSchema = z.object({
-  entries: z.array(GuildDictionaryEntrySchema),
-  createdAt: z.date(),
-}) satisfies z.ZodType<GuildDictionaryValue>;
+const GuildDictionaryValueSchema = z.compile(
+  z.object({
+    entries: z.array(GuildDictionaryEntrySchema),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<GuildDictionaryValue>,
+);
 
 const TWELVE_HOURS = 12 * 60 * 60;
 

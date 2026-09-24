@@ -23,10 +23,12 @@ const GuildTtsIgnoreListEntrySchema = z.object({
   createdAt: z.date(),
 }) satisfies z.ZodType<GuildTtsIgnoreListEntry>;
 
-const GuildTtsIgnoreListValueSchema = z.object({
-  entries: z.array(GuildTtsIgnoreListEntrySchema),
-  createdAt: z.date(),
-}) satisfies z.ZodType<GuildTtsIgnoreListValue>;
+const GuildTtsIgnoreListValueSchema = z.compile(
+  z.object({
+    entries: z.array(GuildTtsIgnoreListEntrySchema),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<GuildTtsIgnoreListValue>,
+);
 
 const TWELVE_HOURS = 12 * 60 * 60;
 

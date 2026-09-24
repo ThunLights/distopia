@@ -9,10 +9,12 @@ export type OAuth2PKCEValue = {
 // z.coerce.date() both revives createdAt (stored as a JSON string) into a real Date and
 // rejects anything that isn't a well-formed date -- `new Date("garbage")` would otherwise
 // silently produce an Invalid Date instead of failing.
-const OAuth2PKCEValueSchema = z.object({
-  sessionKey: z.string(),
-  createdAt: z.coerce.date(),
-}) satisfies z.ZodType<OAuth2PKCEValue>;
+const OAuth2PKCEValueSchema = z.compile(
+  z.object({
+    sessionKey: z.string(),
+    createdAt: z.coerce.date(),
+  }) satisfies z.ZodType<OAuth2PKCEValue>,
+);
 
 // "ephemeral:" makes this reachable by resetEphemeralMemory's <owner>:ephemeral:* SCAN (see
 // ExpiringValueOptions.reset) -- a stray PKCE session id from before a deploy should never

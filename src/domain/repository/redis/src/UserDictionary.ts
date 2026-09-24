@@ -25,10 +25,12 @@ const UserDictionaryEntrySchema = z.object({
   updatedAt: z.date(),
 }) satisfies z.ZodType<UserDictionaryEntry>;
 
-const UserDictionaryValueSchema = z.object({
-  entries: z.array(UserDictionaryEntrySchema),
-  createdAt: z.date(),
-}) satisfies z.ZodType<UserDictionaryValue>;
+const UserDictionaryValueSchema = z.compile(
+  z.object({
+    entries: z.array(UserDictionaryEntrySchema),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<UserDictionaryValue>,
+);
 
 const TWELVE_HOURS = 12 * 60 * 60;
 

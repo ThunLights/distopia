@@ -9,10 +9,12 @@ export type MessageCreateValue = {
   updatedAt: Date;
 };
 
-const MessageCreateValueSchema = z.object({
-  messageLens: z.array(z.number()),
-  updatedAt: z.date(),
-}) satisfies z.ZodType<MessageCreateValue>;
+const MessageCreateValueSchema = z.compile(
+  z.object({
+    messageLens: z.array(z.number()),
+    updatedAt: z.date(),
+  }) satisfies z.ZodType<MessageCreateValue>,
+);
 
 export class MessageCreate extends RedisHashMap<MessageCreateValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {

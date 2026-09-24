@@ -8,9 +8,11 @@ export type VoiceChannelMemberValue = {
   memberCounts: number[];
 };
 
-const VoiceChannelMemberValueSchema = z.object({
-  memberCounts: z.array(z.number()),
-}) satisfies z.ZodType<VoiceChannelMemberValue>;
+const VoiceChannelMemberValueSchema = z.compile(
+  z.object({
+    memberCounts: z.array(z.number()),
+  }) satisfies z.ZodType<VoiceChannelMemberValue>,
+);
 
 // Bounded rolling sample buffer, not TTL'd. VoiceChannel.update() reads this right after
 // pushing this cycle's sample and averages it into `plusPoint`, so the newest sample must

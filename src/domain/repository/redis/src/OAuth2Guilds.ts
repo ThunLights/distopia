@@ -16,19 +16,21 @@ export type Guilds = {
   isPublic: boolean;
 }[];
 
-const GuildsSchema = z.array(
-  z.object({
-    id: z.string(),
-    name: z.string(),
-    icon: z.string().nullable(),
-    banner: z.string().nullable(),
-    owner: z.boolean(),
-    approximate_member_count: z.number().optional(),
-    approximate_presence_count: z.number().optional(),
-    isBotJoined: z.boolean(),
-    isPublic: z.boolean(),
-  }),
-) satisfies z.ZodType<Guilds>;
+const GuildsSchema = z.compile(
+  z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      icon: z.string().nullable(),
+      banner: z.string().nullable(),
+      owner: z.boolean(),
+      approximate_member_count: z.number().optional(),
+      approximate_presence_count: z.number().optional(),
+      isBotJoined: z.boolean(),
+      isPublic: z.boolean(),
+    }),
+  ) satisfies z.ZodType<Guilds>,
+);
 
 // 5 min -- matches the old OAuth2Guilds.gc()'s unconditional every-short-interval clear
 // (setScheduleTask's */5 cron), just applied per-entry instead of as a full sweep.

@@ -9,10 +9,12 @@ export type UrlCacheInMemoryValue = {
   createdAt: Date;
 };
 
-const UrlCacheInMemoryValueSchema = z.object({
-  isInviteLink: z.boolean(),
-  createdAt: z.date(),
-}) satisfies z.ZodType<UrlCacheInMemoryValue>;
+const UrlCacheInMemoryValueSchema = z.compile(
+  z.object({
+    isInviteLink: z.boolean(),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<UrlCacheInMemoryValue>,
+);
 
 const TWELVE_HOURS = 12 * 60 * 60;
 

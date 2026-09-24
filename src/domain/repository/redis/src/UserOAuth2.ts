@@ -12,13 +12,15 @@ export type UserOAuth2Value = {
   updatedAt: Date;
 };
 
-const UserOAuth2ValueSchema = z.object({
-  username: z.string(),
-  email: z.string().optional(),
-  avatarUrl: z.string().optional(),
-  bannerUrl: z.string().optional(),
-  updatedAt: z.date(),
-}) satisfies z.ZodType<UserOAuth2Value>;
+const UserOAuth2ValueSchema = z.compile(
+  z.object({
+    username: z.string(),
+    email: z.string().optional(),
+    avatarUrl: z.string().optional(),
+    bannerUrl: z.string().optional(),
+    updatedAt: z.date(),
+  }) satisfies z.ZodType<UserOAuth2Value>,
+);
 
 const TEN_MINUTES = 10 * 60;
 

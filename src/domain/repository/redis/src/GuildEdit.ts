@@ -13,18 +13,20 @@ export type GuildEditValue = {
   updated: Date;
 };
 
-const GuildEditValueSchema = z.object({
-  description: z.string().optional(),
-  nsfw: z.boolean().optional(),
-  pub: z.boolean().optional(),
-  tags: z.array(z.string()).optional(),
-  invite: z.string().optional(),
-  // z.coerce.date(), not z.date() -- ExpiringValue's reviveDates only re-inflates
-  // createdAt/updatedAt keys into real Date instances (see its own comment); this field is
-  // named "updated", so it survives JSON.parse as a plain ISO string. z.date() would reject
-  // every stored value outright, making every GuildEdit.get() fail schema validation.
-  updated: z.coerce.date(),
-}) satisfies z.ZodType<GuildEditValue>;
+const GuildEditValueSchema = z.compile(
+  z.object({
+    description: z.string().optional(),
+    nsfw: z.boolean().optional(),
+    pub: z.boolean().optional(),
+    tags: z.array(z.string()).optional(),
+    invite: z.string().optional(),
+    // z.coerce.date(), not z.date() -- ExpiringValue's reviveDates only re-inflates
+    // createdAt/updatedAt keys into real Date instances (see its own comment); this field is
+    // named "updated", so it survives JSON.parse as a plain ISO string. z.date() would reject
+    // every stored value outright, making every GuildEdit.get() fail schema validation.
+    updated: z.coerce.date(),
+  }) satisfies z.ZodType<GuildEditValue>,
+);
 
 const TWO_HOURS = 2 * 60 * 60;
 

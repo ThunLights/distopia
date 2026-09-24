@@ -29,10 +29,12 @@ const GuildBlackListEntrySchema = z.object({
   updatedAt: z.date(),
 }) satisfies z.ZodType<GuildBlackListEntry>;
 
-const GuildBlackListValueSchema = z.object({
-  entries: z.array(GuildBlackListEntrySchema),
-  createdAt: z.date(),
-}) satisfies z.ZodType<GuildBlackListValue>;
+const GuildBlackListValueSchema = z.compile(
+  z.object({
+    entries: z.array(GuildBlackListEntrySchema),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<GuildBlackListValue>,
+);
 
 const TWELVE_HOURS = 12 * 60 * 60;
 

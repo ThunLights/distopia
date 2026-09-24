@@ -29,10 +29,12 @@ const GuildWhiteListEntrySchema = z.object({
   updatedAt: z.date(),
 }) satisfies z.ZodType<GuildWhiteListEntry>;
 
-const GuildWhiteListValueSchema = z.object({
-  entries: z.array(GuildWhiteListEntrySchema),
-  createdAt: z.date(),
-}) satisfies z.ZodType<GuildWhiteListValue>;
+const GuildWhiteListValueSchema = z.compile(
+  z.object({
+    entries: z.array(GuildWhiteListEntrySchema),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<GuildWhiteListValue>,
+);
 
 const TWELVE_HOURS = 12 * 60 * 60;
 

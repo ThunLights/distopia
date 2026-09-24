@@ -9,10 +9,12 @@ export type GuildMemberAddValue = {
   updatedAt: Date;
 };
 
-const GuildMemberAddValueSchema = z.object({
-  memberIds: z.array(z.string()),
-  updatedAt: z.date(),
-}) satisfies z.ZodType<GuildMemberAddValue>;
+const GuildMemberAddValueSchema = z.compile(
+  z.object({
+    memberIds: z.array(z.string()),
+    updatedAt: z.date(),
+  }) satisfies z.ZodType<GuildMemberAddValue>,
+);
 
 export class GuildMemberAdd extends RedisHashMap<GuildMemberAddValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {

@@ -9,10 +9,12 @@ export type TtsSynthesisCacheValue = {
   createdAt: Date;
 };
 
-const TtsSynthesisCacheValueSchema = z.object({
-  audio: z.instanceof(Buffer),
-  createdAt: z.date(),
-}) satisfies z.ZodType<TtsSynthesisCacheValue>;
+const TtsSynthesisCacheValueSchema = z.compile(
+  z.object({
+    audio: z.instanceof(Buffer),
+    createdAt: z.date(),
+  }) satisfies z.ZodType<TtsSynthesisCacheValue>,
+);
 
 type EncodedTtsSynthesisCacheValue = {
   audio: string;
