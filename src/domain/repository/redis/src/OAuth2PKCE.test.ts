@@ -62,4 +62,34 @@ describe("OAuth2PKCE", () => {
 
     expect(del).toHaveBeenCalledWith("web:ephemeral:oauth2pkce:session-1");
   });
+
+  test("get() logs and returns undefined for a value that no longer matches the schema", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const pkce = new OAuth2PKCE(
+      fakeRedis({ get: vi.fn().mockResolvedValue(JSON.stringify({ codeVerifier: "old-shape" })) }),
+    );
+
+    const result = await pkce.get("session-1");
+
+    expect(result).toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining("failed schema validation"),
+      expect.anything(),
+    );
+    consoleError.mockRestore();
+  });
+
+  test("get() logs and returns undefined for a value that isn't valid JSON", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const pkce = new OAuth2PKCE(fakeRedis({ get: vi.fn().mockResolvedValue("not json") }));
+
+    const result = await pkce.get("session-1");
+
+    expect(result).toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining("failed to decode"),
+      expect.anything(),
+    );
+    consoleError.mockRestore();
+  });
 });

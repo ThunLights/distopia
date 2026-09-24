@@ -1,9 +1,18 @@
 import type { RedisClient } from "infra-redis";
+import z from "zod";
 
 export type OAuth2PKCEValue = {
   sessionKey: string;
   createdAt: Date;
 };
+
+// z.coerce.date() both revives createdAt (stored as a JSON string) into a real Date and
+// rejects anything that isn't a well-formed date -- `new Date("garbage")` would otherwise
+// silently produce an Invalid Date instead of failing.
+const OAuth2PKCEValueSchema = z.object({
+  sessionKey: z.string(),
+  createdAt: z.coerce.date(),
+}) satisfies z.ZodType<OAuth2PKCEValue>;
 
 // "ephemeral:" makes this reachable by resetEphemeralMemory's <owner>:ephemeral:* SCAN (see
 // ExpiringValueOptions.reset) -- a stray PKCE session id from before a deploy should never
@@ -21,12 +30,22 @@ export class OAuth2PKCE {
   }
 
   public async get(sessionId: string): Promise<OAuth2PKCEValue | undefined> {
-    const raw = await this.redis.get(`${KEY_PREFIX}${sessionId}`);
+    const key = `${KEY_PREFIX}${sessionId}`;
+    const raw = await this.redis.get(key);
     if (!raw) {
       return undefined;
     }
-    const parsed = JSON.parse(raw) as OAuth2PKCEValue;
-    return { ...parsed, createdAt: new Date(parsed.createdAt) };
+    try {
+      const result = OAuth2PKCEValueSchema.safeParse(JSON.parse(raw));
+      if (!result.success) {
+        console.error(`[redis] ${key} failed schema validation`, result.error);
+        return undefined;
+      }
+      return result.data;
+    } catch (error) {
+      console.error(`[redis] failed to decode ${key}`, error);
+      return undefined;
+    }
   }
 
   public async delete(sessionId: string): Promise<void> {

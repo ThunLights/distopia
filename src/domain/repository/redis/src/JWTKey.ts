@@ -1,4 +1,5 @@
 import type { RedisClient } from "infra-redis";
+import z from "zod";
 
 import { RedisHashMap } from "./RedisHashMap";
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
@@ -8,6 +9,12 @@ export type JWTKeyValue = {
   key: Buffer;
   createdAt: Date;
 };
+
+const JWTKeyValueSchema = z.object({
+  alg: z.literal("HS256"),
+  key: z.instanceof(Buffer),
+  createdAt: z.date(),
+}) satisfies z.ZodType<JWTKeyValue>;
 
 type EncodedJWTKeyValue = {
   alg: "HS256";
@@ -22,7 +29,7 @@ type EncodedJWTKeyValue = {
 // unintended behavior for security-sensitive signing material.
 export class JWTKey extends RedisHashMap<JWTKeyValue, number> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "jwtKey");
+    super(redis, owner, "jwtKey", { schema: JWTKeyValueSchema });
   }
 
   // Redis strings are text -- the signing key is stored base64-encoded rather than

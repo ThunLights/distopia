@@ -1,4 +1,5 @@
 import type { RedisClient } from "infra-redis";
+import z from "zod";
 
 import { ExpiringValue } from "./ExpiringValue";
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
@@ -7,6 +8,11 @@ export type TtsSynthesisCacheValue = {
   audio: Buffer;
   createdAt: Date;
 };
+
+const TtsSynthesisCacheValueSchema = z.object({
+  audio: z.instanceof(Buffer),
+  createdAt: z.date(),
+}) satisfies z.ZodType<TtsSynthesisCacheValue>;
 
 type EncodedTtsSynthesisCacheValue = {
   audio: string;
@@ -23,7 +29,7 @@ export class TtsSynthesisCache extends ExpiringValue<TtsSynthesisCacheValue> {
     // Deliberately not { reset: true } -- synthesized audio is expensive to regenerate and
     // losing it on every deploy would force a re-synthesis storm for no correctness benefit
     // (the 1h TTL above already bounds staleness).
-    super(redis, owner, "ttsSynthesisCache", TTL_SECONDS);
+    super(redis, owner, "ttsSynthesisCache", TTL_SECONDS, { schema: TtsSynthesisCacheValueSchema });
   }
 
   // Redis strings are text -- audio is stored base64-encoded rather than JSON.stringify'd

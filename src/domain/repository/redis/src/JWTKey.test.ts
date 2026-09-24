@@ -86,4 +86,30 @@ describe("JWTKey", () => {
 
     expect(hdel).toHaveBeenCalledWith("web:jwtKey", "7");
   });
+
+  // JWTKey overrides decode() (base64 <-> Buffer) rather than using RedisHashMap's default
+  // JSON.parse -- confirms schema validation still runs on its output, e.g. an "alg" a
+  // rolling update's other pod version no longer signs with.
+  test("get() logs and returns undefined for a persisted key with an unrecognized alg", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const store = new JWTKey(
+      fakeRedis({
+        hget: vi.fn().mockResolvedValue(
+          JSON.stringify({
+            alg: "RS256",
+            key: Buffer.from("secret-key").toString("base64"),
+            createdAt: new Date("2024-06-01T12:00:00.000Z"),
+          }),
+        ),
+      }),
+      "web",
+    );
+
+    expect(await store.get(7)).toBeUndefined();
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining("failed schema validation"),
+      expect.anything(),
+    );
+    consoleError.mockRestore();
+  });
 });

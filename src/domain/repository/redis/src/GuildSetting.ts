@@ -1,4 +1,5 @@
 import type { RedisClient } from "infra-redis";
+import z from "zod";
 
 import { ExpiringValue } from "./ExpiringValue";
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
@@ -44,10 +45,53 @@ export type GuildSettingValue = {
   createdAt: Date;
 };
 
+const nullableString = z.string().nullable();
+
+const GuildSettingValueSchema = z.object({
+  guildId: z.string(),
+  actingOwner: nullableString,
+  bumpNotice: z.boolean(),
+  bumpNoticeRole: nullableString,
+  bumpNoticeContent: nullableString,
+  inviteLinkBlock: z.boolean(),
+  logAntiRaid: nullableString,
+  logMemberJoin: nullableString,
+  logMemberLeave: nullableString,
+  logMemberTimeout: nullableString,
+  logMemberKick: nullableString,
+  logMemberBan: nullableString,
+  logMemberUnban: nullableString,
+  logRoleCreate: nullableString,
+  logRoleEdit: nullableString,
+  logRoleDelete: nullableString,
+  logChannelCreate: nullableString,
+  logChannelEdit: nullableString,
+  logChannelDelete: nullableString,
+  logMessageEdit: nullableString,
+  logMessageDelete: nullableString,
+  logVoiceJoin: nullableString,
+  logVoiceLeave: nullableString,
+  welcomeMessageChannel: nullableString,
+  welcomeMessageContent: nullableString,
+  leaveMessageChannel: nullableString,
+  leaveMessageContent: nullableString,
+  statChannelAllMembers: nullableString,
+  statChannelUsers: nullableString,
+  statChannelBots: nullableString,
+  statChannelActiveRate: nullableString,
+  statChannelActiveRateRanking: nullableString,
+  ttsDefaultSpeakerId: z.number().nullable(),
+  ttsSkipCommand: z.string(),
+  ttsSkipUrl: z.boolean(),
+  ttsSkipCodeBlock: z.boolean(),
+  ttsProvider: z.enum(["WebVoiceVox", "SakuraAi"]),
+  createdAt: z.date(),
+}) satisfies z.ZodType<GuildSettingValue>;
+
 const TWELVE_HOURS = 12 * 60 * 60;
 
 export class GuildSetting extends ExpiringValue<GuildSettingValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "guildSetting", TWELVE_HOURS);
+    super(redis, owner, "guildSetting", TWELVE_HOURS, { schema: GuildSettingValueSchema });
   }
 }

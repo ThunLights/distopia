@@ -1,5 +1,6 @@
 import type { RedisClient } from "infra-redis";
 import { describe, expect, test, vi } from "vitest";
+import z from "zod";
 
 import { ExpiringValue } from "./ExpiringValue";
 
@@ -116,5 +117,75 @@ describe("ExpiringValue", () => {
     await store.get("user-1");
 
     expect(get).toHaveBeenCalledWith("bot:ephemeral:oauth2Guilds:user-1");
+  });
+
+  describe("schema", () => {
+    const schema = z.object({ username: z.string() });
+
+    test("get() returns the value when it matches the schema", async () => {
+      const store = new ExpiringValue<Value>(
+        fakeRedis({ get: vi.fn().mockResolvedValue(JSON.stringify({ username: "bob" })) }),
+        "web",
+        "userOAuth2",
+        600,
+        { schema },
+      );
+
+      expect(await store.get("user-1")).toEqual({ username: "bob" });
+    });
+
+    // Reproduces a rolling update's old/new pod overlap: a value written under a schema a
+    // still-running old pod no longer recognizes (a field renamed/dropped/retyped) must not
+    // reach the caller as a wrong-shaped object, and must not throw mid-request either.
+    test("get() logs and returns undefined for a value that no longer matches the schema", async () => {
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      const store = new ExpiringValue<Value>(
+        fakeRedis({ get: vi.fn().mockResolvedValue(JSON.stringify({ displayName: "bob" })) }),
+        "web",
+        "userOAuth2",
+        600,
+        { schema },
+      );
+
+      const result = await store.get("user-1");
+
+      expect(result).toBeUndefined();
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining("failed schema validation"),
+        expect.anything(),
+      );
+      consoleError.mockRestore();
+    });
+
+    test("get() logs and returns undefined for a value that isn't valid JSON", async () => {
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      const store = new ExpiringValue<Value>(
+        fakeRedis({ get: vi.fn().mockResolvedValue("not json") }),
+        "web",
+        "userOAuth2",
+        600,
+        { schema },
+      );
+
+      const result = await store.get("user-1");
+
+      expect(result).toBeUndefined();
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining("failed to decode"),
+        expect.anything(),
+      );
+      consoleError.mockRestore();
+    });
+
+    test("get() skips validation entirely when no schema is configured", async () => {
+      const store = new ExpiringValue<Value>(
+        fakeRedis({ get: vi.fn().mockResolvedValue(JSON.stringify({ anything: "goes" })) }),
+        "web",
+        "userOAuth2",
+        600,
+      );
+
+      expect(await store.get("user-1")).toEqual({ anything: "goes" });
+    });
   });
 });

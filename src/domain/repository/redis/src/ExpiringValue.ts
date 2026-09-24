@@ -1,4 +1,5 @@
 import type { RedisClient } from "infra-redis";
+import type z from "zod";
 
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 
@@ -19,7 +20,7 @@ export function reviveDates(key: string, value: unknown): unknown {
   return value;
 }
 
-export type ExpiringValueOptions = {
+export type ExpiringValueOptions<V = unknown> = {
   // Opts this store into resetEphemeralMemory's boot-time wipe. Defaults to false: most
   // stores here are read-through caches (Postgres- or Discord-API-backed) where a stale
   // entry is just a cache-miss, not a correctness issue -- wiping them on every deploy would
@@ -27,6 +28,14 @@ export type ExpiringValueOptions = {
   // genuinely needs "fresh on every process start" semantics (matching the in-memory `Map`
   // these stores replaced).
   reset?: boolean;
+  // Validates every decoded value before handing it back to a caller. Guards against a
+  // rolling update's old/new pod overlap (k8s/app/deployment.yaml's maxSurge: 1): if one pod
+  // version writes a shape the other doesn't recognize anymore (a renamed/removed/retyped
+  // field), a bare `JSON.parse` cast would hand that mismatched object straight to the
+  // caller instead of failing loudly or safely. A schema failure here is logged and treated
+  // as a cache miss (same as a missing key), never thrown -- consistent with every store
+  // above being a read-through cache where "recompute it" is always a safe fallback.
+  schema?: z.ZodType<V>;
 };
 
 // Generic JSON value cache -- Redis's own EX replaces the various repo-memory gc() sweeps
@@ -45,15 +54,17 @@ export type ExpiringValueOptions = {
 // them instead of duplicating the Redis plumbing.
 export class ExpiringValue<V> {
   private readonly reset: boolean;
+  private readonly schema?: z.ZodType<V>;
 
   constructor(
     private readonly redis: RedisClient,
     private readonly owner: EphemeralMemoryOwner,
     private readonly store: string,
     private readonly ttlSeconds?: number,
-    options?: ExpiringValueOptions,
+    options?: ExpiringValueOptions<V>,
   ) {
     this.reset = options?.reset ?? false;
+    this.schema = options?.schema;
   }
 
   protected key(id: string): string {
@@ -80,11 +91,34 @@ export class ExpiringValue<V> {
   }
 
   public async get(id: string): Promise<V | undefined> {
-    const raw = await this.redis.get(this.key(id));
-    return raw === null ? undefined : this.decode(raw);
+    const key = this.key(id);
+    const raw = await this.redis.get(key);
+    return raw === null ? undefined : this.parse(key, raw);
   }
 
   public async delete(id: string): Promise<void> {
     await this.redis.del(this.key(id));
+  }
+
+  // Decode errors (malformed JSON) and schema mismatches (valid JSON, wrong shape) both land
+  // here so every caller gets the same "bad entry -> cache miss" fallback, whether decode()
+  // is this class's own JSON.parse or a subclass's custom override (TtsSynthesisCache's
+  // Buffer handling, UserJWTVerifyKey's raw base64).
+  private parse(key: string, raw: string): V | undefined {
+    try {
+      const decoded = this.decode(raw);
+      if (!this.schema) {
+        return decoded;
+      }
+      const result = this.schema.safeParse(decoded);
+      if (!result.success) {
+        console.error(`[redis] ${key} failed schema validation`, result.error);
+        return undefined;
+      }
+      return result.data;
+    } catch (error) {
+      console.error(`[redis] failed to decode ${key}`, error);
+      return undefined;
+    }
   }
 }

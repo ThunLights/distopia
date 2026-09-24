@@ -1,5 +1,6 @@
 import type { RedisClient } from "infra-redis";
 import { describe, expect, test, vi } from "vitest";
+import z from "zod";
 
 import { RedisHashMap } from "./RedisHashMap";
 
@@ -114,5 +115,61 @@ describe("RedisHashMap", () => {
     await map.get("guild-1");
 
     expect(hget).toHaveBeenCalledWith("bot:ephemeral:voiceChannelMember", "guild-1");
+  });
+
+  describe("schema", () => {
+    const schema = z.object({ memberCounts: z.array(z.number()) });
+
+    test("get() returns the value when it matches the schema", async () => {
+      const map = new RedisHashMap<Value>(
+        fakeRedis({ hget: vi.fn().mockResolvedValue(JSON.stringify({ memberCounts: [1, 2] })) }),
+        "bot",
+        "voiceChannelMember",
+        { schema },
+      );
+
+      expect(await map.get("guild-1")).toEqual({ memberCounts: [1, 2] });
+    });
+
+    test("get() logs and returns undefined for a field that no longer matches the schema", async () => {
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      const map = new RedisHashMap<Value>(
+        fakeRedis({ hget: vi.fn().mockResolvedValue(JSON.stringify({ memberCounts: "oops" })) }),
+        "bot",
+        "voiceChannelMember",
+        { schema },
+      );
+
+      expect(await map.get("guild-1")).toBeUndefined();
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining("failed schema validation"),
+        expect.anything(),
+      );
+      consoleError.mockRestore();
+    });
+
+    // A rolling update can leave one bad-shaped field (written by the other pod version)
+    // sitting next to otherwise-good ones in the same hash -- entries() must still return
+    // every valid field rather than fail the whole call over that one entry.
+    test("entries() skips a field that fails schema validation but keeps the rest", async () => {
+      const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+      const hgetall = vi.fn().mockResolvedValue({
+        "guild-1": JSON.stringify({ memberCounts: [1] }),
+        "guild-2": JSON.stringify({ memberCounts: "oops" }),
+        "guild-3": JSON.stringify({ memberCounts: [3] }),
+      });
+      const map = new RedisHashMap<Value>(fakeRedis({ hgetall }), "bot", "voiceChannelMember", {
+        schema,
+      });
+
+      const result = await map.entries();
+
+      expect(result).toEqual([
+        ["guild-1", { memberCounts: [1] }],
+        ["guild-3", { memberCounts: [3] }],
+      ]);
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      consoleError.mockRestore();
+    });
   });
 });

@@ -113,6 +113,7 @@
       "name": "repo-redis",
       "dependencies": {
         "infra-redis": "workspace:*",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/node": "catalog:",

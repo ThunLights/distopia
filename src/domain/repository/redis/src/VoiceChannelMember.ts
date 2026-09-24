@@ -1,4 +1,5 @@
 import type { RedisClient } from "infra-redis";
+import z from "zod";
 
 import { RedisHashMap } from "./RedisHashMap";
 import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
@@ -6,6 +7,10 @@ import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 export type VoiceChannelMemberValue = {
   memberCounts: number[];
 };
+
+const VoiceChannelMemberValueSchema = z.object({
+  memberCounts: z.array(z.number()),
+}) satisfies z.ZodType<VoiceChannelMemberValue>;
 
 // Bounded rolling sample buffer, not TTL'd -- repo-memory's original gc() only capped array
 // length (slice(0, 40)), it never expired entries by age. Applying that same cap inline on
@@ -15,7 +20,10 @@ const MAX_SAMPLES = 40;
 
 export class VoiceChannelMember extends RedisHashMap<VoiceChannelMemberValue> {
   constructor(redis: RedisClient, owner: EphemeralMemoryOwner) {
-    super(redis, owner, "voiceChannelMember", { reset: true });
+    super(redis, owner, "voiceChannelMember", {
+      reset: true,
+      schema: VoiceChannelMemberValueSchema,
+    });
   }
 
   public async pushMemberCounts(guildId: string, num: number): Promise<void> {

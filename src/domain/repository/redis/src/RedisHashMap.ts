@@ -18,14 +18,16 @@ import type { EphemeralMemoryOwner } from "./resetEphemeralMemory";
 // field names that aren't plain strings (e.g. JWTKey's numeric key ids, via the K parameter).
 export class RedisHashMap<V, K extends string | number = string> {
   private readonly reset: boolean;
+  private readonly schema?: ExpiringValueOptions<V>["schema"];
 
   constructor(
     private readonly redis: RedisClient,
     private readonly owner: EphemeralMemoryOwner,
     private readonly store: string,
-    options?: ExpiringValueOptions,
+    options?: ExpiringValueOptions<V>,
   ) {
     this.reset = options?.reset ?? false;
+    this.schema = options?.schema;
   }
 
   private key(): string {
@@ -46,16 +48,26 @@ export class RedisHashMap<V, K extends string | number = string> {
 
   public async get(field: K): Promise<V | undefined> {
     const raw = await this.redis.hget(this.key(), String(field));
-    return raw === null ? undefined : this.decode(raw);
+    return raw === null ? undefined : this.parse(String(field), raw);
   }
 
   public async set(field: K, value: V): Promise<void> {
     await this.redis.hset(this.key(), String(field), this.encode(value));
   }
 
+  // A malformed/mismatched field is skipped (logged, not returned) rather than failing the
+  // whole entries() call -- one bad field shouldn't block every other guild's entry in the
+  // same hash from coming back.
   public async entries(): Promise<[K, V][]> {
     const all = await this.redis.hgetall(this.key());
-    return Object.entries(all).map(([field, raw]) => [this.decodeField(field), this.decode(raw)]);
+    const results: [K, V][] = [];
+    for (const [field, raw] of Object.entries(all)) {
+      const value = this.parse(field, raw);
+      if (value !== undefined) {
+        results.push([this.decodeField(field), value]);
+      }
+    }
+    return results;
   }
 
   public async delete(field: K): Promise<void> {
@@ -64,5 +76,26 @@ export class RedisHashMap<V, K extends string | number = string> {
 
   public async clear(): Promise<void> {
     await this.redis.del(this.key());
+  }
+
+  // See ExpiringValue.parse's own comment -- same "decode error or schema mismatch both
+  // become a logged, skipped entry" contract, just per-field instead of per-key.
+  private parse(field: string, raw: string): V | undefined {
+    const label = `${this.key()}.${field}`;
+    try {
+      const decoded = this.decode(raw);
+      if (!this.schema) {
+        return decoded;
+      }
+      const result = this.schema.safeParse(decoded);
+      if (!result.success) {
+        console.error(`[redis] ${label} failed schema validation`, result.error);
+        return undefined;
+      }
+      return result.data;
+    } catch (error) {
+      console.error(`[redis] failed to decode ${label}`, error);
+      return undefined;
+    }
   }
 }
