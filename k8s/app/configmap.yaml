@@ -2,7 +2,7 @@
 # value here (and containerPort/service.yaml's targetPort to match) to move the app off
 # port 3000.
 #
-# REDIS_URL has no credentials in it (see k8s/redis/deployment.yaml -- no AUTH configured),
+# REDIS_URL has no credentials in it (see k8s/redis/redis.yaml -- no AUTH configured),
 # which is why it lives here rather than in the distopia-env Secret.
 apiVersion: v1
 kind: ConfigMap
