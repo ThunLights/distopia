@@ -6,9 +6,18 @@ import { Base } from "./Base";
 import { formatYMD } from "./utils/date";
 
 export class Message extends Base {
+  // Known gap: messageCreate.get()-then-set() below is a read-modify-write, not atomic. A
+  // plain in-process Map (repo-memory's original backing) made this safe for free -- no
+  // await between read and write, so nothing else could run in between. Now that the value
+  // lives in Redis, two increase() calls for the same guildId that overlap between the
+  // get() and the set() can race, and the second set() silently drops the first's message
+  // length. Requires two messages in the same guild within the same event-loop tick to
+  // trigger, and the only consequence is a slightly undercounted message-length sample feeding
+  // syncDB's level/point calculation -- not data loss. A real fix (RPUSH onto a per-guild
+  // Redis list, or a Lua script) is a heavier storage-shape change; out of scope here.
   public async increase(guildId: string, memberId: string, messageContent: string) {
     const ratelimit = this.state.memory.ratelimit.messageCreate;
-    const limit = ratelimit.get(memberId);
+    const limit = await ratelimit.get(memberId);
 
     if (limit && limit.getTime() > Date.now()) {
       return;
@@ -20,16 +29,23 @@ export class Message extends Base {
 
     const minute = 60 * 1000;
 
-    ratelimit.set(memberId, new Date(Date.now() + minute));
+    await ratelimit.set(memberId, new Date(Date.now() + minute));
 
-    const data = this.state.memory.messageCreate.get(guildId);
+    const data = await this.state.memory.messageCreate.get(guildId);
 
-    this.state.memory.messageCreate.set(guildId, {
+    await this.state.memory.messageCreate.set(guildId, {
       messageLens: [...(data?.messageLens ?? []), messageContent.length],
       updatedAt: new Date(),
     });
   }
 
+  // Known gap: entries() (read) and clear() (below) aren't one atomic operation either, so a
+  // message that arrives between them is wiped without being counted, and a failed
+  // upsertAll() below still loses the just-cleared snapshot. Same accepted-risk shape as
+  // increase()'s known gap above -- this cron runs every few minutes (setScheduleTask), so
+  // the exposure window is small and the cost of a miss is an undercounted stat, not
+  // corrupted data. A real fix (move the hash to a processing key, delete only after
+  // upsertAll() succeeds) is out of scope here.
   public async syncDB() {
     const date = await formatYMD(new Date());
     const query: GuildRecordOneDayUpsertInput[] = [];
@@ -43,7 +59,7 @@ export class Message extends Base {
       ]),
     );
 
-    for (const [guildId, value] of this.state.memory.messageCreate.entries()) {
+    for (const [guildId, value] of await this.state.memory.messageCreate.entries()) {
       const guild = guilds.get(guildId);
       const record = records.get(guildId);
       let level = guild?.level ?? 0n,
@@ -62,7 +78,7 @@ export class Message extends Base {
       });
     }
 
-    this.state.memory.messageCreate.clear();
+    await this.state.memory.messageCreate.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
   }
@@ -71,7 +87,7 @@ export class Message extends Base {
     const { inviteLinks, normalUrls } = await findUrls(content);
 
     for (const url of normalUrls) {
-      const memoryCache = this.state.memory.urlCacheInMemory.get(url)?.isInviteLink;
+      const memoryCache = (await this.state.memory.urlCacheInMemory.get(url))?.isInviteLink;
       if (memoryCache !== undefined) {
         if (memoryCache) {
           inviteLinks.push(url);
@@ -86,7 +102,7 @@ export class Message extends Base {
       }
 
       if (!response.isUsedCf) {
-        this.state.memory.urlCacheInMemory.set(url, {
+        await this.state.memory.urlCacheInMemory.set(url, {
           isInviteLink: response.content,
           createdAt: new Date(),
         });

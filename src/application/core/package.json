@@ -49,7 +49,7 @@
     "infra-redis": "workspace:*",
     "infra-sakura": "workspace:*",
     "infra-voicevox": "workspace:*",
-    "repo-memory": "workspace:*",
+    "repo-redis": "workspace:*",
     "repo-search": "workspace:*",
     "smol-toml": "catalog:",
     "zod": "catalog:"

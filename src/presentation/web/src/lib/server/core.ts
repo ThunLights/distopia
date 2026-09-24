@@ -3,10 +3,10 @@ import { env } from "$env/dynamic/public";
 import { djsController } from "./bot";
 import { database } from "./database";
 import { memory } from "./memory";
+import { redis } from "./redis";
 import { searchEngine } from "./search";
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
-import { createRedisClient } from "infra-redis";
 import { page as levelRatePage } from "presentation-bot/page/Ranking/Level";
 import { page as activeRatePage } from "presentation-bot/page/Ranking/Rate";
 import { page as userBumpPage } from "presentation-bot/page/Ranking/UserBump";
@@ -25,7 +25,7 @@ export const core = genCore({
   searchEngine,
   discord: djsController,
   database,
-  redis: createRedisClient(privateEnv.REDIS_URL!),
+  redis,
 });
 
 export async function updatePanels() {

@@ -9,7 +9,7 @@ import type {
   GuildWhiteListUpsertInput,
   WhiteListPermission,
 } from "infra-database/types";
-import type { GuildEditValue as Value } from "repo-memory";
+import type { GuildEditValue as Value } from "repo-redis";
 import type { GuildDBValue, SearchOptions } from "repo-search";
 
 import type { AppState } from "./AppState";
@@ -76,15 +76,18 @@ export class Guild extends Base {
   public async removeUnJoinedGuildData() {
     for (const { guildId } of await this.state.database.guild.findAll()) {
       if (!(await this.state.discord.guild.isJoined(guildId))) {
-        const limit = this.state.memory.unJoinedGuild.get(guildId);
+        const limit = await this.state.memory.unJoinedGuild.get(guildId);
         if (limit) {
           if (Date.now() > limit.getTime()) {
             await this.state.searchEngine.delete(guildId);
             await this.state.database.guild.delete(guildId);
-            this.state.memory.unJoinedGuild.delete(guildId);
+            await this.state.memory.unJoinedGuild.delete(guildId);
           }
         } else {
-          this.state.memory.unJoinedGuild.set(guildId, new Date(Date.now() + 8 * 60 * 60 * 1000));
+          await this.state.memory.unJoinedGuild.set(
+            guildId,
+            new Date(Date.now() + 8 * 60 * 60 * 1000),
+          );
         }
       }
     }
@@ -92,7 +95,7 @@ export class Guild extends Base {
 
   public async getDraft(guildId: string) {
     const dbData = await this.state.database.guild.find(guildId);
-    const memoryData = this.state.memory.guildEdit.get(guildId);
+    const memoryData = await this.state.memory.guildEdit.get(guildId);
     return {
       description: memoryData?.description ?? dbData?.description ?? undefined,
       nsfw: memoryData?.nsfw ?? dbData?.nsfw,
@@ -103,15 +106,15 @@ export class Guild extends Base {
   }
 
   public async saveDraft(guildId: string, value: Value, updateAll: boolean = true) {
-    const memoryData = this.state.memory.guildEdit.get(guildId);
-    return this.state.memory.guildEdit.set(
+    const memoryData = await this.state.memory.guildEdit.get(guildId);
+    return await this.state.memory.guildEdit.set(
       guildId,
       updateAll ? { ...memoryData, ...value } : value,
     );
   }
 
   public async deleteDraft(guildId: string) {
-    return this.state.memory.guildEdit.delete(guildId);
+    return await this.state.memory.guildEdit.delete(guildId);
   }
 
   public async isBotJoined(guildId: string) {
@@ -130,13 +133,12 @@ export class Guild extends Base {
       return null;
     }
 
-    const limit = ratelimit.get(guild.id);
+    const acquired = await ratelimit.acquire(guild.id, new Date(nowDate.getTime() + twoHours));
 
-    if (limit && limit.getTime() > Date.now()) {
-      return new RateLimitError(limit);
+    if (!acquired) {
+      const limit = await ratelimit.get(guild.id);
+      return new RateLimitError(limit ?? nowDate);
     }
-
-    ratelimit.set(guild.id, new Date(nowDate.getTime() + twoHours));
 
     const updatedGuild = await database.guild.update({
       guildId: guild.id,
@@ -343,26 +345,24 @@ export class Guild extends Base {
   }
 
   public async getSetting(guildId: string): Promise<GuildSetting | null> {
-    return (
-      this.state.memory.guildSetting.get(guildId) ??
-      (await this.state.database.guildSetting.find(guildId))
-    );
+    const cached = await this.state.memory.guildSetting.get(guildId);
+    return cached ?? (await this.state.database.guildSetting.find(guildId));
   }
 
   public async saveSetting(input: GuildSettingUpsertInput) {
     const setting = await this.state.database.guildSetting.upsert(input);
-    this.state.memory.guildSetting.set(input.guildId, { ...setting, createdAt: new Date() });
+    await this.state.memory.guildSetting.set(input.guildId, { ...setting, createdAt: new Date() });
     return setting;
   }
 
   public async getWhiteList(guildId: string): Promise<GuildWhiteList[]> {
-    const cached = this.state.memory.guildWhiteList.get(guildId);
+    const cached = await this.state.memory.guildWhiteList.get(guildId);
     if (cached) {
       return cached.entries;
     }
 
     const entries = await this.state.database.guildWhiteList.findAll(guildId);
-    this.state.memory.guildWhiteList.set(guildId, { entries, createdAt: new Date() });
+    await this.state.memory.guildWhiteList.set(guildId, { entries, createdAt: new Date() });
     return entries;
   }
 
@@ -376,7 +376,7 @@ export class Guild extends Base {
 
   public async upsertWhiteListEntry(input: GuildWhiteListUpsertInput): Promise<GuildWhiteList> {
     const entry = await this.state.database.guildWhiteList.upsert(input);
-    this.state.memory.guildWhiteList.delete(input.guildId);
+    await this.state.memory.guildWhiteList.delete(input.guildId);
     return entry;
   }
 
@@ -385,7 +385,7 @@ export class Guild extends Base {
     targetId: string,
   ): Promise<GuildWhiteList | null> {
     const entry = await this.state.database.guildWhiteList.delete(guildId, targetId);
-    this.state.memory.guildWhiteList.delete(guildId);
+    await this.state.memory.guildWhiteList.delete(guildId);
     return entry;
   }
 

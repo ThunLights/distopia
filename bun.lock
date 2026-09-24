@@ -60,7 +60,7 @@
         "infra-redis": "workspace:*",
         "infra-sakura": "workspace:*",
         "infra-voicevox": "workspace:*",
-        "repo-memory": "workspace:*",
+        "repo-redis": "workspace:*",
         "repo-search": "workspace:*",
         "smol-toml": "catalog:",
         "zod": "catalog:",
@@ -109,8 +109,12 @@
         "typescript": "catalog:",
       },
     },
-    "src/domain/repository/memory": {
-      "name": "repo-memory",
+    "src/domain/repository/redis": {
+      "name": "repo-redis",
+      "dependencies": {
+        "infra-redis": "workspace:*",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@types/node": "catalog:",
         "bun": "catalog:",
@@ -302,7 +306,7 @@
         "opusscript": "catalog:",
         "presentation-bot": "workspace:*",
         "prism-media": "catalog:",
-        "repo-memory": "workspace:*",
+        "repo-redis": "workspace:*",
         "repo-search": "workspace:*",
         "super-sitemap": "2.0.6",
         "svelte-exmarkdown": "5.0.2",
@@ -2457,7 +2461,7 @@
 
     "remeda": ["remeda@2.33.4", "", {}, "sha512-ygHswjlc/opg2VrtiYvUOPLjxjtdKvjGz1/plDhkG66hjNjFr1xmfrs2ClNFo/E6TyUFiwYNh53bKV26oBoMGQ=="],
 
-    "repo-memory": ["repo-memory@workspace:src/domain/repository/memory"],
+    "repo-redis": ["repo-redis@workspace:src/domain/repository/redis"],
 
     "repo-search": ["repo-search@workspace:src/domain/repository/search"],
 

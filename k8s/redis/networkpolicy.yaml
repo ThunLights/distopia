@@ -3,6 +3,12 @@
 # in the namespace. distopia-ci's Workflow/Sensor/EventSource pods, the CNPG-managed
 # database, and the registry have no reason to reach an unauthenticated Redis holding TTS
 # session pointers, so they're deliberately not included here.
+#
+# Label selector matches what OT-CONTAINER-KIT/redis-operator actually stamps on the pod it
+# generates from redis.yaml (`app: <CR name>`, `redis_setup_type: standalone`) -- confirmed
+# against the operator's own label-generation source
+# (internal/controller/common/labels.go), not the app.kubernetes.io/* convention the old
+# hand-written Deployment used.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -11,7 +17,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: distopia-redis
+      app: distopia-redis
+      redis_setup_type: standalone
   policyTypes:
     - Ingress
   ingress:

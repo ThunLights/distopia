@@ -6,8 +6,38 @@ import Redis from "ioredis";
 export type RedisClient = {
   get(key: string): Promise<string | null>;
   set(key: string, value: string): Promise<"OK">;
+  // Atomic set-with-expiry (SET key value EX seconds) -- one round trip instead of a
+  // separate set()+expire() pair, for TTL'd caches migrated off repo-memory's Map-based gc().
+  set(key: string, value: string, exToken: "EX", seconds: number): Promise<"OK">;
+  // Atomic "set only if absent" with expiry (SET key value EX seconds NX) -- returns null
+  // instead of "OK" when the key already exists, so a caller can use one round trip to both
+  // check and acquire a rate-limit-style lock instead of a get()-then-set() pair a concurrent
+  // request could race between.
+  set(
+    key: string,
+    value: string,
+    exToken: "EX",
+    seconds: number,
+    nxToken: "NX",
+  ): Promise<"OK" | null>;
   del(key: string): Promise<number>;
   keys(pattern: string): Promise<string[]>;
+  // Cursor-based iteration -- unlike keys(), safe to use against a Redis holding a
+  // meaningful number of keys (KEYS blocks the whole event loop; SCAN doesn't). Added ahead
+  // of the repo-memory migration's owner-scoped boot-time reset, which needs to enumerate
+  // `<owner>:*` without a KEYS-style full-keyspace block.
+  scan(
+    cursor: string,
+    matchToken: "MATCH",
+    pattern: string,
+    countToken: "COUNT",
+    count: number,
+  ): Promise<[cursor: string, elements: string[]]>;
+  expire(key: string, seconds: number): Promise<number>;
+  hset(key: string, field: string, value: string): Promise<number>;
+  hget(key: string, field: string): Promise<string | null>;
+  hgetall(key: string): Promise<Record<string, string>>;
+  hdel(key: string, field: string): Promise<number>;
 };
 
 // ioredis (not Bun's own native RedisClient) on purpose -- Bun's client only resolves under

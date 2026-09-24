@@ -14,6 +14,11 @@ export type UpsertQuery = {
 }[];
 
 export class VoiceChannel extends Base {
+  // Known gap: VoiceChannelMember.pushMemberCounts does its own get()-then-set() internally
+  // (see VoiceChannelMember.ts) -- same class of race as Message.increase(). update() only
+  // calls it once per guild per run here, so in practice this would require two overlapping
+  // update() runs, which setScheduleTask's cron already serializes -- listed for
+  // completeness, not because it's currently reachable.
   public async update() {
     const upsertVcMemberUpperTwoQuery: string[] = [];
     const upsertVcMembersQuery: UpsertVcMembersQuery = [];
@@ -31,10 +36,10 @@ export class VoiceChannel extends Base {
         });
       }
 
-      this.state.memory.voiceChannelMember.pushMemberCounts(vc.guildId, vc.activeMemberCount);
+      await this.state.memory.voiceChannelMember.pushMemberCounts(vc.guildId, vc.activeMemberCount);
     }
 
-    for (const [guildId, value] of this.state.memory.voiceChannelMember.entries()) {
+    for (const [guildId, value] of await this.state.memory.voiceChannelMember.entries()) {
       if (voiceChannels.map(({ guildId }) => guildId).includes(guildId)) {
         const plusPoint =
           value.memberCounts.reduce((sum, e) => sum + e, 0) / value.memberCounts.length;
@@ -44,7 +49,7 @@ export class VoiceChannel extends Base {
           plusPoint,
         });
       } else {
-        this.state.memory.voiceChannelMember.delete(guildId);
+        await this.state.memory.voiceChannelMember.delete(guildId);
       }
     }
 

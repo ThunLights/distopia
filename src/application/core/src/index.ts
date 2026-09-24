@@ -6,7 +6,6 @@ import { Friend } from "./Friend";
 import { Guild } from "./Guild";
 import { JWT } from "./JWT";
 import { Member } from "./Member";
-import { Memory } from "./Memory";
 import { Message } from "./Message";
 import { OAuth2 } from "./OAuth2";
 import { Panel } from "./Panel";
@@ -28,7 +27,6 @@ export class AppCore extends Base {
   public readonly jwt = new JWT(this.state);
   public readonly friend = new Friend(this.state);
   public readonly member = new Member(this.state);
-  public readonly memory = new Memory(this.state);
   public readonly message = new Message(this.state);
   public readonly oauth2 = new OAuth2(this.state, this.guild);
   public readonly panel = new Panel(this.state);

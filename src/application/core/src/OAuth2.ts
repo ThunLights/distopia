@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 
 import type { UserDiscordUpsertInput } from "infra-database/types";
-import type { Guilds } from "repo-memory";
+import type { Guilds } from "repo-redis";
 
 import type { AppState } from "./AppState";
 import { Base } from "./Base";
@@ -18,7 +18,7 @@ export class OAuth2 extends Base {
   public async savePKCE() {
     const sessionId = randomUUID();
     const sessionKey = randomUUID();
-    this.state.memory.oauth2PKCE.set(sessionId, {
+    await this.state.memory.oauth2PKCE.set(sessionId, {
       sessionKey,
       createdAt: new Date(),
     });
@@ -26,11 +26,11 @@ export class OAuth2 extends Base {
   }
 
   public async getPKCE(sessionId: string) {
-    return this.state.memory.oauth2PKCE.get(sessionId);
+    return await this.state.memory.oauth2PKCE.get(sessionId);
   }
 
   public async deletePKCE(sessionId: string) {
-    return this.state.memory.oauth2PKCE.delete(sessionId);
+    return await this.state.memory.oauth2PKCE.delete(sessionId);
   }
 
   public async updateTokens() {
@@ -84,7 +84,7 @@ export class OAuth2 extends Base {
 
     const { id, email, username, avatarUrl, bannerUrl } = user;
 
-    this.state.memory.userOAuth2.set(id, {
+    await this.state.memory.userOAuth2.set(id, {
       email: email ?? undefined,
       username,
       avatarUrl: avatarUrl ?? undefined,
@@ -110,7 +110,7 @@ export class OAuth2 extends Base {
 
   public async getGuilds(userId: string, useCache: boolean = true): Promise<Guilds | null> {
     if (useCache) {
-      const cache = this.state.memory.oauth2Guilds.get(userId);
+      const cache = await this.state.memory.oauth2Guilds.get(userId);
       if (cache) {
         return cache;
       }
@@ -152,7 +152,7 @@ export class OAuth2 extends Base {
           },
         ),
       );
-      this.state.memory.oauth2Guilds.set(userId, guilds);
+      await this.state.memory.oauth2Guilds.set(userId, guilds);
       return guilds;
     }
 

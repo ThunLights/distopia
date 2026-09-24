@@ -27,6 +27,7 @@ env:
   BOT_SECRET: ${{ secrets.BOT_SECRET }}
 
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  REDIS_URL: redis://distopia-redis:6379
 
   SENTRY_ORG: thunlights
   SENTRY_PROJECT: distopia-ci
@@ -151,6 +152,17 @@ jobs:
           kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.24/releases/cnpg-1.24.0.yaml
           kubectl -n cnpg-system wait --for=condition=Available deployment/cnpg-controller-manager --timeout=120s
 
+      # k8s/redis/redis.yaml (the app's Redis-backed session/cache store) is a
+      # OT-CONTAINER-KIT/redis-operator CRD, same one-time cluster bootstrap as
+      # k8s/README.md's "Prerequisites" section describes for real production.
+      - name: Install redis-operator
+        run: |
+          helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+          helm repo update
+          helm install redis-operator ot-helm/redis-operator \
+            --namespace ot-operators --create-namespace \
+            --version 0.26.1 --wait --timeout 120s
+
       # Generates the Secret manifests from this job's own env (same idea as the
       # devcontainer/ci-dev jobs' "Generate .env" step), instead of one long
       # --from-literal argument list -- kubectl apply -f - reads it straight off stdin, so
@@ -208,6 +220,20 @@ jobs:
 
       - name: Deploy CloudNativePG cluster (k8s/db, unmodified)
         run: kubectl apply -k k8s/db
+
+      - name: Deploy Redis (k8s/redis, unmodified)
+        run: kubectl apply -k k8s/redis
+
+      # The redis-operator's standalone Redis CR stamps `app: <CR name>,
+      # redis_setup_type: standalone` on the pod it generates (see k8s/redis/networkpolicy.yaml's
+      # own comment) -- wait on that label selector rather than guess the generated pod name.
+      - name: Wait for Redis to be ready
+        run: |
+          timeout 180 bash -c '
+            until kubectl wait --for=condition=Ready pod -n distopia -l "app=distopia-redis,redis_setup_type=standalone" --timeout=10s 2>/dev/null; do
+              sleep 3
+            done
+          '
 
       # `kubectl exec ... pg_isready` only proves postgres itself answers queries inside the
       # container -- it says nothing about the pod's Kubernetes Ready condition, which is
@@ -446,6 +472,7 @@ jobs:
           kubectl describe pod -n distopia -l app.kubernetes.io/name=distopia-app
           kubectl logs -n distopia deployment/distopia-app --tail=200
           kubectl logs -n distopia pod/distopia-db-1 -c postgres --tail=100 || true
+          kubectl logs -n distopia -l "app=distopia-redis,redis_setup_type=standalone" --tail=100 || true
           kubectl logs -n distopia job/distopia-db-backup-test --tail=100 || true
           kubectl logs -n distopia deployment/distopia-r2-mock --tail=100 || true
           kubectl get events -n distopia --sort-by=.lastTimestamp

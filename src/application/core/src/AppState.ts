@@ -1,6 +1,13 @@
 import type { DatabaseClient } from "infra-database/types";
 import type { Controller } from "infra-discord";
 import type { RedisClient } from "infra-redis";
+// Redis-backed -- migrated off repo-memory's in-process Map so it's readable across
+// processes/languages instead of trapped in one Node process's memory. Each field is its own
+// per-table class (ButtonRateLimit, GuildSetting, ...) extending a shared base
+// (ExpiringDate/ExpiringValue/RedisHashMap) that owns the actual Redis plumbing -- see each
+// type's own repo-redis module for its TTL (or lack of one, where the original had no gc()
+// at all) and resetEphemeralMemory for the owner-scoped boot-time reset that reproduces
+// "fresh Map on every process start" for the ephemeral (non-DB-backed) stores.
 import type {
   ButtonRateLimit,
   ChatInputCommandRateLimit,
@@ -25,7 +32,7 @@ import type {
   UserJWTVerifyKey,
   UserOAuth2,
   VoiceChannelMember,
-} from "repo-memory";
+} from "repo-redis";
 import type { SearchEngine } from "repo-search";
 
 export type AppState = {

@@ -37,48 +37,48 @@ export type DictionaryImportError = "fetch_failed" | "invalid_format";
 
 export class Dictionary extends Base {
   public async getUserEntries(userId: string): Promise<UserDictionary[]> {
-    const cached = this.state.memory.userDictionary.get(userId);
+    const cached = await this.state.memory.userDictionary.get(userId);
     if (cached) {
       return cached.entries;
     }
 
     const entries = await this.state.database.userDictionary.findAll(userId);
-    this.state.memory.userDictionary.set(userId, { entries, createdAt: new Date() });
+    await this.state.memory.userDictionary.set(userId, { entries, createdAt: new Date() });
     return entries;
   }
 
   public async getGuildEntries(guildId: string): Promise<GuildDictionary[]> {
-    const cached = this.state.memory.guildDictionary.get(guildId);
+    const cached = await this.state.memory.guildDictionary.get(guildId);
     if (cached) {
       return cached.entries;
     }
 
     const entries = await this.state.database.guildDictionary.findAll(guildId);
-    this.state.memory.guildDictionary.set(guildId, { entries, createdAt: new Date() });
+    await this.state.memory.guildDictionary.set(guildId, { entries, createdAt: new Date() });
     return entries;
   }
 
   public async addUserEntry(input: UserDictionaryUpsertInput): Promise<UserDictionary> {
     const entry = await this.state.database.userDictionary.upsert(input);
-    this.state.memory.userDictionary.delete(input.userId);
+    await this.state.memory.userDictionary.delete(input.userId);
     return entry;
   }
 
   public async removeUserEntry(userId: string, word: string): Promise<UserDictionary | null> {
     const entry = await this.state.database.userDictionary.delete(userId, word);
-    this.state.memory.userDictionary.delete(userId);
+    await this.state.memory.userDictionary.delete(userId);
     return entry;
   }
 
   public async addGuildEntry(input: GuildDictionaryUpsertInput): Promise<GuildDictionary> {
     const entry = await this.state.database.guildDictionary.upsert(input);
-    this.state.memory.guildDictionary.delete(input.guildId);
+    await this.state.memory.guildDictionary.delete(input.guildId);
     return entry;
   }
 
   public async removeGuildEntry(guildId: string, word: string): Promise<GuildDictionary | null> {
     const entry = await this.state.database.guildDictionary.delete(guildId, word);
-    this.state.memory.guildDictionary.delete(guildId);
+    await this.state.memory.guildDictionary.delete(guildId);
     return entry;
   }
 
@@ -155,7 +155,7 @@ export class Dictionary extends Base {
       }
     }
 
-    this.state.memory.guildDictionary.delete(guildId);
+    await this.state.memory.guildDictionary.delete(guildId);
     return words.length;
   }
 

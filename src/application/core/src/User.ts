@@ -38,7 +38,7 @@ export class User extends Base {
 
     const { id, email, username, avatarUrl, bannerUrl } = userOAuth2Data;
 
-    this.state.memory.userOAuth2.set(id, {
+    await this.state.memory.userOAuth2.set(id, {
       email: email ?? undefined,
       username,
       avatarUrl: avatarUrl ?? undefined,
@@ -61,7 +61,7 @@ export class User extends Base {
       };
     }
 
-    const memCache = this.state.memory.userOAuth2.get(userId);
+    const memCache = await this.state.memory.userOAuth2.get(userId);
     if (memCache) {
       const { username, avatarUrl, bannerUrl } = memCache;
       return {

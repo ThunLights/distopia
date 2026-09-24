@@ -16,9 +16,8 @@ import { PermissionFlagsBits, type Client, type VoiceBasedChannel } from "discor
 
 // Process-local, in-memory only -- these hold live discord.js voice objects tied to this
 // process's WebSocket/UDP connections, which can't survive (or be meaningfully persisted
-// across) a restart. Kept here rather than in the shared `repo-memory` package since that
-// package is consumed by both the bot and the web app, and has no reason to depend on
-// discord.js voice types.
+// across) a restart, so they stay a plain local Map here rather than moving to Redis like
+// the rest of the app's formerly-in-memory state (see repo-redis).
 type TtsSession = {
   voiceChannelId: string;
   textChannelId: string;

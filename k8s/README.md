@@ -9,7 +9,7 @@ by you — nothing here is applied automatically by me.
 |---|---|---|
 | `k8s/registry/` | `distopia-registry` | Self-hosted `registry:2`, cluster-internal only + a daily retention/GC `CronJob` (see "Registry image retention" below) |
 | `k8s/db/` | `distopia-db` | CloudNativePG `Cluster` (replaces the docker-compose Postgres) + a daily `pg_dump` backup `CronJob` |
-| `k8s/redis/` | `distopia-redis` | Cluster-internal Redis (no auth, no PVC) — persists which guild's TTS session is bound to which voice/text channel, so a rolling update's new pod can rejoin where the old one left off; see "TTS session persistence" below |
+| `k8s/redis/` | `distopia-redis` | Cluster-internal Redis (no auth), managed by `OT-CONTAINER-KIT/redis-operator`'s standalone `Redis` CRD with a PVC — persists which guild's TTS session is bound to which voice/text channel, so a rolling update's new pod can rejoin where the old one left off; see "TTS session persistence" below |
 | `k8s/app/` | `distopia-app` | The app itself (`Deployment`/`Service`/`ConfigMap`); the `Application`'s annotations also drive Argo CD Image Updater |
 | `k8s/ci/` | `distopia-ci` | Argo Events (`EventBus`/`EventSource`/`Sensor`) + Argo Workflows (`WorkflowTemplate`) that build, migrate, and push an image on every push to `main` — nothing here deploys it, see "Shipping a new build" below |
 | `k8s/network/` | `distopia-network` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach `distopia-app`/the webhook `EventSource` via loopback ports you choose yourself |
@@ -27,6 +27,23 @@ app-specific config. In short: Argo Workflows and Argo Events need to be install
 **cluster** (not namespace-scoped) mode so they pick up the
 `WorkflowTemplate`/`EventSource`/`Sensor` resources living in the `distopia` namespace
 below.
+
+`OT-CONTAINER-KIT/redis-operator` (the CRD `k8s/redis/redis.yaml` depends on) also needs to
+be installed cluster-wide, into its own `ot-operators` namespace — same "one-time bootstrap,
+not app-specific config" posture as the operators above:
+
+```bash
+helm repo add ot-helm https://ot-container-kit.github.io/helm-charts/
+helm repo update
+helm install redis-operator ot-helm/redis-operator \
+  --namespace ot-operators --create-namespace \
+  --version 0.26.1
+```
+
+Pin `--version` to whatever's current when you actually run this — `0.26.1` was latest as of
+writing. The operator watches `Redis`/`RedisReplication`/`RedisSentinel`/`RedisCluster`
+CRDs cluster-wide by default, so it picks up `k8s/redis/redis.yaml` in the `distopia`
+namespace with no extra per-namespace config.
 
 Argo CD Image Updater also needs to know `distopia-registry` is a plain-HTTP internal
 registry — add an entry to its `registries.conf` ConfigMap (usually
