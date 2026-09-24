@@ -62,6 +62,15 @@ async function start() {
   // restart on their own, so there's no "fresh Map" to reproduce, and wiping them here would
   // only race against a still-serving old pod during k8s/app/deployment.yaml's RollingUpdate
   // overlap (maxSurge: 1, maxUnavailable: 0) for no benefit.
+  //
+  // Known gap: that overlap still applies to OAuth2PKCE itself -- if a new pod's boot lands
+  // mid-flow, it wipes a PKCE session the still-serving old pod just wrote (or a second
+  // replica starting later wipes one the first replica just wrote), even though that pod
+  // could still receive the /auth callback for it. Accepted: bounded to a login that happens
+  // to straddle a deploy, in which case the user just retries -- never a security issue
+  // (worst case is rejecting a still-valid attempt, not accepting a stale one), and the
+  // 20-minute TTL already bounds it further. A versioned/deployment-scoped namespace would
+  // close this but is real added complexity for a rare, low-cost case.
   await resetEphemeralMemory(redis, "web");
   await resetEphemeralMemory(redis, "bot");
   console.log("Reset ephemeral web/bot memory.");

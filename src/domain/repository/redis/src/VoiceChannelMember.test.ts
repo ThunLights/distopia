@@ -50,7 +50,10 @@ describe("VoiceChannelMember", () => {
     );
   });
 
-  test("pushMemberCounts() caps at 40 samples, keeping the first 40", async () => {
+  // VoiceChannel.update() reads this buffer right after pushing this cycle's sample and
+  // averages it into `plusPoint` -- if the newest sample were dropped instead of the oldest,
+  // `plusPoint` would freeze at whatever the first 40 samples ever recorded averaged to.
+  test("pushMemberCounts() caps at 40 samples, keeping the newest 40", async () => {
     const existing = { memberCounts: Array.from({ length: 40 }, (_, i) => i) };
     const hget = vi.fn().mockResolvedValue(JSON.stringify(existing));
     const hset = vi.fn().mockResolvedValue(1);
@@ -59,8 +62,10 @@ describe("VoiceChannelMember", () => {
     await store.pushMemberCounts("guild-1", 999);
 
     const [, , storedJson] = hset.mock.calls[0] as [string, string, string];
-    expect(JSON.parse(storedJson).memberCounts).toEqual(existing.memberCounts);
-    expect(JSON.parse(storedJson).memberCounts).not.toContain(999);
+    const stored = JSON.parse(storedJson).memberCounts;
+    expect(stored).toHaveLength(40);
+    expect(stored).toContain(999);
+    expect(stored).not.toContain(0);
   });
 
   test("entries() delegates to the underlying hash", async () => {
