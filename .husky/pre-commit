@@ -1,5 +1,13 @@
 #!/bin/bash
 
-sudo trufflehog git file://. --since-commit HEAD --results=verified,unknown --fail --trust-local-git-config
+# --branch scopes the scan to the branch actually being committed on. Without it, trufflehog
+# walks every local ref -- including origin/gh-pages, which accumulates a full Storybook build
+# per open PR (hundreds of MB of bundled JS/sourcemaps) and isn't an ancestor of any feature
+# branch, so --since-commit HEAD never limits it. That made every commit re-scan gh-pages'
+# entire history, turning a sub-second check into a multi-minute (sometimes effectively
+# hung) one. Security coverage is unaffected: this hook's job is catching secrets in what
+# you're about to commit, and gh-pages' own history is still covered on whichever commit
+# actually pushes to it.
+sudo trufflehog git file://. --branch "$(git rev-parse --abbrev-ref HEAD)" --since-commit HEAD --results=verified,unknown --fail --trust-local-git-config
 
 gitleaks protect --staged --verbose
