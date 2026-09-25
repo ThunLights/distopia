@@ -1,1 +1,0 @@
-import{n as e}from"./rolldown-runtime-DkW27tQK.js";import{l as t,u as n}from"./common-BAqTHzE8.js";function r(e){return typeof e==`object`&&!!e&&typeof e!=`function`}function i(e,t,...i){return r(e)?{...e,class:n(t,...i,e.class)}:{class:n(t,...i)}}function a(){return(a=e((()=>{t()})))()}export{a as n,i as t};
