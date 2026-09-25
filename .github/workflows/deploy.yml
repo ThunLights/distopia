@@ -82,9 +82,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build-time-only .env (see docker/dockerfile.prod's own comment) -- SENTRY_ORG/
-      # SENTRY_PROJECT/PUBLIC_SENTRY_DSN are the same non-secret values already public in
-      # ci.yml's own env block; only SENTRY_AUTH_TOKEN is a real secret. App runtime secrets
+      # Build-time-only .env (see docker/dockerfile.prod's own comment) -- just DATABASE_URL.
+      # No Sentry secret is needed here at all: SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN
+      # (sourcemap upload) are only used when present (vite.config.ts's
+      # `autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN` skips upload cleanly when
+      # they're absent, rather than failing the build), and PUBLIC_SENTRY_DSN was never a
+      # build-time value in the first place -- it's read via $env/dynamic/public at request
+      # time (hooks.client.ts/instrumentation.server.ts). This deliberately does NOT reuse
+      # ci.yml's secrets.SENTRY_AUTH_TOKEN -- that token and its "distopia-ci" project are
+      # scoped to CI, not production releases; if production sourcemap upload is wanted
+      # later, add this job's own SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN env entries
+      # from dedicated repo secrets rather than borrowing CI's. App runtime secrets
       # (BOT_TOKEN, PUBLIC_*) are never written here -- see k8s/app/deployment.yaml, they're
       # injected live into the Pod, never baked into the image.
       #
@@ -95,10 +103,6 @@ jobs:
         run: |
           cat > .env <<EOF
           DATABASE_URL=$DATABASE_URL
-          SENTRY_ORG=thunlights
-          SENTRY_PROJECT=distopia-ci
-          SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          PUBLIC_SENTRY_DSN=https://c00b15c8dde94b7a50f0706b6ec3d7ed@o4511148812599296.ingest.us.sentry.io/4511955775455232
           EOF
 
           image_epoch_sha="ghcr.io/thunlights/distopia:${{ steps.tag.outputs.epoch }}-${{ steps.tag.outputs.sha }}"

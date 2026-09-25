@@ -124,20 +124,36 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=BOT_TOKEN='...' \
   --from-literal=BOT_SECRET='...' \
   --from-literal=SENTRY_ORG='thunlights' \
-  --from-literal=SENTRY_PROJECT='distopia-ci' \
+  --from-literal=SENTRY_PROJECT='...' \
   --from-literal=PUBLIC_SENTRY_DSN='...' \
   --from-literal=SENTRY_AUTH_TOKEN='...' \
   --from-literal=VOICEVOX_API_KEY='...' \
   --from-literal=SAKURA_AI_ENGINE_API_KEY='...'
+```
 
+`SENTRY_PROJECT`/`PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` here must be your **production**
+Sentry project's own values, not `ci.yml`'s CI-scoped ones — `SENTRY_ORG` is the only Sentry
+value actually shared between the two. Unlike the other values in this secret,
+`.github/workflows/deploy.yml` does **not** need a copy of these three: `PUBLIC_SENTRY_DSN`
+is read at request time via `$env/dynamic/public` (never a build-time value in the first
+place), and sourcemap upload (`SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`) is opt-in at
+build time -- `vite.config.ts`'s `autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN`
+skips it cleanly when absent, rather than failing the build. `deploy.yml`'s own build-time
+`.env` deliberately carries only `DATABASE_URL` as a result. If you want production
+sourcemap upload too, add this job's own `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`
+env entries from dedicated repo secrets (Settings → Secrets and variables → Actions) --
+never reuse `ci.yml`'s `secrets.SENTRY_AUTH_TOKEN`, which is scoped to CI, not production
+releases.
+
+```bash
 # --- DB credentials -- your own choice of username/password (equivalent to the old
 # docker/.env's DB_USER/DB_PW), given to CloudNativePG's Cluster (k8s/db/cluster.yaml) as
 # bootstrap.initdb.secret so it doesn't auto-generate its own. `username` MUST match
 # cluster.yaml's `owner` field (default "distopia"). Create this BEFORE the distopia-db
 # Application first syncs -- bootstrap.initdb only runs once, at cluster creation.
 #
-# `url` is the single DATABASE_URL value both the app (k8s/app/deployment.yaml) and the
-# Workflow's migrate/prepare-env steps read directly, composed here by hand rather than at
+# `url` is the single DATABASE_URL value both the app and the `migrate` initContainer
+# (k8s/app/deployment.yaml) read directly, composed here by hand rather than at
 # runtime -- host/port/dbname are always distopia-db-rw.distopia.svc.cluster.local:5432/
 # distopia (CloudNativePG's standard read-write Service name for a Cluster named
 # distopia-db). Assembled with printf's own %s substitution rather than spliced directly
@@ -477,12 +493,14 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
   ConfigMap, `distopia-db-credentials`) — the same mechanism also picks up a plain mounted
   `.env` file if you'd rather run the image that way (e.g. local `docker run` testing),
   since `dotenv` never overrides a value that's already set in the real environment.
-  `bun run build` still needs a *separate*, build-time-only `.env` (just `DATABASE_URL` +
-  `SENTRY_*`, written by `.github/workflows/deploy.yml`'s build step) purely because
-  `prisma generate --sql` needs to introspect a real database at build time — that file is
-  deleted before the runtime image layer is created and never contains `BOT_TOKEN`/
-  `PUBLIC_*`, and the database it points at is a throwaway one the workflow itself spins up,
-  never the real production database.
+  `bun run build` still needs a *separate*, build-time-only `.env` (just `DATABASE_URL`,
+  written by `.github/workflows/deploy.yml`'s build step) purely because `prisma generate
+  --sql` needs to introspect a real database at build time — that file is deleted before
+  the runtime image layer is created and never contains `BOT_TOKEN`/`PUBLIC_*`, and the
+  database it points at is a throwaway one the workflow itself spins up, never the real
+  production database. No Sentry value is needed at build time either: sourcemap upload is
+  opt-in (see the note after `distopia-env`'s creation command above), and
+  `PUBLIC_SENTRY_DSN` is a runtime-only value regardless.
 - Rotating `distopia-env` or `distopia-db-credentials` takes effect on the **next Pod
   restart** (`kubectl rollout restart deployment/distopia-app -n distopia`) — no rebuild
   needed. Changing DB credentials specifically also needs that restart to reach the

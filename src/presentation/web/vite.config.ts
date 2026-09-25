@@ -25,6 +25,13 @@ export default defineConfig({
     sentrySvelteKit({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
+      // Sourcemap upload needs org/project/SENTRY_AUTH_TOKEN (the plugin reads the token
+      // from process.env itself, not a prop here) -- skip it entirely rather than fail the
+      // build when they're absent, so `bun run build` only ever requires DATABASE_URL for
+      // infra-database's prisma generate --sql. Runtime error reporting itself doesn't need
+      // any of this -- PUBLIC_SENTRY_DSN is read via $env/dynamic/public at request time
+      // (see hooks.client.ts/instrumentation.server.ts), unaffected either way.
+      autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN,
     }),
     tailwindcss(),
     enhancedImages(),
