@@ -1,0 +1,4 @@
+import{n as e}from"./rolldown-runtime-DkW27tQK.js";function t(e){return e<.5?4*e*e*e:.5*(2*e-2)**3+1}function n(e,{delay:t=0,duration:n=400,easing:r=i}={}){let a=+getComputedStyle(e).opacity;return{delay:t,duration:n,easing:r,css:e=>`opacity: ${e*a}`}}function r(e,{delay:n=0,speed:r,duration:i,easing:a=t}={}){let o=e.getTotalLength(),s=getComputedStyle(e);return s.strokeLinecap!==`butt`&&(o+=parseInt(s.strokeWidth)),i===void 0?i=r===void 0?800:o/r:typeof i==`function`&&(i=i(o)),{delay:n,duration:i,easing:a,css:(e,t)=>`
+			stroke-dasharray: ${o};
+			stroke-dashoffset: ${t*o};
+		`}}var i;function a(){return(a=e((()=>{i=e=>e})))()}export{n,a as r,r as t};
