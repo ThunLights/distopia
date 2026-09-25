@@ -9,8 +9,7 @@
 # overlap, so a hardcoded address valid on one would make `kubectl apply` fail outright on
 # the other. The auto-assigned ClusterIP is stable across normal `kubectl apply`/Argo CD
 # syncs anyway (only changes if the Service object itself is deleted and recreated, which
-# neither does for a plain field change) -- same tradeoff k8s/ci/eventsource.yaml's
-# controller-managed Service already has.
+# neither does for a plain field change).
 apiVersion: v1
 kind: Service
 metadata:

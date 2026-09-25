@@ -19,16 +19,18 @@
 # reads org/project/auth-token from process.env for sourcemap upload. Neither value ends up
 # in the compiled output -- Prisma's generated code doesn't embed the connection string,
 # and the Sentry step is a transient sourcemap upload, not something written to disk here.
-# The Argo Workflow writes this build-only `.env` from k8s Secrets into the build context
-# before invoking this Dockerfile, then pushes only to the cluster-internal registry — the
-# image is never pushed anywhere external.
+# `.github/workflows/deploy.yml` writes this build-only `.env` (pointed at a throwaway
+# Postgres service container it migrates itself, not the real production database) into the
+# build context before invoking this Dockerfile, then pushes the resulting image to
+# ghcr.io -- no app runtime secret (BOT_TOKEN, PUBLIC_*, the real DATABASE_URL) is ever part
+# of that build context or this image.
 
 ARG BUN_VERSION=1.4.0
 # Short git SHA of the commit this image was built from -- not a secret, just baked in as a
 # build-time label so the running app can report which commit is actually deployed (e.g.
-# the owner status command). Passed by the Argo Workflow's build-push step
-# (--build-arg=GIT_SHA={{tasks.clone.outputs.parameters.short-sha}}); defaults to "unknown"
-# for local `docker build` runs that don't pass it.
+# the owner status command). Passed by .github/workflows/deploy.yml's build step
+# (--build-arg GIT_SHA=<short-sha>); defaults to "unknown" for local `docker build` runs
+# that don't pass it.
 ARG GIT_SHA=unknown
 
 FROM oven/bun:${BUN_VERSION} AS builder

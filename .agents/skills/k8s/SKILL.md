@@ -1,6 +1,6 @@
 ---
 name: k8s
-description: Kubernetes/k3s manifests under k8s/, CloudNativePG, the self-hosted registry, and the kind-based e2e-prod CI job
+description: Kubernetes/k3s manifests under k8s/, CloudNativePG, and the kind-based e2e-prod CI job
 ---
 
 # Kubernetes / k3s Guide
@@ -14,14 +14,15 @@ Full operational runbook: `k8s/README.md`.
 
 | Path | Contents |
 |---|---|
-| `k8s/registry/` | Self-hosted `registry:2` (htpasswd auth), cluster-internal only, no Ingress |
 | `k8s/db/` | CloudNativePG `Cluster` + `NetworkPolicy` + daily backup `CronJob` |
-| `k8s/app/` | The app itself — `Deployment`/`Service`/`ConfigMap` |
-| `k8s/ci/` | Argo Events + Argo Workflows pipeline resources (see `argo` skill) |
-| `k8s/network/` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach in-cluster Services via loopback ports |
-| `k8s/argocd/` | The five Argo CD `Application` objects |
+| `k8s/app/` | The app itself — `Deployment` (main container + a `migrate` initContainer)/`Service`/`ConfigMap` |
+| `k8s/redis/` | Cluster-internal Redis, `OT-CONTAINER-KIT/redis-operator`'s `Redis` CRD + a PVC |
+| `k8s/network/` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach `distopia-app` via a loopback port |
+| `k8s/argocd/` | The four Argo CD `Application` objects |
 
-Each directory is its own `kustomization.yaml` (no Helm anywhere in this repo).
+Each directory is its own `kustomization.yaml` (no Helm anywhere in this repo). The image
+this all deploys is built and pushed to `ghcr.io/thunlights/distopia` by
+`.github/workflows/deploy.yml`, outside the cluster entirely — see the `argo` skill.
 
 ## CloudNativePG (`k8s/db/`)
 
@@ -68,7 +69,7 @@ gets recognized as local and skipped, but anything real-looking
 (including a `*.svc.cluster.local` name, or even a bare `$var`/`${var}` reference sitting in
 that position) gets a real DNS lookup attempt; the resulting failure is classified
 "unverified" rather than "not a secret" and **still fails the pre-commit hook**. The
-established safe pattern (used in both `k8s/ci/workflowtemplate.yaml` and
+established safe pattern (used in both `.github/workflows/ci.yml`'s `e2e-prod` job and
 `k8s/README.md`) is to assemble the value with `printf`'s own `%s` substitution so the
 literal text in the file never contains anything hostname-shaped:
 
@@ -84,10 +85,16 @@ db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' "$user" "$pass" "$db_host"
   duplicate event handling.
 - `strategy: RollingUpdate` with `maxSurge: 1, maxUnavailable: 0` (not `Recreate`) — a
   brief window with two pods during rollout is accepted in exchange for zero downtime.
+- A `migrate` initContainer runs `bunx prisma migrate deploy` against the real
+  `distopia-db-credentials`, from the same image as the main container, once per new Pod
+  (idempotent, so a crash-loop restart re-running it is harmless). See the `argo` skill for
+  why this replaced a separate pipeline step.
 - Config sources: `distopia-config` ConfigMap (`PORT`, non-secret) via `envFrom`,
   `distopia-env` Secret (`BOT_TOKEN`, `PUBLIC_*`, `SENTRY_*`) via `envFrom`, and
-  `DATABASE_URL` via its own `secretKeyRef` (see above) — the app reads all of it through
-  `$env/dynamic/*` + `dotenv` at runtime, nothing baked into the image.
+  `DATABASE_URL` via its own `secretKeyRef` (see above, read by both the main container and
+  the `migrate` initContainer) — the app reads all of it through `$env/dynamic/*` + `dotenv`
+  at runtime, nothing baked into the image.
+- No `imagePullSecrets` — `ghcr.io/thunlights/distopia` is a public package.
 - No `Ingress`/`NodePort`/`LoadBalancer` anywhere — `k8s/app/service.yaml` is `ClusterIP`
   only, deliberately **not pinning `clusterIP`** (k3s's and kind's service CIDRs don't
   overlap, so a hardcoded address would break one or the other). Public traffic reaches it
@@ -95,15 +102,14 @@ db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' "$user" "$pass" "$db_host"
 
 ## Network Exposure (`k8s/network/tunnel-relay.yaml`)
 
-A `hostNetwork: true` Deployment (two `alpine/socat` containers) that plain-binds two
-loopback ports on the node's own interface (`bind=127.0.0.1` — not reachable from outside
-the node even without `ufw`'s help) and forwards to `distopia-app`/the webhook
-`EventSource` by their normal cluster DNS names. **The actual port numbers are never
-written in this repo** (public repo — see `k8s/README.md`'s "Cloudflare Tunnel and network
-exposure" section for why) — each container reads its port from an env var sourced from
-`distopia-tunnel-relay-config`, a Secret you create by hand with whatever numbers you
-choose. Since it forwards to Services, not a specific Pod IP, it keeps working unmodified
-across normal rollouts.
+A `hostNetwork: true` Deployment (one `alpine/socat` container) that plain-binds a loopback
+port on the node's own interface (`bind=127.0.0.1` — not reachable from outside the node
+even without `ufw`'s help) and forwards to `distopia-app` by its normal cluster DNS name.
+**The actual port number is never written in this repo** (public repo — see
+`k8s/README.md`'s "Cloudflare Tunnel and network exposure" section for why) — the container
+reads its port from an env var sourced from `distopia-tunnel-relay-config`, a Secret you
+create by hand with whatever number you choose. Since it forwards to the Service, not a
+specific Pod IP, it keeps working unmodified across normal rollouts.
 
 ## k3s-Specific Setup
 
@@ -113,28 +119,10 @@ across normal rollouts.
   directly for `LoadBalancer`/`NodePort` in a way that bypasses `ufw` — this is *why* they
   must be disabled, not just left unused.
 - k3s's default StorageClass is `local-path` — `k8s/db/cluster.yaml` and
-  `k8s/registry/pvc.yaml` both reference it by that name directly.
+  `k8s/redis/redis.yaml` both reference it by that name directly.
 - With Traefik/ServiceLB off and nothing in `k8s/` creating an Ingress/NodePort/
   LoadBalancer, `ufw default deny incoming` + `ufw allow 22/tcp` is fully accurate — no
   80/443 needed, since Cloudflare Tunnel only makes outbound connections.
-
-## Registry (`k8s/registry/`)
-
-Plain `registry:2` with htpasswd auth, `ClusterIP` only, no Ingress — pushed to only by
-Kaniko (Argo Workflow) and pulled from only by the app Deployment's `imagePullSecrets`.
-`REGISTRY_STORAGE_DELETE_ENABLED: "true"` is set, but there's **no garbage collection** —
-every push adds a new `<short-sha>`-tagged image forever, so the 20Gi PVC will eventually
-fill on a long-lived project. The readiness probe is TCP, not HTTP — `registry:2` requires
-auth on every endpoint including `/v2/`, so a plain `httpGet` probe would see 401.
-
-Credentials: `distopia-registry-credentials` (`username`/`password`) is the source of
-truth, created once by hand — `distopia-registry-htpasswd` (the bcrypt-hashed file
-`registry:2` actually authenticates against) and `distopia-registry-pull`
-(`dockerconfigjson`, used by both Kaniko's push and the app's `imagePullSecrets`) are both
-*derived* from it in the same step (`k8s/README.md` section 2), rather than the same
-username/password being retyped into two separate `kubectl create secret` invocations.
-`registry:2` has no way to read plain credentials directly, so the htpasswd file itself
-can't be eliminated — only generated from one canonical place instead of typed twice.
 
 ## Testing manifests in CI: the `e2e-prod` job
 

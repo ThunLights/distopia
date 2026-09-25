@@ -1,20 +1,20 @@
 # Host-level cloudflared (see k8s/README.md's "Cloudflare Tunnel and network exposure")
-# needs to reach two in-cluster Services without any Ingress/NodePort/LoadBalancer ever
+# needs to reach the in-cluster app Service without any Ingress/NodePort/LoadBalancer ever
 # binding a host-facing port (Traefik/ServiceLB stay disabled -- see k8s/README.md section
 # 0). Rather than relying on the host resolving *.svc.cluster.local (an extra
 # resolvectl/systemd-resolved setup step that has to survive reboots and network changes),
-# this Deployment plain-binds two loopback ports on the node itself and forwards to the
-# real Services by their normal cluster DNS names -- ordinary Kubernetes Service routing
-# (kube-proxy works fine on a real k3s cluster; the NodePort-specific issue documented in
-# the `k8s` skill / e2e-prod CI job is a kind+GitHub-Actions-only quirk, not something this
-# depends on or reproduces).
+# this Deployment plain-binds a loopback port on the node itself and forwards to the real
+# Service by its normal cluster DNS name -- ordinary Kubernetes Service routing (kube-proxy
+# works fine on a real k3s cluster; the NodePort-specific issue documented in the `k8s`
+# skill / e2e-prod CI job is a kind+GitHub-Actions-only quirk, not something this depends on
+# or reproduces).
 #
-# The actual port numbers are deliberately NOT written here (or anywhere else in this
+# The actual port number is deliberately NOT written here (or anywhere else in this
 # repo) -- this is a public repo, and even a loopback-only bind is still worth keeping out
-# of it, the same reasoning as the DATABASE_URL convention (see k8s/README.md). Both ports
-# are read from distopia-tunnel-relay-config, a Secret you create by hand on your own
-# server with whatever numbers you choose (k8s/README.md section 2 has the command) --
-# never committed, so this manifest works unmodified regardless of which ports you pick.
+# of it, the same reasoning as the DATABASE_URL convention (see k8s/README.md). It's read
+# from distopia-tunnel-relay-config, a Secret you create by hand on your own server with
+# whatever number you choose (k8s/README.md section 2 has the command) -- never committed,
+# so this manifest works unmodified regardless of which port you pick.
 #
 # hostNetwork means this Pod shares the node's own network namespace -- socat's `bind=`
 # option scopes each listener to 127.0.0.1 specifically, so neither port is reachable from
@@ -56,25 +56,6 @@ spec:
                 secretKeyRef:
                   name: distopia-tunnel-relay-config
                   key: app-port
-          resources:
-            requests:
-              cpu: 25m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
-        # Forwards to ci.distopia.top's webhook EventSource, port sourced from CI_PORT.
-        - name: ci-relay
-          image: alpine/socat
-          command: ["sh", "-c"]
-          args:
-            - exec socat "TCP-LISTEN:$CI_PORT,bind=127.0.0.1,fork,reuseaddr" TCP:github-eventsource-svc.distopia.svc.cluster.local:12000
-          env:
-            - name: CI_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: distopia-tunnel-relay-config
-                  key: ci-port
           resources:
             requests:
               cpu: 25m

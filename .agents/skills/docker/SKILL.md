@@ -160,13 +160,15 @@ docker build -f docker/dockerfile.prod -t distopia:local .
 
 ## Production Deploy
 
-Production runs on k3s and deploys automatically via GitOps (Argo CD + Argo Workflows +
-Argo Events) on every push to `main` — the Workflow builds `docker/dockerfile.prod` with
-Kaniko, runs `prisma migrate deploy`, pushes to an in-cluster registry, and Argo CD rolls
-the Deployment. See `k8s/README.md` for the full pipeline, secrets, and one-time cluster
-bootstrap. `.github/workflows/ci.yml`'s `e2e-prod` job builds/runs the same
-`docker/dockerfile.prod` image directly with `docker build`/`docker run` (no k8s) to
-smoke-test it in CI.
+Production runs on k3s and deploys via GitOps (Argo CD + Argo CD Image Updater) on every
+push to `main` — `.github/workflows/deploy.yml` (GitHub Actions, not the cluster) builds
+`docker/dockerfile.prod` and pushes it to `ghcr.io/thunlights/distopia`; Argo CD Image
+Updater detects the new tag and rolls the Deployment, whose `migrate` initContainer runs the
+real `prisma migrate deploy` against production. See `k8s/README.md` for the full pipeline,
+secrets, and one-time cluster bootstrap; the `argo` skill for the Argo CD/Image Updater side
+specifically. `.github/workflows/ci.yml`'s `e2e-prod` job builds/runs the same
+`docker/dockerfile.prod` image directly with `docker build`/`docker run` (no k8s, no ghcr)
+to smoke-test it in CI.
 
 ## Networking
 

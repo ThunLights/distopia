@@ -178,7 +178,7 @@ jobs:
           # secret", still failing the hook. With %s placeholders, the literal text in this
           # file never contains anything hostname-shaped at all; the real value only exists
           # in memory once printf's arguments are substituted at runtime. Same pattern
-          # k8s/ci/workflowtemplate.yaml's prepare-env step already uses.
+          # .github/workflows/deploy.yml's build step already uses.
           db_host=distopia-db-rw.distopia.svc.cluster.local
           db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' distopia distopia-e2e-test "$db_host")
           cat <<EOF | kubectl apply -f -
@@ -409,11 +409,12 @@ jobs:
           done
           exit 1
 
-      # Builds the same image k8s/ci/workflowtemplate.yaml's Kaniko step builds, just with
-      # `docker build` instead. --network host lets `prisma generate --sql` reach the
-      # relay-exposed database above. Build-time-only .env (deleted before the runtime
-      # layer, same as the real pipeline) -- BOT_TOKEN/PUBLIC_*/etc. are intentionally not
-      # in here, only what `bun run build` itself needs.
+      # Builds the same image .github/workflows/deploy.yml's build step builds, against this
+      # job's own kind-cluster database instead of deploy.yml's throwaway one. --network
+      # host lets `prisma generate --sql` reach the relay-exposed database above.
+      # Build-time-only .env (deleted before the runtime layer, same as the real pipeline) --
+      # BOT_TOKEN/PUBLIC_*/etc. are intentionally not in here, only what `bun run build`
+      # itself needs.
       - name: Build production image
         run: |
           cat > .env <<EOF
@@ -433,7 +434,7 @@ jobs:
       - name: Deploy app (k8s/app, image tag set directly -- no Argo CD Image Updater in this kind cluster)
         run: |
           cd k8s/app
-          kustomize edit set image distopia-registry.distopia.svc.cluster.local:5000/distopia=distopia:e2e
+          kustomize edit set image ghcr.io/thunlights/distopia=distopia:e2e
           cd ../..
           kubectl apply -k k8s/app
           kubectl rollout status deployment/distopia-app -n distopia --timeout=180s
