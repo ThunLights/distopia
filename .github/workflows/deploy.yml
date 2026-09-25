@@ -1,0 +1,109 @@
+name: Deploy
+
+# Builds the production image and pushes it to ghcr.io on every push to main. That's the
+# whole job -- nothing here touches the cluster. Argo CD Image Updater (see
+# k8s/argocd/app-app.yaml's annotations) polls ghcr.io directly and rolls distopia-app to
+# whichever <epoch>-<short-sha> tag sorts highest; k8s/app/deployment.yaml's initContainer
+# runs the real migration against the actual production database right before the new Pod's
+# main container starts. See k8s/README.md's "Shipping a new build" for the full flow.
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  # Never cancel a run that might already be mid-push -- a half-pushed tag is worse than a
+  # slightly delayed one. Two pushes landing close together just produce two tags; Image
+  # Updater's alphabetical strategy (see app-app.yaml's own comment) picks the right one
+  # regardless of which build finishes last.
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    # A throwaway database to migrate and introspect at build time (infra-database's build
+    # step, `prisma generate --sql`, needs a real already-migrated database, not just the
+    # schema files -- see docker/dockerfile.prod's own comment) -- never the real production
+    # database, which isn't reachable from a GitHub-hosted runner in the first place (see
+    # k8s/README.md's "Cloudflare Tunnel and network exposure": nothing in the cluster binds
+    # a public port).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: distopia
+          POSTGRES_PASSWORD: distopia
+          POSTGRES_DB: distopia
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U distopia"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://distopia:distopia@localhost:5432/distopia
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.0"
+
+      - name: Apply database migrations
+        run: |
+          bun install --frozen-lockfile
+          cd src/infrastructure/database
+          bunx prisma migrate deploy
+
+      - name: Compute image tags
+        id: tag
+        run: |
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "epoch=$(git show -s --format=%ct "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build-time-only .env (see docker/dockerfile.prod's own comment) -- SENTRY_ORG/
+      # SENTRY_PROJECT/PUBLIC_SENTRY_DSN are the same non-secret values already public in
+      # ci.yml's own env block; only SENTRY_AUTH_TOKEN is a real secret. App runtime secrets
+      # (BOT_TOKEN, PUBLIC_*) are never written here -- see k8s/app/deployment.yaml, they're
+      # injected live into the Pod, never baked into the image.
+      #
+      # --network host (not docker/build-push-action's buildx, which builds in an isolated
+      # network namespace by default) so the build can actually reach the postgres service
+      # container on localhost -- same reasoning, same flag, as ci.yml's E2E job.
+      - name: Build and push production image
+        run: |
+          cat > .env <<EOF
+          DATABASE_URL=$DATABASE_URL
+          SENTRY_ORG=thunlights
+          SENTRY_PROJECT=distopia-ci
+          SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+          PUBLIC_SENTRY_DSN=https://c00b15c8dde94b7a50f0706b6ec3d7ed@o4511148812599296.ingest.us.sentry.io/4511955775455232
+          EOF
+
+          image_epoch_sha="ghcr.io/thunlights/distopia:${{ steps.tag.outputs.epoch }}-${{ steps.tag.outputs.sha }}"
+          image_latest="ghcr.io/thunlights/distopia:latest"
+
+          docker build --network host -f docker/dockerfile.prod \
+            --build-arg GIT_SHA="${{ steps.tag.outputs.sha }}" \
+            -t "$image_epoch_sha" -t "$image_latest" .
+          rm -f .env
+
+          docker push "$image_epoch_sha"
+          docker push "$image_latest"
