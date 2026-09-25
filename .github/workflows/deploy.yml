@@ -54,6 +54,14 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://distopia:distopia@localhost:5432/distopia
+      # Production sourcemap upload -- deliberately NOT ci.yml's secrets.SENTRY_AUTH_TOKEN,
+      # which is scoped to the "distopia-ci" project. SENTRY_ORG is the same org as ci.yml
+      # (not sensitive, so hardcoded the same way); SENTRY_PROJECT_PROD/SENTRY_AUTH_TOKEN_PROD
+      # are this job's own repo secrets (Settings -> Secrets and variables -> Actions),
+      # pointing at the production Sentry project.
+      SENTRY_ORG: thunlights
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT_PROD }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN_PROD }}
 
     steps:
       - name: Checkout repository
@@ -82,19 +90,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build-time-only .env (see docker/dockerfile.prod's own comment) -- just DATABASE_URL.
-      # No Sentry secret is needed here at all: SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN
-      # (sourcemap upload) are only used when present (vite.config.ts's
-      # `autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN` skips upload cleanly when
-      # they're absent, rather than failing the build), and PUBLIC_SENTRY_DSN was never a
-      # build-time value in the first place -- it's read via $env/dynamic/public at request
-      # time (hooks.client.ts/instrumentation.server.ts). This deliberately does NOT reuse
-      # ci.yml's secrets.SENTRY_AUTH_TOKEN -- that token and its "distopia-ci" project are
-      # scoped to CI, not production releases; if production sourcemap upload is wanted
-      # later, add this job's own SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN env entries
-      # from dedicated repo secrets rather than borrowing CI's. App runtime secrets
-      # (BOT_TOKEN, PUBLIC_*) are never written here -- see k8s/app/deployment.yaml, they're
-      # injected live into the Pod, never baked into the image.
+      # Build-time-only .env (see docker/dockerfile.prod's own comment): DATABASE_URL plus
+      # sourcemap upload config. If SENTRY_PROJECT_PROD/SENTRY_AUTH_TOKEN_PROD aren't set as
+      # repo secrets, SENTRY_AUTH_TOKEN is empty and vite.config.ts's
+      # `autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN` skips the upload cleanly
+      # rather than failing the build -- so this stays optional either way. PUBLIC_SENTRY_DSN
+      # was never a build-time value -- it's read via $env/dynamic/public at request time
+      # (hooks.client.ts/instrumentation.server.ts). App runtime secrets (BOT_TOKEN, PUBLIC_*)
+      # are never written here -- see k8s/app/deployment.yaml, they're injected live into the
+      # Pod, never baked into the image.
       #
       # --network host (not docker/build-push-action's buildx, which builds in an isolated
       # network namespace by default) so the build can actually reach the postgres service
@@ -103,6 +107,9 @@ jobs:
         run: |
           cat > .env <<EOF
           DATABASE_URL=$DATABASE_URL
+          SENTRY_ORG=$SENTRY_ORG
+          SENTRY_PROJECT=$SENTRY_PROJECT
+          SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
           EOF
 
           image_epoch_sha="ghcr.io/thunlights/distopia:${{ steps.tag.outputs.epoch }}-${{ steps.tag.outputs.sha }}"

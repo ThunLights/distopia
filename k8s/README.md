@@ -123,27 +123,28 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=PUBLIC_BOT_ID='...' \
   --from-literal=BOT_TOKEN='...' \
   --from-literal=BOT_SECRET='...' \
-  --from-literal=SENTRY_ORG='thunlights' \
-  --from-literal=SENTRY_PROJECT='...' \
   --from-literal=PUBLIC_SENTRY_DSN='...' \
-  --from-literal=SENTRY_AUTH_TOKEN='...' \
   --from-literal=VOICEVOX_API_KEY='...' \
   --from-literal=SAKURA_AI_ENGINE_API_KEY='...'
 ```
 
-`SENTRY_PROJECT`/`PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` here must be your **production**
-Sentry project's own values, not `ci.yml`'s CI-scoped ones — `SENTRY_ORG` is the only Sentry
-value actually shared between the two. Unlike the other values in this secret,
-`.github/workflows/deploy.yml` does **not** need a copy of these three: `PUBLIC_SENTRY_DSN`
-is read at request time via `$env/dynamic/public` (never a build-time value in the first
-place), and sourcemap upload (`SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`) is opt-in at
-build time -- `vite.config.ts`'s `autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN`
-skips it cleanly when absent, rather than failing the build. `deploy.yml`'s own build-time
-`.env` deliberately carries only `DATABASE_URL` as a result. If you want production
-sourcemap upload too, add this job's own `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`
-env entries from dedicated repo secrets (Settings → Secrets and variables → Actions) --
-never reuse `ci.yml`'s `secrets.SENTRY_AUTH_TOKEN`, which is scoped to CI, not production
-releases.
+`PUBLIC_SENTRY_DSN` here must be your **production** Sentry project's own DSN, not `ci.yml`'s
+CI-scoped one. It's the only Sentry value this Secret carries, and the only one the running
+app ever reads at runtime (`hooks.client.ts`/`instrumentation.server.ts`, via
+`$env/dynamic/public`) — `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` are deliberately
+**not** in here. Those three are build-time-only (`vite.config.ts`'s sourcemap upload
+config), never read by the running app, and putting a real upload-scoped `SENTRY_AUTH_TOKEN`
+into the app Pod's environment would just be unnecessary exposure for a value it has no use
+for.
+
+`.github/workflows/deploy.yml` sources those three from its own repo secrets --
+`SENTRY_PROJECT_PROD` and `SENTRY_AUTH_TOKEN_PROD` (Settings → Secrets and variables →
+Actions; `SENTRY_ORG` is hardcoded to `thunlights`, same as `ci.yml`, since it isn't
+sensitive). This is a **different** token from `ci.yml`'s `secrets.SENTRY_AUTH_TOKEN`, which
+is scoped to the `distopia-ci` project -- never reuse it here. If `SENTRY_PROJECT_PROD`/
+`SENTRY_AUTH_TOKEN_PROD` aren't set, `SENTRY_AUTH_TOKEN` is empty and `vite.config.ts`'s
+`autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN` skips the upload cleanly rather than
+failing the build, so setting these up remains optional.
 
 ```bash
 # --- DB credentials -- your own choice of username/password (equivalent to the old
@@ -493,14 +494,16 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
   ConfigMap, `distopia-db-credentials`) — the same mechanism also picks up a plain mounted
   `.env` file if you'd rather run the image that way (e.g. local `docker run` testing),
   since `dotenv` never overrides a value that's already set in the real environment.
-  `bun run build` still needs a *separate*, build-time-only `.env` (just `DATABASE_URL`,
-  written by `.github/workflows/deploy.yml`'s build step) purely because `prisma generate
-  --sql` needs to introspect a real database at build time — that file is deleted before
-  the runtime image layer is created and never contains `BOT_TOKEN`/`PUBLIC_*`, and the
-  database it points at is a throwaway one the workflow itself spins up, never the real
-  production database. No Sentry value is needed at build time either: sourcemap upload is
-  opt-in (see the note after `distopia-env`'s creation command above), and
-  `PUBLIC_SENTRY_DSN` is a runtime-only value regardless.
+  `bun run build` still needs a *separate*, build-time-only `.env` (`DATABASE_URL` plus
+  sourcemap upload config, written by `.github/workflows/deploy.yml`'s build step) purely
+  because `prisma generate --sql` needs to introspect a real database at build time — that
+  file is deleted before the runtime image layer is created and never contains
+  `BOT_TOKEN`/`PUBLIC_*`, and the database it points at is a throwaway one the workflow
+  itself spins up, never the real production database. Sourcemap upload
+  (`SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`) stays opt-in even though `deploy.yml`
+  now wires it up (see the note after `distopia-env`'s creation command above) — it's driven
+  by its own `SENTRY_PROJECT_PROD`/`SENTRY_AUTH_TOKEN_PROD` repo secrets, distinct from
+  `ci.yml`'s, and `PUBLIC_SENTRY_DSN` is a runtime-only value regardless.
 - Rotating `distopia-env` or `distopia-db-credentials` takes effect on the **next Pod
   restart** (`kubectl rollout restart deployment/distopia-app -n distopia`) — no rebuild
   needed. Changing DB credentials specifically also needs that restart to reach the

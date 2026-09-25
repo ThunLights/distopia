@@ -148,10 +148,13 @@ container just runs `bun run src/presentation/web/build/index.js` on start — n
 install/build/migrate at container startup. The app reads its own config (`BOT_TOKEN`,
 `PUBLIC_*`, `DATABASE_URL`, ...) via `$env/dynamic/*` + `dotenv` (see `hooks.server.ts`),
 resolved at container start from real env vars/a mounted `.env` — none of it is baked into
-the image. The build itself still needs a *separate*, build-time-only `.env` (just
-`DATABASE_URL` + `SENTRY_*`) because `prisma generate --sql` needs to introspect a real
-database and the Sentry vite plugin needs org/project/token for sourcemap upload; that file
-is deleted before the runtime layer is created.
+the image. The build itself still needs a *separate*, build-time-only `.env` (just `DATABASE_URL`,
+because `prisma generate --sql` needs to introspect a real database) -- that file is
+deleted before the runtime layer is created. `SENTRY_ORG`/`SENTRY_PROJECT`/
+`SENTRY_AUTH_TOKEN` are optional there, not required: the Sentry vite plugin's
+`autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN` (vite.config.ts) skips sourcemap
+upload cleanly when they're absent rather than failing the build. `PUBLIC_SENTRY_DSN` was
+never a build-time value at all -- it's read via `$env/dynamic/public` at runtime.
 
 ```bash
 # build context must be the repo root

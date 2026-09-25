@@ -96,17 +96,17 @@ All created by hand, never committed (`k8s/README.md` section 2 has the exact co
 | `distopia-env` | The app Deployment (`envFrom`) |
 | `distopia-db-credentials` | CNPG's `bootstrap.initdb.secret` and the app Deployment (both the main container and the `migrate` initContainer, via its `url` key) |
 
-`deploy.yml` (GitHub Actions, not this cluster) needs no Sentry secret at all — its
-build-time `.env` carries only `DATABASE_URL` (a throwaway Postgres service container, not
-production). Sourcemap upload is opt-in: `vite.config.ts`'s `autoUploadSourceMaps:
-!!process.env.SENTRY_AUTH_TOKEN` skips it cleanly when the env var is absent rather than
-failing the build, and `PUBLIC_SENTRY_DSN` was never a build-time value in the first place
-(`$env/dynamic/public`, read at request time). If you want production sourcemap upload,
-add this job's own `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` from dedicated repo
-secrets — never `ci.yml`'s `secrets.SENTRY_AUTH_TOKEN`, which is scoped to CI (see
-`k8s/README.md` section 2's note right after the `distopia-env` block). The only secret
-`deploy.yml` does need is the ambient `secrets.GITHUB_TOKEN` (scoped to `packages: write`
-in the job, no PAT needed) — not a k8s Secret either.
+`deploy.yml` (GitHub Actions, not this cluster) needs no k8s Secret at all — its build-time
+`.env` carries `DATABASE_URL` (a throwaway Postgres service container, not production) plus
+sourcemap upload config, sourced from its own `secrets.SENTRY_PROJECT_PROD`/
+`secrets.SENTRY_AUTH_TOKEN_PROD` repo secrets (`SENTRY_ORG` is hardcoded, not sensitive) —
+never `ci.yml`'s `secrets.SENTRY_AUTH_TOKEN`, which is scoped to CI. Upload still stays
+opt-in: `vite.config.ts`'s `autoUploadSourceMaps: !!process.env.SENTRY_AUTH_TOKEN` skips it
+cleanly if those repo secrets aren't set, rather than failing the build, and
+`PUBLIC_SENTRY_DSN` was never a build-time value in the first place (`$env/dynamic/public`,
+read at request time) — see `k8s/README.md` section 2's note right after the `distopia-env`
+block. The only k8s-adjacent secret `deploy.yml` needs is the ambient `secrets.GITHUB_TOKEN`
+(scoped to `packages: write` in the job, no PAT needed) — not a k8s Secret either.
 
 ## Common Commands
 
