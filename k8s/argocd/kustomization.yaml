@@ -1,5 +1,20 @@
 # Not consumed by Argo CD itself -- this just lets you bootstrap all four Applications in
 # one shot: `kubectl apply -k k8s/argocd`. See k8s/README.md for the recommended order.
+#
+# If you're migrating from the old self-hosted-registry pipeline: applying this does NOT
+# retire the old `distopia-ci`/`distopia-registry` Applications on its own -- `kubectl
+# apply -k` only ever adds/updates resources listed here, it never deletes an existing
+# Application just because a file was removed from this list. Argo CD keeps reconciling
+# both against their now-git-deleted source paths (k8s/ci, k8s/registry) regardless of
+# whether this kustomization still references them. `distopia-ci` (prune: true) self-heals
+# once that happens -- its managed EventBus/EventSource/Sensor/RBAC get pruned
+# automatically, only the empty Application shell needs a manual
+# `kubectl delete application distopia-ci -n argocd` afterward. `distopia-registry` (prune:
+# false, deliberately) does NOT self-heal -- it just goes OutOfSync and leaves the old
+# registry Deployment/Service/PVC/NetworkPolicy running untouched. In particular,
+# `distopia-registry-data` (the PVC) holds every image ever pushed to the old registry --
+# decide on purpose whether you still need that image history before deleting anything;
+# don't cascade-delete it as a side effect of tidying up the Application object.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

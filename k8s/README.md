@@ -287,6 +287,38 @@ Configure whatever policy suits your storage budget there — never delete the t
 `distopia-app`'s currently-running image by hand (`kubectl get deployment distopia-app -n
 distopia -o jsonpath='{.spec.template.spec.containers[0].image}'` shows which tag that is).
 
+## Retiring the old self-hosted-registry pipeline
+
+If you're upgrading a cluster that already ran the old in-cluster registry/Argo Workflows
+pipeline, `kubectl apply -k k8s/argocd` (step 1 above) does **not** retire the old
+`distopia-ci`/`distopia-registry` Applications on its own — `kubectl apply -k` only ever
+adds/updates the resources listed in `k8s/argocd/kustomization.yaml`, it never deletes an
+existing Application just because its file was removed from that list. Argo CD keeps
+reconciling both against their now-git-deleted source paths (`k8s/ci`, `k8s/registry`)
+regardless.
+
+- `distopia-ci` (`prune: true`) self-heals once Argo CD notices `k8s/ci` is gone from git —
+  its managed `EventBus`/`EventSource`/`Sensor`/RBAC get pruned automatically. Only the
+  now-empty Application shell needs a manual follow-up: `kubectl delete application
+  distopia-ci -n argocd`.
+- `distopia-registry` (`prune: false`, deliberately) does **not** self-heal — it just goes
+  `OutOfSync` and leaves the old registry `Deployment`/`Service`/`PVC`/`NetworkPolicy`
+  running, untouched, indefinitely. In particular, `distopia-registry-data` (the PVC) holds
+  every image ever pushed to the old registry — decide on purpose whether you still want
+  that image history around (e.g. as a rollback fallback for a few days) before deleting
+  anything. Once you're confident `ghcr.io/thunlights/distopia` is working and you no longer
+  need the old images:
+  ```bash
+  kubectl delete application distopia-registry -n argocd
+  kubectl delete deployment,service,pvc,networkpolicy -n distopia -l app=distopia-registry
+  ```
+
+Also outside this repo's scope but worth doing once you've confirmed the new pipeline
+works: remove the GitHub webhook (repo Settings → Webhooks) that used to point at
+`ci.distopia.top/push` — its deliveries will just start failing harmlessly once
+`k8s/ci`'s `EventSource` is gone, but it's dead weight — and drop the `ci.distopia.top`
+route from your own `cloudflared` config and Cloudflare Tunnel dashboard.
+
 ## 5. Database backups
 
 `k8s/db/backup-cronjob.yaml` runs a daily `pg_dump` (custom format, same shape as the

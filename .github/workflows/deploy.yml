@@ -10,6 +10,10 @@ on:
   push:
     branches:
       - main
+  # Lets `gh workflow run deploy.yml --ref main` (see k8s/README.md's bootstrap section and
+  # the `argo` skill) actually start a run -- GitHub refuses a manual dispatch on a workflow
+  # that only declares `push`, regardless of ref.
+  workflow_dispatch:
 
 concurrency:
   group: deploy-${{ github.ref }}
