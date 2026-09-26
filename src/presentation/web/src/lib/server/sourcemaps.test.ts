@@ -1,3 +1,5 @@
+import { env } from "$env/dynamic/private";
+import { uploadSourceMapsOnce } from "./sourcemaps";
 import type { RedisClient } from "infra-redis";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -27,10 +29,6 @@ vi.mock("$env/dynamic/private", () => ({
     SENTRY_PROJECT: "project",
   },
 }));
-
-import { env } from "$env/dynamic/private";
-
-import { uploadSourceMapsOnce } from "./sourcemaps";
 
 function fakeRedis(): RedisClient {
   return {} as RedisClient;
