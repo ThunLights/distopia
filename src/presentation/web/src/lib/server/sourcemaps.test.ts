@@ -90,7 +90,9 @@ describe("uploadSourceMapsOnce", () => {
   });
 
   test("skips entirely when SENTRY_AUTH_TOKEN is not configured", async () => {
-    env.SENTRY_AUTH_TOKEN = undefined;
+    // $env/dynamic/private types env as Record<string, string> (never `| undefined`) --
+    // Reflect.deleteProperty removes the key without fighting that type at the call site.
+    Reflect.deleteProperty(env, "SENTRY_AUTH_TOKEN");
 
     await uploadSourceMapsOnce(fakeRedis());
 
