@@ -43,6 +43,15 @@ ENV HUSKY=0
 COPY . .
 RUN bun install --frozen-lockfile
 RUN bun run build
+# Preserve a private copy of the build (source maps included) for the runtime uploader
+# (src/presentation/web/src/lib/server/sourcemaps.ts), then strip the real .map files out of
+# the build itself. adapter-node serves src/presentation/web/build/client as public static
+# files -- anything left there with a .map extension is fetchable by anyone, disclosing full
+# unminified source, not just something a stack-trace symbolication tool would use. build/server
+# is never served over HTTP, but its maps are stripped too for consistency; both are already
+# preserved in .sourcemaps/ below.
+RUN cp -a src/presentation/web/build .sourcemaps && \
+    find src/presentation/web/build -type f -name '*.map' -delete
 # Build-time-only .env (see above) -- delete it so it never reaches the runtime layer.
 RUN rm -f .env
 

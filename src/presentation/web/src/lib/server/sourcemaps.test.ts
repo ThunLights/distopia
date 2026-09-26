@@ -1,13 +1,20 @@
 import type { RedisClient } from "infra-redis";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-const { claimSourcemapUpload, releaseSourcemapUploadClaim } = vi.hoisted(() => ({
-  claimSourcemapUpload: vi.fn(),
-  releaseSourcemapUploadClaim: vi.fn(),
-}));
+const { claimSourcemapUpload, markSourcemapUploadDone, releaseSourcemapUploadClaim } = vi.hoisted(
+  () => ({
+    claimSourcemapUpload: vi.fn(),
+    markSourcemapUploadDone: vi.fn(),
+    releaseSourcemapUploadClaim: vi.fn(),
+  }),
+);
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }));
 
-vi.mock("repo-redis", () => ({ claimSourcemapUpload, releaseSourcemapUploadClaim }));
+vi.mock("repo-redis", () => ({
+  claimSourcemapUpload,
+  markSourcemapUploadDone,
+  releaseSourcemapUploadClaim,
+}));
 vi.mock("@sentry/cli", () => ({
   default: class {
     public execute = execute;
@@ -38,6 +45,7 @@ describe("uploadSourceMapsOnce", () => {
     env.SENTRY_ORG = "org";
     env.SENTRY_PROJECT = "project";
     claimSourcemapUpload.mockReset().mockResolvedValue(true);
+    markSourcemapUploadDone.mockReset().mockResolvedValue(undefined);
     releaseSourcemapUploadClaim.mockReset().mockResolvedValue(undefined);
     execute.mockReset().mockResolvedValue("");
   });
@@ -46,14 +54,20 @@ describe("uploadSourceMapsOnce", () => {
     process.env.GIT_SHA = originalGitSha;
   });
 
-  test("uploads once claimed and never releases the claim", async () => {
+  test("uploads once claimed, marks it done, and never releases the claim", async () => {
     await uploadSourceMapsOnce(fakeRedis());
 
     expect(claimSourcemapUpload).toHaveBeenCalledWith(expect.anything(), "web", "abc123");
     expect(execute).toHaveBeenCalledWith(
-      ["sourcemaps", "upload", expect.stringContaining("build/client"), expect.stringContaining("build/server")],
+      [
+        "sourcemaps",
+        "upload",
+        expect.stringContaining(".sourcemaps/client"),
+        expect.stringContaining(".sourcemaps/server"),
+      ],
       "rejectOnError",
     );
+    expect(markSourcemapUploadDone).toHaveBeenCalledWith(expect.anything(), "web", "abc123");
     expect(releaseSourcemapUploadClaim).not.toHaveBeenCalled();
   });
 
@@ -63,6 +77,7 @@ describe("uploadSourceMapsOnce", () => {
     await uploadSourceMapsOnce(fakeRedis());
 
     expect(execute).not.toHaveBeenCalled();
+    expect(releaseSourcemapUploadClaim).not.toHaveBeenCalled();
   });
 
   test("skips entirely when GIT_SHA is the local-dev default", async () => {
@@ -89,5 +104,20 @@ describe("uploadSourceMapsOnce", () => {
     await uploadSourceMapsOnce(fakeRedis());
 
     expect(releaseSourcemapUploadClaim).toHaveBeenCalledWith(expect.anything(), "web", "abc123");
+    expect(markSourcemapUploadDone).not.toHaveBeenCalled();
+  });
+
+  test("never rejects, even when claimSourcemapUpload itself fails", async () => {
+    claimSourcemapUpload.mockRejectedValue(new Error("redis unreachable"));
+
+    await expect(uploadSourceMapsOnce(fakeRedis())).resolves.toBeUndefined();
+    expect(releaseSourcemapUploadClaim).not.toHaveBeenCalled();
+  });
+
+  test("never rejects, even when releasing a failed claim also fails", async () => {
+    execute.mockRejectedValue(new Error("network error"));
+    releaseSourcemapUploadClaim.mockRejectedValue(new Error("redis unreachable"));
+
+    await expect(uploadSourceMapsOnce(fakeRedis())).resolves.toBeUndefined();
   });
 });
