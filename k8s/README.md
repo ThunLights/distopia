@@ -534,10 +534,16 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
   `distopia-db-credentials`) — the same mechanism also picks up a plain mounted `.env` file
   if you'd rather run the image that way (e.g. local `docker run` testing), since `dotenv`
   never overrides a value that's already set in the real environment. `bun run build` still
-  needs a *separate*, build-time-only `.env` (just `DATABASE_URL` + `SENTRY_*`, written by
-  the Workflow's `prepare-env` step) purely because `prisma generate --sql` needs to
-  introspect a real database at build time — that file is deleted before the runtime image
-  layer is created and never contains `BOT_TOKEN`/`PUBLIC_*`.
+  needs a *separate*, build-time-only `.env` (`DATABASE_URL` + `SENTRY_ORG`/`SENTRY_PROJECT`,
+  written by the Workflow's `prepare-env` step) purely because `prisma generate --sql` needs
+  to introspect a real database at build time and the Sentry vite plugin wants org/project to
+  inject debug IDs — that file is deleted before the runtime image layer is created and never
+  contains `BOT_TOKEN`/`PUBLIC_*`/`SENTRY_AUTH_TOKEN`. `prepare-env` deliberately skips
+  `SENTRY_AUTH_TOKEN`: with no auth token, the Sentry vite plugin still generates source maps
+  and injects debug IDs but skips its own upload; the app uploads them for real, once, at
+  startup instead (`src/presentation/web/src/lib/server/sourcemaps.ts`, using
+  `SENTRY_AUTH_TOKEN` as a normal runtime env var like everything else in `distopia-env`) —
+  so the actual Sentry credential is never a build input at all.
 - Rotating `distopia-env`, `distopia-db-credentials`, or the registry secrets takes effect
   on the **next Pod restart** (`kubectl rollout restart deployment/distopia-app -n
   distopia`) — no rebuild needed, unlike before. `bunx prisma migrate deploy` (used

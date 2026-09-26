@@ -22,6 +22,12 @@ if (existsSync(dotenvPath)) {
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [
+    // SENTRY_AUTH_TOKEN is deliberately never present at build time (see
+    // docker/dockerfile.prod and k8s/ci/workflowtemplate.yaml's prepare-env step) -- without
+    // it, this plugin still generates source maps and injects debug IDs, but its own
+    // build-time upload attempt just warns and no-ops instead of running, leaving the .map
+    // files in the build output. $lib/server/sourcemaps.ts uploads them for real, once, at
+    // app startup instead.
     sentrySvelteKit({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
@@ -37,7 +43,17 @@ export default defineConfig({
     // being statically bundled by Rolldown, which fails trying to parse the .node file as
     // source ("[UNLOADABLE_DEPENDENCY] ... stream did not contain valid UTF-8"). Left external,
     // Bun's own require/import resolves them normally at runtime instead.
-    external: ["@discordjs/voice", "@snazzah/davey", "prism-media", "ffmpeg-static", "opusscript"],
+    // @sentry/cli (used by $lib/server/sourcemaps.ts) joins this list for the same reason:
+    // it resolves its platform-specific native binary via a runtime `require.resolve` and
+    // spawns it directly, which Rolldown can't statically bundle.
+    external: [
+      "@discordjs/voice",
+      "@snazzah/davey",
+      "prism-media",
+      "ffmpeg-static",
+      "opusscript",
+      "@sentry/cli",
+    ],
   },
   server: {
     watch: {

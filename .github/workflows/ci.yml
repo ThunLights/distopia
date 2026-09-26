@@ -413,14 +413,15 @@ jobs:
       # `docker build` instead. --network host lets `prisma generate --sql` reach the
       # relay-exposed database above. Build-time-only .env (deleted before the runtime
       # layer, same as the real pipeline) -- BOT_TOKEN/PUBLIC_*/etc. are intentionally not
-      # in here, only what `bun run build` itself needs.
+      # in here, only what `bun run build` itself needs. SENTRY_AUTH_TOKEN is deliberately
+      # excluded too, matching workflowtemplate.yaml's prepare-env step -- see
+      # docker/dockerfile.prod for why.
       - name: Build production image
         run: |
           cat > .env <<EOF
           DATABASE_URL=$DATABASE_URL
           SENTRY_ORG=$SENTRY_ORG
           SENTRY_PROJECT=$SENTRY_PROJECT
-          SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
           PUBLIC_SENTRY_DSN=$PUBLIC_SENTRY_DSN
           EOF
           docker build --network host -f docker/dockerfile.prod \

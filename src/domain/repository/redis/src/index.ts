@@ -18,6 +18,7 @@ export * from "./OAuth2Guilds";
 export * from "./OAuth2PKCE";
 export * from "./RedisHashMap";
 export * from "./resetEphemeralMemory";
+export * from "./SourcemapUploadClaim";
 export * from "./TtsSynthesisCache";
 export * from "./UnJoinedGuild";
 export * from "./UrlCacheInMemory";

@@ -13,12 +13,18 @@
 # + dotenv at RUNTIME (see hooks.server.ts) -- none of that is baked in here, and no
 # private value ever ends up in this image or the registry it's pushed to.
 #
-# `bun run build` still needs a `.env` with just DATABASE_URL and SENTRY_*/SENTRY_AUTH_TOKEN
-# at BUILD time: `prisma generate --sql` (infra-database's build step, typedSql) connects
-# to a real, already-migrated database to type-check raw SQL, and the Sentry vite plugin
-# reads org/project/auth-token from process.env for sourcemap upload. Neither value ends up
-# in the compiled output -- Prisma's generated code doesn't embed the connection string,
-# and the Sentry step is a transient sourcemap upload, not something written to disk here.
+# `bun run build` still needs a `.env` with DATABASE_URL and SENTRY_ORG/SENTRY_PROJECT at
+# BUILD time: `prisma generate --sql` (infra-database's build step, typedSql) connects to a
+# real, already-migrated database to type-check raw SQL, and the Sentry vite plugin reads
+# org/project from process.env. Neither value ends up in the compiled output -- Prisma's
+# generated code doesn't embed the connection string, and org/project are just slugs, not
+# secrets. SENTRY_AUTH_TOKEN is deliberately EXCLUDED from this build-time `.env` (see
+# k8s/ci/workflowtemplate.yaml's prepare-env step) -- without it, the Sentry vite plugin still
+# generates source maps and injects debug IDs, but skips its own upload attempt instead of
+# running it with no credentials. src/presentation/web/src/lib/server/sourcemaps.ts uploads
+# them for real, once, at app startup instead, using the same secret injected as a normal
+# runtime env var (k8s/app/deployment.yaml). This keeps the actual Sentry credential out of
+# the build entirely -- only DATABASE_URL and non-secret slugs are build inputs.
 # The Argo Workflow writes this build-only `.env` from k8s Secrets into the build context
 # before invoking this Dockerfile, then pushes only to the cluster-internal registry — the
 # image is never pushed anywhere external.
@@ -37,6 +43,15 @@ ENV HUSKY=0
 COPY . .
 RUN bun install --frozen-lockfile
 RUN bun run build
+# Preserve a private copy of the build (source maps included) for the runtime uploader
+# (src/presentation/web/src/lib/server/sourcemaps.ts), then strip the real .map files out of
+# the build itself. adapter-node serves src/presentation/web/build/client as public static
+# files -- anything left there with a .map extension is fetchable by anyone, disclosing full
+# unminified source, not just something a stack-trace symbolication tool would use. build/server
+# is never served over HTTP, but its maps are stripped too for consistency; both are already
+# preserved in .sourcemaps/ below.
+RUN cp -a src/presentation/web/build .sourcemaps && \
+    find src/presentation/web/build -type f -name '*.map' -delete
 # Build-time-only .env (see above) -- delete it so it never reaches the runtime layer.
 RUN rm -f .env
 

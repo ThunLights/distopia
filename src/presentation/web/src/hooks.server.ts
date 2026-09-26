@@ -5,6 +5,7 @@ import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
 import { core, updatePanels } from "$lib/server/core";
 import { redis } from "$lib/server/redis";
+import { uploadSourceMapsOnce } from "$lib/server/sourcemaps";
 import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
@@ -74,6 +75,11 @@ async function start() {
   await resetEphemeralMemory(redis, "web");
   await resetEphemeralMemory(redis, "bot");
   console.log("Reset ephemeral web/bot memory.");
+
+  // Fire-and-forget: unlike everything else in start(), this never gates the server accepting
+  // traffic -- symbolicating a future error report isn't worth delaying every pod's readiness
+  // for. uploadSourceMapsOnce handles its own errors internally (see its comment).
+  void uploadSourceMapsOnce(redis);
 
   await core.jwt.importDB();
   console.log("JWT keys is imported.");

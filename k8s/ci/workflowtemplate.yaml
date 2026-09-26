@@ -105,10 +105,20 @@ spec:
 
     # 2. Materialize a BUILD-time-only .env into the cloned tree -- just what
     #    `bun run build` itself needs (DATABASE_URL for infra-database's `prisma generate
-    #    --sql`, SENTRY_* for sourcemap upload). App runtime secrets (BOT_TOKEN, PUBLIC_*)
-    #    are intentionally NOT written here -- they're only ever injected as live env vars
-    #    into the running Pod (k8s/app/deployment.yaml), never present in the image. This
-    #    .env is deleted by docker/dockerfile.prod before the runtime layer is created.
+    #    --sql`, SENTRY_ORG/SENTRY_PROJECT for the Sentry vite plugin's debug-ID injection).
+    #    This is an ALLOWLIST, not a denylist: distopia-env holds every app runtime secret
+    #    (BOT_TOKEN, PUBLIC_*, SENTRY_AUTH_TOKEN, ...), and only the two names below ever get
+    #    written to /workspace/src/.env. Anything else would sit in the build workspace where
+    #    `bun run build` (and any of its transitive deps) could read or exfiltrate it --
+    #    excluding just SENTRY_AUTH_TOKEN by name isn't good enough, since the next secret
+    #    added to distopia-env would silently leak into the build again. Runtime secrets are
+    #    only ever injected as live env vars into the running Pod (k8s/app/deployment.yaml),
+    #    never present in the image. SENTRY_AUTH_TOKEN specifically is excluded on purpose
+    #    (see docker/dockerfile.prod): source map upload happens at app startup now
+    #    (src/presentation/web/src/lib/server/sourcemaps.ts), using the same secret key as a
+    #    normal runtime env var, so the real Sentry credential never needs to be a build input
+    #    at all. This .env is deleted by docker/dockerfile.prod before the runtime layer is
+    #    created.
     - name: prepare-env
       container:
         image: alpine:3.21
@@ -118,7 +128,12 @@ spec:
             set -eu
             : > /workspace/src/.env
             for f in /secrets/app/*; do
-              printf '%s=%s\n' "$(basename "$f")" "$(cat "$f")" >> /workspace/src/.env
+              name="$(basename "$f")"
+              case "$name" in
+                SENTRY_ORG | SENTRY_PROJECT) ;;
+                *) continue ;;
+              esac
+              printf '%s=%s\n' "$name" "$(cat "$f")" >> /workspace/src/.env
             done
             printf 'DATABASE_URL=%s\n' "$(cat /secrets/db/url)" >> /workspace/src/.env
         volumeMounts:
@@ -139,8 +154,10 @@ spec:
             memory: 256Mi
       volumes:
         - name: app-secret
-          # SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN live in here too (build-time only);
-          # BOT_TOKEN/PUBLIC_*/etc. are also present but simply unused at build time.
+          # The whole distopia-env secret is mounted here (every key is readable in this
+          # container), but prepare-env's script above only ever writes SENTRY_ORG/
+          # SENTRY_PROJECT out to the build workspace -- everything else (BOT_TOKEN,
+          # PUBLIC_*, SENTRY_AUTH_TOKEN, ...) is mounted but never leaves this step.
           secret:
             secretName: distopia-env
         - name: db-secret
