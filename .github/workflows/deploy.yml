@@ -65,7 +65,7 @@ jobs:
       # at app startup instead (see docker/dockerfile.prod's own comment), reading the real
       # credential as a normal runtime env var from distopia-env.
       SENTRY_ORG: thunlights
-      SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+      SENTRY_PROJECT: distopia-ci
 
     steps:
       - name: Checkout repository
