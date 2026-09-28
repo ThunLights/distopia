@@ -148,10 +148,14 @@ container just runs `bun run src/presentation/web/build/index.js` on start — n
 install/build/migrate at container startup. The app reads its own config (`BOT_TOKEN`,
 `PUBLIC_*`, `DATABASE_URL`, ...) via `$env/dynamic/*` + `dotenv` (see `hooks.server.ts`),
 resolved at container start from real env vars/a mounted `.env` — none of it is baked into
-the image. The build itself still needs a *separate*, build-time-only `.env` (just
-`DATABASE_URL` + `SENTRY_*`) because `prisma generate --sql` needs to introspect a real
-database and the Sentry vite plugin needs org/project/token for sourcemap upload; that file
-is deleted before the runtime layer is created.
+the image. The build itself still needs a *separate*, build-time-only `.env` (`DATABASE_URL`
+because `prisma generate --sql` needs to introspect a real database, plus `SENTRY_ORG`/
+`SENTRY_PROJECT` -- non-secret slugs the Sentry vite plugin needs for debug-ID injection) --
+that file is deleted before the runtime layer is created. `SENTRY_AUTH_TOKEN` never appears
+in it at all: without it, the plugin still generates source maps but skips its own upload;
+`src/presentation/web/src/lib/server/sourcemaps.ts` uploads them for real, once, at app
+startup instead, reading the real credential as a normal runtime env var. `PUBLIC_SENTRY_DSN`
+was never a build-time value at all -- it's read via `$env/dynamic/public` at runtime.
 
 ```bash
 # build context must be the repo root
@@ -160,13 +164,15 @@ docker build -f docker/dockerfile.prod -t distopia:local .
 
 ## Production Deploy
 
-Production runs on k3s and deploys automatically via GitOps (Argo CD + Argo Workflows +
-Argo Events) on every push to `main` — the Workflow builds `docker/dockerfile.prod` with
-Kaniko, runs `prisma migrate deploy`, pushes to an in-cluster registry, and Argo CD rolls
-the Deployment. See `k8s/README.md` for the full pipeline, secrets, and one-time cluster
-bootstrap. `.github/workflows/ci.yml`'s `e2e-prod` job builds/runs the same
-`docker/dockerfile.prod` image directly with `docker build`/`docker run` (no k8s) to
-smoke-test it in CI.
+Production runs on k3s and deploys via GitOps (Argo CD + Argo CD Image Updater) on every
+push to `main` — `.github/workflows/deploy.yml` (GitHub Actions, not the cluster) builds
+`docker/dockerfile.prod` and pushes it to `ghcr.io/thunlights/distopia`; Argo CD Image
+Updater detects the new tag and rolls the Deployment, whose `migrate` initContainer runs the
+real `prisma migrate deploy` against production. See `k8s/README.md` for the full pipeline,
+secrets, and one-time cluster bootstrap; the `argo` skill for the Argo CD/Image Updater side
+specifically. `.github/workflows/ci.yml`'s `e2e-prod` job builds/runs the same
+`docker/dockerfile.prod` image directly with `docker build`/`docker run` (no k8s, no ghcr)
+to smoke-test it in CI.
 
 ## Networking
 

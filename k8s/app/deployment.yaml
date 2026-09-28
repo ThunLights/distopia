@@ -31,14 +31,38 @@ spec:
       labels:
         app.kubernetes.io/name: distopia-app
     spec:
-      imagePullSecrets:
-        - name: distopia-registry-pull
+      # initContainers run once per new Pod (i.e. once per rollout, since replicas: 1 means
+      # the still-running old Pod never restarts its own) -- prisma migrate deploy is
+      # idempotent, so re-running it on a crash-loop restart is harmless, just redundant.
+      # Runs from this same image (built by .github/workflows/deploy.yml) rather than a
+      # separate clone+install, so the schema applied is always exactly what this image was
+      # built against -- see infra-database's build step for why the schema must be current
+      # *before* the image is built in the first place (prisma generate --sql introspects a
+      # live database at build time, not just at migrate time).
+      initContainers:
+        - name: migrate
+          image: ghcr.io/thunlights/distopia:latest
+          workingDir: /app/src/infrastructure/database
+          command: ["bunx", "prisma", "migrate", "deploy"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-db-credentials
+                  key: url
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
       containers:
         - name: distopia
           # This :latest is only the bootstrap fallback -- Argo CD Image Updater overrides
           # it with the actual deployed tag at the Application level (no git write-back).
           # See the annotations on k8s/argocd/app-app.yaml and k8s/README.md.
-          image: distopia-registry.distopia.svc.cluster.local:5000/distopia:latest
+          image: ghcr.io/thunlights/distopia:latest
           ports:
             - name: http
               containerPort: 3000

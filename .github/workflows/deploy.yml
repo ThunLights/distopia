@@ -1,0 +1,148 @@
+name: Deploy
+
+# Builds the production image on every push to main AND every pull_request (the build
+# itself is the verification -- a Dockerfile/build-time regression should fail the PR, not
+# surface for the first time on main), but only pushes it to ghcr.io on an actual push to
+# main -- see the "Push production image" step's `if`. Nothing here ever touches the
+# cluster. Argo CD Image Updater (see k8s/argocd/app-app.yaml's annotations) polls ghcr.io
+# directly and rolls distopia-app to whichever <run-number>-<short-sha> tag sorts highest;
+# k8s/app/deployment.yaml's initContainer runs the real migration against the actual
+# production database right before the new Pod's main container starts. See
+# k8s/README.md's "Shipping a new build" for the full flow.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  # Lets `gh workflow run deploy.yml --ref main` (see k8s/README.md's bootstrap section and
+  # the `argo` skill) actually start a run -- GitHub refuses a manual dispatch on a workflow
+  # that only declares `push`, regardless of ref.
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  # Never cancel a run that might already be mid-push -- a half-pushed tag is worse than a
+  # slightly delayed one. Two pushes landing close together just produce two tags; Image
+  # Updater's alphabetical strategy (see app-app.yaml's own comment) picks the right one
+  # regardless of which build finishes last.
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build image (and push, on main)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    # A throwaway database to migrate and introspect at build time (infra-database's build
+    # step, `prisma generate --sql`, needs a real already-migrated database, not just the
+    # schema files -- see docker/dockerfile.prod's own comment) -- never the real production
+    # database, which isn't reachable from a GitHub-hosted runner in the first place (see
+    # k8s/README.md's "Cloudflare Tunnel and network exposure": nothing in the cluster binds
+    # a public port).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: distopia
+          POSTGRES_PASSWORD: distopia
+          POSTGRES_DB: distopia
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U distopia"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://distopia:distopia@localhost:5432/distopia
+      # SENTRY_ORG/SENTRY_PROJECT are non-secret slugs the Sentry vite plugin needs to inject
+      # debug IDs at build time -- SENTRY_PROJECT is a repo variable (Settings -> Secrets and
+      # variables -> Actions -> Variables), not a secret, since it isn't sensitive.
+      # SENTRY_AUTH_TOKEN deliberately never appears here at all: source map upload happens
+      # at app startup instead (see docker/dockerfile.prod's own comment), reading the real
+      # credential as a normal runtime env var from distopia-env.
+      SENTRY_ORG: thunlights
+      SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # This job's GITHUB_TOKEN carries packages: write -- persist-credentials defaults
+          # to true and would leave that token readable on disk (under $RUNNER_TEMP) while
+          # `bun install`/`bunx prisma migrate deploy` run untrusted dependency scripts,
+          # before the registry login step even needs it.
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.0"
+
+      - name: Apply database migrations
+        run: |
+          bun install --frozen-lockfile
+          cd src/infrastructure/database
+          bunx prisma migrate deploy
+
+      # run-number (github.run_number), not the commit's committer timestamp: two pushes can
+      # land within the same second, and %ct's one-second resolution would then leave Image
+      # Updater's alphabetical strategy sorting those tags by SHA, which encodes nothing
+      # about push order -- it could deploy the older commit. run_number is a strictly
+      # increasing per-workflow counter GitHub itself assigns in event-processing order, so
+      # zero-padded to 10 digits (matching app-app.yaml's allow-tags regexp) it always sorts
+      # in true publication order regardless of build duration or commit timestamps.
+      - name: Compute image tags
+        id: tag
+        run: |
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          printf 'run_number=%010d\n' "$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+
+      # A real push to main -- or a manual dispatch targeting it, the documented bootstrap
+      # path in k8s/README.md and the `argo` skill for creating the very first image -- are
+      # the only events that ever need registry credentials. A PR build never pushes (see
+      # the "Push production image" step below), so it never needs to log in either.
+      - name: Log in to ghcr.io
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build-time-only .env (see docker/dockerfile.prod's own comment): DATABASE_URL plus
+      # SENTRY_ORG/SENTRY_PROJECT for debug-ID injection. SENTRY_AUTH_TOKEN is never in here
+      # -- PUBLIC_SENTRY_DSN was never a build-time value either -- it's read via
+      # $env/dynamic/public at request time (hooks.client.ts/instrumentation.server.ts). App
+      # runtime secrets (BOT_TOKEN, PUBLIC_*, SENTRY_AUTH_TOKEN) are never written here -- see
+      # k8s/app/deployment.yaml, they're injected live into the Pod, never baked into the
+      # image.
+      #
+      # --network host (not docker/build-push-action's buildx, which builds in an isolated
+      # network namespace by default) so the build can actually reach the postgres service
+      # container on localhost -- same reasoning, same flag, as ci.yml's E2E job. Runs on
+      # every push and pull_request alike -- a Dockerfile/build regression should fail here,
+      # not surface for the first time on main.
+      - name: Build production image
+        run: |
+          cat > .env <<EOF
+          DATABASE_URL=$DATABASE_URL
+          SENTRY_ORG=$SENTRY_ORG
+          SENTRY_PROJECT=$SENTRY_PROJECT
+          EOF
+
+          docker build --network host -f docker/dockerfile.prod \
+            --build-arg GIT_SHA="${{ steps.tag.outputs.sha }}" \
+            -t "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.run_number }}-${{ steps.tag.outputs.sha }}" \
+            -t ghcr.io/thunlights/distopia:latest .
+          rm -f .env
+
+      # Gated the same as the login step above -- everything else (including the build
+      # itself) already ran and already verified the image builds, on a pull_request too.
+      - name: Push production image
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+        run: |
+          docker push "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.run_number }}-${{ steps.tag.outputs.sha }}"
+          docker push ghcr.io/thunlights/distopia:latest

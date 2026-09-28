@@ -1,12 +1,29 @@
-# Not consumed by Argo CD itself -- this just lets you bootstrap all five Applications in
+# Not consumed by Argo CD itself -- this just lets you bootstrap all four Applications in
 # one shot: `kubectl apply -k k8s/argocd`. See k8s/README.md for the recommended order.
+#
+# If you're migrating from the old self-hosted-registry pipeline: applying this does NOT
+# retire the old `distopia-ci`/`distopia-registry` Applications on its own -- `kubectl
+# apply -k` only ever adds/updates resources listed here, it never deletes an existing
+# Application just because a file was removed from this list. Argo CD keeps reconciling
+# both against their now-git-deleted source paths (k8s/ci, k8s/registry) regardless of
+# whether this kustomization still references them. `distopia-ci` (prune: true) does NOT
+# self-heal despite that -- once k8s/ci is gone, Argo CD can't generate a desired-state
+# manifest from that missing path at all, so there's no diff for it to prune against; its
+# managed EventBus/EventSource/Sensor/RBAC stay running, orphaned. Use a real cascade
+# instead (`argocd app delete distopia-ci --cascade`, then verify nothing was left behind --
+# see k8s/README.md's "Retiring the old self-hosted-registry pipeline"), not a plain
+# `kubectl delete application`, which only removes the Application object itself for the
+# same reason. `distopia-registry` (prune: false, deliberately) does NOT self-heal either --
+# it just goes OutOfSync and leaves the old registry Deployment/Service/PVC/NetworkPolicy
+# running untouched. In particular, `distopia-registry-data` (the PVC) holds every image
+# ever pushed to the old registry -- decide on purpose whether you still need that image
+# history before deleting anything; don't cascade-delete it as a side effect of tidying up
+# the Application object.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - app-registry.yaml
   - app-db.yaml
   - app-redis.yaml
   - app-app.yaml
-  - app-ci.yaml
   - app-network.yaml
   - imageupdater.yaml

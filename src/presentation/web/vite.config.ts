@@ -23,11 +23,10 @@ if (existsSync(dotenvPath)) {
 export default defineConfig({
   plugins: [
     // SENTRY_AUTH_TOKEN is deliberately never present at build time (see
-    // docker/dockerfile.prod and k8s/ci/workflowtemplate.yaml's prepare-env step) -- without
-    // it, this plugin still generates source maps and injects debug IDs, but its own
-    // build-time upload attempt just warns and no-ops instead of running, leaving the .map
-    // files in the build output. $lib/server/sourcemaps.ts uploads them for real, once, at
-    // app startup instead.
+    // docker/dockerfile.prod) -- without it, this plugin still generates source maps and
+    // injects debug IDs, but its own build-time upload attempt just warns and no-ops instead
+    // of running, leaving the .map files in the build output. $lib/server/sourcemaps.ts
+    // uploads them for real, once, at app startup instead.
     sentrySvelteKit({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,

@@ -10,10 +10,10 @@ import {
 
 // Source maps are generated at build time (vite.config.ts's sentrySvelteKit plugin still sets
 // `build.sourcemap: "hidden"` and injects debug IDs), but SENTRY_AUTH_TOKEN is deliberately
-// absent from the build -- see docker/dockerfile.prod and k8s/ci/workflowtemplate.yaml's
-// prepare-env step. Without it, the plugin's own build-time upload attempt just warns and
-// skips, leaving the .map files in the built output. This uploads them for real, once, the
-// first time any pod boots off a given image -- GIT_SHA (baked in as a runtime ENV, see
+// absent from the build -- see docker/dockerfile.prod. Without it, the plugin's own
+// build-time upload attempt just warns and skips, leaving the .map files in the built
+// output. This uploads them for real, once, the first time any pod boots off a given
+// image -- GIT_SHA (baked in as a runtime ENV, see
 // docker/dockerfile.prod) both identifies that image's build output and doubles as the Redis
 // dedup key via claimSourcemapUpload, so every other replica (and any later restart of the
 // same image) skips straight past.

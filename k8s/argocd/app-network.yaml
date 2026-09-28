@@ -1,8 +1,7 @@
 # Watches k8s/network -- the hostNetwork relay that lets the host-level Cloudflare Tunnel
-# reach distopia-app and the GitHub webhook EventSource via loopback ports you choose
-# yourself (see k8s/README.md section 2 -- the actual port numbers are never committed).
-# Stateless (just a socat process), so prune:true is safe here, unlike
-# distopia-db/distopia-registry.
+# reach distopia-app via a loopback port you choose yourself (see k8s/README.md section 2 --
+# the actual port number is never committed). Stateless (just a socat process), so
+# prune:true is safe here, unlike distopia-db.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
