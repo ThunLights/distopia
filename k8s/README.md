@@ -235,6 +235,12 @@ build the production image, and push `ghcr.io/thunlights/distopia:<committer-epo
 sha>` (and `:latest`). That workflow never touches the cluster or writes back to git --
 nothing commits an image tag anywhere.
 
+The same workflow also runs on every pull request, for exactly the migrate + build steps
+above -- a Dockerfile/build-time regression fails the PR instead of surfacing for the first
+time on `main`. Only the final "Push production image" step is skipped there (`if:
+github.event_name == 'push'`), so a PR never needs registry credentials and never touches
+`ghcr.io` at all.
+
 > **First-push check:** GHCR packages don't always inherit the repository's public
 > visibility automatically. After the very first push, check the package's own Settings
 > (github.com/thunlights/distopia/pkgs/container/distopia → Package settings) and set
