@@ -10,9 +10,12 @@
 # main close together and spawn overlapping GitHub Actions runs -- an older commit's build
 # can finish (and get pushed) after a newer commit's, and `newest-build` would then deploy
 # the OLDER commit. `.github/workflows/deploy.yml` instead tags each image
-# "<committer-epoch>-<short-sha>", a value that only depends on the commit itself, not on how
-# long its build took -- `alphabetical` sorting on that tag always recovers true source order
-# regardless of build duration.
+# "<run-number>-<short-sha>" -- a 10-digit zero-padded `github.run_number`, a counter GitHub
+# itself assigns in strict event-processing order, not by anything build-related --
+# `alphabetical` sorting on that tag always recovers true source order regardless of build
+# duration. (An earlier version used the commit's own committer timestamp instead, but that
+# only has one-second resolution: two pushes landing in the same second would tie and fall
+# back to sorting by SHA, which encodes nothing about push order.)
 #
 # These annotations alone do nothing on Image Updater v1.x -- that version reconciles a
 # separate `ImageUpdater` CR (see k8s/argocd/imageupdater.yaml) and only reads these

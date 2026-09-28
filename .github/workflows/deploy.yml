@@ -5,7 +5,7 @@ name: Deploy
 # surface for the first time on main), but only pushes it to ghcr.io on an actual push to
 # main -- see the "Push production image" step's `if`. Nothing here ever touches the
 # cluster. Argo CD Image Updater (see k8s/argocd/app-app.yaml's annotations) polls ghcr.io
-# directly and rolls distopia-app to whichever <epoch>-<short-sha> tag sorts highest;
+# directly and rolls distopia-app to whichever <run-number>-<short-sha> tag sorts highest;
 # k8s/app/deployment.yaml's initContainer runs the real migration against the actual
 # production database right before the new Pod's main container starts. See
 # k8s/README.md's "Shipping a new build" for the full flow.
@@ -70,6 +70,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          # This job's GITHUB_TOKEN carries packages: write -- persist-credentials defaults
+          # to true and would leave that token readable on disk (under $RUNNER_TEMP) while
+          # `bun install`/`bunx prisma migrate deploy` run untrusted dependency scripts,
+          # before the registry login step even needs it.
+          persist-credentials: false
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -81,16 +87,25 @@ jobs:
           cd src/infrastructure/database
           bunx prisma migrate deploy
 
+      # run-number (github.run_number), not the commit's committer timestamp: two pushes can
+      # land within the same second, and %ct's one-second resolution would then leave Image
+      # Updater's alphabetical strategy sorting those tags by SHA, which encodes nothing
+      # about push order -- it could deploy the older commit. run_number is a strictly
+      # increasing per-workflow counter GitHub itself assigns in event-processing order, so
+      # zero-padded to 10 digits (matching app-app.yaml's allow-tags regexp) it always sorts
+      # in true publication order regardless of build duration or commit timestamps.
       - name: Compute image tags
         id: tag
         run: |
           echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "epoch=$(git show -s --format=%ct "$GITHUB_SHA")" >> "$GITHUB_OUTPUT"
+          printf 'run_number=%010d\n' "$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
 
-      # Only a real push to main ever needs registry credentials -- a PR build never pushes
-      # (see the "Push production image" step below), so it never needs to log in either.
+      # A real push to main -- or a manual dispatch targeting it, the documented bootstrap
+      # path in k8s/README.md and the `argo` skill for creating the very first image -- are
+      # the only events that ever need registry credentials. A PR build never pushes (see
+      # the "Push production image" step below), so it never needs to log in either.
       - name: Log in to ghcr.io
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -120,14 +135,14 @@ jobs:
 
           docker build --network host -f docker/dockerfile.prod \
             --build-arg GIT_SHA="${{ steps.tag.outputs.sha }}" \
-            -t "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.epoch }}-${{ steps.tag.outputs.sha }}" \
+            -t "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.run_number }}-${{ steps.tag.outputs.sha }}" \
             -t ghcr.io/thunlights/distopia:latest .
           rm -f .env
 
-      # The only step gated to push events -- everything above (including the build itself)
-      # already ran and already verified the image builds, on a pull_request too.
+      # Gated the same as the login step above -- everything else (including the build
+      # itself) already ran and already verified the image builds, on a pull_request too.
       - name: Push production image
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         run: |
-          docker push "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.epoch }}-${{ steps.tag.outputs.sha }}"
+          docker push "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.run_number }}-${{ steps.tag.outputs.sha }}"
           docker push ghcr.io/thunlights/distopia:latest

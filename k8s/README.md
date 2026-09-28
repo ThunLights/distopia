@@ -100,7 +100,7 @@ gh workflow run deploy.yml --repo thunlights/distopia --ref main
 
 # 5. Once that run finishes (`gh run watch --repo thunlights/distopia`), :latest exists and
 #    distopia-app comes up. Argo CD Image Updater then notices the tagged image
-#    (distopia:<epoch>-<short-sha>) on its own polling cycle (a few minutes) and switches
+#    (distopia:<run-number>-<short-sha>) on its own polling cycle (a few minutes) and switches
 #    the Deployment to it automatically -- see "Shipping a new build" below. From here on,
 #    every push to main does this for you with no manual step.
 ```
@@ -231,9 +231,9 @@ for your install) — not required for correctness, just latency.
 
 Every push to `main` runs `.github/workflows/deploy.yml`: migrate a throwaway database (just
 for `prisma generate --sql` to introspect at build time -- see the workflow's own comment),
-build the production image, and push `ghcr.io/thunlights/distopia:<committer-epoch>-<short-
-sha>` (and `:latest`). That workflow never touches the cluster or writes back to git --
-nothing commits an image tag anywhere.
+build the production image, and push `ghcr.io/thunlights/distopia:<run-number>-<short-sha>`
+(and `:latest`). That workflow never touches the cluster or writes back to git -- nothing
+commits an image tag anywhere.
 
 The same workflow also runs on every pull request, for exactly the migrate + build steps
 above -- a Dockerfile/build-time regression fails the PR instead of surfacing for the first
@@ -253,7 +253,7 @@ github.event_name == 'push'`), so a PR never needs registry credentials and neve
 Instead, **Argo CD Image Updater** (installed per section 0, configured via the annotations
 on `k8s/argocd/app-app.yaml`) polls `ghcr.io/thunlights/distopia` directly, on its own
 interval (default ~2 minutes), for tags matching `distopia.allow-tags`'s regexp (the
-`<epoch>-<short-sha>` tags only — `latest` is excluded so it isn't mistaken for a real
+`<run-number>-<short-sha>` tags only — `latest` is excluded so it isn't mistaken for a real
 candidate). Its `update-strategy: alphabetical` picks whichever matching tag sorts highest
 and, since `write-back-method` is `argocd` rather than `git`, patches that tag straight into
 the `distopia-app` `Application`'s `spec.source.kustomize.images` — a live object in the
@@ -262,16 +262,20 @@ the `distopia-app` `Application`'s `spec.source.kustomize.images` — a live obj
 transformer patches every container referencing that image, so the `migrate` initContainer
 (see "Database migrations" below) always runs from the same new image as the main container.
 
-The tag's leading `<committer-epoch>` (the pushed commit's own committer timestamp, computed
-by the workflow's `Compute image tags` step, not by anything build-related) is what makes
-this safe against two pushes landing on `main` close together, which spawn separate workflow
-runs with unordered build durations — an older commit's image can finish building (and get
-pushed) after a newer commit's. Sorting alphabetically on each commit's own timestamp is
-immune to that: unlike an `update-strategy: newest-build` (which sorts by build-*completion*
-time and would wrongly pick the older commit if its build happened to finish last), the epoch
-prefix here never changes based on how long the build took, so whichever tag Image Updater
-sees as highest is always the actual newest source commit — on the very next poll if not
-immediately, with no in-workflow locking or git ancestry check required.
+The tag's leading `<run-number>` (`github.run_number`, a 10-digit zero-padded counter GitHub
+itself assigns each run of `deploy.yml` in strict event-processing order — computed by the
+workflow's `Compute image tags` step, not by anything build-related) is what makes this safe
+against two pushes landing on `main` close together, which spawn separate workflow runs with
+unordered build durations — an older commit's image can finish building (and get pushed)
+after a newer commit's. Sorting alphabetically on that counter is immune to that: unlike an
+`update-strategy: newest-build` (which sorts by build-*completion* time and would wrongly
+pick the older commit if its build happened to finish last), run_number never changes based
+on how long the build took, so whichever tag Image Updater sees as highest is always the
+actual newest source commit — on the very next poll if not immediately, with no in-workflow
+locking or git ancestry check required. (An earlier version of this tag used the commit's
+own committer timestamp instead of run_number — dropped for only having one-second
+resolution, which two pushes landing in the same second would tie, falling back to a
+SHA-order comparison that encodes nothing about push order.)
 
 To change the poll interval or inspect what Image Updater is doing:
 
@@ -292,7 +296,7 @@ constraint the old in-cluster pipeline had.
 
 ## Registry image retention
 
-Every push to `main` adds a new `<epoch>-<short-sha>` tag and re-pushes `latest` to
+Every push to `main` adds a new `<run-number>-<short-sha>` tag and re-pushes `latest` to
 `ghcr.io/thunlights/distopia` — nothing in "Shipping a new build" above ever deletes one.
 Unlike the old self-hosted registry, there's no CronJob here to write: GitHub Container
 Registry has its own retention, in the package's own Settings
@@ -312,10 +316,21 @@ existing Application just because its file was removed from that list. Argo CD k
 reconciling both against their now-git-deleted source paths (`k8s/ci`, `k8s/registry`)
 regardless.
 
-- `distopia-ci` (`prune: true`) self-heals once Argo CD notices `k8s/ci` is gone from git —
-  its managed `EventBus`/`EventSource`/`Sensor`/RBAC get pruned automatically. Only the
-  now-empty Application shell needs a manual follow-up: `kubectl delete application
-  distopia-ci -n argocd`.
+- `distopia-ci` (`prune: true`) does **not** self-heal, despite `prune: true` — once `k8s/ci`
+  is gone from git, Argo CD's repo-server can't generate a desired-state manifest from that
+  now-missing source path at all, so there's no diff for it to prune *against*; its managed
+  `EventBus`/`EventSource`/`Sensor`/RBAC stay running, orphaned, indefinitely. A plain
+  `kubectl delete application distopia-ci -n argocd` only removes the Application object
+  itself, same reason — it doesn't touch those resources. Delete with a real cascade
+  instead, which uses Argo CD's own live resource-tracking, not git, so it still works
+  correctly even after the source path is gone:
+  ```bash
+  argocd app delete distopia-ci --cascade
+
+  # Confirm nothing was left behind:
+  kubectl get eventbus,eventsource,sensor -n distopia
+  kubectl get serviceaccount,role,rolebinding -n distopia | grep -e distopia-sensor -e distopia-workflow
+  ```
 - `distopia-registry` (`prune: false`, deliberately) does **not** self-heal — it just goes
   `OutOfSync` and leaves the old registry `Deployment`/`Service`/`PVC`/`NetworkPolicy`
   running, untouched, indefinitely. In particular, `distopia-registry-data` (the PVC) holds

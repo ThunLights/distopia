@@ -53,17 +53,19 @@ auto-sync then rolls the `Deployment`. No `pull-secret` annotation and no `regis
 entry — `ghcr.io/thunlights/distopia` is a public package, so Image Updater polls it
 anonymously (verify this under the package's own Settings after the first push).
 
-**`update-strategy: alphabetical` on the epoch-prefixed tag, not `newest-build`, is
+**`update-strategy: alphabetical` on the run-number-prefixed tag, not `newest-build`, is
 deliberate.** `newest-build` sorts by each image's *build-completion* timestamp — two pushes
 landing on `main` close together spawn separate GitHub Actions runs with unordered build
 durations, so an older commit's image can finish building (and get pushed) after a newer
 commit's. Under `newest-build` that would deploy the OLDER commit, since its build happened
-to finish last. Sorting alphabetically on `<committer-epoch>-<short-sha>` sidesteps this
-entirely: the epoch only depends on the commit itself, never on how long its build took, so
-the alphabetically highest tag is always the true newest source commit, on the very next
-poll if not sooner — no in-workflow locking or git ancestry check needed. `deploy.yml`'s
-`Compute image tags` step writes it, reading the pushed commit's own committer timestamp
-(`git show -s --format=%ct`), not a build timestamp.
+to finish last. Sorting alphabetically on `<run-number>-<short-sha>` sidesteps this
+entirely: `deploy.yml`'s `Compute image tags` step writes a 10-digit zero-padded
+`github.run_number` — a counter GitHub itself assigns in strict event-processing order, not
+a build timestamp — so the alphabetically highest tag is always the true newest source
+commit, on the very next poll if not sooner, regardless of how long any build took. (An
+earlier version of this tag used the commit's own committer timestamp instead, but that
+only has one-second resolution — two pushes landing in the same second would then tie and
+fall back to sorting by SHA, which encodes nothing about push order.)
 
 `k8s/app/kustomization.yaml` deliberately has no `images:` override — `deployment.yaml`'s
 own `:latest` is just the bootstrap fallback before the first Image Updater patch lands.
