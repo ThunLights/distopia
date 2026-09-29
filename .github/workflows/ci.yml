@@ -136,16 +136,7 @@ jobs:
       # k8s/db/cluster.yaml's storageClass: local-path applies completely unmodified, same
       # as it would against the real k3s cluster.
       - name: Alias kind's storage class as local-path
-        run: |
-          kubectl apply -f - <<'EOF'
-          apiVersion: storage.k8s.io/v1
-          kind: StorageClass
-          metadata:
-            name: local-path
-          provisioner: rancher.io/local-path
-          volumeBindingMode: WaitForFirstConsumer
-          reclaimPolicy: Delete
-          EOF
+        run: kubectl apply -f scripts/ci/fixtures/local-path-storageclass.yaml
 
       - name: Install CloudNativePG operator
         run: |
@@ -163,60 +154,8 @@ jobs:
             --namespace ot-operators --create-namespace \
             --version 0.26.1 --wait --timeout 120s
 
-      # Generates the Secret manifests from this job's own env (same idea as the
-      # devcontainer/ci-dev jobs' "Generate .env" step), instead of one long
-      # --from-literal argument list -- kubectl apply -f - reads it straight off stdin, so
-      # the rendered YAML (with real secret values) never touches disk on the runner.
       - name: Create namespace and secrets
-        run: |
-          kubectl create namespace distopia
-
-          # Assembled via printf's own %s substitution, not a shell variable spliced
-          # directly into a postgresql:// literal -- a bare `$var` reference there still
-          # reads as a real (if unresolvable) hostname to trufflehog, which attempts to
-          # verify it and classifies the DNS failure "unverified" rather than "not a
-          # secret", still failing the hook. With %s placeholders, the literal text in this
-          # file never contains anything hostname-shaped at all; the real value only exists
-          # in memory once printf's arguments are substituted at runtime. Same pattern
-          # .github/workflows/deploy.yml's build step already uses.
-          db_host=distopia-db-rw.distopia.svc.cluster.local
-          db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' distopia distopia-e2e-test "$db_host")
-          cat <<EOF | kubectl apply -f -
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: distopia-db-credentials
-            namespace: distopia
-          stringData:
-            username: distopia
-            password: distopia-e2e-test
-            # Same shape as production's k8s/README.md secret-creation command -- the app
-            # Deployment (k8s/app/deployment.yaml) reads DATABASE_URL from this single key
-            # rather than assembling it from separate fields at runtime.
-            url: $db_url
-          ---
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: distopia-env
-            namespace: distopia
-          stringData:
-            PUBLIC_URL: "$PUBLIC_URL"
-            PUBLIC_OWNER_ID: "$PUBLIC_OWNER_ID"
-            PUBLIC_HOME_SERVER_ID: "$PUBLIC_HOME_SERVER_ID"
-            PUBLIC_STAFF_ROLE_ID: "$PUBLIC_STAFF_ROLE_ID"
-            PUBLIC_HONORARY_MEMBER_ROLE_ID: "$PUBLIC_HONORARY_MEMBER_ROLE_ID"
-            PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "$PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID"
-            PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "$PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID"
-            PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "$PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID"
-            PUBLIC_BOT_ID: "$PUBLIC_BOT_ID"
-            BOT_TOKEN: "$BOT_TOKEN"
-            BOT_SECRET: "$BOT_SECRET"
-            SENTRY_ORG: "$SENTRY_ORG"
-            SENTRY_PROJECT: "$SENTRY_PROJECT"
-            PUBLIC_SENTRY_DSN: "$PUBLIC_SENTRY_DSN"
-            SENTRY_AUTH_TOKEN: "$SENTRY_AUTH_TOKEN"
-          EOF
+        run: scripts/ci/create-e2e-secrets.sh
 
       - name: Deploy CloudNativePG cluster (k8s/db, unmodified)
         run: kubectl apply -k k8s/db
@@ -261,172 +200,27 @@ jobs:
             --pod-running-timeout=30s --image=postgres:17-alpine --command \
             -- pg_isready -h distopia-db-rw -p 5432 -U distopia -d distopia
 
-      # backup-cronjob.yaml's upload-r2 container reads distopia-db-r2-credentials, which in
-      # real production points at a Cloudflare R2 bucket -- there is no such secret here, so
-      # without this step the Job below would just sit in CreateContainerConfigError until
-      # the timeout. A real R2 bucket for CI would mean putting live cloud credentials in a
-      # GitHub secret and leaving test objects behind on every run; a throwaway S3Mock Pod
-      # inside this already-throwaway kind cluster exercises the exact same `aws s3 sync`
-      # command with no external dependency and nothing to clean up afterwards.
-      #
-      # adobe/s3mock, not MinIO -- confirmed directly: quay.io/minio/minio (the previous
-      # mock here) now 401s on an anonymous pull of any tag, the same way Docker Hub's
-      # minio/minio already did (see git blame on this step for that history) -- MinIO has
-      # locked down anonymous pulls everywhere, not just Docker Hub. adobe/s3mock is a
-      # dedicated S3-API test double (no real storage backend, in-memory), pulls
-      # anonymously, and needs no credentials at all -- COM_ADOBE_TESTING_S3MOCK_STORE_
-      # INITIAL_BUCKETS creates the bucket at startup, so the separate "create the bucket by
-      # hand" step this used to need against MinIO is gone too.
       - name: Start a mock S3 endpoint for the backup CronJob's R2 upload step
-        run: |
-          cat <<'EOF' | kubectl apply -f -
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: distopia-r2-mock
-            namespace: distopia
-          spec:
-            replicas: 1
-            selector:
-              matchLabels: { app: distopia-r2-mock }
-            template:
-              metadata:
-                labels: { app: distopia-r2-mock }
-              spec:
-                containers:
-                  - name: s3mock
-                    image: adobe/s3mock:5.2.3
-                    env:
-                      - name: COM_ADOBE_TESTING_S3MOCK_STORE_INITIAL_BUCKETS
-                        value: distopia-db-backup-test
-                    ports:
-                      - containerPort: 9090
-                    # Deployment "Available" only reflects the container starting, not
-                    # Spring Boot finishing startup (~4s) -- without this, the backup Job
-                    # below could start its upload before S3Mock is actually accepting
-                    # connections on 9090.
-                    readinessProbe:
-                      httpGet:
-                        path: /favicon.ico
-                        port: 9090
-          ---
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: distopia-r2-mock
-            namespace: distopia
-          spec:
-            selector: { app: distopia-r2-mock }
-            ports:
-              - port: 9090
-                targetPort: 9090
-          EOF
-          kubectl wait --for=condition=Available deployment/distopia-r2-mock -n distopia --timeout=60s
+        run: scripts/ci/start-s3mock.sh
 
-          # S3Mock ignores these values (no auth by default) -- the aws-cli in
-          # backup-cronjob.yaml's upload-r2 container still requires *some* access
-          # key/secret to be set, so these are dummy placeholders, not real credentials.
-          kubectl create secret generic distopia-db-r2-credentials -n distopia \
-            --from-literal=access-key-id=distopia-ci \
-            --from-literal=secret-access-key=distopia-ci-test \
-            --from-literal=endpoint=http://distopia-r2-mock.distopia.svc.cluster.local:9090 \
-            --from-literal=bucket=distopia-db-backup-test
-
-      # k8s/db/kustomization.yaml deploys the backup CronJob alongside the Cluster, but a
-      # CronJob just sits there waiting for its schedule -- deploying it here was never
-      # actually exercising the backup logic itself. Manually trigger one Job from it (same
-      # thing `kubectl create job --from=cronjob/...` does for an on-demand production run)
-      # and wait for it to actually succeed, so a change to backup-cronjob.yaml's script or
-      # DB_HOST (see its own comments for why that's distopia-db-rw, not -r) gets caught here
-      # instead of only being discovered against real production data.
       - name: Test the database backup CronJob
-        run: |
-          kubectl create job --from=cronjob/distopia-db-backup distopia-db-backup-test -n distopia
-          timeout 120 bash -c '
-            until [ "$(kubectl get job distopia-db-backup-test -n distopia -o jsonpath="{.status.succeeded}")" = "1" ]; do
-              if [ "$(kubectl get job distopia-db-backup-test -n distopia -o jsonpath="{.status.failed}")" = "1" ]; then
-                echo "backup job failed" >&2
-                exit 1
-              fi
-              sleep 3
-            done
-          '
-          kubectl logs -n distopia job/distopia-db-backup-test
+        run: scripts/ci/test-backup-cronjob.sh
 
       # The runner (bun install/prisma migrate/docker build) still needs to reach postgres
       # from OUTSIDE the cluster -- see the job-level comment for why NodePort doesn't work
-      # here. Connect a hostNetwork relay directly to the pod's own IP (not the Service),
-      # so this step's correctness never depends on the ClusterIP check above -- an ordinary
-      # OS-level port bind and pod-to-pod CNI routing, nothing kube-proxy has to program.
+      # here.
       - name: Expose the database via a hostNetwork relay pod for migrate/build
-        run: |
-          DB_POD_IP="$(kubectl get pod distopia-db-1 -n distopia -o jsonpath='{.status.podIP}')"
-          echo "distopia-db-1 pod IP: $DB_POD_IP"
-
-          kubectl run distopia-db-relay -n distopia \
-            --image=alpine/socat \
-            --restart=Never \
-            --overrides='{"spec":{"hostNetwork":true,"dnsPolicy":"ClusterFirstWithHostNet"}}' \
-            -- "TCP-LISTEN:30432,fork,reuseaddr" "TCP:${DB_POD_IP}:5432"
-
-          echo "Waiting for the relay pod to be ready..."
-          timeout 60 bash -c '
-            until kubectl wait --for=condition=Ready pod/distopia-db-relay -n distopia --timeout=10s 2>/dev/null; do
-              sleep 3
-            done
-          '
-
-          echo "DATABASE_URL=postgresql://distopia:distopia-e2e-test@127.0.0.1:30432/distopia" >> "$GITHUB_ENV"
-
-          # A real Postgres protocol exchange (not just a TCP connect) confirms the relay
-          # genuinely forwards to postgres, not just that something is listening on the port.
-          sudo apt-get update -y >/dev/null && sudo apt-get install -y --no-install-recommends postgresql-client >/dev/null
-          echo "Waiting for the relay to actually proxy a real Postgres handshake through to the pod..."
-          timeout 60 bash -c '
-            until PGCONNECT_TIMEOUT=3 pg_isready -h 127.0.0.1 -p 30432 -U distopia -d distopia; do
-              sleep 3
-            done
-          '
+        run: scripts/ci/expose-db-relay.sh
 
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.4.0"
 
-      # The relay being reachable a moment ago doesn't guarantee it still is a few seconds
-      # later (bun install alone takes ~7s) -- retry rather than assume the first real
-      # connection attempt succeeds just because the previous step's probe did.
       - name: Apply database migrations
-        run: |
-          bun install --frozen-lockfile
-          cd src/infrastructure/database
+        run: scripts/ci/migrate-e2e-db.sh
 
-          for attempt in 1 2 3 4 5; do
-            if bunx prisma migrate deploy; then
-              exit 0
-            fi
-            echo "migrate deploy attempt $attempt failed, retrying in 5s..." >&2
-            sleep 5
-          done
-          exit 1
-
-      # Builds the same image .github/workflows/deploy.yml's build step builds, against this
-      # job's own kind-cluster database instead of deploy.yml's throwaway one. --network
-      # host lets `prisma generate --sql` reach the relay-exposed database above.
-      # Build-time-only .env (deleted before the runtime layer, same as the real pipeline) --
-      # BOT_TOKEN/PUBLIC_*/etc. are intentionally not in here, only what `bun run build`
-      # itself needs. SENTRY_AUTH_TOKEN is deliberately excluded too -- see
-      # docker/dockerfile.prod for why.
       - name: Build production image
-        run: |
-          cat > .env <<EOF
-          DATABASE_URL=$DATABASE_URL
-          SENTRY_ORG=$SENTRY_ORG
-          SENTRY_PROJECT=$SENTRY_PROJECT
-          PUBLIC_SENTRY_DSN=$PUBLIC_SENTRY_DSN
-          EOF
-          docker build --network host -f docker/dockerfile.prod \
-            --build-arg GIT_SHA="${GITHUB_SHA::7}" -t distopia:e2e .
-          rm -f .env
+        run: scripts/ci/build-e2e-image.sh
 
       - name: Load image into kind
         run: kind load docker-image distopia:e2e --name distopia-e2e
@@ -439,29 +233,8 @@ jobs:
           kubectl apply -k k8s/app
           kubectl rollout status deployment/distopia-app -n distopia --timeout=180s
 
-      # Same rationale as the database relay above: kubectl port-forward is unreliable here,
-      # and there's no NodePort/Ingress on this Service by design (k8s/app/service.yaml is
-      # ClusterIP-only, matching real production's Cloudflare-Tunnel-only exposure model).
       - name: Expose the app via a hostNetwork relay pod
-        run: |
-          APP_POD_IP="$(kubectl get pod -n distopia -l app.kubernetes.io/name=distopia-app -o jsonpath='{.items[0].status.podIP}')"
-          echo "distopia-app pod IP: $APP_POD_IP"
-
-          kubectl run distopia-app-relay -n distopia \
-            --image=alpine/socat \
-            --restart=Never \
-            --overrides='{"spec":{"hostNetwork":true,"dnsPolicy":"ClusterFirstWithHostNet"}}' \
-            -- "TCP-LISTEN:3000,fork,reuseaddr" "TCP:${APP_POD_IP}:3000"
-
-          echo "Waiting for the relay pod to be ready..."
-          timeout 60 bash -c '
-            until kubectl wait --for=condition=Ready pod/distopia-app-relay -n distopia --timeout=10s 2>/dev/null; do
-              sleep 3
-            done
-          '
-
-          echo "Waiting for the relay to actually proxy a real HTTP response through to the app..."
-          timeout 60 bash -c 'until curl -sf http://127.0.0.1:3000/ -o /dev/null; do sleep 3; done'
+        run: scripts/ci/expose-app-relay.sh
 
       - name: Run E2E tests against production build
         working-directory: ./src/presentation/web
