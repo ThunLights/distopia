@@ -3,6 +3,7 @@ import {
   type ButtonInteraction,
   type CacheType,
   type InteractionReplyOptions,
+  type InteractionResponse,
   type MessagePayload,
 } from "discord.js";
 
@@ -15,7 +16,7 @@ export class PanelRankingRateButton extends ButtonInteractionBase {
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
-  ): Promise<string | InteractionReplyOptions | MessagePayload> {
+  ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
     if (interaction.user.id !== this.core.state.owner.id) {
       return { content: "権限がありません", flags: [MessageFlags.Ephemeral] };
     }
@@ -25,13 +26,21 @@ export class PanelRankingRateButton extends ButtonInteractionBase {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
+    // Reply here ourselves (rather than returning content for the dispatcher to send) so we
+    // can record the id of the panel message we're actually creating -- interaction.message
+    // is the (ephemeral) message this button is attached to, not the new public reply below,
+    // and the dispatcher's own interaction.reply() call happens after exec() already
+    // returned, too late to ever learn that reply's id.
+    const response = await interaction.reply(await page(this.core));
+    const message = await interaction.fetchReply();
+
     await this.core.panel.save({
       guildId: guild.id,
       channelId: interaction.channelId,
-      messageId: interaction.message.id,
+      messageId: message.id,
       type: "ActiveRateRanking",
     });
 
-    return await page(this.core);
+    return response;
   }
 }
