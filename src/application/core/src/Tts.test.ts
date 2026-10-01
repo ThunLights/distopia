@@ -93,6 +93,41 @@ describe("Tts.stripFilteredPatterns", () => {
     });
     expect(result).toBe("ただのメッセージです");
   });
+
+  test("strips a custom emoji token even with all filters disabled", () => {
+    const result = tts.stripFilteredPatterns("いいね <:thumbsup:123456789012345678> です", {
+      skipUrl: false,
+      skipCodeBlock: false,
+    });
+    expect(result).not.toContain("thumbsup");
+    expect(result).not.toContain("123456789012345678");
+  });
+
+  test("strips an animated custom emoji token", () => {
+    const result = tts.stripFilteredPatterns("<a:party:987654321098765432> わーい", {
+      skipUrl: true,
+      skipCodeBlock: true,
+    });
+    expect(result.trim()).toBe("わーい");
+  });
+
+  test("leaves only whitespace for a custom-emoji-only message", () => {
+    const result = tts.stripFilteredPatterns("<:peepo:111111111111111111>", {
+      skipUrl: true,
+      skipCodeBlock: true,
+    });
+    expect(result.trim()).toBe("");
+  });
+
+  // Default (Unicode) emojis are left for the synthesis engine to ignore -- only the
+  // custom emoji markup tokens are noise it can't drop on its own.
+  test("leaves a default Unicode emoji untouched", () => {
+    const result = tts.stripFilteredPatterns("いいね 👍 です", {
+      skipUrl: true,
+      skipCodeBlock: true,
+    });
+    expect(result).toBe("いいね 👍 です");
+  });
 });
 
 describe("Tts.truncateForReading", () => {
