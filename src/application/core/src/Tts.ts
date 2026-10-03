@@ -159,7 +159,10 @@ export class Tts extends Base {
     text: string,
     setting: { skipUrl: boolean; skipCodeBlock: boolean },
   ): string {
-    let result = text;
+    // Custom emoji markup (<:name:id>, <a:name:id>) is read aloud as its raw token, while
+    // default (Unicode) emojis are already silent in synthesis -- stripped unconditionally
+    // to match, not behind a setting.
+    let result = text.replace(/<a?:\w+:\d+>/g, " ");
     if (setting.skipCodeBlock) {
       result = result.replace(/```[\s\S]*?```/g, " ");
     }
