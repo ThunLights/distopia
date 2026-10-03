@@ -1,8 +1,19 @@
 name: Security
 
+# Deliberately NOT pull_request_target. Both scanners here only read the checked-out tree as
+# data -- neither installs dependencies nor runs repository code -- so they have no reason to
+# need the base repo's secrets, and pull_request_target actively broke both of them:
+#
+# - gitleaks-action rejects the event outright ("ERROR: The [pull_request_target] event is not
+#   yet supported") and failed every fork PR in seconds.
+# - trufflehog could not resolve a commit range for it and silently fell back to scanning the
+#   whole filesystem (~3.3 GB, ~10 minutes), which also surfaced unverified matches from files
+#   the pull request never touched.
+#
+# Plain pull_request fires for fork PRs too, just without secrets -- see the gitleaks job's own
+# comment for how that is handled.
 on:
   pull_request:
-  pull_request_target:
   push:
     branches:
       - main
@@ -11,16 +22,18 @@ jobs:
   gitleaks:
     name: Git Leaks
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    # Skipped for fork PRs: gitleaks-action cannot run on pull_request_target at all, and a
+    # fork's pull_request run gets no secrets, so GITLEAKS_LICENSE would be empty and the
+    # action would fail on licensing instead. Fork PRs are still covered by the trufflehog job
+    # below, and by this job's own push run once the PR is merged into main.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
           persist-credentials: false
-          allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}
 
       - name: Check Leaks
         uses: gitleaks/gitleaks-action@v3
@@ -31,18 +44,18 @@ jobs:
   trufflehog:
     name: Trufflehog
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
           persist-credentials: false
-          allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}
 
+      # Pinned rather than @main: this runs on untrusted fork pull requests, so a compromised
+      # upstream default branch would execute here. v3.97.9 is the version the action was
+      # already resolving to, so this changes nothing but the supply-chain exposure.
       - name: Secret Scanning
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.97.9
         with:
           extra_args: --results=verified,unknown
