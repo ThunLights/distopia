@@ -1,0 +1,49 @@
+name: Cache cleanup
+
+# A cache created on refs/pull/<n>/merge is only ever readable by that same pull request's
+# runs -- never by another PR, never by main. Once the PR closes it is unreachable, but it
+# still occupies the repository-wide 10 GB cache budget until GitHub happens to evict it.
+# That budget running full is what makes buildx fail with "failed to reserve cache", and it
+# evicts main's caches (the ones every branch actually restores from) along the way, so
+# clearing these back out is a speed win, not a speed cost.
+#
+# pull_request_target, not pull_request: a fork's pull_request run only ever gets a read-only
+# token, which cannot delete caches no matter what `permissions` says. The usual danger of
+# pull_request_target does not apply here because this job never checks out or executes the
+# pull request's code -- it has no checkout step at all and only calls the cache API. (The
+# scanners in security.yml do read the PR tree, which is why they deliberately do NOT use
+# this event; see that file's own comment.)
+on:
+  pull_request_target:
+    types: [closed]
+
+jobs:
+  cleanup:
+    name: Delete caches for the closed pull request
+    runs-on: ubuntu-latest
+    permissions:
+      # The repository default is read-only; deleting caches needs this explicitly.
+      actions: write
+
+    steps:
+      - name: Delete this pull request's caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_REF: refs/pull/${{ github.event.pull_request.number }}/merge
+        run: |
+          set -euo pipefail
+
+          ids=$(gh cache list --ref "$PR_REF" --limit 100 --json id --jq '.[].id')
+          if [ -z "$ids" ]; then
+            echo "No caches found for $PR_REF."
+            exit 0
+          fi
+
+          echo "Deleting $(echo "$ids" | wc -l) cache(s) for $PR_REF:"
+          gh cache list --ref "$PR_REF" --limit 100 \
+            --json id,key,sizeInBytes \
+            --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
+
+          echo "$ids" | xargs -r -n1 gh cache delete
+          echo "Done."
