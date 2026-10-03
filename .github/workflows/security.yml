@@ -55,7 +55,13 @@ jobs:
       # Pinned rather than @main: this runs on untrusted fork pull requests, so a compromised
       # upstream default branch would execute here. v3.97.9 is the version the action was
       # already resolving to, so this changes nothing but the supply-chain exposure.
+      #
+      # `version` pins the scanner separately from the action, and is just as load-bearing:
+      # the action is a thin wrapper that runs `docker run <image>:<version>`, and that input
+      # defaults to "latest" -- so pinning only `uses:` would still pull a floating image.
+      # The image tag carries no leading "v" (ghcr.io/trufflesecurity/trufflehog:3.97.9).
       - name: Secret Scanning
         uses: trufflesecurity/trufflehog@v3.97.9
         with:
+          version: "3.97.9"
           extra_args: --results=verified,unknown
