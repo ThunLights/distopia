@@ -56,13 +56,22 @@ function fakeChannel(guildId: string) {
 }
 
 // joinNow awaits entersState(Ready); the Disconnected handler races
-// entersState(Signalling)/entersState(Connecting). Dispatching on the requested status lets
-// one mock serve both without relying on call ordering.
-function mockEntersState({ reconnecting }: { reconnecting: boolean }) {
+// entersState(Signalling)/entersState(Connecting) and then awaits Ready too. Dispatching on
+// the requested status lets one mock serve all of them without relying on call ordering.
+function mockEntersState({
+  reconnecting,
+  reachesReady = true,
+}: {
+  reconnecting: boolean;
+  reachesReady?: boolean;
+}) {
   // `status` widens to AudioPlayerStatus from entersState's first overload; both are string
   // enums, so compare the underlying values rather than fighting the overload resolution.
   vi.mocked(entersState).mockImplementation(async (_target, status) => {
     if ((status as string) === (VoiceConnectionStatus.Ready as string)) {
+      if (!reachesReady) {
+        throw new Error("stalled before Ready");
+      }
       return undefined as never;
     }
     if (reconnecting) {
@@ -128,6 +137,25 @@ describe("voice connection Disconnected handling", () => {
 
     expect(isJoined(guildId)).toBe(true);
     expect(connection.destroy).not.toHaveBeenCalled();
+  });
+
+  // Reaching Signalling/Connecting only proves a reconnect started. A handshake that stalls
+  // there would otherwise leave the session joined but permanently silent.
+  test("tears down when a reconnect starts but never reaches Ready", async () => {
+    const guildId = "guild-stalled";
+    const core = fakeCore();
+    const connection = new FakeConnection();
+    mockEntersState({ reconnecting: true });
+
+    expect(await joinWith(guildId, connection, core)).toBe(true);
+
+    // Now the reconnect gets as far as Signalling/Connecting but stalls before Ready.
+    mockEntersState({ reconnecting: true, reachesReady: false });
+    connection.emit(VoiceConnectionStatus.Disconnected);
+    await vi.waitFor(() => expect(isJoined(guildId)).toBe(false));
+
+    expect(connection.destroy).toHaveBeenCalled();
+    expect(core.tts.clearVoiceSession).not.toHaveBeenCalled();
   });
 
   test("a late disconnect does not tear down a session a newer join already replaced", async () => {

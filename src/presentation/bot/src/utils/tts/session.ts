@@ -107,9 +107,14 @@ async function joinNow(
         entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
         entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
       ]);
+      // Reaching Signalling/Connecting only proves a reconnect started, not that it finished:
+      // @discordjs/voice has no timeout of its own for either state, and audio stays silent
+      // until Ready, so a stalled handshake would leave exactly the zombie session this
+      // handler exists to prevent. Same bound as the initial connect below.
+      await entersState(connection, VoiceConnectionStatus.Ready, 15_000);
       return;
     } catch {
-      // Not reconnecting -- fall through and tear this session down.
+      // Never got back to Ready -- fall through and tear this session down.
     }
 
     // A concurrent /tts join may have already replaced this session; that newer connection
@@ -159,8 +164,20 @@ async function joinNow(
     // report failure instead, same as the entersState(Ready) failure path above.
     console.error("[tts] failed to persist voice session", error);
     session.player.stop(true);
-    session.connection.destroy();
+    // Guarded: the Disconnected handler above may have destroyed this connection while the
+    // save was in flight, and destroy() throws on an already-destroyed connection -- which
+    // would turn this failure path into a rejected join() instead of a `false` return.
+    if (session.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+      session.connection.destroy();
+    }
     sessions.delete(voiceChannel.guildId);
+    return false;
+  }
+
+  // The save above is a Redis round trip, and the Disconnected handler can tear this session
+  // down while it is in flight. Reporting success then would tell the caller the bot joined
+  // while isJoined() is already false.
+  if (sessions.get(voiceChannel.guildId)?.connection !== connection) {
     return false;
   }
   return true;
