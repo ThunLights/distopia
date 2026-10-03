@@ -569,6 +569,11 @@ can't cross-reference a ConfigMap value into another field.
   `migrate` initContainer (it reads `distopia-db-credentials` too, same as the main
   container), but never a rebuild — the build-time database `deploy.yml` migrates is a
   separate, throwaway one, unrelated to the real `distopia-db-credentials` value.
+  Rotating `SCHEDULEMANAGER_RPC_TOKEN` specifically needs **both** Deployments restarted
+  (`... distopia-app` and `... distopia-schedulemanager`) — it's the one `distopia-env` key
+  `distopia-schedulemanager` also reads, and a still-running Pod keeps its old
+  Secret-backed env var value until restarted, so a one-sided restart leaves the two
+  processes with mismatched tokens and every RPC call failing auth.
 - `distopia-db`'s Argo CD Application (`k8s/argocd/app-db.yaml`) runs with `prune: false`,
   unlike `distopia-app`/`distopia-network`. It owns stateful data (the CNPG `Cluster` and
   its PVC) — an accidental removal of its manifest from git should show up as "OutOfSync"

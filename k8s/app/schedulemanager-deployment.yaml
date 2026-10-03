@@ -5,7 +5,11 @@
 # has no Service of its own.
 #
 # replicas stays at 1 for the same reason as distopia-app's own node-cron jobs used to
-# (see k8s/README.md): a second replica would double-fire every RPC call.
+# (see k8s/README.md): a second replica would double-fire every RPC call. Recreate (not
+# RollingUpdate) for the same reason -- RollingUpdate's maxSurge:1 would let the new pod
+# start ticking before the old one stops, which is exactly the double-fire this Deployment
+# otherwise avoids. Unlike distopia-app, a brief gap in scheduling during a rollout is fine
+# here: it just means one tick is skipped, not a dropped request.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,10 +20,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: distopia-schedulemanager

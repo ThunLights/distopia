@@ -17,25 +17,29 @@ const client = createClient(SchedulerService, transport);
 
 const manager = new ScheduleTaskManager();
 
+// node-cron's `noOverlap` only prevents a task from overlapping its OWN next tick, not the
+// two tasks from running concurrently with each other -- at every 20-minute mark both fire
+// at once, which is exactly the concurrent guildRecord(OneDay) upsert that deadlocks
+// (Postgres 40P01). Chaining both bodies onto one shared promise serializes them across
+// tasks too; `.then(fn, fn)` keeps the chain alive even if a run throws.
+let queue: Promise<unknown> = Promise.resolve();
+function serialized(fn: () => Promise<unknown>) {
+  return () => (queue = queue.then(fn, fn));
+}
+
 await manager.add(
   "*/5 * * * *",
-  async () => {
+  serialized(async () => {
     await client.runFiveMinuteTasks({});
-  },
-  // Prevent a slow run from overlapping the next tick, which caused
-  // concurrent guildRecordOneDay upserts to deadlock (Postgres 40P01)
-  // with the */20 job below.
+  }),
   { noOverlap: true },
 );
 
 await manager.add(
   "*/20 * * * *",
-  async () => {
+  serialized(async () => {
     await client.runTwentyMinuteTasks({});
-  },
-  // This job's runtime scales with guild count (sequential Discord API
-  // calls); without noOverlap a slow run can still be executing when the
-  // next tick fires, causing concurrent guildRecord upserts to deadlock.
+  }),
   { noOverlap: true },
 );
 
