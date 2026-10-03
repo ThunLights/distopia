@@ -90,6 +90,41 @@ async function joinNow(
   connection.on("error", (error) => console.error("[tts] voice connection error", error));
   player.on("error", (error) => console.error("[tts] audio player error", error));
 
+  // @discordjs/voice does not recover from every Disconnected state on its own. Without this
+  // the entry stays in `sessions` indefinitely: isJoined() keeps reporting true and enqueue()
+  // keeps feeding audio into a dead connection, so the guild looks joined but is silent until
+  // someone runs /tts join again. The Signalling/Connecting race distinguishes a transient hop
+  // that reconnects itself (channel move, voice server failover) from a real disconnect
+  // (kicked by a moderator, or this process losing the connection to a newer one).
+  //
+  // Tears down in-memory state ONLY -- clearVoiceSession is deliberately not called here.
+  // During a rolling update the new pod takes over the connection, which lands the old pod in
+  // this handler; clearing Redis there would delete the pointer the new pod just restored,
+  // turning k8s/README.md's narrow rollout-window race into one that fires on every rollout.
+  connection.on(VoiceConnectionStatus.Disconnected, async () => {
+    try {
+      await Promise.race([
+        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
+        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
+      ]);
+      return;
+    } catch {
+      // Not reconnecting -- fall through and tear this session down.
+    }
+
+    // A concurrent /tts join may have already replaced this session; that newer connection
+    // must not be torn down here.
+    if (sessions.get(voiceChannel.guildId)?.connection !== connection) {
+      return;
+    }
+
+    sessions.delete(voiceChannel.guildId);
+    player.stop(true);
+    if (connection.state.status !== VoiceConnectionStatus.Destroyed) {
+      connection.destroy();
+    }
+  });
+
   try {
     await entersState(connection, VoiceConnectionStatus.Ready, 15_000);
   } catch (error) {
