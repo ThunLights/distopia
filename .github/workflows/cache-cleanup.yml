@@ -41,14 +41,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          ids=$(gh cache list --ref "$PR_REF" --limit 100 --json id --jq '.[].id')
+          ids=$(gh cache list --ref "$PR_REF" --limit 1000 --json id --jq '.[].id')
           if [ -z "$ids" ]; then
             echo "No caches found for $PR_REF."
             exit 0
           fi
 
           echo "Deleting $(echo "$ids" | wc -l) cache(s) for $PR_REF:"
-          gh cache list --ref "$PR_REF" --limit 100 --json key,sizeInBytes \
+          gh cache list --ref "$PR_REF" --limit 1000 --json key,sizeInBytes \
             --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
 
           echo "$ids" | xargs -r -n1 gh cache delete
@@ -71,7 +71,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          refs=$(gh cache list --limit 100 --json ref \
+          # --limit has to exceed the repository's total cache count, not the number of
+          # matches: gh applies it when fetching, so the refs/pull/ filter below only ever
+          # sees that many caches. Too low and a closed PR sitting behind newer main/open-PR
+          # entries never enters the scan -- precisely the caches worth reclaiming. gh
+          # paginates to reach this.
+          refs=$(gh cache list --limit 1000 --json ref \
             --jq '[.[].ref | select(startswith("refs/pull/"))] | unique | .[]')
           if [ -z "$refs" ]; then
             echo "No pull-request-scoped caches."
@@ -87,9 +92,9 @@ jobs:
             case "$state" in
               CLOSED | MERGED)
                 echo "PR #$pr is $state -- deleting its caches:"
-                gh cache list --ref "$ref" --limit 100 --json key,sizeInBytes \
+                gh cache list --ref "$ref" --limit 1000 --json key,sizeInBytes \
                   --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
-                gh cache list --ref "$ref" --limit 100 --json id --jq '.[].id' \
+                gh cache list --ref "$ref" --limit 1000 --json id --jq '.[].id' \
                   | xargs -r -n1 gh cache delete
                 ;;
               OPEN)
@@ -111,7 +116,7 @@ jobs:
 
           # Ordered by last access, not creation: a cache that is still being restored is the
           # one worth keeping, and it matches how GitHub's own over-budget eviction picks.
-          doomed=$(gh cache list --ref refs/heads/main --limit 100 \
+          doomed=$(gh cache list --ref refs/heads/main --limit 1000 \
             --sort last_accessed_at --order desc \
             --json id,key,sizeInBytes \
             --jq ".[${KEEP}:]")
