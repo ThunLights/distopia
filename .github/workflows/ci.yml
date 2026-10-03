@@ -29,6 +29,13 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   REDIS_URL: redis://distopia-redis:6379
 
+  # Internal schedulemanager<->web RPC auth -- self-contained to this one CI container (the
+  # "Setup" composite action's `printenv > .env` step is what makes vite preview's
+  # hooks.server.ts see these), never a real secret, so a literal value is fine here the same
+  # way REDIS_URL above is.
+  SCHEDULEMANAGER_RPC_PORT: "8081"
+  SCHEDULEMANAGER_RPC_TOKEN: ci-schedulemanager-rpc-token
+
   SENTRY_ORG: thunlights
   SENTRY_PROJECT: distopia-ci
   PUBLIC_SENTRY_DSN: https://c00b15c8dde94b7a50f0706b6ec3d7ed@o4511148812599296.ingest.us.sentry.io/4511955775455232
