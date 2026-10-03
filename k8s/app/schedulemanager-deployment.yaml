@@ -1,0 +1,56 @@
+# presentation-schedulemanager: a lightweight process that only ticks two node-cron
+# schedules and calls distopia-app's internal Connect RPC port (see
+# src/presentation/web/src/lib/server/schedulerRpcServer.ts) -- it never touches the
+# database, Redis, or Discord directly, and never receives inbound traffic itself, so it
+# has no Service of its own.
+#
+# replicas stays at 1 for the same reason as distopia-app's own node-cron jobs used to
+# (see k8s/README.md): a second replica would double-fire every RPC call.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-schedulemanager
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-schedulemanager
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-schedulemanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-schedulemanager
+    spec:
+      containers:
+        - name: distopia-schedulemanager
+          # Same image as distopia-app (see deployment.yaml's own comment on the :latest
+          # bootstrap fallback + Argo CD Image Updater) -- `bun run build` already builds
+          # every workspace package into it, so this just overrides the start command.
+          image: ghcr.io/thunlights/distopia:latest
+          command: ["bun", "run", "src/presentation/schedulemanager/src/index.ts"]
+          workingDir: /app
+          env:
+            # distopia-app:8081 (in-cluster DNS, matching distopia-config's
+            # SCHEDULEMANAGER_RPC_PORT + service.yaml's `rpc` port) -- update together if
+            # either port changes.
+            - name: SCHEDULEMANAGER_RPC_URL
+              value: "http://distopia-app:8081"
+            - name: SCHEDULEMANAGER_RPC_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-env
+                  key: SCHEDULEMANAGER_RPC_TOKEN
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

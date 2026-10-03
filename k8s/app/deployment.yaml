@@ -4,11 +4,16 @@
 # below is injected purely as a live env var at Pod start, sourced from k8s Secrets/
 # ConfigMaps that are never part of the image or the in-cluster registry.
 #
-# replicas stays at 1: the app logs into the Discord gateway and runs in-process cron jobs
-# itself (see k8s/README.md), so more than one instance running at once causes duplicate
-# event handling. RollingUpdate with maxSurge:1/maxUnavailable:0 is still used (instead of
-# Recreate) to get a zero-downtime rollout -- the brief window where the new pod is up
-# alongside the old one during a rollout is accepted.
+# replicas stays at 1: the app logs into the Discord gateway itself (see k8s/README.md), so
+# more than one instance running at once causes duplicate event handling. RollingUpdate with
+# maxSurge:1/maxUnavailable:0 is still used (instead of Recreate) to get a zero-downtime
+# rollout -- the brief window where the new pod is up alongside the old one during a rollout
+# is accepted.
+#
+# Also serves a small internal Connect RPC server (the `rpc` port) that
+# presentation-schedulemanager calls on a cron tick -- see schedulerRpcListener.ts and
+# schedulemanager-networkpolicy.yaml, which restricts ingress on that port to the
+# schedulemanager pod only.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -66,16 +71,19 @@ spec:
           ports:
             - name: http
               containerPort: 3000
+            - name: rpc
+              containerPort: 8081
           envFrom:
             - configMapRef:
-                # PORT (default "3000") -- @sveltejs/adapter-node reads this directly.
-                # If you change it here, update `containerPort`/`service.yaml`'s
-                # targetPort to match -- plain Kubernetes YAML can't cross-reference a
-                # ConfigMap value into another field.
+                # PORT (default "3000"), SCHEDULEMANAGER_RPC_PORT (default "8081") -- read
+                # directly by @sveltejs/adapter-node and schedulerRpcListener.ts respectively.
+                # If you change either, update the matching `containerPort` above and
+                # `service.yaml`'s targetPort to match -- plain Kubernetes YAML can't
+                # cross-reference a ConfigMap value into another field.
                 name: distopia-config
             - secretRef:
-                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_* -- see k8s/README.md for the
-                # kubectl create secret command.
+                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_*, SCHEDULEMANAGER_RPC_TOKEN -- see
+                # k8s/README.md for the kubectl create secret command.
                 name: distopia-env
           env:
             # distopia-db-credentials carries a `url` key alongside the `username`/

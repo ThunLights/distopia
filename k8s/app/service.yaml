@@ -22,3 +22,8 @@ spec:
     - name: http
       port: 3000
       targetPort: http
+    # Internal-only Connect RPC port -- only reachable from the schedulemanager pod, see
+    # schedulemanager-networkpolicy.yaml. Never wired to the Cloudflare Tunnel.
+    - name: rpc
+      port: 8081
+      targetPort: rpc

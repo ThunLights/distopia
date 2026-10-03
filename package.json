@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev-web": "turbo run dev --filter=presentation-web",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "format": "turbo run format",
@@ -34,6 +36,11 @@
       "./src/**/*"
     ],
     "catalog": {
+      "@bufbuild/buf": "1.73.0",
+      "@bufbuild/protobuf": "2.16.0",
+      "@bufbuild/protoc-gen-es": "2.16.0",
+      "@connectrpc/connect": "2.2.0",
+      "@connectrpc/connect-node": "2.2.0",
       "@discordjs/voice": "0.19.2",
       "@noble/ciphers": "2.4.0",
       "@standard-schema/spec": "1.1.0",

@@ -17,6 +17,10 @@ kubectl create namespace distopia
 # .github/workflows/deploy.yml's build step already uses.
 db_host=distopia-db-rw.distopia.svc.cluster.local
 db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' distopia distopia-e2e-test "$db_host")
+# Purely an internal shared secret between distopia-app and distopia-schedulemanager within
+# this one test cluster -- nothing external needs to know it in advance, so it's generated
+# here rather than sourced from a GitHub Actions secret.
+schedulemanager_rpc_token=$(openssl rand -hex 32)
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
@@ -52,4 +56,5 @@ stringData:
   SENTRY_PROJECT: "$SENTRY_PROJECT"
   PUBLIC_SENTRY_DSN: "$PUBLIC_SENTRY_DSN"
   SENTRY_AUTH_TOKEN: "$SENTRY_AUTH_TOKEN"
+  SCHEDULEMANAGER_RPC_TOKEN: "$schedulemanager_rpc_token"
 EOF
