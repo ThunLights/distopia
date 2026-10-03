@@ -1,0 +1,134 @@
+name: Cache cleanup
+
+# The repository-wide Actions cache budget is 10 GB, shared by every ref. Running it full is
+# what makes buildx fail with "failed to reserve cache", and it also evicts main's caches --
+# the ones every branch actually restores from -- so keeping it trimmed is a speed win, not a
+# speed cost.
+#
+# pull_request_target (not pull_request) for the close-triggered job: a fork's pull_request
+# run only ever gets a read-only token, which cannot delete caches no matter what
+# `permissions` says. The usual danger of pull_request_target does not apply to anything in
+# this file because no job here checks out or executes the pull request's code -- there is no
+# checkout step at all, only cache API calls. (The scanners in security.yml do read the PR
+# tree, which is why they deliberately do NOT use this event; see that file's own comment.)
+on:
+  pull_request_target:
+    types: [closed]
+  schedule:
+    # Daily at 03:00 UTC (12:00 JST) -- a backstop for whatever the close-triggered job
+    # misses, e.g. caches written by a run that finished after the PR was already closed.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  pr-closed:
+    name: Delete caches for the closed pull request
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      # The repository default is read-only; deleting caches needs this explicitly.
+      actions: write
+
+    steps:
+      # A cache created on refs/pull/<n>/merge is only ever readable by that same pull
+      # request's runs -- never by another PR, never by main -- so once the PR closes it is
+      # unreachable and purely occupying budget.
+      - name: Delete this pull request's caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_REF: refs/pull/${{ github.event.pull_request.number }}/merge
+        run: |
+          set -euo pipefail
+
+          ids=$(gh cache list --ref "$PR_REF" --limit 1000 --json id --jq '.[].id')
+          if [ -z "$ids" ]; then
+            echo "No caches found for $PR_REF."
+            exit 0
+          fi
+
+          echo "Deleting $(echo "$ids" | wc -l) cache(s) for $PR_REF:"
+          gh cache list --ref "$PR_REF" --limit 1000 --json key,sizeInBytes \
+            --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
+
+          echo "$ids" | xargs -r -n1 gh cache delete
+          echo "Done."
+
+  scheduled:
+    name: Trim stale caches
+    if: github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      # gh pr view, to tell an open pull request's caches from a closed one's.
+      pull-requests: read
+
+    steps:
+      - name: Delete caches of pull requests that are no longer open
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # --limit has to exceed the repository's total cache count, not the number of
+          # matches: gh applies it when fetching, so the refs/pull/ filter below only ever
+          # sees that many caches. Too low and a closed PR sitting behind newer main/open-PR
+          # entries never enters the scan -- precisely the caches worth reclaiming. gh
+          # paginates to reach this.
+          refs=$(gh cache list --limit 1000 --json ref \
+            --jq '[.[].ref | select(startswith("refs/pull/"))] | unique | .[]')
+          if [ -z "$refs" ]; then
+            echo "No pull-request-scoped caches."
+            exit 0
+          fi
+
+          for ref in $refs; do
+            pr=$(echo "$ref" | cut -d/ -f3)
+            state=$(gh pr view "$pr" --json state --jq .state 2>/dev/null || echo "UNKNOWN")
+
+            # Deliberately an allowlist rather than "anything that is not OPEN": a transient
+            # API failure must not be read as "closed" and delete a live PR's caches.
+            case "$state" in
+              CLOSED | MERGED)
+                echo "PR #$pr is $state -- deleting its caches:"
+                gh cache list --ref "$ref" --limit 1000 --json key,sizeInBytes \
+                  --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
+                gh cache list --ref "$ref" --limit 1000 --json id --jq '.[].id' \
+                  | xargs -r -n1 gh cache delete
+                ;;
+              OPEN)
+                echo "PR #$pr is open -- keeping its caches."
+                ;;
+              *)
+                echo "PR #$pr state could not be determined -- keeping its caches."
+                ;;
+            esac
+          done
+
+      - name: Trim main caches to the most recently used 15
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          KEEP: "15"
+        run: |
+          set -euo pipefail
+
+          # Ordered by last access, not creation: a cache that is still being restored is the
+          # one worth keeping, and it matches how GitHub's own over-budget eviction picks.
+          doomed=$(gh cache list --ref refs/heads/main --limit 1000 \
+            --sort last_accessed_at --order desc \
+            --json id,key,sizeInBytes \
+            --jq ".[${KEEP}:]")
+
+          count=$(echo "$doomed" | jq 'length')
+          if [ "$count" -eq 0 ]; then
+            echo "main has at most ${KEEP} caches -- nothing to trim."
+            exit 0
+          fi
+
+          echo "Keeping the ${KEEP} most recently used main caches, deleting ${count}:"
+          echo "$doomed" | jq -r '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
+
+          echo "$doomed" | jq -r '.[].id' | xargs -r -n1 gh cache delete
+          echo "Done."

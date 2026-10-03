@@ -32,7 +32,14 @@ runs:
         push: false
         load: true
         cache-from: type=gha
-        cache-to: type=gha,mode=max
+        # mode=min, not max: max additionally exports the layers of intermediate build stages
+        # that the final image discards, and docker/dockerfile is single-stage (one FROM), so
+        # there are none -- every layer is already in the final image and exported either way.
+        # The extra entries max produced just consumed the repository-wide 10 GB cache budget,
+        # which is what makes buildx fail with "failed to reserve cache". (docker/
+        # dockerfile.prod IS multi-stage, but deploy.yml builds it without any GHA cache, so
+        # this setting never applied to it.)
+        cache-to: type=gha,mode=min
 
     - name: Cache Bun install
       uses: actions/cache@v6
