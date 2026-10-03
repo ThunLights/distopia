@@ -8,3 +8,5 @@ resources:
 - configmap.yaml
 - deployment.yaml
 - service.yaml
+- schedulemanager-deployment.yaml
+- schedulemanager-networkpolicy.yaml

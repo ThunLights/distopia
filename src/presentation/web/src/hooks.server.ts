@@ -1,16 +1,15 @@
 import { dev } from "$app/environment";
 import { env as privateEnv } from "$env/dynamic/private";
-import { env as publicEnv } from "$env/dynamic/public";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
 import { client } from "$lib/server/bot";
-import { core, updatePanels } from "$lib/server/core";
+import { core } from "$lib/server/core";
 import { redis } from "$lib/server/redis";
+import { startSchedulerRpcServer } from "$lib/server/schedulerRpcListener";
 import { uploadSourceMapsOnce } from "$lib/server/sourcemaps";
 import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { setScheduleTask } from "app-schedule";
 import { handleClient } from "presentation-bot";
 import { resetEphemeralMemory } from "repo-redis";
 
@@ -40,12 +39,6 @@ process.on("unhandledRejection", async (reason) => {
 
 async function start() {
   const { BOT_TOKEN } = privateEnv;
-  const {
-    PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
-    PUBLIC_HOME_SERVER_ID,
-    PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
-    PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
-  } = publicEnv;
 
   // Wipes each owner's `<owner>:ephemeral:*` namespace (see repo-redis's
   // resetEphemeralMemory) -- must run before anything below reads/writes affected stores.
@@ -99,14 +92,8 @@ async function start() {
   await core.guild.loadSearchEngine();
   console.log("Loaded SearchEngine.");
 
-  setScheduleTask({
-    core,
-    updatePanels,
-    homeServerId: PUBLIC_HOME_SERVER_ID!,
-    specialDirectorsRoleId: PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
-    directorsRoleId: PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
-    subDirectorsRoleId: PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
-  });
+  startSchedulerRpcServer();
+  console.log("Scheduler RPC server started.");
 }
 
 export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }) => {

@@ -1,5 +1,5 @@
 {
-  "name": "app-schedule",
+  "name": "infra-rpc",
   "private": true,
   "type": "module",
   "exports": {
@@ -8,23 +8,26 @@
     }
   },
   "scripts": {
-    "test": "vitest run",
+    "build": "buf generate",
+    "setup": "bun run build",
     "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/node": "catalog:"
+    "@bufbuild/protobuf": "catalog:",
+    "@connectrpc/connect": "catalog:"
   },
   "devDependencies": {
+    "@bufbuild/buf": "catalog:",
+    "@bufbuild/protoc-gen-es": "catalog:",
+    "@types/node": "catalog:",
     "bun": "catalog:",
     "oxfmt": "catalog:",
-    "oxlint": "catalog:",
-    "vitest": "catalog:"
+    "oxlint": "catalog:"
   },
   "peerDependencies": {
-    "node-cron": "4.6.0",
     "typescript": "catalog:"
   }
 }

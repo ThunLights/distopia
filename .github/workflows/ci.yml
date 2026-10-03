@@ -29,6 +29,13 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   REDIS_URL: redis://distopia-redis:6379
 
+  # Internal schedulemanager<->web RPC auth -- self-contained to this one CI container (the
+  # "Setup" composite action's `printenv > .env` step is what makes vite preview's
+  # hooks.server.ts see these), never a real secret, so a literal value is fine here the same
+  # way REDIS_URL above is.
+  SCHEDULEMANAGER_RPC_PORT: "8081"
+  SCHEDULEMANAGER_RPC_TOKEN: ci-schedulemanager-rpc-token
+
   SENTRY_ORG: thunlights
   SENTRY_PROJECT: distopia-ci
   PUBLIC_SENTRY_DSN: https://c00b15c8dde94b7a50f0706b6ec3d7ed@o4511148812599296.ingest.us.sentry.io/4511955775455232
@@ -232,6 +239,7 @@ jobs:
           cd ../..
           kubectl apply -k k8s/app
           kubectl rollout status deployment/distopia-app -n distopia --timeout=180s
+          kubectl rollout status deployment/distopia-schedulemanager -n distopia --timeout=180s
 
       - name: Expose the app via a hostNetwork relay pod
         run: scripts/ci/expose-app-relay.sh
@@ -248,6 +256,8 @@ jobs:
           kubectl get all -n distopia
           kubectl describe pod -n distopia -l app.kubernetes.io/name=distopia-app
           kubectl logs -n distopia deployment/distopia-app --tail=200
+          kubectl describe pod -n distopia -l app.kubernetes.io/name=distopia-schedulemanager
+          kubectl logs -n distopia deployment/distopia-schedulemanager --tail=200
           kubectl logs -n distopia pod/distopia-db-1 -c postgres --tail=100 || true
           kubectl logs -n distopia -l "app=distopia-redis,redis_setup_type=standalone" --tail=100 || true
           kubectl logs -n distopia job/distopia-db-backup-test --tail=100 || true

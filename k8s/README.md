@@ -128,8 +128,15 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=PUBLIC_SENTRY_DSN='...' \
   --from-literal=SENTRY_AUTH_TOKEN='...' \
   --from-literal=VOICEVOX_API_KEY='...' \
-  --from-literal=SAKURA_AI_ENGINE_API_KEY='...'
+  --from-literal=SAKURA_AI_ENGINE_API_KEY='...' \
+  --from-literal=SCHEDULEMANAGER_RPC_TOKEN='...'
 ```
+
+`SCHEDULEMANAGER_RPC_TOKEN` is a shared secret between `distopia-app` and
+`distopia-schedulemanager` only (generate any random value yourself, e.g. `openssl rand -hex
+32`) — both Deployments read the same key out of this one Secret (see
+`schedulemanager-deployment.yaml`). It authenticates calls to `distopia-app`'s internal
+Connect RPC port; see "Scheduler RPC (schedulemanager)" below for the full picture.
 
 `SENTRY_PROJECT`/`PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` here must be your **production**
 Sentry project's own values, not `ci.yml`'s CI-scoped ones — `SENTRY_ORG` is the only Sentry
@@ -493,13 +500,50 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
 > narrow, rollout-window-only race, but is real added complexity for a low-probability,
 > low-impact case — out of scope here; revisit if it turns out to matter in practice.
 
+## Scheduler RPC (schedulemanager)
+
+`distopia-schedulemanager` (`schedulemanager-deployment.yaml`) is a separate, lightweight
+Deployment built from the same image as `distopia-app`, just with its `command` overridden to
+run `presentation-schedulemanager` instead of the SvelteKit server. It owns the two
+`node-cron` schedules that used to run in-process inside `hooks.server.ts` (via the retired
+`app-schedule` package) and, on each tick, calls a small internal Connect RPC server
+`distopia-app` now exposes (`src/presentation/web/src/lib/server/schedulerRpcListener.ts`,
+implementing `SchedulerService` from `infra-rpc`) — the actual job bodies (`core.jwt.update()`,
+`updatePanels()`, ...) are unchanged, only the trigger moved from an in-process timer to an RPC
+call. `distopia-app` still hosts `AppCore` and the Discord client for now; this is stage 1 of
+splitting the monolith into independent `web`/`bot`/`schedulemanager`/`searchengine` services,
+not a full split.
+
+Reachability is restricted two ways, neither a substitute for the other:
+
+- `schedulemanager-networkpolicy.yaml` — a NetworkPolicy that lets only the
+  `distopia-schedulemanager` pod reach `distopia-app`'s internal `rpc` port (see its own
+  comment for why this NetworkPolicy also needs an unrestricted rule for the `http` port, or it
+  would silently break public traffic).
+- `SCHEDULEMANAGER_RPC_TOKEN` — a bearer token both Deployments read from the same
+  `distopia-env` Secret key (see "2. Secrets to create by hand" above); `distopia-app` rejects
+  any RPC call whose `Authorization` header doesn't match.
+
+`SCHEDULEMANAGER_RPC_PORT` (`distopia-config` ConfigMap, default `8081`) is committed as a
+plain literal, same as the public `PORT` value right above it in that ConfigMap — unlike the
+Cloudflare Tunnel relay's loopback ports (see that section below), this port is never a secret
+on its own: it's cluster-internal only, and the NetworkPolicy + bearer token above are what
+actually gate access, not the port number being unguessable. If you change it, update
+`deployment.yaml`'s `rpc` `containerPort`, `service.yaml`'s `rpc` port, and
+`schedulemanager-deployment.yaml`'s `SCHEDULEMANAGER_RPC_URL` together — plain Kubernetes YAML
+can't cross-reference a ConfigMap value into another field.
+
 ## Notes / known constraints
 
 - `replicas: 1` is load-bearing, not just a default — the app logs into the Discord
-  gateway and runs in-process `node-cron` jobs itself (`hooks.server.ts`), so a second
-  concurrent instance causes duplicate event handling. `k8s/app/deployment.yaml` uses
-  `RollingUpdate` with `maxSurge: 1, maxUnavailable: 0` (zero-downtime, brief overlap
-  during rollout accepted) rather than `Recreate`.
+  gateway itself (`hooks.server.ts`), so a second concurrent instance causes duplicate event
+  handling. `k8s/app/deployment.yaml` uses `RollingUpdate` with `maxSurge: 1,
+  maxUnavailable: 0` (zero-downtime, brief overlap during rollout accepted) rather than
+  `Recreate`.
+- `distopia-schedulemanager`'s `replicas: 1` (`schedulemanager-deployment.yaml`) is
+  load-bearing for a different reason: it only ticks two `node-cron` schedules and calls
+  `distopia-app`'s internal RPC port (see "Scheduler RPC (schedulemanager)" below) — a
+  second replica would double-fire every call.
 - No app secret is ever baked into the image or pushed to ghcr.io. The app reads its
   runtime config (`BOT_TOKEN`, `PUBLIC_*`, `DATABASE_URL`, ...) via `$env/dynamic/*` +
   `dotenv` (see `hooks.server.ts`), resolved fresh every time the container starts from the
@@ -525,6 +569,11 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
   `migrate` initContainer (it reads `distopia-db-credentials` too, same as the main
   container), but never a rebuild — the build-time database `deploy.yml` migrates is a
   separate, throwaway one, unrelated to the real `distopia-db-credentials` value.
+  Rotating `SCHEDULEMANAGER_RPC_TOKEN` specifically needs **both** Deployments restarted
+  (`... distopia-app` and `... distopia-schedulemanager`) — it's the one `distopia-env` key
+  `distopia-schedulemanager` also reads, and a still-running Pod keeps its old
+  Secret-backed env var value until restarted, so a one-sided restart leaves the two
+  processes with mismatched tokens and every RPC call failing auth.
 - `distopia-db`'s Argo CD Application (`k8s/argocd/app-db.yaml`) runs with `prune: false`,
   unlike `distopia-app`/`distopia-network`. It owns stateful data (the CNPG `Cluster` and
   its PVC) — an accidental removal of its manifest from git should show up as "OutOfSync"

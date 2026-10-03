@@ -4,6 +4,13 @@
 #
 # REDIS_URL has no credentials in it (see k8s/redis/redis.yaml -- no AUTH configured),
 # which is why it lives here rather than in the distopia-env Secret.
+#
+# SCHEDULEMANAGER_RPC_PORT is the internal-only Connect RPC port presentation-schedulemanager
+# calls into (see schedulemanager-deployment.yaml/schedulemanager-networkpolicy.yaml) -- not
+# secret (the NetworkPolicy + SCHEDULEMANAGER_RPC_TOKEN, in distopia-env, are what actually
+# gate access), so it's fine alongside PORT here. Change it here (and containerPort/
+# service.yaml's `rpc` entry, plus schedulemanager-deployment.yaml's SCHEDULEMANAGER_RPC_URL)
+# together.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,3 +19,4 @@ metadata:
 data:
   PORT: "3000"
   REDIS_URL: "redis://distopia-redis.distopia.svc.cluster.local:6379"
+  SCHEDULEMANAGER_RPC_PORT: "8081"

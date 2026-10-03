@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package distopia.schedulemanager.v1;
+
+// Implemented by presentation-web (which still hosts AppCore + the Discord client) and called
+// by presentation-schedulemanager on a node-cron tick -- see setSchedulerRpcServer.ts and
+// presentation-schedulemanager/src/index.ts.
+service SchedulerService {
+  rpc RunFiveMinuteTasks(RunFiveMinuteTasksRequest) returns (RunFiveMinuteTasksResponse);
+  rpc RunTwentyMinuteTasks(RunTwentyMinuteTasksRequest) returns (RunTwentyMinuteTasksResponse);
+}
+
+message RunFiveMinuteTasksRequest {}
+message RunFiveMinuteTasksResponse {}
+
+message RunTwentyMinuteTasksRequest {}
+message RunTwentyMinuteTasksResponse {}

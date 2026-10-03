@@ -1,0 +1,29 @@
+# Defense-in-depth alongside the SCHEDULEMANAGER_RPC_TOKEN bearer check
+# (schedulerRpcListener.ts): restricts distopia-app's internal `rpc` port to only the
+# schedulemanager pod, while leaving the public `http` port unrestricted (any NetworkPolicy
+# that selects a pod switches that pod to default-deny for every port/source not covered by
+# one of its rules -- the unrestricted `http` rule below preserves today's public/tunnel
+# reachability). Mirrors the existing pattern in k8s/redis/networkpolicy.yaml.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: distopia-app-allow-schedulemanager-rpc
+  namespace: distopia
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-app
+  policyTypes:
+    - Ingress
+  ingress:
+    # Unrestricted: preserves today's http-port reachability (public via the Cloudflare
+    # Tunnel, plus any in-namespace caller).
+    - ports:
+        - port: http
+    # Only presentation-schedulemanager may reach the internal RPC port.
+    - ports:
+        - port: rpc
+      from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: distopia-schedulemanager
