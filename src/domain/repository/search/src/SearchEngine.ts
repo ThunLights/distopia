@@ -73,3 +73,8 @@ export class SearchEngine {
     };
   }
 }
+
+// What callers outside this package (AppCore, and presentation-web's RPC client that stands
+// in for it) actually use -- a plain object can satisfy this, the class itself cannot be
+// implemented structurally because of its private fields.
+export type SearchEngineClient = Pick<SearchEngine, "upsert" | "upsertAll" | "delete" | "search">;

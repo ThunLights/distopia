@@ -89,8 +89,20 @@ async function start() {
   await core.guild.updateRootPage();
   console.log("Updated root page guilds.");
 
-  await core.guild.loadSearchEngine();
-  console.log("Loaded SearchEngine.");
+  // Best-effort: the index now lives in presentation-searchengine (see lib/server/search.ts),
+  // so a search outage must not take the whole site down with it -- an empty index just
+  // returns 0 hits (repo-search's SearchEngine short-circuits on an empty index).
+  //
+  // ponytail: nothing re-indexes after this one boot-time call, so a searchengine pod that
+  // restarts on its own stays empty until distopia-app restarts too. Upgrade path: add
+  // loadSearchEngine() to schedulerRpcServer.ts's runTwentyMinuteTasks, which costs a full
+  // re-index (one fetchMetaData per public guild) every 20 minutes.
+  try {
+    await core.guild.loadSearchEngine();
+    console.log("Loaded SearchEngine.");
+  } catch (error) {
+    console.error("Failed to load SearchEngine:", error);
+  }
 
   startSchedulerRpcServer();
   console.log("Scheduler RPC server started.");

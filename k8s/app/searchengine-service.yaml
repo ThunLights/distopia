@@ -1,0 +1,17 @@
+# Internal-only: distopia-app resolves this as distopia-searchengine:8082 (distopia-config's
+# SEARCHENGINE_RPC_URL) and only the app pod may actually reach it, see
+# searchengine-networkpolicy.yaml. Never wired to the Cloudflare Tunnel.
+#
+# Deliberately not pinning a clusterIP, same reasoning as service.yaml's own comment.
+apiVersion: v1
+kind: Service
+metadata:
+  name: distopia-searchengine
+  namespace: distopia
+spec:
+  selector:
+    app.kubernetes.io/name: distopia-searchengine
+  ports:
+    - name: rpc
+      port: 8082
+      targetPort: rpc

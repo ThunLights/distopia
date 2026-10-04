@@ -1,0 +1,60 @@
+# presentation-searchengine: owns the Orama search index (repo-search's SearchEngine) and
+# serves it to distopia-app over an internal Connect RPC port -- see
+# src/presentation/searchengine/src/index.ts and searchengine-networkpolicy.yaml. Unlike
+# distopia-schedulemanager this one receives inbound traffic, so it has its own Service
+# (searchengine-service.yaml).
+#
+# replicas stays at 1 and the index is memory-only: a second replica would answer searches
+# from its own, differently-populated index, since distopia-app's upserts land on whichever
+# replica the Service happens to pick. Recreate (not RollingUpdate) because two pods
+# overlapping during a rollout is the same split-index problem; a brief search outage mid-
+# rollout is accepted instead (distopia-app treats a failed search engine call as an error
+# on that one request, and re-indexes on its own next boot -- see hooks.server.ts).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-searchengine
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-searchengine
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-searchengine
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-searchengine
+    spec:
+      containers:
+        - name: distopia-searchengine
+          # Same image as distopia-app (see deployment.yaml's own comment on the :latest
+          # bootstrap fallback + Argo CD Image Updater) -- `bun run build` already builds
+          # every workspace package into it, so this just overrides the start command.
+          image: ghcr.io/thunlights/distopia:latest
+          command: ["bun", "run", "src/presentation/searchengine/src/index.ts"]
+          workingDir: /app
+          ports:
+            - name: rpc
+              containerPort: 8082
+          env:
+            - name: SEARCHENGINE_RPC_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: distopia-config
+                  key: SEARCHENGINE_RPC_PORT
+            - name: SEARCHENGINE_RPC_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-env
+                  key: SEARCHENGINE_RPC_TOKEN
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

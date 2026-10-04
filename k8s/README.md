@@ -129,7 +129,8 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=SENTRY_AUTH_TOKEN='...' \
   --from-literal=VOICEVOX_API_KEY='...' \
   --from-literal=SAKURA_AI_ENGINE_API_KEY='...' \
-  --from-literal=SCHEDULEMANAGER_RPC_TOKEN='...'
+  --from-literal=SCHEDULEMANAGER_RPC_TOKEN='...' \
+  --from-literal=SEARCHENGINE_RPC_TOKEN='...'
 ```
 
 `SCHEDULEMANAGER_RPC_TOKEN` is a shared secret between `distopia-app` and
@@ -137,6 +138,11 @@ kubectl create secret generic distopia-env -n distopia \
 32`) — both Deployments read the same key out of this one Secret (see
 `schedulemanager-deployment.yaml`). It authenticates calls to `distopia-app`'s internal
 Connect RPC port; see "Scheduler RPC (schedulemanager)" below for the full picture.
+
+`SEARCHENGINE_RPC_TOKEN` is the same thing for the other internal RPC link, in the opposite
+direction: a shared secret between `distopia-app` (the caller) and `distopia-searchengine`
+(the server), read by both Deployments from this same Secret — see "Search engine RPC
+(searchengine)" below.
 
 `SENTRY_PROJECT`/`PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` here must be your **production**
 Sentry project's own values, not `ci.yml`'s CI-scoped ones — `SENTRY_ORG` is the only Sentry
@@ -511,8 +517,8 @@ run `presentation-schedulemanager` instead of the SvelteKit server. It owns the 
 implementing `SchedulerService` from `infra-rpc`) — the actual job bodies (`core.jwt.update()`,
 `updatePanels()`, ...) are unchanged, only the trigger moved from an in-process timer to an RPC
 call. `distopia-app` still hosts `AppCore` and the Discord client for now; this is stage 1 of
-splitting the monolith into independent `web`/`bot`/`schedulemanager`/`searchengine` services,
-not a full split.
+splitting the monolith into independent `web`/`bot`/`schedulemanager`/`searchengine` services
+(`searchengine` followed -- see below -- `bot` has not), not a full split.
 
 Reachability is restricted two ways, neither a substitute for the other:
 
@@ -533,6 +539,41 @@ actually gate access, not the port number being unguessable. If you change it, u
 `schedulemanager-deployment.yaml`'s `SCHEDULEMANAGER_RPC_URL` together — plain Kubernetes YAML
 can't cross-reference a ConfigMap value into another field.
 
+## Search engine RPC (searchengine)
+
+`distopia-searchengine` (`searchengine-deployment.yaml`) is the mirror image of the
+schedulemanager split: same image, `command` overridden to run `presentation-searchengine`,
+but here it is the **server** and `distopia-app` the client. It owns the Orama index
+(`repo-search`'s `SearchEngine`, which used to be instantiated in-process by
+`src/presentation/web/src/lib/server/search.ts`) and serves it as `SearchEngineService` from
+`infra-rpc`; `search.ts` is now just a Connect client exposing that same method surface, so
+every `AppCore` call site (`core.guild.save`, `loadSearchEngine`, `search`, …) is unchanged.
+
+Because it receives inbound traffic it has its own `searchengine-service.yaml`, and the
+`searchengine-networkpolicy.yaml` runs the other way around from the schedulemanager one:
+the searchengine pod serves nothing public, so its only ingress rule is `distopia-app` on the
+`rpc` port. `SEARCHENGINE_RPC_TOKEN` (`distopia-env`) is the bearer check on top of that.
+
+`SEARCHENGINE_RPC_PORT` (`8082`) and `SEARCHENGINE_RPC_URL`
+(`http://distopia-searchengine:8082`) are both plain literals in the `distopia-config`
+ConfigMap for the same reason `SCHEDULEMANAGER_RPC_PORT` is — cluster-internal only, gated by
+the NetworkPolicy plus the bearer token, never by the port being unguessable. Change them
+together with `searchengine-deployment.yaml`'s `containerPort` and
+`searchengine-service.yaml`'s `rpc` port.
+
+Two things follow from the index being in-process memory only:
+
+- `replicas: 1` + `Recreate` are load-bearing (see that Deployment's own comment): a second
+  pod would answer searches from its own, differently-populated index.
+- The index is populated once, by `distopia-app`'s boot (`hooks.server.ts` →
+  `core.guild.loadSearchEngine()`), and nothing re-indexes it afterwards — so a
+  `distopia-searchengine` pod that restarts on its own comes back empty and stays that way
+  (searches return 0 hits, not an error) until `distopia-app` restarts too. That call is
+  deliberately best-effort on the app side, so the reverse is not true: a searchengine
+  outage never blocks the app's own boot. Closing the gap means re-indexing on a schedule
+  (add `loadSearchEngine()` to `schedulerRpcServer.ts`'s `runTwentyMinuteTasks`), which costs
+  one `fetchMetaData` per public guild every 20 minutes — not done yet, deliberately.
+
 ## Notes / known constraints
 
 - `replicas: 1` is load-bearing, not just a default — the app logs into the Discord
@@ -544,6 +585,10 @@ can't cross-reference a ConfigMap value into another field.
   load-bearing for a different reason: it only ticks two `node-cron` schedules and calls
   `distopia-app`'s internal RPC port (see "Scheduler RPC (schedulemanager)" below) — a
   second replica would double-fire every call.
+- `distopia-searchengine`'s `replicas: 1` (`searchengine-deployment.yaml`) is load-bearing
+  too, for yet another reason: its Orama index lives in process memory, so a second replica
+  would serve searches from an index `distopia-app` never populated (see "Search engine RPC
+  (searchengine)" above).
 - No app secret is ever baked into the image or pushed to ghcr.io. The app reads its
   runtime config (`BOT_TOKEN`, `PUBLIC_*`, `DATABASE_URL`, ...) via `$env/dynamic/*` +
   `dotenv` (see `hooks.server.ts`), resolved fresh every time the container starts from the
@@ -569,6 +614,8 @@ can't cross-reference a ConfigMap value into another field.
   `migrate` initContainer (it reads `distopia-db-credentials` too, same as the main
   container), but never a rebuild — the build-time database `deploy.yml` migrates is a
   separate, throwaway one, unrelated to the real `distopia-db-credentials` value.
+  Rotating `SEARCHENGINE_RPC_TOKEN` needs `distopia-app` and `distopia-searchengine`
+  restarted together, for exactly the same reason as the schedulemanager token below.
   Rotating `SCHEDULEMANAGER_RPC_TOKEN` specifically needs **both** Deployments restarted
   (`... distopia-app` and `... distopia-schedulemanager`) — it's the one `distopia-env` key
   `distopia-schedulemanager` also reads, and a still-running Pod keeps its old

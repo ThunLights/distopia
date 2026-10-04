@@ -10,3 +10,6 @@ resources:
 - service.yaml
 - schedulemanager-deployment.yaml
 - schedulemanager-networkpolicy.yaml
+- searchengine-deployment.yaml
+- searchengine-service.yaml
+- searchengine-networkpolicy.yaml

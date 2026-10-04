@@ -11,6 +11,12 @@
 # gate access), so it's fine alongside PORT here. Change it here (and containerPort/
 # service.yaml's `rpc` entry, plus schedulemanager-deployment.yaml's SCHEDULEMANAGER_RPC_URL)
 # together.
+#
+# SEARCHENGINE_RPC_PORT/SEARCHENGINE_RPC_URL are the same arrangement with the direction
+# reversed: presentation-searchengine serves that port and distopia-app calls it (see
+# searchengine-deployment.yaml/searchengine-networkpolicy.yaml). Both the port and the
+# in-cluster URL live here because both pods read this ConfigMap; change them together with
+# searchengine-deployment.yaml's containerPort and searchengine-service.yaml's `rpc` port.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -20,3 +26,5 @@ data:
   PORT: "3000"
   REDIS_URL: "redis://distopia-redis.distopia.svc.cluster.local:6379"
   SCHEDULEMANAGER_RPC_PORT: "8081"
+  SEARCHENGINE_RPC_PORT: "8082"
+  SEARCHENGINE_RPC_URL: "http://distopia-searchengine:8082"
