@@ -4,6 +4,11 @@ import { createConnectTransport } from "@connectrpc/connect-node";
 import { createBearerAuthInterceptor, SearchEngineService } from "infra-rpc";
 import type { SearchEngineClient } from "repo-search";
 
+// A search sits in front of a user request, so its deadline is short; the full index load
+// sends every public guild in one call and gets a longer one.
+const SEARCH_TIMEOUT_MS = 10_000;
+const LOAD_TIMEOUT_MS = 60_000;
+
 // Built on first call, not at module load: `vite build`'s prerender analysis imports this
 // module with an empty $env/dynamic/private, so an eager env check fails the build.
 let client: Client<typeof SearchEngineService> | undefined;
@@ -20,6 +25,11 @@ function rpc() {
       createConnectTransport({
         baseUrl: SEARCHENGINE_RPC_URL,
         httpVersion: "1.1",
+        // connect-node applies no deadline of its own when this is unset. Without one, a
+        // searchengine that accepts the connection but never answers would hang the caller
+        // forever -- including hooks.server.ts's boot-time load, which would then never
+        // reach startSchedulerRpcServer().
+        defaultTimeoutMs: SEARCH_TIMEOUT_MS,
         interceptors: [createBearerAuthInterceptor(SEARCHENGINE_RPC_TOKEN)],
       }),
     );
@@ -36,7 +46,7 @@ export const searchEngine: SearchEngineClient = {
   },
 
   async upsertAll(values) {
-    await rpc().upsertAll({ values });
+    await rpc().upsertAll({ values }, { timeoutMs: LOAD_TIMEOUT_MS });
   },
 
   async delete(guildId) {

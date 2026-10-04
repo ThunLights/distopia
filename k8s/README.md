@@ -565,14 +565,14 @@ Two things follow from the index being in-process memory only:
 
 - `replicas: 1` + `Recreate` are load-bearing (see that Deployment's own comment): a second
   pod would answer searches from its own, differently-populated index.
-- The index is populated once, by `distopia-app`'s boot (`hooks.server.ts` →
-  `core.guild.loadSearchEngine()`), and nothing re-indexes it afterwards — so a
-  `distopia-searchengine` pod that restarts on its own comes back empty and stays that way
-  (searches return 0 hits, not an error) until `distopia-app` restarts too. That call is
-  deliberately best-effort on the app side, so the reverse is not true: a searchengine
-  outage never blocks the app's own boot. Closing the gap means re-indexing on a schedule
-  (add `loadSearchEngine()` to `schedulerRpcServer.ts`'s `runTwentyMinuteTasks`), which costs
-  one `fetchMetaData` per public guild every 20 minutes — not done yet, deliberately.
+- A restart loses the index, so `distopia-app` populates it from two places:
+  `core.guild.loadSearchEngine()` at boot (`hooks.server.ts`) and again on every
+  `runTwentyMinuteTasks` tick (`schedulerRpcServer.ts`). A `distopia-searchengine` pod that
+  restarts alone therefore comes back empty for at most one tick — searches return 0 hits
+  during that window, never an error. Repeating the load is cheap: one
+  `database.guild.findAll()` plus discord.js cache reads, no Discord REST calls. The boot
+  call is also deliberately best-effort, so the dependency does not run the other way: a
+  searchengine outage never blocks the app's own startup.
 
 ## Notes / known constraints
 
