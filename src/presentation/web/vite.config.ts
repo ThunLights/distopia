@@ -1,4 +1,4 @@
-import { sentrySvelteKit } from "@sentry/sveltekit";
+import { sentrySvelteKit } from "@sentry/sveltekit/vite";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { enhancedImages } from "@sveltejs/enhanced-img";
 import { sveltekit } from "@sveltejs/kit/vite";

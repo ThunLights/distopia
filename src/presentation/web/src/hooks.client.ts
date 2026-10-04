@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/public";
+import { SENTRY_DATA_COLLECTION } from "$lib/sentry";
 import { getClient, handleErrorWithSentry, init } from "@sentry/sveltekit";
 
 init({
@@ -6,15 +7,13 @@ init({
 
   tracesSampleRate: 1.0,
 
-  enableLogs: true,
-
   replaysSessionSampleRate: 0.1,
 
   replaysOnErrorSampleRate: 1.0,
 
   // Session Replay is added lazily below instead of listed here -- see loadReplay().
 
-  dataCollection: {},
+  dataCollection: SENTRY_DATA_COLLECTION,
 });
 
 // Session Replay is one of the heaviest parts of the Sentry SDK. Referencing `replayIntegration`
