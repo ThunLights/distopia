@@ -21,7 +21,12 @@ export const SENTRY_DATA_COLLECTION: DataCollection = {
     response: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
   },
   httpBodies: [],
-  urlQueryParams: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+  // Stricter than the v10 baseline, which only denied the PII header snippets above. Those are
+  // header-name substrings, so they match no query key this app uses: the `/auth` OAuth callback
+  // lands with `?code=&state=`, and the SDK's own always-on sensitive-key list covers neither.
+  // Denying the two known keys would leave the next one to leak, and the only query params here
+  // (`t`, `w`) are not worth a triage round-trip, so drop the whole category.
+  urlQueryParams: false,
   genAI: { inputs: false, outputs: false },
   databaseQueryData: false,
   queues: false,
