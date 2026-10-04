@@ -103,17 +103,28 @@ different nodes, and the hops above then cross a real wire in cleartext
 adding the node, not after:
 
 ```yaml
-# /etc/rancher/k3s/config.yaml, on every node
+# /etc/rancher/k3s/config.yaml -- on k3s *servers* only
 flannel-backend: wireguard-native
 ```
 
 That encrypts all inter-node pod traffic cluster-wide, which covers every row of the table at
-once — including the database password, which no amount of RPC-level work would reach. k3s
-reads the backend at startup, and switching it on a cluster that is already running can
-require clearing each node's existing flannel/CNI state, so check the k3s docs for your
-version rather than assuming a restart is enough. Setting it now, while single-node, is
-harmless (there is no inter-node traffic to encrypt yet) and gets the flag in place before it
-matters.
+once — including the database password, which no amount of RPC-level work would reach.
+
+Two separate requirements, easy to conflate:
+
+- **The setting is server-side.** k3s takes Flannel options on server nodes only, and they
+  must be identical on every server in the cluster — so an HA control plane means editing
+  each server's config, while agents take nothing.
+- **The kernel support is node-wide.** The WireGuard kernel modules must be available on
+  every node, servers *and* agents, before the backend is enabled; otherwise the node cannot
+  join the pod network. Check this on the machine you are about to add, not just on the
+  server.
+
+k3s reads the backend at startup, and its docs don't cover changing it on an
+already-running cluster at all — so treat the switch as unproven on a live cluster rather
+than assuming a restart is enough. Setting it now, while single-node, avoids that question
+entirely: there is no inter-node traffic to encrypt yet, so it is harmless, and the flag is
+then already in place before it matters.
 
 Two alternatives, for the record:
 
