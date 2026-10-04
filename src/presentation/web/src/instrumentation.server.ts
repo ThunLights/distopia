@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/public";
+import { SENTRY_DATA_COLLECTION } from "$lib/sentry";
 import * as Sentry from "@sentry/sveltekit";
 
 Sentry.init({
@@ -6,5 +7,5 @@ Sentry.init({
 
   tracesSampleRate: 1.0,
 
-  enableLogs: true,
+  dataCollection: SENTRY_DATA_COLLECTION,
 });
