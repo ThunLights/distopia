@@ -78,6 +78,56 @@ then `systemctl restart k3s` (adjust for however k3s was installed/is managed on
 host). This repo doesn't create any `Ingress`/`LoadBalancer`/`NodePort` resources, so once
 Traefik/ServiceLB are off, nothing in this cluster can bind a public port at all.
 
+### Before adding a second node: encrypt inter-node pod traffic
+
+Everything in this cluster talks over plain HTTP/TCP inside the pod network, and several of
+those hops carry a credential:
+
+| Hop | What travels in the clear |
+|---|---|
+| `distopia-schedulemanager` → `distopia-app:rpc` | `SCHEDULEMANAGER_RPC_TOKEN` bearer token |
+| `distopia-app` → `distopia-searchengine:rpc` | `SEARCHENGINE_RPC_TOKEN` bearer token |
+| `distopia-app` → `distopia-db-rw:5432` | the `DATABASE_URL` password — the strongest of these |
+| `distopia-app` → `distopia-redis:6379` | no credential, because Redis has no AUTH at all (`k8s/redis/redis.yaml`) — so reachability *is* the only control |
+
+**On a single node that is not an exposure.** Pod-to-pod traffic never leaves the host's
+kernel, so reading any of it already requires root on that node — and root there can read the
+Secrets and the processes' memory directly, making the wire the least interesting way in. The
+NetworkPolicies and bearer tokens gate *reachability*; none of it is transport encryption, and
+nothing above claims otherwise.
+
+**The moment a second node joins, it is.** Every Deployment here is `replicas: 1`, so the
+scheduler is free to place `distopia-app`, `distopia-searchengine` and the database on
+different nodes, and the hops above then cross a real wire in cleartext
+([CWE-319](https://cwe.mitre.org/data/definitions/319.html)). Enable encryption *before*
+adding the node, not after:
+
+```yaml
+# /etc/rancher/k3s/config.yaml, on every node
+flannel-backend: wireguard-native
+```
+
+That encrypts all inter-node pod traffic cluster-wide, which covers every row of the table at
+once — including the database password, which no amount of RPC-level work would reach. k3s
+reads the backend at startup, and switching it on a cluster that is already running can
+require clearing each node's existing flannel/CNI state, so check the k3s docs for your
+version rather than assuming a restart is enough. Setting it now, while single-node, is
+harmless (there is no inter-node traffic to encrypt yet) and gets the flag in place before it
+matters.
+
+Two alternatives, for the record:
+
+- A service mesh (Linkerd, Istio) would give the same coverage as mTLS with workload identity
+  instead of just encryption, and needs no application change — but it adds a control plane
+  plus a sidecar on every pod, which is a lot of runtime for a cluster this size. Worth it if
+  a mesh is wanted for other reasons anyway; then the flag above becomes redundant for pod
+  traffic.
+- Application-level TLS on the two RPC hops (cert-manager issuing certs, `https` servers,
+  clients pinned to the CA) was considered and deliberately not done: it is inert while the
+  cluster is single-node, and after the move it would still protect only the two bearer-token
+  rows while leaving the database password — the more valuable credential — in the clear. The
+  encryption belongs below the application, not in each service.
+
 ## 1. Bootstrap order
 
 ```bash
@@ -530,6 +580,10 @@ Reachability is restricted two ways, neither a substitute for the other:
   `distopia-env` Secret key (see "2. Secrets to create by hand" above); `distopia-app` rejects
   any RPC call whose `Authorization` header doesn't match.
 
+Neither is transport encryption — the token itself crosses this hop in the clear. That is
+fine while the cluster is single-node and not fine afterwards; see "Before adding a second
+node" in section 0.
+
 `SCHEDULEMANAGER_RPC_PORT` (`distopia-config` ConfigMap, default `8081`) is committed as a
 plain literal, same as the public `PORT` value right above it in that ConfigMap — unlike the
 Cloudflare Tunnel relay's loopback ports (see that section below), this port is never a secret
@@ -552,7 +606,9 @@ every `AppCore` call site (`core.guild.save`, `loadSearchEngine`, `search`, …)
 Because it receives inbound traffic it has its own `searchengine-service.yaml`, and the
 `searchengine-networkpolicy.yaml` runs the other way around from the schedulemanager one:
 the searchengine pod serves nothing public, so its only ingress rule is `distopia-app` on the
-`rpc` port. `SEARCHENGINE_RPC_TOKEN` (`distopia-env`) is the bearer check on top of that.
+`rpc` port. `SEARCHENGINE_RPC_TOKEN` (`distopia-env`) is the bearer check on top of that. The
+same cleartext caveat applies to this hop as to the schedulemanager one — see "Before adding
+a second node" in section 0.
 
 `SEARCHENGINE_RPC_PORT` (`8082`) and `SEARCHENGINE_RPC_URL`
 (`http://distopia-searchengine:8082`) are both plain literals in the `distopia-config`
