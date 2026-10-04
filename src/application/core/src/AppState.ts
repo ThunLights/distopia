@@ -33,7 +33,7 @@ import type {
   UserOAuth2,
   VoiceChannelMember,
 } from "repo-redis";
-import type { SearchEngine } from "repo-search";
+import type { SearchEngineClient } from "repo-search";
 
 export type AppState = {
   owner: {
@@ -74,7 +74,7 @@ export type AppState = {
     userOAuth2: UserOAuth2;
     voiceChannelMember: VoiceChannelMember;
   };
-  searchEngine: SearchEngine;
+  searchEngine: SearchEngineClient;
   discord: Controller;
   database: DatabaseClient;
   // Durable (survives a process restart, unlike `memory` above) -- used to persist which

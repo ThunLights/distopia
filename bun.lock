@@ -320,6 +320,24 @@
         "typescript": "catalog:",
       },
     },
+    "src/presentation/searchengine": {
+      "name": "presentation-searchengine",
+      "dependencies": {
+        "@connectrpc/connect": "catalog:",
+        "@connectrpc/connect-node": "catalog:",
+        "infra-rpc": "workspace:*",
+        "repo-search": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
     "src/presentation/web": {
       "name": "presentation-web",
       "dependencies": {
@@ -2474,6 +2492,8 @@
     "presentation-bot": ["presentation-bot@workspace:src/presentation/bot"],
 
     "presentation-schedulemanager": ["presentation-schedulemanager@workspace:src/presentation/schedulemanager"],
+
+    "presentation-searchengine": ["presentation-searchengine@workspace:src/presentation/searchengine"],
 
     "presentation-web": ["presentation-web@workspace:src/presentation/web"],
 

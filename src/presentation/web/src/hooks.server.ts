@@ -89,8 +89,17 @@ async function start() {
   await core.guild.updateRootPage();
   console.log("Updated root page guilds.");
 
-  await core.guild.loadSearchEngine();
-  console.log("Loaded SearchEngine.");
+  // Best-effort: the index now lives in presentation-searchengine (see lib/server/search.ts),
+  // so a search outage must not take the whole site down with it -- an empty index just
+  // returns 0 hits (repo-search's SearchEngine short-circuits on an empty index).
+  // schedulerRpcServer.ts's runTwentyMinuteTasks re-indexes, so a failure here recovers on
+  // its own rather than lasting until the next restart.
+  try {
+    await core.guild.loadSearchEngine();
+    console.log("Loaded SearchEngine.");
+  } catch (error) {
+    console.error("Failed to load SearchEngine:", error);
+  }
 
   startSchedulerRpcServer();
   console.log("Scheduler RPC server started.");

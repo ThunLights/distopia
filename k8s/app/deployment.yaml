@@ -14,6 +14,10 @@
 # presentation-schedulemanager calls on a cron tick -- see schedulerRpcListener.ts and
 # schedulemanager-networkpolicy.yaml, which restricts ingress on that port to the
 # schedulemanager pod only.
+#
+# Conversely, this pod is the *client* of distopia-searchengine's own internal RPC port (the
+# Orama index moved out of this process -- see lib/server/search.ts and
+# searchengine-deployment.yaml).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -76,14 +80,17 @@ spec:
           envFrom:
             - configMapRef:
                 # PORT (default "3000"), SCHEDULEMANAGER_RPC_PORT (default "8081") -- read
-                # directly by @sveltejs/adapter-node and schedulerRpcListener.ts respectively.
-                # If you change either, update the matching `containerPort` above and
+                # directly by @sveltejs/adapter-node and schedulerRpcListener.ts respectively,
+                # plus SEARCHENGINE_RPC_URL, the address lib/server/search.ts calls (served by
+                # searchengine-deployment.yaml, not by this pod).
+                # If you change either port, update the matching `containerPort` above and
                 # `service.yaml`'s targetPort to match -- plain Kubernetes YAML can't
                 # cross-reference a ConfigMap value into another field.
                 name: distopia-config
             - secretRef:
-                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_*, SCHEDULEMANAGER_RPC_TOKEN -- see
-                # k8s/README.md for the kubectl create secret command.
+                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_*, SCHEDULEMANAGER_RPC_TOKEN,
+                # SEARCHENGINE_RPC_TOKEN -- see k8s/README.md for the kubectl create secret
+                # command.
                 name: distopia-env
           env:
             # distopia-db-credentials carries a `url` key alongside the `username`/

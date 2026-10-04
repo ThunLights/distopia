@@ -1,5 +1,5 @@
 {
-  "name": "presentation-schedulemanager",
+  "name": "presentation-searchengine",
   "private": true,
   "type": "module",
   "exports": {
@@ -18,9 +18,8 @@
   "dependencies": {
     "@connectrpc/connect": "catalog:",
     "@connectrpc/connect-node": "catalog:",
-    "app-schedule": "workspace:*",
     "infra-rpc": "workspace:*",
-    "node-cron": "4.6.0"
+    "repo-search": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

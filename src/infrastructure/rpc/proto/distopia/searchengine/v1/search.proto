@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package distopia.searchengine.v1;
+
+// Implemented by presentation-searchengine, which owns the Orama index, and called by
+// presentation-web through lib/server/search.ts -- a 1:1 mirror of repo-search's
+// SearchEngine class, so AppCore's call sites stay unchanged. The index is in-process
+// memory only, which is why that Deployment stays at replicas: 1.
+service SearchEngineService {
+  rpc Upsert(UpsertRequest) returns (UpsertResponse);
+  rpc UpsertAll(UpsertAllRequest) returns (UpsertAllResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
+
+message Guild {
+  string guild_id = 1;
+  string name = 2;
+  string description = 3;
+  bool nsfw = 4;
+  repeated string tags = 5;
+}
+
+message UpsertRequest {
+  Guild value = 1;
+}
+message UpsertResponse {}
+
+message UpsertAllRequest {
+  repeated Guild values = 1;
+}
+message UpsertAllResponse {}
+
+message DeleteRequest {
+  string guild_id = 1;
+}
+message DeleteResponse {}
+
+message SearchRequest {
+  string term = 1;
+  // Optional, not defaulted: unset means "no nsfw filter at all", which is a different
+  // query than nsfw = false (see repo-search's SearchOptions.filter.nsfw).
+  optional bool nsfw = 2;
+  // "exact" / "preflight" -- empty means neither.
+  repeated string alg = 3;
+}
+message SearchResponse {
+  repeated Guild hits = 1;
+  uint32 count = 2;
+  string time = 3;
+}

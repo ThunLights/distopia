@@ -75,6 +75,7 @@ it under a different name — never over the real file.
 | 3000 | Production build preview |
 | 6006 | Storybook |
 | 8081 | Internal Connect RPC (schedulemanager → web, see "Connect RPC (Inter-service)" below) |
+| 8082 | Internal Connect RPC (web → searchengine, same section) |
 
 ---
 
@@ -86,6 +87,7 @@ distopia/
 │   ├── presentation/
 │   │   ├── bot/               # Discord bot (discord.js v14)
 │   │   ├── schedulemanager/   # Cron ticker; calls web's Scheduler RPC on each tick
+│   │   ├── searchengine/      # Orama search index; serves SearchEngine RPC to web
 │   │   └── web/               # Web frontend (SvelteKit / Svelte 5)
 │   ├── application/
 │   │   └── core/         # Application core services
@@ -112,6 +114,7 @@ distopia/
 |---|---|
 | `src/presentation/bot` | `presentation-bot` |
 | `src/presentation/schedulemanager` | `presentation-schedulemanager` |
+| `src/presentation/searchengine` | `presentation-searchengine` |
 | `src/presentation/web` | `presentation-web` |
 | `src/application/core` | `app-core` |
 | `src/infrastructure/database` | `infra-database` |
@@ -599,10 +602,18 @@ import { myQuery } from "@prisma/client/sql";
 
 `src/infrastructure/rpc` (`infra-rpc`) holds the Protobuf/Connect contracts services use to
 call each other, as distopia splits from one process into independent `web`/`bot`/
-`schedulemanager`/`searchengine` services. `presentation-schedulemanager` (a standalone
-cron-ticker process that calls `presentation-web`'s internal RPC port on each tick — see
-`k8s/README.md`'s "Scheduler RPC" section) is the first service built this way; follow the
-same shape for the next one.
+`schedulemanager`/`searchengine` services. Two services are built this way so far — follow
+the same shape for the next one, and note that the two already differ in direction:
+
+- `presentation-schedulemanager` — a standalone cron-ticker process that **calls**
+  `presentation-web`'s internal RPC port on each tick (see `k8s/README.md`'s "Scheduler RPC"
+  section).
+- `presentation-searchengine` — owns the Orama index (`repo-search`'s `SearchEngine`) and
+  **serves** it to `presentation-web`, which holds only a Connect client
+  (`web/src/lib/server/search.ts`) exposing the same method surface, so `AppCore`'s call
+  sites are unchanged (`AppState.searchEngine` is typed `SearchEngineClient`, the structural
+  subset of that class). See `k8s/README.md`'s "Search engine RPC" section — including why
+  that Deployment is `replicas: 1` and what still does not re-index after a restart.
 
 ### Adding a new RPC contract
 

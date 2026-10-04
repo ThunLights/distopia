@@ -20,6 +20,11 @@ export function schedulerRoutes(router: ConnectRouter) {
       await core.friend.updateCache();
 
       await core.guild.removeUnJoinedGuildData();
+      // Also the recovery path for the index itself: presentation-searchengine keeps it in
+      // process memory, so a restart there (or a failed load during this app's own boot --
+      // see hooks.server.ts) leaves it empty until something re-indexes. Cheap to repeat:
+      // one guild.findAll() plus discord.js cache reads, no REST calls.
+      await core.guild.loadSearchEngine();
       await core.voice.update();
       await core.activeRate.update();
       await core.ranking.cleanCache();
