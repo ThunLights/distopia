@@ -69,14 +69,39 @@ async function start() {
   await core.jwt.importDB();
   console.log("JWT keys is imported.");
 
-  await core.friend.updateCache();
-  console.log("Updated friend cache.");
+  // Best-effort: friend.updateCache() and guild.updateRootPage() both now call out to
+  // presentation-bot over RPC (see lib/server/discord.ts) instead of a local discord.js
+  // cache, so a bot pod that isn't reachable yet (mid-rollout, mid-Discord-login) must not
+  // crash this process's own startup -- that would turn one slow dependency into a
+  // crash-looping web pod too.
+  //
+  // friend.updateCache() fully self-heals: it's retried every 20 minutes by
+  // runTwentyMinuteTasks (schedulerRpcServer.ts), so a boot-time failure here just leaves
+  // the Friend page on its last-cached data until that next tick.
+  //
+  // guild.updateRootPage() only partially self-heals: its `activeGuilds` half gets
+  // refreshed as a side effect of activeRate.update() on that same 20-minute tick, but its
+  // `latestGuilds` half (the root page's "newest bumped guilds" list) isn't re-run by
+  // anything else -- a boot-time failure leaves it at its empty initial value until the
+  // next actual bump() call updates it incrementally. Acceptable: a stale/empty display
+  // list, not a correctness or data-loss issue, same severity class as the search index gap
+  // below.
+  try {
+    await core.friend.updateCache();
+    console.log("Updated friend cache.");
+  } catch (error) {
+    console.error("Failed to update friend cache:", error);
+  }
 
   await core.record.update();
   console.log("Updated guild records.");
 
-  await core.guild.updateRootPage();
-  console.log("Updated root page guilds.");
+  try {
+    await core.guild.updateRootPage();
+    console.log("Updated root page guilds.");
+  } catch (error) {
+    console.error("Failed to update root page guilds:", error);
+  }
 
   // Best-effort: the index now lives in presentation-searchengine (see lib/server/search.ts),
   // so a search outage must not take the whole site down with it -- an empty index just
