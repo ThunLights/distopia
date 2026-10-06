@@ -5,6 +5,11 @@ import { createConnectTransport } from "@connectrpc/connect-node";
 import { Controller, genClient, type DiscordClient } from "infra-discord";
 import { BotService, createBearerAuthInterceptor } from "infra-rpc";
 
+// Connect applies no deadline of its own when this is unset -- without one, a bot pod that
+// accepts the connection but never answers (e.g. mid-Discord-login) would hang every caller
+// forever. Same reasoning as search.ts's own SEARCH_TIMEOUT_MS.
+const BOT_RPC_TIMEOUT_MS = 10_000;
+
 // Never logged in -- just a host for the pure, no-live-cache parts of Controller
 // (oauth2/embed, and guild.iconUrl), which only need `client.rest.cdn`/REST helpers that
 // work without an actual gateway connection. See infra-discord's DiscordClient for why these
@@ -30,6 +35,7 @@ function rpc() {
       createConnectTransport({
         baseUrl: BOT_RPC_URL,
         httpVersion: "1.1",
+        defaultTimeoutMs: BOT_RPC_TIMEOUT_MS,
         interceptors: [createBearerAuthInterceptor(BOT_RPC_TOKEN)],
       }),
     );

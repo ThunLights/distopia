@@ -62,6 +62,19 @@ spec:
                 secretKeyRef:
                   name: distopia-db-credentials
                   key: url
+          # TCP, not httpGet: connectNodeAdapter only answers Connect's own POST method
+          # paths, so a GET health check would 404. A plain connect succeeding is still a
+          # faithful readiness signal here, because index.ts only calls
+          # startBotRpcServer() as its last step, after the Redis reset and Discord login
+          # above it both resolve -- the rpc port never accepts a connection before that
+          # state is actually usable. Without this, Kubernetes treats the container as ready
+          # the instant it starts (the default with no probe), and could route RPC calls to
+          # a pod that's still logging into Discord.
+          readinessProbe:
+            tcpSocket:
+              port: rpc
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: 250m
