@@ -14,6 +14,8 @@ name: Cache cleanup
 on:
   pull_request_target:
     types: [closed]
+  push:
+    branches: [main]
   schedule:
     # Daily at 03:00 UTC (12:00 JST) -- a backstop for whatever the close-triggered job
     # misses, e.g. caches written by a run that finished after the PR was already closed.
