@@ -1,0 +1,71 @@
+# presentation-bot: the standalone Discord bot process. It is now the only pod that logs
+# into the Discord gateway (guild/member/channel cache included) and connects to
+# Postgres/Redis/searchengine directly -- distopia-app talks to it only over the internal
+# `rpc` port it serves (see src/presentation/bot/src/server/rpc.ts and
+# bot-networkpolicy.yaml), the mirror image of the searchengine split (there distopia-app is
+# the client; here it is).
+#
+# replicas stays at 1 for the same reason distopia-app's own replicas: 1 used to be (see
+# k8s/README.md): a second pod logging into the same Discord gateway with the same token
+# causes duplicate event handling. RollingUpdate with maxSurge:1/maxUnavailable:0 (not
+# Recreate) keeps the bot's RPC port answering during a rollout instead of going dark for
+# the whole swap -- the brief old-pod/new-pod overlap this accepts is the same one
+# deployment.yaml's own comment already covers for distopia-app.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-bot
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-bot
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-bot
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-bot
+    spec:
+      containers:
+        - name: distopia-bot
+          # Same image as distopia-app (see deployment.yaml's own comment on the :latest
+          # bootstrap fallback + Argo CD Image Updater) -- `bun run build` already builds
+          # every workspace package into it, so this just overrides the start command.
+          image: ghcr.io/thunlights/distopia:latest
+          command: ["bun", "run", "src/presentation/bot/src/index.ts"]
+          workingDir: /app
+          ports:
+            - name: rpc
+              containerPort: 8083
+          envFrom:
+            # REDIS_URL, SEARCHENGINE_RPC_URL (client), BOT_RPC_PORT (this pod's own server
+            # port) from distopia-config; BOT_TOKEN, BOT_SECRET, PUBLIC_*, VOICEVOX_API_KEY,
+            # SAKURA_AI_ENGINE_API_KEY, SEARCHENGINE_RPC_TOKEN, BOT_RPC_TOKEN from
+            # distopia-env -- same two sources distopia-app's own envFrom reads (see
+            # deployment.yaml), since this process now needs almost the same config.
+            - configMapRef:
+                name: distopia-config
+            - secretRef:
+                name: distopia-env
+          env:
+            # distopia-db-credentials carries a `url` key -- see deployment.yaml's own
+            # comment for how it's composed by hand once, not at runtime.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-db-credentials
+                  key: url
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi

@@ -1,7 +1,5 @@
 import { dev } from "$app/environment";
-import { env as privateEnv } from "$env/dynamic/private";
 import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
-import { client } from "$lib/server/bot";
 import { core } from "$lib/server/core";
 import { redis } from "$lib/server/redis";
 import { startSchedulerRpcServer } from "$lib/server/schedulerRpcListener";
@@ -10,7 +8,6 @@ import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { type Handle, type HandleServerError } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { handleClient } from "presentation-bot";
 import { resetEphemeralMemory } from "repo-redis";
 
 // +layout.svelte embeds these literal tokens in its partytown <script> tags; substituted below
@@ -38,18 +35,14 @@ process.on("unhandledRejection", async (reason) => {
 });
 
 async function start() {
-  const { BOT_TOKEN } = privateEnv;
-
-  // Wipes each owner's `<owner>:ephemeral:*` namespace (see repo-redis's
+  // Wipes this process's `web:ephemeral:*` namespace (see repo-redis's
   // resetEphemeralMemory) -- must run before anything below reads/writes affected stores.
-  // Resets both "web:*" and "bot:*" here because this one process still plays both roles
-  // (see lib/server/memory.ts's ratelimit comment) -- once presentation-bot gets its own
-  // entrypoint, move the "bot" call there and drop it from here.
+  // presentation-bot resets its own "bot:*" namespace in its own entrypoint now (see its
+  // src/index.ts) -- this process only ever owned "web:*".
   //
   // Only OAuth2PKCE currently opts into that namespace (a stray PKCE session id from before
   // a deploy should never authenticate a later /auth callback -- an in-flight login is
-  // treated as invalidated by a redeploy, not silently carried across it), and it's
-  // web-owned -- so the "bot" call below currently has nothing to delete. Every other
+  // treated as invalidated by a redeploy, not silently carried across it). Every other
   // repo-redis store (rate limits, the message/member/voice-channel buffers, the URL safety
   // cache, ...) deliberately persists across a redeploy rather than resetting: unlike the
   // in-process `Map`s these replaced, they now live in shared Redis and survive a pod
@@ -66,8 +59,7 @@ async function start() {
   // 20-minute TTL already bounds it further. A versioned/deployment-scoped namespace would
   // close this but is real added complexity for a rare, low-cost case.
   await resetEphemeralMemory(redis, "web");
-  await resetEphemeralMemory(redis, "bot");
-  console.log("Reset ephemeral web/bot memory.");
+  console.log("Reset ephemeral web memory.");
 
   // Fire-and-forget: unlike everything else in start(), this never gates the server accepting
   // traffic -- symbolicating a future error report isn't worth delaying every pod's readiness
@@ -76,9 +68,6 @@ async function start() {
 
   await core.jwt.importDB();
   console.log("JWT keys is imported.");
-
-  await handleClient(client, core).login(BOT_TOKEN);
-  console.log("BOT logged in.");
 
   await core.friend.updateCache();
   console.log("Updated friend cache.");

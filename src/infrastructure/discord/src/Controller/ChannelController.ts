@@ -40,7 +40,10 @@ export class ChannelController extends Base {
     return true;
   }
 
-  public existsVoiceChannel(channelId: string): boolean {
+  // async so this stays callable identically whether `this.client` is the real,
+  // live-cache-backed Client (presentation-bot) or an RPC client standing in for it
+  // (presentation-web) -- see infra-rpc's BotService.
+  public async existsVoiceChannel(channelId: string): Promise<boolean> {
     const channel = this.client.channels.cache.get(channelId);
     return channel?.isVoiceBased() ?? false;
   }

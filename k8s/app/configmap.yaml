@@ -13,10 +13,18 @@
 # together.
 #
 # SEARCHENGINE_RPC_PORT/SEARCHENGINE_RPC_URL are the same arrangement with the direction
-# reversed: presentation-searchengine serves that port and distopia-app calls it (see
+# reversed: presentation-searchengine serves that port and distopia-app (and now
+# distopia-bot too, for its own guild-profile-editing commands) calls it (see
 # searchengine-deployment.yaml/searchengine-networkpolicy.yaml). Both the port and the
-# in-cluster URL live here because both pods read this ConfigMap; change them together with
-# searchengine-deployment.yaml's containerPort and searchengine-service.yaml's `rpc` port.
+# in-cluster URL live here because every pod that needs them reads this ConfigMap; change
+# them together with searchengine-deployment.yaml's containerPort and
+# searchengine-service.yaml's `rpc` port.
+#
+# BOT_RPC_PORT/BOT_RPC_URL mirror that same arrangement again, direction reversed once more:
+# presentation-bot serves that port (it owns the one real, logged-in discord.js Client) and
+# distopia-app calls it (see bot-deployment.yaml/bot-networkpolicy.yaml and
+# src/presentation/web/src/lib/server/discord.ts). Change them together with
+# bot-deployment.yaml's containerPort and bot-service.yaml's `rpc` port.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -28,3 +36,5 @@ data:
   SCHEDULEMANAGER_RPC_PORT: "8081"
   SEARCHENGINE_RPC_PORT: "8082"
   SEARCHENGINE_RPC_URL: "http://distopia-searchengine:8082"
+  BOT_RPC_PORT: "8083"
+  BOT_RPC_URL: "http://distopia-bot:8083"

@@ -23,11 +23,6 @@ export class UserController extends Base {
     };
   }
 
-  public async getAvatarUrl(userId: string) {
-    const avatarUrl = this.client.users.cache.get(userId)?.avatarURL() ?? null;
-    return avatarUrl;
-  }
-
   public async setActivity() {
     if (!this.client.isReady()) {
       return;

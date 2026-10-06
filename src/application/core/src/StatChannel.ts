@@ -105,7 +105,7 @@ export class StatChannel extends Base {
     for (const field of fields) {
       const channelId = setting?.[field];
 
-      if (channelId && this.state.discord.channel.existsVoiceChannel(channelId)) {
+      if (channelId && (await this.state.discord.channel.existsVoiceChannel(channelId))) {
         continue;
       }
 

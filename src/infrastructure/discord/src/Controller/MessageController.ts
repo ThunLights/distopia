@@ -1,19 +1,13 @@
-import {
-  ChannelType,
-  DiscordAPIError,
-  MessagePayload,
-  RESTJSONErrorCodes,
-  type MessageEditOptions,
-} from "discord.js";
+import { ChannelType, DiscordAPIError, RESTJSONErrorCodes, type APIEmbed } from "discord.js";
 
 import { Base } from "./Base";
 
 export class MessageController extends Base {
-  public async edit(
-    channelId: string,
-    messageId: string,
-    content: string | MessageEditOptions | MessagePayload,
-  ) {
+  // Narrowed to just `embeds` (plain, protobuf/JSON-friendly APIEmbed objects, not
+  // EmbedBuilder instances) -- the only thing any caller ever edits (see
+  // presentation-web's updatePanels()), and this needs to be serializable to be called over
+  // RPC once presentation-bot owns the live client.
+  public async edit(channelId: string, messageId: string, embeds: APIEmbed[]) {
     const channel = this.client.channels.cache.get(channelId);
     if (channel?.type !== ChannelType.GuildText) {
       return;
@@ -41,6 +35,6 @@ export class MessageController extends Base {
       throw error;
     }
 
-    await message.edit(content);
+    await message.edit({ embeds });
   }
 }

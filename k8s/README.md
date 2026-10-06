@@ -191,7 +191,8 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=VOICEVOX_API_KEY='...' \
   --from-literal=SAKURA_AI_ENGINE_API_KEY='...' \
   --from-literal=SCHEDULEMANAGER_RPC_TOKEN='...' \
-  --from-literal=SEARCHENGINE_RPC_TOKEN='...'
+  --from-literal=SEARCHENGINE_RPC_TOKEN='...' \
+  --from-literal=BOT_RPC_TOKEN='...'
 ```
 
 `SCHEDULEMANAGER_RPC_TOKEN` is a shared secret between `distopia-app` and
@@ -201,9 +202,13 @@ kubectl create secret generic distopia-env -n distopia \
 Connect RPC port; see "Scheduler RPC (schedulemanager)" below for the full picture.
 
 `SEARCHENGINE_RPC_TOKEN` is the same thing for the other internal RPC link, in the opposite
-direction: a shared secret between `distopia-app` (the caller) and `distopia-searchengine`
-(the server), read by both Deployments from this same Secret — see "Search engine RPC
-(searchengine)" below.
+direction: a shared secret between `distopia-app`/`distopia-bot` (the callers) and
+`distopia-searchengine` (the server), read by all three Deployments from this same Secret —
+see "Search engine RPC (searchengine)" below.
+
+`BOT_RPC_TOKEN` mirrors that same arrangement once more, direction reversed again: a shared
+secret between `distopia-app` (the caller) and `distopia-bot` (the server), read by both
+Deployments from this same Secret — see "Bot RPC (bot)" below.
 
 `SENTRY_PROJECT`/`PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` here must be your **production**
 Sentry project's own values, not `ci.yml`'s CI-scoped ones — `SENTRY_ORG` is the only Sentry
@@ -219,9 +224,10 @@ for why none of these is a build-time input.
 # cluster.yaml's `owner` field (default "distopia"). Create this BEFORE the distopia-db
 # Application first syncs -- bootstrap.initdb only runs once, at cluster creation.
 #
-# `url` is the single DATABASE_URL value both the app and the `migrate` initContainer
-# (k8s/app/deployment.yaml) read directly, composed here by hand rather than at
-# runtime -- host/port/dbname are always distopia-db-rw.distopia.svc.cluster.local:5432/
+# `url` is the single DATABASE_URL value the app, the `migrate` initContainer
+# (k8s/app/deployment.yaml), and distopia-bot (bot-deployment.yaml) all read directly,
+# composed here by hand rather than at runtime -- host/port/dbname are always
+# distopia-db-rw.distopia.svc.cluster.local:5432/
 # distopia (CloudNativePG's standard read-write Service name for a Cluster named
 # distopia-db). Assembled with printf's own %s substitution rather than spliced directly
 # into a postgresql:// literal -- a `$var`/`${var}` reference sitting there still reads as
@@ -577,9 +583,9 @@ run `presentation-schedulemanager` instead of the SvelteKit server. It owns the 
 `distopia-app` now exposes (`src/presentation/web/src/lib/server/schedulerRpcListener.ts`,
 implementing `SchedulerService` from `infra-rpc`) — the actual job bodies (`core.jwt.update()`,
 `updatePanels()`, ...) are unchanged, only the trigger moved from an in-process timer to an RPC
-call. `distopia-app` still hosts `AppCore` and the Discord client for now; this is stage 1 of
-splitting the monolith into independent `web`/`bot`/`schedulemanager`/`searchengine` services
-(`searchengine` followed -- see below -- `bot` has not), not a full split.
+call. This was stage 1 of splitting the monolith into independent `web`/`bot`/
+`schedulemanager`/`searchengine` services; `searchengine` and `bot` have both since followed
+(see below) -- `distopia-app` itself no longer hosts the Discord client or the Orama index.
 
 Reachability is restricted two ways, neither a substitute for the other:
 
@@ -616,10 +622,11 @@ every `AppCore` call site (`core.guild.save`, `loadSearchEngine`, `search`, …)
 
 Because it receives inbound traffic it has its own `searchengine-service.yaml`, and the
 `searchengine-networkpolicy.yaml` runs the other way around from the schedulemanager one:
-the searchengine pod serves nothing public, so its only ingress rule is `distopia-app` on the
-`rpc` port. `SEARCHENGINE_RPC_TOKEN` (`distopia-env`) is the bearer check on top of that. The
-same cleartext caveat applies to this hop as to the schedulemanager one — see "Before adding
-a second node" in section 0.
+the searchengine pod serves nothing public, so its only ingress rule is `distopia-app` and
+`distopia-bot` (which also needs it, for its own guild-profile-editing commands) on the `rpc`
+port. `SEARCHENGINE_RPC_TOKEN` (`distopia-env`) is the bearer check on top of that. The same
+cleartext caveat applies to this hop as to the schedulemanager one — see "Before adding a
+second node" in section 0.
 
 `SEARCHENGINE_RPC_PORT` (`8082`) and `SEARCHENGINE_RPC_URL`
 (`http://distopia-searchengine:8082`) are both plain literals in the `distopia-config`
@@ -637,25 +644,67 @@ Two things follow from the index being in-process memory only:
   `runTwentyMinuteTasks` tick (`schedulerRpcServer.ts`). A `distopia-searchengine` pod that
   restarts alone therefore comes back empty for at most one tick — searches return 0 hits
   during that window, never an error. Repeating the load is cheap: one
-  `database.guild.findAll()` plus discord.js cache reads, no Discord REST calls. The boot
-  call is also deliberately best-effort, so the dependency does not run the other way: a
-  searchengine outage never blocks the app's own startup.
+  `database.guild.findAll()` plus `distopia-bot`'s cache (over the Bot RPC below), no Discord
+  REST calls. The boot call is also deliberately best-effort, so the dependency does not run
+  the other way: a searchengine outage never blocks the app's own startup.
+
+## Bot RPC (bot)
+
+`distopia-bot` (`bot-deployment.yaml`) is the mirror image of the searchengine split again,
+same direction: same image, `command` overridden to run `presentation-bot`, and it is the
+**server** while `distopia-app` is the client. Unlike searchengine, this one is a full
+process split rather than just moving one in-memory resource out: `distopia-bot` is now the
+only pod that logs into the Discord gateway at all (`src/presentation/bot/src/index.ts`),
+owns the resulting guild/member/channel cache, and connects to Postgres/Redis/searchengine
+directly with its own `AppState` (`src/presentation/bot/src/server/*.ts` — the same pattern
+`lib/server/*.ts` uses in `presentation-web`, since `AppCore` is shared code neither process
+knows is "the other one"). It serves the live-cache-dependent half of `infra-discord`'s
+`Controller` as `BotService` from `infra-rpc`; `src/presentation/web/src/lib/server/
+discord.ts` is now just a Connect client exposing that same method surface (typed
+`DiscordClient`, `infra-discord`'s structural subset of `Controller`), so every `AppCore`
+call site (`AppState.discord`) is unchanged. The pure/stateless half (`oauth2`, `embed`,
+`guild.iconUrl` — no live cache needed, just REST/CDN helpers) stays a plain local
+implementation in both processes instead of going over RPC.
+
+Because it receives inbound traffic it has its own `bot-service.yaml`, and
+`bot-networkpolicy.yaml` mirrors `searchengine-networkpolicy.yaml` exactly (same direction):
+the bot pod serves nothing public, so its only ingress rule is `distopia-app` on the `rpc`
+port. `BOT_RPC_TOKEN` (`distopia-env`) is the bearer check on top of that. The same cleartext
+caveat applies to this hop as to the other two — see "Before adding a second node" in
+section 0.
+
+`BOT_RPC_PORT` (`8083`) and `BOT_RPC_URL` (`http://distopia-bot:8083`) are both plain
+literals in the `distopia-config` ConfigMap for the same reason the other RPC ports are —
+cluster-internal only, gated by the NetworkPolicy plus the bearer token, never by the port
+being unguessable. Change them together with `bot-deployment.yaml`'s `containerPort` and
+`bot-service.yaml`'s `rpc` port.
+
+`replicas: 1` is load-bearing here for the reason `distopia-app`'s own `replicas: 1` used to
+be (that constraint moved here): logging into the Discord gateway with the same bot token
+from two pods at once causes duplicate event handling. `distopia-redis-allow-intra-namespace`
+(`k8s/redis/networkpolicy.yaml`) and `distopia-searchengine-allow-app-rpc`
+(`searchengine-networkpolicy.yaml`) both had to grow a second ingress rule for
+`distopia-bot`, since it now talks to both directly instead of only through `distopia-app`.
 
 ## Notes / known constraints
 
-- `replicas: 1` is load-bearing, not just a default — the app logs into the Discord
-  gateway itself (`hooks.server.ts`), so a second concurrent instance causes duplicate event
-  handling. `k8s/app/deployment.yaml` uses `RollingUpdate` with `maxSurge: 1,
-  maxUnavailable: 0` (zero-downtime, brief overlap during rollout accepted) rather than
-  `Recreate`.
+- `replicas: 1` is still set for `distopia-app` (`k8s/app/deployment.yaml`, `RollingUpdate`
+  with `maxSurge: 1, maxUnavailable: 0`), but it is no longer load-bearing the way it used
+  to be — the app stopped logging into the Discord gateway itself once that moved to
+  `distopia-bot` (see "Bot RPC (bot)" above). Kept at 1 anyway as the default posture for a
+  single-node cluster, not because a second `distopia-app` replica would misbehave.
+- `distopia-bot`'s `replicas: 1` (`bot-deployment.yaml`) is where that Discord-gateway
+  constraint actually lives now: logging in with the same bot token from two pods at once
+  causes duplicate event handling. Same `RollingUpdate` posture as `distopia-app` for the
+  same zero-downtime reason.
 - `distopia-schedulemanager`'s `replicas: 1` (`schedulemanager-deployment.yaml`) is
   load-bearing for a different reason: it only ticks two `node-cron` schedules and calls
   `distopia-app`'s internal RPC port (see "Scheduler RPC (schedulemanager)" below) — a
   second replica would double-fire every call.
 - `distopia-searchengine`'s `replicas: 1` (`searchengine-deployment.yaml`) is load-bearing
   too, for yet another reason: its Orama index lives in process memory, so a second replica
-  would serve searches from an index `distopia-app` never populated (see "Search engine RPC
-  (searchengine)" above).
+  would serve searches from an index neither caller (`distopia-app` nor `distopia-bot`) ever
+  populated (see "Search engine RPC (searchengine)" above).
 - No app secret is ever baked into the image or pushed to ghcr.io. The app reads its
   runtime config (`BOT_TOKEN`, `PUBLIC_*`, `DATABASE_URL`, ...) via `$env/dynamic/*` +
   `dotenv` (see `hooks.server.ts`), resolved fresh every time the container starts from the
@@ -681,9 +730,11 @@ Two things follow from the index being in-process memory only:
   `migrate` initContainer (it reads `distopia-db-credentials` too, same as the main
   container), but never a rebuild — the build-time database `deploy.yml` migrates is a
   separate, throwaway one, unrelated to the real `distopia-db-credentials` value.
-  Rotating `SEARCHENGINE_RPC_TOKEN` needs `distopia-app` and `distopia-searchengine`
-  restarted together, for exactly the same reason as the schedulemanager token below.
-  Rotating `SCHEDULEMANAGER_RPC_TOKEN` specifically needs **both** Deployments restarted
+  Rotating `SEARCHENGINE_RPC_TOKEN` needs `distopia-app`, `distopia-bot`, and
+  `distopia-searchengine` all restarted together (both callers, plus the server), for
+  exactly the same reason as the schedulemanager token below. Rotating `BOT_RPC_TOKEN` needs
+  `distopia-app` and `distopia-bot` restarted together, same reason again. Rotating
+  `SCHEDULEMANAGER_RPC_TOKEN` specifically needs **both** Deployments restarted
   (`... distopia-app` and `... distopia-schedulemanager`) — it's the one `distopia-env` key
   `distopia-schedulemanager` also reads, and a still-running Pod keeps its old
   Secret-backed env var value until restarted, so a one-sided restart leaves the two

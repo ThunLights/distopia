@@ -13,3 +13,6 @@ resources:
 - searchengine-deployment.yaml
 - searchengine-service.yaml
 - searchengine-networkpolicy.yaml
+- bot-deployment.yaml
+- bot-service.yaml
+- bot-networkpolicy.yaml

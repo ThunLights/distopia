@@ -43,8 +43,7 @@ export class AppCore extends Base {
     const ownerIds = new Set<string>();
 
     for (const guild of await this.ranking.fetchGuild("activeRate", { num: 10 })) {
-      const owner = await this.state.discord.guild.fetchOwner(guild.guildId);
-      const ownerId = owner?.id;
+      const ownerId = await this.state.discord.guild.fetchOwnerId(guild.guildId);
       if (ownerId) {
         ownerIds.add(ownerId);
       }
@@ -54,13 +53,12 @@ export class AppCore extends Base {
       await this.state.discord.role.give(homeGuildId, ownerId, specialDirectorsRoleId);
     }
 
-    for (const user of (
-      await this.state.discord.role.fetchGuild(homeGuildId, specialDirectorsRoleId)
-    )
-      ?.values()
-      .toArray() ?? []) {
-      if (!Array.from(ownerIds).includes(user.id)) {
-        await this.state.discord.role.deprive(homeGuildId, user.id, specialDirectorsRoleId);
+    for (const userId of await this.state.discord.role.fetchGuild(
+      homeGuildId,
+      specialDirectorsRoleId,
+    )) {
+      if (!ownerIds.has(userId)) {
+        await this.state.discord.role.deprive(homeGuildId, userId, specialDirectorsRoleId);
       }
     }
   }
@@ -69,8 +67,7 @@ export class AppCore extends Base {
     const ownerIds = new Set<string>();
 
     for (const guild of await this.ranking.fetchGuild("activeRate", { num: 100 })) {
-      const owner = await this.state.discord.guild.fetchOwner(guild.guildId);
-      const ownerId = owner?.id;
+      const ownerId = await this.state.discord.guild.fetchOwnerId(guild.guildId);
       if (ownerId) {
         ownerIds.add(ownerId);
       }
@@ -80,11 +77,9 @@ export class AppCore extends Base {
       await this.state.discord.role.give(homeGuildId, ownerId, directorsRoleId);
     }
 
-    for (const user of (await this.state.discord.role.fetchGuild(homeGuildId, directorsRoleId))
-      ?.values()
-      .toArray() ?? []) {
-      if (!Array.from(ownerIds).includes(user.id)) {
-        await this.state.discord.role.deprive(homeGuildId, user.id, directorsRoleId);
+    for (const userId of await this.state.discord.role.fetchGuild(homeGuildId, directorsRoleId)) {
+      if (!ownerIds.has(userId)) {
+        await this.state.discord.role.deprive(homeGuildId, userId, directorsRoleId);
       }
     }
   }
@@ -93,12 +88,8 @@ export class AppCore extends Base {
     const adminIds = new Set<string>();
 
     for (const guild of await this.ranking.fetchGuild("activeRate", { num: 100 })) {
-      const admins =
-        (await this.state.discord.guild.fetchHasPermissionUsers(guild.guildId, ["Administrator"]))
-          ?.values()
-          .toArray() ?? [];
-      for (const admin of admins) {
-        adminIds.add(admin.id);
+      for (const adminId of await this.state.discord.guild.fetchAdminIds(guild.guildId)) {
+        adminIds.add(adminId);
       }
     }
 
@@ -106,11 +97,12 @@ export class AppCore extends Base {
       await this.state.discord.role.give(homeGuildId, adminId, subDirectorsRoleId);
     }
 
-    for (const user of (await this.state.discord.role.fetchGuild(homeGuildId, subDirectorsRoleId))
-      ?.values()
-      .toArray() ?? []) {
-      if (!Array.from(adminIds).includes(user.id)) {
-        await this.state.discord.role.deprive(homeGuildId, user.id, subDirectorsRoleId);
+    for (const userId of await this.state.discord.role.fetchGuild(
+      homeGuildId,
+      subDirectorsRoleId,
+    )) {
+      if (!adminIds.has(userId)) {
+        await this.state.discord.role.deprive(homeGuildId, userId, subDirectorsRoleId);
       }
     }
   }

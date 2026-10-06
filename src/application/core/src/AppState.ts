@@ -1,5 +1,5 @@
 import type { DatabaseClient } from "infra-database/types";
-import type { Controller } from "infra-discord";
+import type { DiscordClient } from "infra-discord";
 import type { RedisClient } from "infra-redis";
 // Redis-backed -- migrated off repo-memory's in-process Map so it's readable across
 // processes/languages instead of trapped in one Node process's memory. Each field is its own
@@ -75,7 +75,10 @@ export type AppState = {
     voiceChannelMember: VoiceChannelMember;
   };
   searchEngine: SearchEngineClient;
-  discord: Controller;
+  // The live-Discord-cache subset lives in presentation-bot now; see infra-discord's
+  // DiscordClient and presentation-web's lib/server/discord.ts (the RPC client standing in
+  // for it there).
+  discord: DiscordClient;
   database: DatabaseClient;
   // Durable (survives a process restart, unlike `memory` above) -- used to persist which
   // guild's TTS session is bound to which voice/text channel, so a rolling update's brief
