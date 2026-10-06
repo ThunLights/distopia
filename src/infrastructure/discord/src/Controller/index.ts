@@ -1,6 +1,5 @@
 import type { Client } from "discord.js";
 
-import { AvatarController } from "./AvatarController";
 import { Base } from "./Base";
 import { ChannelController } from "./ChannelController";
 import { EmbedController } from "./EmbedController";
@@ -18,7 +17,6 @@ export type Config = {
 };
 
 export class Controller extends Base {
-  public readonly avatar = new AvatarController(this.client);
   public readonly channel = new ChannelController(this.client);
   public readonly embed = new EmbedController(this.client);
   public readonly guild = new GuildController(this.client);
@@ -35,5 +33,36 @@ export class Controller extends Base {
     this.oauth2 = new OAuth2Controller(this.client, this.config);
   }
 }
+
+// The AppState.discord shape (app-core/src/AppState.ts), implemented directly by Controller
+// itself (presentation-bot, which owns the real logged-in Client) and, over Connect RPC, by
+// presentation-web (see infra-rpc's BotService and presentation-web's lib/server/discord.ts).
+// `channel`/`guild`/`role`/`user`/`message` (`guild.iconUrl` excepted) read discord.js's
+// gateway-populated cache, which only exists in the process that actually logged in, so
+// those go over RPC on the web side. `oauth2`, `embed`, and `guild.iconUrl` need no live
+// cache (pure REST/CDN helpers) and stay a plain local implementation on both sides.
+export type DiscordClient = {
+  channel: Pick<
+    ChannelController,
+    "fetchVoiceChannel" | "rename" | "existsVoiceChannel" | "create"
+  >;
+  guild: Pick<
+    GuildController,
+    | "fetch"
+    | "fetchOwnerId"
+    | "fetchAdminIds"
+    | "fetchMemberCount"
+    | "fetchMemberCounts"
+    | "fetchBoostCount"
+    | "isJoined"
+    | "iconUrl"
+    | "fetchWhiteListTargetName"
+  >;
+  role: Pick<RoleController, "fetchGuild" | "give" | "deprive">;
+  user: Pick<UserController, "find" | "setActivity">;
+  message: Pick<MessageController, "edit">;
+  oauth2: OAuth2Controller;
+  embed: Pick<EmbedController, "detectInviteLinks">;
+};
 
 export type { FetchTokenResult, FetchUserInfoResult } from "./OAuth2Controller";

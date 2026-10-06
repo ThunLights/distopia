@@ -1,0 +1,202 @@
+syntax = "proto3";
+
+package distopia.bot.v1;
+
+// Implemented by presentation-bot, which owns the live, logged-in discord.js Client (and
+// therefore its gateway-populated guild/member/channel cache), and called by
+// presentation-web through lib/server/discord.ts -- a 1:1 mirror of infra-discord's
+// DiscordClient, so AppCore's call sites (AppState.discord) stay unchanged. Only one process
+// can hold the real gateway session, which is why presentation-bot stays at replicas: 1 (see
+// k8s/README.md), the same reason presentation-searchengine does for its in-memory index.
+service BotService {
+  rpc FetchGuild(FetchGuildRequest) returns (FetchGuildResponse);
+  rpc FetchOwnerId(FetchOwnerIdRequest) returns (FetchOwnerIdResponse);
+  rpc FetchAdminIds(FetchAdminIdsRequest) returns (FetchAdminIdsResponse);
+  rpc FetchMemberCount(FetchMemberCountRequest) returns (FetchMemberCountResponse);
+  rpc FetchMemberCounts(FetchMemberCountsRequest) returns (FetchMemberCountsResponse);
+  rpc FetchBoostCount(FetchBoostCountRequest) returns (FetchBoostCountResponse);
+  rpc IsJoined(IsJoinedRequest) returns (IsJoinedResponse);
+  rpc FetchWhiteListTargetName(FetchWhiteListTargetNameRequest)
+      returns (FetchWhiteListTargetNameResponse);
+
+  rpc FetchVoiceChannels(FetchVoiceChannelsRequest) returns (FetchVoiceChannelsResponse);
+  rpc RenameChannel(RenameChannelRequest) returns (RenameChannelResponse);
+  rpc ExistsVoiceChannel(ExistsVoiceChannelRequest) returns (ExistsVoiceChannelResponse);
+  rpc CreateVoiceChannel(CreateVoiceChannelRequest) returns (CreateVoiceChannelResponse);
+
+  rpc FetchRoleMemberIds(FetchRoleMemberIdsRequest) returns (FetchRoleMemberIdsResponse);
+  rpc GiveRole(GiveRoleRequest) returns (GiveRoleResponse);
+  rpc DepriveRole(DepriveRoleRequest) returns (DepriveRoleResponse);
+
+  rpc FindUser(FindUserRequest) returns (FindUserResponse);
+  rpc SetActivity(SetActivityRequest) returns (SetActivityResponse);
+
+  rpc EditMessage(EditMessageRequest) returns (EditMessageResponse);
+}
+
+message BotGuild {
+  string id = 1;
+  string name = 2;
+  string owner_id = 3;
+  optional string description = 4;
+  optional string icon = 5;
+  optional string banner = 6;
+  optional string icon_url = 7;
+  optional string banner_url = 8;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string display_name = 3;
+  optional string global_name = 4;
+  optional string avatar_url = 5;
+  optional string banner_url = 6;
+}
+
+message VoiceChannelMember {
+  string id = 1;
+  bool is_active = 2;
+}
+
+message VoiceChannel {
+  string guild_id = 1;
+  string channel_id = 2;
+  repeated VoiceChannelMember members = 3;
+  uint32 active_member_count = 4;
+  uint32 member_count = 5;
+}
+
+// Mirrors discord.js's APIEmbed JSON shape (infra-discord's MessageController.edit) -- kept
+// as an opaque JSON blob rather than a full proto schema of Discord's embed format, which is
+// complex, not ours to own, and already serialized this way by EmbedBuilder.toJSON().
+message EditMessageRequest {
+  string channel_id = 1;
+  string message_id = 2;
+  string embeds_json = 3;
+}
+message EditMessageResponse {}
+
+message FetchGuildRequest {
+  string guild_id = 1;
+}
+message FetchGuildResponse {
+  optional BotGuild guild = 1;
+}
+
+message FetchOwnerIdRequest {
+  string guild_id = 1;
+}
+message FetchOwnerIdResponse {
+  optional string owner_id = 1;
+}
+
+message FetchAdminIdsRequest {
+  string guild_id = 1;
+}
+message FetchAdminIdsResponse {
+  repeated string user_ids = 1;
+}
+
+message FetchMemberCountRequest {
+  string guild_id = 1;
+  bool online_only = 2;
+}
+message FetchMemberCountResponse {
+  optional uint32 count = 1;
+}
+
+message FetchMemberCountsRequest {
+  string guild_id = 1;
+}
+message FetchMemberCountsResponse {
+  message Counts {
+    uint32 all = 1;
+    uint32 users = 2;
+    uint32 bots = 3;
+  }
+  optional Counts counts = 1;
+}
+
+message FetchBoostCountRequest {
+  string guild_id = 1;
+}
+message FetchBoostCountResponse {
+  optional uint32 count = 1;
+}
+
+message IsJoinedRequest {
+  string guild_id = 1;
+}
+message IsJoinedResponse {
+  bool joined = 1;
+}
+
+message FetchWhiteListTargetNameRequest {
+  string guild_id = 1;
+  string id_type = 2;
+  string target_id = 3;
+}
+message FetchWhiteListTargetNameResponse {
+  optional string name = 1;
+}
+
+message FetchVoiceChannelsRequest {}
+message FetchVoiceChannelsResponse {
+  repeated VoiceChannel channels = 1;
+}
+
+message RenameChannelRequest {
+  string channel_id = 1;
+  string name = 2;
+}
+message RenameChannelResponse {
+  bool ok = 1;
+}
+
+message ExistsVoiceChannelRequest {
+  string channel_id = 1;
+}
+message ExistsVoiceChannelResponse {
+  bool exists = 1;
+}
+
+message CreateVoiceChannelRequest {
+  string guild_id = 1;
+  string name = 2;
+}
+message CreateVoiceChannelResponse {
+  optional string channel_id = 1;
+}
+
+message FetchRoleMemberIdsRequest {
+  string guild_id = 1;
+  string role_id = 2;
+}
+message FetchRoleMemberIdsResponse {
+  repeated string user_ids = 1;
+}
+
+message GiveRoleRequest {
+  string guild_id = 1;
+  string user_id = 2;
+  string role_id = 3;
+}
+message GiveRoleResponse {}
+
+message DepriveRoleRequest {
+  string guild_id = 1;
+  string user_id = 2;
+  string role_id = 3;
+}
+message DepriveRoleResponse {}
+
+message FindUserRequest {
+  string user_id = 1;
+}
+message FindUserResponse {
+  optional User user = 1;
+}
+
+message SetActivityRequest {}
+message SetActivityResponse {}

@@ -1,35 +1,31 @@
-import type { PermissionResolvable, PresenceStatus } from "discord.js";
-
 import type { Guild } from "../types/Guild";
 import { Base } from "./Base";
 
 export class GuildController extends Base {
-  public async fetchHasPermissionUsers(guildId: string, permissions: PermissionResolvable[]) {
-    return this.client.guilds.cache
-      .get(guildId)
-      ?.members.cache.filter((member) => member.permissions.has(permissions));
-  }
-
-  public async isAdmin(guildId: string, userId: string) {
+  // Only ever checked against "Administrator" -- see app-core's Guild.isOwnerOrAdmin /
+  // OAuth2.isAdmin and AppCore.updateHomeGuild*Role. Returns ids only (not full GuildMember
+  // objects) so this can also be served over RPC once presentation-bot owns the live client.
+  public async fetchAdminIds(guildId: string): Promise<string[]> {
     return (
-      (await this.fetchHasPermissionUsers(guildId, ["Administrator"]))
-        ?.values()
-        .toArray()
-        .map(({ id }) => id) ?? []
-    ).includes(userId);
+      this.client.guilds.cache
+        .get(guildId)
+        ?.members.cache.filter((member) => member.permissions.has("Administrator"))
+        .map((member) => member.id) ?? []
+    );
   }
 
-  public async fetchOwner(guildId: string) {
-    return await this.client.guilds.cache.get(guildId)?.fetchOwner({ cache: true });
+  public async fetchOwnerId(guildId: string): Promise<string | undefined> {
+    return (await this.client.guilds.cache.get(guildId)?.fetchOwner({ cache: true }))?.id;
   }
 
-  public async fetchMemberCount(guildId: string, status?: PresenceStatus[]) {
+  public async fetchMemberCount(
+    guildId: string,
+    onlineOnly?: boolean,
+  ): Promise<number | undefined> {
     const guild = this.client.guilds.cache.get(guildId);
 
-    if (status) {
-      return guild?.members.cache.filter(
-        (member) => member.presence?.status && status.includes(member.presence.status),
-      ).size;
+    if (onlineOnly) {
+      return guild?.members.cache.filter((member) => member.presence?.status === "online").size;
     } else {
       return guild?.memberCount;
     }

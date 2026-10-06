@@ -16,6 +16,8 @@
   "scripts": {
     "build": "bun run scripts/cmdGen.ts",
     "setup": "npm run build",
+    "start": "bun run src/index.ts",
+    "dev": "bun --env-file=../../../.env run src/index.ts",
     "test": "vitest run",
     "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
@@ -23,6 +25,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@connectrpc/connect": "catalog:",
+    "@connectrpc/connect-node": "catalog:",
     "@discordjs/voice": "catalog:",
     "@noble/ciphers": "catalog:",
     "@standard-schema/spec": "catalog:",
@@ -31,8 +35,14 @@
     "discord.js": "catalog:",
     "domain-model": "workspace:*",
     "ffmpeg-static": "catalog:",
+    "infra-database": "workspace:*",
+    "infra-discord": "workspace:*",
+    "infra-redis": "workspace:*",
+    "infra-rpc": "workspace:*",
     "opusscript": "catalog:",
     "prism-media": "catalog:",
+    "repo-redis": "workspace:*",
+    "repo-search": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -52,7 +52,7 @@ export class ActiveRate extends Base {
       const vcMemberSum = new Set(records.map((value) => value.vcMembers).flat()).size;
       const vcMemberUpperTwo = records.reduce((sum, record) => sum + record.vcMemberUpperTwo, 0);
       const activeMember =
-        (await this.state.discord.guild.fetchMemberCount(guild.guildId, ["online"])) ?? 0;
+        (await this.state.discord.guild.fetchMemberCount(guild.guildId, true)) ?? 0;
       const allMember = (await this.state.discord.guild.fetchMemberCount(guild.guildId)) ?? 0;
       const memberCount =
         (await this.state.discord.guild.fetchMemberCounts(guild.guildId))?.users ?? 0;

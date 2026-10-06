@@ -76,6 +76,7 @@ it under a different name — never over the real file.
 | 6006 | Storybook |
 | 8081 | Internal Connect RPC (schedulemanager → web, see "Connect RPC (Inter-service)" below) |
 | 8082 | Internal Connect RPC (web → searchengine, same section) |
+| 8083 | Internal Connect RPC (web → bot, same section) |
 
 ---
 
@@ -601,9 +602,9 @@ import { myQuery } from "@prisma/client/sql";
 ## Connect RPC (Inter-service)
 
 `src/infrastructure/rpc` (`infra-rpc`) holds the Protobuf/Connect contracts services use to
-call each other, as distopia splits from one process into independent `web`/`bot`/
-`schedulemanager`/`searchengine` services. Two services are built this way so far — follow
-the same shape for the next one, and note that the two already differ in direction:
+call each other, now that distopia has split from one process into independent `web`/`bot`/
+`schedulemanager`/`searchengine` services. Three services are built this way so far — follow
+the same shape for the next one, and note that they don't all share one direction:
 
 - `presentation-schedulemanager` — a standalone cron-ticker process that **calls**
   `presentation-web`'s internal RPC port on each tick (see `k8s/README.md`'s "Scheduler RPC"
@@ -614,6 +615,14 @@ the same shape for the next one, and note that the two already differ in directi
   sites are unchanged (`AppState.searchEngine` is typed `SearchEngineClient`, the structural
   subset of that class). See `k8s/README.md`'s "Search engine RPC" section — including why
   that Deployment is `replicas: 1` and what still does not re-index after a restart.
+- `presentation-bot` — the mirror image of the searchengine split: it owns the one real,
+  logged-in discord.js `Client` (guild/member/channel cache included) and **serves** the
+  live-cache-dependent half of `infra-discord`'s `Controller` to `presentation-web`
+  (`web/src/lib/server/discord.ts`), which holds only a Connect client typed
+  `DiscordClient` (`infra-discord`'s structural subset of `Controller` — `AppState.discord`).
+  The pure/stateless half (`oauth2`, `embed`, `guild.iconUrl` — no live cache needed) stays a
+  plain local implementation on both sides instead of going over RPC. See `k8s/README.md`'s
+  "Bot RPC" section for why this Deployment is `replicas: 1`, same reason as searchengine.
 
 ### Adding a new RPC contract
 

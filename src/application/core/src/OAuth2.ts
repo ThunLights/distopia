@@ -101,7 +101,8 @@ export class OAuth2 extends Base {
     const results = await Promise.all(
       allGuilds.map(async (guild) => ({
         guild,
-        isAdminOrOwner: guild.owner || (await this.state.discord.guild.isAdmin(guild.id, userId)),
+        isAdminOrOwner:
+          guild.owner || (await this.state.discord.guild.fetchAdminIds(guild.id)).includes(userId),
       })),
     );
 

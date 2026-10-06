@@ -413,7 +413,7 @@ export class Guild extends Base {
   public async rankingToGuildWithMeta({ guildId, activeRate, level, point }: GuildRecordRanking) {
     const meta = await this.fetchMetaData(guildId);
     const memberCount = await this.state.discord.guild.fetchMemberCount(guildId);
-    const onlineMemberCount = await this.state.discord.guild.fetchMemberCount(guildId, ["online"]);
+    const onlineMemberCount = await this.state.discord.guild.fetchMemberCount(guildId, true);
 
     if (!meta) {
       return null;
@@ -432,12 +432,8 @@ export class Guild extends Base {
   }
 
   public async isOwnerOrAdmin(guildId: string, userId: string) {
-    const ownerId = (await this.state.discord.guild.fetchOwner(guildId))?.id;
-    const adminUserIds =
-      (await this.state.discord.guild.fetchHasPermissionUsers(guildId, ["Administrator"]))
-        ?.values()
-        .toArray()
-        .map(({ id }) => id) ?? [];
+    const ownerId = await this.state.discord.guild.fetchOwnerId(guildId);
+    const adminUserIds = await this.state.discord.guild.fetchAdminIds(guildId);
 
     return ownerId === userId || adminUserIds.includes(userId);
   }

@@ -1,7 +1,7 @@
 import { env as privateEnv } from "$env/dynamic/private";
 import { env } from "$env/dynamic/public";
-import { djsController } from "./bot";
 import { database } from "./database";
+import { djsController } from "./discord";
 import { memory } from "./memory";
 import { redis } from "./redis";
 import { searchEngine } from "./search";
@@ -36,6 +36,10 @@ export async function updatePanels() {
         : panel.type === "LevelRanking"
           ? await levelRatePage(core)
           : await userBumpPage(core);
-    await djsController.message.edit(panel.channelId, panel.messageId, { embeds: content.embeds });
+    await djsController.message.edit(
+      panel.channelId,
+      panel.messageId,
+      (content.embeds ?? []).map((embed) => ("toJSON" in embed ? embed.toJSON() : embed)),
+    );
   }
 }

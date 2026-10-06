@@ -1,4 +1,3 @@
-import { redis } from "./redis";
 import type { AppState } from "app-core/AppState";
 import {
   ButtonRateLimit,
@@ -26,21 +25,12 @@ import {
   VoiceChannelMember,
 } from "repo-redis";
 
-// Ownership notes:
-// - The four ratelimit stores, unJoinedGuild, urlCacheInMemory, guildMemberAdd,
-//   messageCreate, voiceChannelMember, ttsSynthesisCache, and every guild-settings-shaped
-//   store below (guildBlackList/guildDictionary/guildEdit/guildSetting/
-//   guildTtsIgnoreList/guildWhiteList/userDictionary/friend) are bot-owned -- all written
-//   from Discord slash commands/buttons/modals (presentation-bot) or bot-driven cron jobs,
-//   confirmed by grepping every call site.
-// - oauth2PKCE, oauth2Guilds, userOAuth2, jwtKey, userJWTVerifyKey are web-owned (OAuth2
-//   login flow, JWT session auth).
-// All of them are still instantiated here regardless of owner tag, same as in
-// presentation-bot's own server/memory.ts: AppCore (and therefore AppState["memory"]'s full
-// shape) is shared code neither process's build knows is "the other one," and every store
-// here is just a thin Redis client wrapper -- cheap to construct twice, both pointing at the
-// same Redis. The owner tag ("bot"/"web") is baked into each store's Redis key, not into
-// which process is allowed to construct the class.
+import { redis } from "./redis";
+
+// Mirrors presentation-web's lib/server/memory.ts -- both processes point at the same Redis
+// and construct the full AppState["memory"] shape, since AppCore itself doesn't know which
+// process it's running in. Each store's owner tag ("bot"/"web") is a Redis key namespace,
+// not a process boundary -- see that file's own comment for the full ownership breakdown.
 export const memory: AppState["memory"] = {
   ratelimit: {
     messageCreate: new MessageCreateRateLimit(redis, "bot"),
