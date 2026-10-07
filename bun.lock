@@ -160,7 +160,7 @@
     "src/infrastructure/aip": {
       "name": "infra-aip",
       "dependencies": {
-        "anonymous-ip": "2.3.0",
+        "anonymous-ip": "2.4.0",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -1573,7 +1573,7 @@
 
     "ajv": ["ajv@6.14.0", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-IWrosm/yrn43eiKqkfkHis7QioDleaXQHdDVPKg0FSwwd/DuvyX79TZnFOnYpB7dcsFAMmtFztZuXPDvSePkFw=="],
 
-    "anonymous-ip": ["anonymous-ip@2.3.0", "", { "dependencies": { "geolite2-redist": "^3.1.3", "maxmind": "^5.0.7" }, "peerDependencies": { "hono": "^4", "typescript": "^5" }, "optionalPeers": ["hono"] }, "sha512-iSkK4V3RsUP8etlfSKm3RDqBZtWSMNVDdaS3rj3lzKp/AHK2X+Yr6PXSyvPLfdDpj3gpbE7DZl6DpHSXvhXmGw=="],
+    "anonymous-ip": ["anonymous-ip@2.4.0", "", { "dependencies": { "geolite2-redist": "^3.1.3", "maxmind": "^5.0.7" }, "peerDependencies": { "hono": "^4", "typescript": "^5" }, "optionalPeers": ["hono"] }, "sha512-YNLgrcZRgm4aSiQxhuFXtpzMIzqAHmPqZ2ZM9xo+5IVU0ZvSe0GdX38gbMVPkG4UD1ktqVqXlQbv4uEWhF3sBQ=="],
 
     "ansi-regex": ["ansi-regex@6.2.2", "", {}, "sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg=="],
 
