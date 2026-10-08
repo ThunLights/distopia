@@ -308,6 +308,12 @@ jobs:
 
       - name: Build
         uses: devcontainers/ci@v0.3
+        env:
+          # Compose's buildx-bake backend sandboxes file reads outside the build context;
+          # devcontainers/cli's generated Features Dockerfile lives under /tmp, so bake
+          # rejects it with "additional privileges requested: pass --allow=fs.read=...".
+          # Forcing the legacy (non-bake) build backend avoids that entitlement check.
+          COMPOSE_BAKE: "false"
         with:
           cacheFrom: ${{ steps.img.outputs.name }}
           push: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && 'always' || 'never' }}
