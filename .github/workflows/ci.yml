@@ -281,7 +281,10 @@ jobs:
 
   devcontainer:
     name: Dev Container
-    runs-on: ubuntu-latest
+    # Pinned (not ubuntu-latest): Compose v5 removes the internal builder entirely, so
+    # COMPOSE_BAKE: "false" below stops working once the runner image moves to it --
+    # ubuntu-latest is scheduled to migrate to Ubuntu 26.04 (ships Compose 5.1.3).
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
