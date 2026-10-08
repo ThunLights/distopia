@@ -17,6 +17,7 @@ import { RoleCreateHandler } from "./EventHandler/RoleCreateHandler";
 import { RoleDeleteHandler } from "./EventHandler/RoleDeleteHandler";
 import { RoleUpdateHandler } from "./EventHandler/RoleUpdateHandler";
 import { VoiceStateUpdateHandler } from "./EventHandler/VoiceStateUpdateHandler";
+import { restoreBumpNotices } from "./utils/bump/notice";
 import { restoreSessions } from "./utils/tts/session";
 
 export function handleClient(client: Client, core: AppCore) {
@@ -44,6 +45,12 @@ export function handleClient(client: Client, core: AppCore) {
     // not block (or fail) command registration below.
     void restoreSessions(client, core).catch((error) =>
       console.error("[tts] failed to restore voice sessions", error),
+    );
+
+    // Fire-and-forget, same reasoning: re-arming pending bump notices must not block command
+    // registration below.
+    void restoreBumpNotices(client, core).catch((error) =>
+      console.error("[bump] failed to restore bump notices", error),
     );
 
     const commands = interactionCreateHandler.commands.chatInput
