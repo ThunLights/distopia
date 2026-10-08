@@ -14,6 +14,9 @@
     "./Tts": {
       "import": "./src/Tts.ts"
     },
+    "./Guild": {
+      "import": "./src/Guild.ts"
+    },
     "./staff": {
       "import": "./src/utils/staff.ts"
     },

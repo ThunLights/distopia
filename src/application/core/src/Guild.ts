@@ -19,6 +19,32 @@ import type { Record } from "./Record";
 import type { GuildMetaData } from "./types/GuildMetaData";
 import type { RootPage } from "./types/RootPage";
 
+const BUMP_NOTICE_KEY_PREFIX = "bump:notice:";
+
+// A pending "bump is available again" notice -- not the live setTimeout itself (that's
+// process-local, see presentation-bot's utils/bump/notice.ts), just enough to re-arm it after
+// a restart. commandId is captured at schedule time so the restored notice can still render
+// the same clickable `/bump` mention as the original.
+export type BumpNoticeJob = {
+  guildId: string;
+  channelId: string;
+  content: string | null;
+  roleId: string | null;
+  commandId: string | null;
+  fireAt: string;
+};
+
+function isBumpNoticeJob(value: unknown): value is BumpNoticeJob {
+  const job = value as { guildId?: unknown; channelId?: unknown; fireAt?: unknown } | null;
+  return (
+    typeof job === "object" &&
+    job !== null &&
+    typeof job.guildId === "string" &&
+    typeof job.channelId === "string" &&
+    typeof job.fireAt === "string"
+  );
+}
+
 export class Guild extends Base {
   public readonly rootPage: RootPage = {
     latestGuilds: [],
@@ -172,6 +198,50 @@ export class Guild extends Base {
       guildBumpCounter: guildBumpCounter ?? 1,
       userBumpCounter: userBumpCounter ?? 1,
     };
+  }
+
+  // Called from presentation-bot's BumpCommand right alongside arming the live setTimeout --
+  // keeps Redis in sync so a rolling update's restart (which kills that timer) has something
+  // to re-arm from. TTL mirrors fireAt rather than being a fixed two hours: Redis's own
+  // expiry is then a safety net, not the primary cleanup path (fireBumpNotice deletes the key
+  // itself once sent).
+  public async saveBumpNotice(job: BumpNoticeJob): Promise<void> {
+    const ttlSeconds = Math.max(1, Math.ceil((new Date(job.fireAt).getTime() - Date.now()) / 1000));
+    await this.state.redis.set(
+      `${BUMP_NOTICE_KEY_PREFIX}${job.guildId}`,
+      JSON.stringify(job),
+      "EX",
+      ttlSeconds,
+    );
+  }
+
+  public async clearBumpNotice(guildId: string): Promise<void> {
+    await this.state.redis.del(`${BUMP_NOTICE_KEY_PREFIX}${guildId}`);
+  }
+
+  // Read once at startup (see presentation-bot's utils/bump/notice.ts restoreBumpNotices) to
+  // re-arm every notice that survived a restart. A corrupt entry is skipped rather than
+  // thrown -- one bad key shouldn't block every other guild's notice from restoring.
+  public async getAllBumpNotices(): Promise<BumpNoticeJob[]> {
+    const keys = await this.state.redis.keys(`${BUMP_NOTICE_KEY_PREFIX}*`);
+    const jobs: BumpNoticeJob[] = [];
+    for (const key of keys) {
+      const raw = await this.state.redis.get(key);
+      if (!raw) {
+        continue;
+      }
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        if (!isBumpNoticeJob(parsed)) {
+          console.error(`[bump] persisted notice for key ${key} has an unexpected shape`);
+          continue;
+        }
+        jobs.push(parsed);
+      } catch (error) {
+        console.error(`[bump] failed to parse persisted notice for key ${key}`, error);
+      }
+    }
+    return jobs;
   }
 
   public async save(input: GuildUpsertInput) {

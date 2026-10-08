@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 import { RateLimitError } from "domain-model";
 
+import { scheduleBumpNotice } from "../../../utils/bump/notice";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 
@@ -64,21 +65,18 @@ export class BumpCommand extends ChatInputCommandBase<Options> {
     const settings = await this.core.guild.getSetting(guild.id);
 
     if (settings && settings.bumpNotice && channel?.isSendable()) {
-      setTimeout(async () => {
-        const { bumpNoticeContent, bumpNoticeRole } = settings;
-        const embed = new EmbedBuilder()
-          .setColor("Gold")
-          .setTitle("Bumpが実行できますよ!!")
-          .setURL(`https://distopia.top/`)
-          .setDescription(
-            bumpNoticeContent ??
-              `只今、前回のBumpから2時間がたちました。\n再度 </bump:${interaction.commandId}> を実行可能です。`,
-          );
-        await channel.send({
-          content: bumpNoticeRole ? `<@&${bumpNoticeRole}>` : undefined,
-          embeds: [embed],
-        });
-      }, twoHours);
+      const job = {
+        guildId: guild.id,
+        channelId: channel.id,
+        content: settings.bumpNoticeContent,
+        roleId: settings.bumpNoticeRole,
+        commandId: interaction.commandId,
+        fireAt: new Date(Date.now() + twoHours).toISOString(),
+      };
+      // Persisted so a rolling update's restart (which kills the setTimeout below) can
+      // re-arm this from Redis instead of losing the notice -- see utils/bump/notice.ts.
+      await this.core.guild.saveBumpNotice(job);
+      scheduleBumpNotice(job, interaction.client, this.core);
     }
 
     const { guildBumpCounter, userBumpCounter } = bumped;
