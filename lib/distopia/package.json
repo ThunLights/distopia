@@ -13,8 +13,7 @@
     "directory": "lib/distopia"
   },
   "files": [
-    "dist",
-    "CHANGELOG"
+    "dist"
   ],
   "type": "module",
   "exports": {
@@ -38,6 +37,8 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "catalog:",
+    "@connectrpc/connect": "catalog:",
     "@types/node": "catalog:",
     "jsr": "0.14.3",
     "oxfmt": "catalog:",
@@ -46,7 +47,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "bun": "catalog:"
+    "bun": "catalog:",
+    "infra-rpc": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "catalog:"

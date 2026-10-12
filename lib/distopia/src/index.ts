@@ -4,3 +4,5 @@ export const DISTOPIA_VERSION = pkgCfg.version;
 
 export * from "./config";
 export * from "./http";
+export * from "./plugin";
+export * from "./rpc";
