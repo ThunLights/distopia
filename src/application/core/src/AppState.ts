@@ -19,6 +19,7 @@ import type {
   GuildMemberAdd,
   GuildSetting,
   GuildTtsIgnoreList,
+  GuildVerify,
   GuildWhiteList,
   JWTKey,
   MessageCreate,
@@ -60,6 +61,7 @@ export type AppState = {
     guildEdit: GuildEdit;
     guildSetting: GuildSetting;
     guildTtsIgnoreList: GuildTtsIgnoreList;
+    guildVerify: GuildVerify;
     guildWhiteList: GuildWhiteList;
     guildMemberAdd: GuildMemberAdd;
     jwtKey: JWTKey;

@@ -190,6 +190,8 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=SENTRY_AUTH_TOKEN='...' \
   --from-literal=VOICEVOX_API_KEY='...' \
   --from-literal=SAKURA_AI_ENGINE_API_KEY='...' \
+  --from-literal=PUBLIC_TURNSTILE_SITE_KEY='...' \
+  --from-literal=TURNSTILE_SECRET_KEY='...' \
   --from-literal=SCHEDULEMANAGER_RPC_TOKEN='...' \
   --from-literal=SEARCHENGINE_RPC_TOKEN='...' \
   --from-literal=BOT_RPC_TOKEN='...'
@@ -209,6 +211,13 @@ see "Search engine RPC (searchengine)" below.
 `BOT_RPC_TOKEN` mirrors that same arrangement once more, direction reversed again: a shared
 secret between `distopia-app` (the caller) and `distopia-bot` (the server), read by both
 Deployments from this same Secret — see "Bot RPC (bot)" below.
+
+`PUBLIC_TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET_KEY` are Cloudflare Turnstile's own keypair
+(https://dash.cloudflare.com/?to=/:account/turnstile) — the CAPTCHA step on
+`/verify/[guildId]` (`routes/api/verify/+server.ts` verifies the token server-side against
+Cloudflare's `siteverify` endpoint via `safeFetch`). Unrelated to the optional `VERIFY_RPC_*`
+pair below — Turnstile is the always-on baseline check; `VerifyService` is an extra signal on
+top of it. See "Verify RPC (verify)" below for that optional half.
 
 `SENTRY_PROJECT`/`PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN` here must be your **production**
 Sentry project's own values, not `ci.yml`'s CI-scoped ones — `SENTRY_ORG` is the only Sentry
@@ -685,6 +694,93 @@ from two pods at once causes duplicate event handling. `distopia-redis-allow-int
 (`k8s/redis/networkpolicy.yaml`) and `distopia-searchengine-allow-app-rpc`
 (`searchengine-networkpolicy.yaml`) both had to grow a second ingress rule for
 `distopia-bot`, since it now talks to both directly instead of only through `distopia-app`.
+
+## Verify RPC (verify)
+
+`distopia-verify` is a different shape from the three splits above, but less different than
+it first looks: it **is** built from this repo, same image as `distopia-app`/`distopia-bot`
+(`verify-deployment.yaml`'s `command` just runs `presentation-verify` instead), and it is
+entirely **optional**. Member verification (`/verify-admin`,
+`src/presentation/web/src/routes/verify/[guildId]`) only needs two things this public repo
+already ships on its own — Cloudflare Turnstile and the existing `role.give`/`role.deprive`
+RPC through `distopia-bot` — to work end to end. `VerifyService` (`infra-rpc`'s
+`verify.proto`, re-exported publicly as types through the `distopia` npm/jsr package) exists
+purely as an *optional extra signal* on top of that.
+
+What's actually private isn't a separate repo or image — it's the **contents of a folder**
+(`src/presentation/verify/plugins/`, `VERIFY_PLUGIN_DIR` env var to override), mounted into
+`distopia-verify`'s own pod from an optional Kubernetes Secret. `infra-verify`'s
+`loadPluginFolder` (`src/infrastructure/verify/src/pluginLoader.ts`) scans every
+non-dot-prefixed file in that folder, dynamically imports each as an independent plugin
+module, and merges whatever it finds into one `VerifyServerPlugin` (`evaluate` is AND-combined
+across all of them -- any one file can veto; `getClientScript`/`decryptBody` use the first
+file, alphabetically, that defines them). The folder ships in the image with exactly two
+files, both dot-prefixed and therefore always skipped: `plugins/.fingerprint` and
+`plugins/.anti-scraping` -- inert samples showing the expected shape (no real logic in
+either), not loaded by anything until you copy one to a non-dot filename and actually
+implement it. `presentation-verify` itself holds no anti-bot/fingerprinting logic at all --
+every `VerifyService` method (`src/presentation/verify/src/server/rpc.ts`) just delegates to
+`plugin.ts`, which delegates to `loadPluginFolder`, and falls back to allow/empty/fail-closed
+the same way whether the Secret is missing, the whole `distopia-verify` Deployment was never
+applied, or `distopia-app`'s own `VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` are unset. This works
+because `presentation-verify` is a plain Bun script like `presentation-bot`/
+`presentation-schedulemanager` — never bundled by Vite — so a dynamic `import()` of a path
+that may or may not exist on disk really is resolved at runtime, the same trick
+`scripts/load-env.ts` already relies on; this would NOT work inside `presentation-web`
+(SvelteKit/Vite statically resolves and fails the build on a dynamic import whose target
+doesn't exist), which is exactly why the plugin lives in its own dedicated service instead.
+
+Two extensibility points exist for anti-scraping signal beyond `Evaluate` itself, both
+implemented by your plugin file(s), not this repo:
+- **Body obfuscation is plugin-loaded, not built in.** A plugin's `getClientScript()` may
+  serve a module that optionally exports `encrypt(json): string` (`distopia`'s
+  `VerifyClientPlugin`) -- e.g. a private R25A/R25B-style cipher like
+  `thunlights/discord-verify` uses on its own verify endpoint (see `.anti-scraping`'s own
+  comments for this exact split). When it does, `lib/client/verify.ts` sends the encrypted
+  string instead of plain JSON (flagged with the `X-Verify-Body-Encoding: plugin` header) and
+  `routes/api/verify/+server.ts` reverses it by calling `VerifyService.DecryptBody`, which
+  your plugin's `decryptBody()` implements. No `encrypt()` on the client plugin (the default,
+  and the only option when no plugin file is mounted at all) means the body is sent as plain
+  JSON and `decryptBody()` is never called.
+- `EvaluateRequest.headers` forwards the real incoming `/api/verify` request's headers
+  (minus `cookie`/`authorization`, stripped in `verifyPlugin.ts`'s `pluginHeaders`) through
+  to your plugin's `evaluate()` unchanged, so it can apply its own heuristics (User-Agent,
+  Accept-Language, sec-ch-*, ...) without this repo needing to know what those heuristics
+  are -- add fields to `verify.proto` if you need to forward anything else.
+
+Wiring it up is three steps, and the first one alone is already a complete, safe
+no-op-by-default state:
+
+```bash
+# 1. Apply the Deployment/Service/NetworkPolicy -- safe even with no plugin files mounted yet
+#    (every VerifyService method just falls back), and distopia-app still doesn't call it
+#    until step 3.
+kubectl apply -f k8s/app/verify-deployment.yaml -f k8s/app/verify-service.yaml \
+  -f k8s/app/verify-networkpolicy.yaml -n distopia
+
+# 2. Mount your actual plugin file(s) -- one or more bundled modules, each default-exporting
+#    a (partial) VerifyServerPlugin, typed against the `distopia` npm/jsr package. Any
+#    non-dot-prefixed key works; name them for what they do (e.g. fingerprint.mjs,
+#    anti-scraping.mjs), mirroring the two inert samples they replace at this mount path.
+#    Re-run this any time a plugin changes; distopia-verify picks it up on its next restart.
+kubectl create secret generic distopia-verify-plugin -n distopia \
+  --from-file=fingerprint.mjs='<path to your private fingerprint plugin>' \
+  --from-file=anti-scraping.mjs='<path to your private anti-scraping plugin>' \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# 3. Add VERIFY_RPC_TOKEN to distopia-env (same value verify-deployment.yaml's own
+#    secretKeyRef reads -- re-run the distopia-env creation command in section 2 above with
+#    this one extra flag added) and VERIFY_RPC_URL to distopia-app's config:
+#      --from-literal=VERIFY_RPC_TOKEN='<a random value, shared by both sides>'
+#      kubectl edit configmap distopia-config -n distopia   # add VERIFY_RPC_URL: "http://distopia-verify:8084"
+#    then roll both Deployments (kubectl rollout restart deployment/distopia-app
+#    deployment/distopia-verify -n distopia) so they pick up the new env vars.
+```
+
+Until step 3 is done, `distopia-app` simply never attempts the RPC call at all
+(`VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` both have to be set for `verifyPlugin.ts` to even
+construct a client) — there's no partial/broken state to worry about, and steps 1-2 can
+happen in any order or be skipped entirely.
 
 ## Notes / known constraints
 

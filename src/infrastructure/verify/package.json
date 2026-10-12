@@ -1,0 +1,31 @@
+{
+  "name": "infra-verify",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
+    "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "distopia": "workspace:*",
+    "infra-js-obf": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

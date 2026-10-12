@@ -145,6 +145,40 @@ enum TtsProvider {
   SakuraAi
 }
 
+model GuildVerify {
+  guildId       String  @id
+  enabled       Boolean @default(false)
+  channelId     String?
+  roleId        String?
+  pendingRoleId String?
+}
+
+model UserVerifyLog {
+  id                Int      @id @default(autoincrement())
+  userId            String
+  guildId           String
+  success           Boolean
+  // Raw collect() output from the (optional, private) VerifyClientPlugin, Zod-validated (see
+  // app-core's utils/fingerprint.ts) as a well-formed JSON value at the trust boundary before
+  // being stored here as-is. Its shape is entirely up to that plugin (e.g. separate
+  // fingerprintjs/canvas/gpu signals), this repo never interprets it directly. (This is the
+  // only Json column in this schema -- see infra-database's tsconfig.json for why that's
+  // relevant to zod-prisma-types.)
+  fingerprint       Json?
+  // One hash per top-level signal in fingerprint (see app-core's utils/fingerprint.ts), not
+  // one hash for the whole blob -- so two accounts that share just their GPU fingerprint but
+  // differ elsewhere still match on that one signal. Keys are canonicalized before hashing so
+  // key order never affects the result.
+  fingerprintHashes String[] @default([])
+  // Other userIds that shared at least one of those hashes in this guild as of this attempt
+  // -- frozen in at write time, not recomputed later. Best-effort sub-account signal.
+  relatedUserIds    String[] @default([])
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([guildId])
+}
+
 model GuildDictionary {
   guildId   String
   word      String

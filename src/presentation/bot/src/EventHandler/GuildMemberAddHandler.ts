@@ -12,8 +12,16 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       return;
     }
 
+    await this.applyVerifyPendingRole(member);
     await this.logger.log(member.guild, "logMemberJoin", member);
     await this.welcomeMessenger.send(member.guild, member, "join");
+  }
+
+  private async applyVerifyPendingRole(member: GuildMember): Promise<void> {
+    const setting = await this.core.verify.getSetting(member.guild.id);
+    if (setting?.enabled && setting.pendingRoleId) {
+      await this.core.state.discord.role.give(member.guild.id, member.id, setting.pendingRoleId);
+    }
   }
 
   private async enforceBlackList(member: GuildMember): Promise<boolean> {

@@ -4,6 +4,10 @@ import z from "zod";
 export type OAuth2PKCEValue = {
   sessionKey: string;
   createdAt: Date;
+  // Same-origin relative path to send the user back to after login completes (e.g.
+  // "/verify/123"). Validated as same-origin-relative at the point it's first accepted
+  // (routes/login/+server.ts) -- never trust this alone to redirect without rechecking.
+  redirectTo?: string;
 };
 
 // z.coerce.date() both revives createdAt (stored as a JSON string) into a real Date and
@@ -13,6 +17,7 @@ const OAuth2PKCEValueSchema = z.compile(
   z.object({
     sessionKey: z.string(),
     createdAt: z.coerce.date(),
+    redirectTo: z.string().optional(),
   }) satisfies z.ZodType<OAuth2PKCEValue>,
 );
 

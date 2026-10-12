@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package distopia.verify.v1;
+
+// Implemented by a private, closed-source service that is NOT part of this repo (anti-bot/
+// fingerprinting logic the operator deliberately keeps out of the public thunlights/distopia
+// image) and called by presentation-web (lib/server/verifyPlugin.ts) during the member
+// verification flow. See k8s/README.md's "Verify RPC" section for how that service is wired
+// up -- it's entirely optional; presentation-web falls back to always-allow when
+// VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't configured. The `distopia` npm/jsr package
+// re-exports this contract (lib/distopia/src/rpc.ts) so that private service can depend on it
+// without needing access to this monorepo.
+service VerifyService {
+  // Extra server-side signal on top of the built-in Turnstile check. Return allowed=false to
+  // block verification.
+  rpc Evaluate(EvaluateRequest) returns (EvaluateResponse) {}
+  // Raw JS source for the optional browser-side collector/cipher script, served to the
+  // client by presentation-web's routes/api/verify/plugin/+server.ts. Empty `code` means
+  // "nothing to serve" (treated the same as the whole service being unconfigured). The
+  // module it default-exports (distopia's VerifyClientPlugin) may optionally provide its own
+  // encrypt() -- e.g. a private R25A/R25B-style cipher -- to obfuscate the /api/verify body
+  // client-side; if it does, DecryptBody below is how presentation-web reverses it.
+  rpc GetClientScript(GetClientScriptRequest) returns (GetClientScriptResponse) {}
+  // Reverses whatever the client script's own encrypt() produced. Only ever called when the
+  // client actually flagged its body as plugin-encrypted (see lib/client/verify.ts) -- a
+  // client with no encrypt() just sends plain JSON and this is never called at all. An unset
+  // `json` means decryption failed (treated like any other invalid body).
+  rpc DecryptBody(DecryptBodyRequest) returns (DecryptBodyResponse) {}
+}
+
+message EvaluateRequest {
+  string guild_id = 1;
+  string user_id = 2;
+  // JSON-encoded, opaque to presentation-web -- whatever the browser-side collector script
+  // (GetClientScript) returned from its own collect(), round-tripped here unchanged.
+  string extra_json = 3;
+  // The incoming /api/verify request's own headers, forwarded as-is for extensibility (a
+  // private VerifyService implementation may want User-Agent, Accept-Language, sec-ch-*,
+  // etc. for its own heuristics) -- presentation-web never inspects these itself. `cookie`
+  // and `authorization` are stripped before this map is built (see verifyPlugin.ts) since
+  // nothing downstream has a legitimate need for this request's own session credentials.
+  map<string, string> headers = 4;
+}
+message EvaluateResponse {
+  bool allowed = 1;
+}
+
+message GetClientScriptRequest {}
+message GetClientScriptResponse {
+  string code = 1;
+}
+
+message DecryptBodyRequest {
+  string encrypted = 1;
+}
+message DecryptBodyResponse {
+  optional string json = 1;
+}

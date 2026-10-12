@@ -5,7 +5,7 @@
   import { onMount } from "svelte";
 
   const { data } = $props();
-  const { user } = $derived(data);
+  const { user, redirectTo } = $derived(data);
   const result = $derived(user ? "認証に成功しました。" : "認証に失敗しました。");
   const title = $derived(result);
   const description = $derived(
@@ -14,7 +14,7 @@
 
   onMount(async () => {
     setTimeout(async () => {
-      location.href = "/";
+      location.href = redirectTo ?? "/";
     }, 3000);
   });
 </script>

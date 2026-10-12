@@ -11,6 +11,7 @@ import {
   GuildMemberAdd,
   GuildSetting,
   GuildTtsIgnoreList,
+  GuildVerify,
   GuildWhiteList,
   JWTKey,
   MessageCreate,
@@ -30,9 +31,9 @@ import {
 // - The four ratelimit stores, unJoinedGuild, urlCacheInMemory, guildMemberAdd,
 //   messageCreate, voiceChannelMember, ttsSynthesisCache, and every guild-settings-shaped
 //   store below (guildBlackList/guildDictionary/guildEdit/guildSetting/
-//   guildTtsIgnoreList/guildWhiteList/userDictionary/friend) are bot-owned -- all written
-//   from Discord slash commands/buttons/modals (presentation-bot) or bot-driven cron jobs,
-//   confirmed by grepping every call site.
+//   guildTtsIgnoreList/guildVerify/guildWhiteList/userDictionary/friend) are bot-owned -- all
+//   written from Discord slash commands/buttons/modals (presentation-bot) or bot-driven cron
+//   jobs, confirmed by grepping every call site.
 // - oauth2PKCE, oauth2Guilds, userOAuth2, jwtKey, userJWTVerifyKey are web-owned (OAuth2
 //   login flow, JWT session auth).
 // All of them are still instantiated here regardless of owner tag, same as in
@@ -54,6 +55,7 @@ export const memory: AppState["memory"] = {
   guildEdit: new GuildEdit(redis, "bot"),
   guildSetting: new GuildSetting(redis, "bot"),
   guildTtsIgnoreList: new GuildTtsIgnoreList(redis, "bot"),
+  guildVerify: new GuildVerify(redis, "bot"),
   guildWhiteList: new GuildWhiteList(redis, "bot"),
   guildMemberAdd: new GuildMemberAdd(redis, "bot"),
   jwtKey: new JWTKey(redis, "web"),

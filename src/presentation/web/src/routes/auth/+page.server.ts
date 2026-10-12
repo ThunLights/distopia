@@ -10,13 +10,16 @@ export const load: PageServerLoad = async (e) => {
   const sessionKey = e.cookies.get("session_key");
 
   let user: UserAuth | null = null;
+  let redirectTo: string | undefined;
 
   if (code && sessionId && sessionKey) {
     const session = await core.oauth2.getPKCE(sessionId);
 
     if (!session || session.sessionKey !== sessionKey) {
-      return { user: null };
+      return { user: null, redirectTo: undefined };
     }
+
+    redirectTo = session.redirectTo;
 
     e.cookies.delete("session_key", { path: "/" });
     await core.oauth2.deletePKCE(sessionId);
@@ -38,5 +41,5 @@ export const load: PageServerLoad = async (e) => {
     }
   }
 
-  return { user };
+  return { user, redirectTo };
 };
