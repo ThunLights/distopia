@@ -102,6 +102,7 @@ distopia/
 │       ├── http/         # Security-focused HTTP utilities (SSRF prevention)
 │       ├── js-obf/       # Shared JS obfuscation (wraps javascript-obfuscator)
 │       ├── rpc/          # Connect/Protobuf contracts shared across services
+│       ├── stripe/       # Stripe client factory
 │       ├── verify/       # Generic plugin-folder loader for presentation-verify
 │       └── voicevox/     # VOICEVOX TTS Quest API client
 ├── lib/
@@ -127,6 +128,7 @@ distopia/
 | `src/infrastructure/http` | `infra-http` |
 | `src/infrastructure/js-obf` | `infra-js-obf` |
 | `src/infrastructure/rpc` | `infra-rpc` |
+| `src/infrastructure/stripe` | `infra-stripe` |
 | `src/infrastructure/verify` | `infra-verify` |
 | `src/infrastructure/voicevox` | `infra-voicevox` |
 | `src/domain/repository/redis` | `repo-redis` |
