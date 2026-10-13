@@ -55,6 +55,7 @@ export async function evaluateVerifyPlugin(input: {
   userId: string;
   extra?: unknown;
   headers?: Record<string, string>;
+  ip?: string | null;
 }): Promise<boolean> {
   const client = rpc();
   if (!client) {
@@ -66,7 +67,7 @@ export async function evaluateVerifyPlugin(input: {
       guildId: input.guildId,
       userId: input.userId,
       extraJson: JSON.stringify(input.extra ?? null),
-      headers: input.headers ?? {},
+      request: { headers: input.headers ?? {}, ip: input.ip ?? undefined },
     });
     return allowed;
   } catch {
@@ -93,14 +94,20 @@ export async function fetchVerifyClientScript(): Promise<string | null> {
 // lib/client/verify.ts), so "not configured"/"unreachable" here is a real error, not the
 // usual always-allow fallback: the client already committed to an encrypted body that only
 // the private service can reverse.
-export async function decryptPluginBody(encrypted: string): Promise<string | null> {
+export async function decryptPluginBody(
+  encrypted: string,
+  context: { headers: Record<string, string>; ip: string | null },
+): Promise<string | null> {
   const client = rpc();
   if (!client) {
     return null;
   }
 
   try {
-    const { json } = await client.decryptBody({ encrypted });
+    const { json } = await client.decrypt({
+      encrypted,
+      request: { headers: context.headers, ip: context.ip ?? undefined },
+    });
     return json ?? null;
   } catch {
     return null;

@@ -713,7 +713,7 @@ What's actually private isn't a separate repo or image — it's the **contents o
 `loadPluginFolder` (`src/infrastructure/verify/src/pluginLoader.ts`) scans every
 non-dot-prefixed file in that folder, dynamically imports each as an independent plugin
 module, and merges whatever it finds into one `VerifyServerPlugin` (`evaluate` is AND-combined
-across all of them -- any one file can veto; `getClientScript`/`decryptBody` use the first
+across all of them -- any one file can veto; `getClientScript`/`decrypt` use the first
 file, alphabetically, that defines them). The folder ships in the image with exactly two
 files, both dot-prefixed and therefore always skipped: `plugins/.fingerprint` and
 `plugins/.anti-scraping` -- inert samples showing the expected shape (no real logic in
@@ -738,15 +738,19 @@ implemented by your plugin file(s), not this repo:
   `thunlights/discord-verify` uses on its own verify endpoint (see `.anti-scraping`'s own
   comments for this exact split). When it does, `lib/client/verify.ts` sends the encrypted
   string instead of plain JSON (flagged with the `X-Verify-Body-Encoding: plugin` header) and
-  `routes/api/verify/+server.ts` reverses it by calling `VerifyService.DecryptBody`, which
-  your plugin's `decryptBody()` implements. No `encrypt()` on the client plugin (the default,
+  `routes/api/verify/+server.ts` reverses it by calling `VerifyService.Decrypt`, which
+  your plugin's `decrypt()` implements. No `encrypt()` on the client plugin (the default,
   and the only option when no plugin file is mounted at all) means the body is sent as plain
-  JSON and `decryptBody()` is never called.
-- `EvaluateRequest.headers` forwards the real incoming `/api/verify` request's headers
-  (minus `cookie`/`authorization`, stripped in `verifyPlugin.ts`'s `pluginHeaders`) through
-  to your plugin's `evaluate()` unchanged, so it can apply its own heuristics (User-Agent,
-  Accept-Language, sec-ch-*, ...) without this repo needing to know what those heuristics
-  are -- add fields to `verify.proto` if you need to forward anything else.
+  JSON and `decrypt()` is never called.
+- `RequestContext` (`request` on both `EvaluateRequest` and `DecryptRequest` -- distopia's
+  `VerifyRequestContext`) forwards the real incoming `/api/verify` request's headers (minus
+  `cookie`/`authorization`, stripped in `verifyPlugin.ts`'s `pluginHeaders`) and its
+  best-effort client IP (`RequestEvent.getClientAddress()`) through to your plugin's
+  `evaluate()`/`decrypt()` unchanged, so it can apply its own heuristics (User-Agent,
+  Accept-Language, sec-ch-*, geo/ASN on the IP, ...) without this repo needing to know what
+  those heuristics are -- it's one message precisely so adding another field later doesn't
+  mean growing every RPC method's own parameter list; add it to `RequestContext` in
+  `verify.proto` instead.
 
 Wiring it up is three steps, and the first one alone is already a complete, safe
 no-op-by-default state:

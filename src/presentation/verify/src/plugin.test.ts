@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { decryptBody, evaluate, getClientScript } from "./plugin";
+import { decrypt, evaluate, getClientScript } from "./plugin";
 
 // No VERIFY_PLUGIN_DIR is set in this test environment, so this falls back to the default
 // ../plugins directory -- which only contains the inert, dot-prefixed samples (.fingerprint,
@@ -12,14 +12,15 @@ describe("plugin (no plugin loaded)", () => {
   });
 
   it("evaluate always allows", async () => {
-    expect(await evaluate({ guildId: "1", userId: "2", extra: null, headers: {} })).toBe(true);
+    const input = { guildId: "1", userId: "2", extra: null, request: { headers: {}, ip: null } };
+    expect(await evaluate(input)).toBe(true);
   });
 
   it("getClientScript returns empty", async () => {
     expect(await getClientScript()).toBe("");
   });
 
-  it("decryptBody returns null", async () => {
-    expect(await decryptBody("anything")).toBeNull();
+  it("decrypt returns null", async () => {
+    expect(await decrypt("anything", { headers: {}, ip: null })).toBeNull();
   });
 });

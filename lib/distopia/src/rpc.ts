@@ -4,11 +4,12 @@
 // of needing access to the thunlights/distopia monorepo itself.
 export {
   VerifyService,
+  type RequestContext,
   type EvaluateRequest,
   type EvaluateResponse,
   type GetClientScriptRequest,
   type GetClientScriptResponse,
-  type DecryptBodyRequest,
-  type DecryptBodyResponse,
+  type DecryptRequest,
+  type DecryptResponse,
 } from "$infra-rpc/gen/distopia/verify/v1/verify_pb";
 export { createBearerAuthInterceptor, requireBearerAuth } from "$infra-rpc/auth";

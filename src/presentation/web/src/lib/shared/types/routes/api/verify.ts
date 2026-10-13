@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Set by lib/client/verify.ts only when a loaded VerifyClientPlugin actually provided its
 // own encrypt() -- tells routes/api/verify/+server.ts to reverse it via
-// VerifyService.DecryptBody instead of parsing the body as plain JSON. Absent entirely when
+// VerifyService.Decrypt instead of parsing the body as plain JSON. Absent entirely when
 // no plugin is loaded (the common case), so the plain-JSON path never has to think about it.
 export const ENCRYPTED_BODY_HEADER = "X-Verify-Body-Encoding";
 export const ENCRYPTED_BODY_VALUE = "plugin";

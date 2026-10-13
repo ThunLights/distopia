@@ -36,7 +36,7 @@ describe("loadPluginFolder", () => {
       "export default { evaluate: (input) => input.userId === 'ok' };",
     );
     const plugin = await loadPluginFolder(dir);
-    const input = { guildId: "g", extra: null, headers: {} };
+    const input = { guildId: "g", extra: null, request: { headers: {}, ip: null } };
     expect(await plugin!.evaluate({ ...input, userId: "ok" })).toBe(true);
     expect(await plugin!.evaluate({ ...input, userId: "bad" })).toBe(false);
   });
@@ -45,24 +45,22 @@ describe("loadPluginFolder", () => {
     await writeFile(join(dir, "a.mjs"), "export default { evaluate: () => true };");
     await writeFile(join(dir, "b.mjs"), "export default { evaluate: () => false };");
     const plugin = await loadPluginFolder(dir);
-    expect(await plugin!.evaluate({ guildId: "g", userId: "u", extra: null, headers: {} })).toBe(
-      false,
-    );
+    const input = { guildId: "g", userId: "u", extra: null, request: { headers: {}, ip: null } };
+    expect(await plugin!.evaluate(input)).toBe(false);
   });
 
   it("defaults to allow when no plugin file defines evaluate", async () => {
-    await writeFile(join(dir, "a.mjs"), "export default { decryptBody: (s) => s };");
+    await writeFile(join(dir, "a.mjs"), "export default { decrypt: (s) => s };");
     const plugin = await loadPluginFolder(dir);
-    expect(await plugin!.evaluate({ guildId: "g", userId: "u", extra: null, headers: {} })).toBe(
-      true,
-    );
+    const input = { guildId: "g", userId: "u", extra: null, request: { headers: {}, ip: null } };
+    expect(await plugin!.evaluate(input)).toBe(true);
   });
 
-  it("uses the first (sorted) plugin file that defines decryptBody", async () => {
-    await writeFile(join(dir, "a.mjs"), "export default { decryptBody: () => 'from-a' };");
-    await writeFile(join(dir, "b.mjs"), "export default { decryptBody: () => 'from-b' };");
+  it("uses the first (sorted) plugin file that defines decrypt", async () => {
+    await writeFile(join(dir, "a.mjs"), "export default { decrypt: () => 'from-a' };");
+    await writeFile(join(dir, "b.mjs"), "export default { decrypt: () => 'from-b' };");
     const plugin = await loadPluginFolder(dir);
-    expect(await plugin!.decryptBody("x")).toBe("from-a");
+    expect(await plugin!.decrypt("x", { headers: {}, ip: null })).toBe("from-a");
   });
 
   it("obfuscates the client script returned by a plugin file", async () => {

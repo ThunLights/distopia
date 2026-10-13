@@ -6,7 +6,7 @@ import { obfuscate } from "infra-js-obf";
 
 // Each file in the plugin folder may implement any subset of VerifyServerPlugin -- e.g. one
 // file only cares about fingerprinting (evaluate), another only about body obfuscation
-// (decryptBody). loadPluginFolder below combines whatever it finds into one full
+// (decrypt). loadPluginFolder below combines whatever it finds into one full
 // VerifyServerPlugin.
 type VerifyPluginSlot = Partial<VerifyServerPlugin>;
 
@@ -21,7 +21,7 @@ type VerifyPluginSlot = Partial<VerifyServerPlugin>;
  *   more than one contributing browser-side code). Its result is obfuscated and cached for
  *   the life of this loaded plugin set -- individual plugin files return plain JS source and
  *   don't need to obfuscate or cache it themselves.
- * - `decryptBody`: likewise, the first module that defines it wins -- only one cipher scheme
+ * - `decrypt`: likewise, the first module that defines it wins -- only one cipher scheme
  *   is expected to be active at a time.
  *
  * Dot-prefixed entries (e.g. `.fingerprint`, `.anti-scraping`) are always skipped -- this
@@ -33,7 +33,7 @@ type VerifyPluginSlot = Partial<VerifyServerPlugin>;
 export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin | null> {
   let entries: string[];
   try {
-    // Sorted so "first match wins" (getClientScript/decryptBody) is deterministic regardless
+    // Sorted so "first match wins" (getClientScript/decrypt) is deterministic regardless
     // of the OS/filesystem's own directory-entry order.
     entries = (await readdir(dir)).filter((name) => !name.startsWith(".")).sort();
   } catch {
@@ -92,10 +92,10 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
       return clientScriptCache;
     },
 
-    async decryptBody(encrypted) {
+    async decrypt(encrypted, request) {
       for (const mod of modules) {
-        if (mod.decryptBody) {
-          return await mod.decryptBody(encrypted);
+        if (mod.decrypt) {
+          return await mod.decrypt(encrypted, request);
         }
       }
       return null;

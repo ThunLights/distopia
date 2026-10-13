@@ -18,7 +18,7 @@ if (!VERIFY_RPC_PORT || !VERIFY_RPC_TOKEN) {
 const handler = connectNodeAdapter({
   routes: (router) =>
     router.service(VerifyService, {
-      async evaluate({ guildId, userId, extraJson, headers }) {
+      async evaluate({ guildId, userId, extraJson, request }) {
         // extraJson is attacker-reachable (relayed from the browser's POST body via
         // presentation-web) and empty is the proto3 default -- fail closed on malformed JSON
         // rather than letting it throw into an RPC Internal error.
@@ -28,7 +28,12 @@ const handler = connectNodeAdapter({
         } catch {
           return { allowed: false };
         }
-        const allowed = await plugin.evaluate({ guildId, userId, extra, headers });
+        const allowed = await plugin.evaluate({
+          guildId,
+          userId,
+          extra,
+          request: { headers: request?.headers ?? {}, ip: request?.ip ?? null },
+        });
         return { allowed };
       },
 
@@ -36,8 +41,11 @@ const handler = connectNodeAdapter({
         return { code: await plugin.getClientScript() };
       },
 
-      async decryptBody({ encrypted }) {
-        const json = await plugin.decryptBody(encrypted);
+      async decrypt({ encrypted, request }) {
+        const json = await plugin.decrypt(encrypted, {
+          headers: request?.headers ?? {},
+          ip: request?.ip ?? null,
+        });
         return { json: json ?? undefined };
       },
     }),

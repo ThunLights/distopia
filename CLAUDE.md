@@ -640,7 +640,7 @@ the same shape for the next one, and note that they don't all share one directio
   (`VERIFY_PLUGIN_DIR`, default `src/presentation/verify/plugins/`) for non-dot-prefixed
   files, dynamically `import()`s each one, and merges whatever partial `VerifyServerPlugin`s
   they export into one (`evaluate` AND-combined across all of them; `getClientScript`/
-  `decryptBody` from the first file, alphabetically, that defines them). `getClientScript`'s
+  `decrypt` from the first file, alphabetically, that defines them). `getClientScript`'s
   result is cached (computed once per process) and obfuscated via `infra-js-obf`
   (`src/infrastructure/js-obf`) — individual plugin files just return plain JS source and
   never need to cache or obfuscate it themselves. That folder ships
@@ -661,7 +661,7 @@ the same shape for the next one, and note that they don't all share one directio
   `VerifyServerPlugin`/`VerifyClientPlugin`) so a plugin file can be authored and
   type-checked anywhere, without this monorepo. Even the anti-scraping body cipher is
   plugin-loaded, not hardcoded here: `VerifyClientPlugin`'s optional `encrypt()` (served via
-  `GetClientScript`) and `VerifyServerPlugin.decryptBody()` (via `VerifyService.DecryptBody`)
+  `GetClientScript`) and `VerifyServerPlugin.decrypt()` (via `VerifyService.Decrypt`)
   are the extension points. See `k8s/README.md`'s "Verify RPC" section for the full wiring
   instructions.
 

@@ -1,6 +1,6 @@
 import { join } from "node:path";
 
-import type { VerifyServerPlugin } from "distopia";
+import type { VerifyRequestContext, VerifyServerPlugin } from "distopia";
 import { loadPluginFolder } from "infra-verify";
 
 // Resolved relative to this file rather than process.cwd() so it's correct regardless of
@@ -24,7 +24,7 @@ export async function evaluate(input: {
   guildId: string;
   userId: string;
   extra: unknown;
-  headers: Record<string, string>;
+  request: VerifyRequestContext;
 }): Promise<boolean> {
   const plugin = await getPlugin();
   if (!plugin) {
@@ -49,13 +49,16 @@ export async function getClientScript(): Promise<string> {
   }
 }
 
-export async function decryptBody(encrypted: string): Promise<string | null> {
+export async function decrypt(
+  encrypted: string,
+  request: VerifyRequestContext,
+): Promise<string | null> {
   const plugin = await getPlugin();
   if (!plugin) {
     return null;
   }
   try {
-    return await plugin.decryptBody(encrypted);
+    return await plugin.decrypt(encrypted, request);
   } catch {
     return null;
   }

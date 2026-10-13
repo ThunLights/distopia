@@ -2,17 +2,18 @@
 // bundles this file to plain JS (via Bun.build, target: "browser") before it's ever served,
 // so write this in TS freely -- the browser only ever receives the bundled output, never this
 // file directly.
-import type { VerifyClientPlugin } from "distopia";
+import type { AntiScrapingClientPlugin } from "distopia";
 
-const plugin: VerifyClientPlugin = {
+const plugin: AntiScrapingClientPlugin = {
+  // This role is about body obfuscation, not device signal -- collect() is still required
+  // by the contract (the loaded client plugin always calls it), but it has nothing of its
+  // own to report. A ".fingerprint" plugin active alongside this one covers that signal.
   collect() {
-    // TODO: gather whatever anti-scraping signal this plugin cares about (timing, DOM
-    // interaction, canvas/WebGL fingerprint, ...) and return it as JSON-serializable data.
     return null;
   },
 
   // TODO (optional): obfuscate/encrypt the JSON body before it's POSTed -- must agree with
-  // this plugin's own decryptBody() in index.ts.
+  // this plugin's own decrypt() in index.ts.
   // encrypt(json) {
   //   return json;
   // },

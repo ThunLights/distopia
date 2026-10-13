@@ -19,13 +19,29 @@ service VerifyService {
   // "nothing to serve" (treated the same as the whole service being unconfigured). The
   // module it default-exports (distopia's VerifyClientPlugin) may optionally provide its own
   // encrypt() -- e.g. a private R25A/R25B-style cipher -- to obfuscate the /api/verify body
-  // client-side; if it does, DecryptBody below is how presentation-web reverses it.
+  // client-side; if it does, Decrypt below is how presentation-web reverses it.
   rpc GetClientScript(GetClientScriptRequest) returns (GetClientScriptResponse) {}
   // Reverses whatever the client script's own encrypt() produced. Only ever called when the
   // client actually flagged its body as plugin-encrypted (see lib/client/verify.ts) -- a
   // client with no encrypt() just sends plain JSON and this is never called at all. An unset
   // `json` means decryption failed (treated like any other invalid body).
-  rpc DecryptBody(DecryptBodyRequest) returns (DecryptBodyResponse) {}
+  rpc Decrypt(DecryptRequest) returns (DecryptResponse) {}
+}
+
+// Everything about the real incoming /api/verify request that a plugin method might want --
+// grouped into one message so adding more later (e.g. a geo/ASN-derived field) doesn't mean
+// growing every RPC method's own parameter list. See distopia's VerifyRequestContext (the
+// published TS type this maps to).
+message RequestContext {
+  // Forwarded as-is for extensibility (a private VerifyService implementation may want
+  // User-Agent, Accept-Language, sec-ch-*, etc. for its own heuristics) -- presentation-web
+  // never inspects these itself. `cookie` and `authorization` are stripped before this map
+  // is built (see verifyPlugin.ts) since nothing downstream has a legitimate need for this
+  // request's own session credentials.
+  map<string, string> headers = 1;
+  // Best-effort client IP as presentation-web resolved it (SvelteKit's
+  // event.getClientAddress()) -- unset if it couldn't be determined.
+  optional string ip = 2;
 }
 
 message EvaluateRequest {
@@ -34,12 +50,7 @@ message EvaluateRequest {
   // JSON-encoded, opaque to presentation-web -- whatever the browser-side collector script
   // (GetClientScript) returned from its own collect(), round-tripped here unchanged.
   string extra_json = 3;
-  // The incoming /api/verify request's own headers, forwarded as-is for extensibility (a
-  // private VerifyService implementation may want User-Agent, Accept-Language, sec-ch-*,
-  // etc. for its own heuristics) -- presentation-web never inspects these itself. `cookie`
-  // and `authorization` are stripped before this map is built (see verifyPlugin.ts) since
-  // nothing downstream has a legitimate need for this request's own session credentials.
-  map<string, string> headers = 4;
+  RequestContext request = 4;
 }
 message EvaluateResponse {
   bool allowed = 1;
@@ -50,9 +61,10 @@ message GetClientScriptResponse {
   string code = 1;
 }
 
-message DecryptBodyRequest {
+message DecryptRequest {
   string encrypted = 1;
+  RequestContext request = 2;
 }
-message DecryptBodyResponse {
+message DecryptResponse {
   optional string json = 1;
 }
