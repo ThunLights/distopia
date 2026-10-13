@@ -1,5 +1,11 @@
 # distopia
 
+## 0.6.0
+
+### Minor Changes
+
+- 9fef633: feat: export the member-verification plugin contract and VerifyService RPC client
+
 ## 0.5.0
 
 ### Minor Changes
