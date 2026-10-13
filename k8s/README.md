@@ -752,17 +752,15 @@ implemented by your plugin file(s), not this repo:
   mean growing every RPC method's own parameter list; add it to `RequestContext` in
   `verify.proto` instead.
 
-Wiring it up is three steps, and the first one alone is already a complete, safe
-no-op-by-default state:
+Wiring it up is two remaining steps once the Deployment/Service/NetworkPolicy themselves are
+live (`k8s/app/kustomization.yaml` lists all three, so the normal GitOps sync applies them
+automatically on every merge to main -- no separate `kubectl apply` needed, unlike the
+per-resource commands below for everything after that). Having them applied is already a
+complete, safe no-op-by-default state: every `VerifyService` method just falls back, and
+`distopia-app` doesn't even attempt the RPC call until the last step below.
 
 ```bash
-# 1. Apply the Deployment/Service/NetworkPolicy -- safe even with no plugin files mounted yet
-#    (every VerifyService method just falls back), and distopia-app still doesn't call it
-#    until step 3.
-kubectl apply -f k8s/app/verify-deployment.yaml -f k8s/app/verify-service.yaml \
-  -f k8s/app/verify-networkpolicy.yaml -n distopia
-
-# 2. Mount your actual plugin file(s) -- one or more bundled modules, each default-exporting
+# 1. Mount your actual plugin file(s) -- one or more bundled modules, each default-exporting
 #    a (partial) VerifyServerPlugin, typed against the `distopia` npm/jsr package. Any
 #    non-dot-prefixed key works; name them for what they do (e.g. fingerprint.mjs,
 #    anti-scraping.mjs), mirroring the two inert samples they replace at this mount path.
@@ -772,7 +770,7 @@ kubectl create secret generic distopia-verify-plugin -n distopia \
   --from-file=anti-scraping.mjs='<path to your private anti-scraping plugin>' \
   --dry-run=client -o yaml | kubectl apply -f -
 
-# 3. Add VERIFY_RPC_TOKEN to distopia-env (same value verify-deployment.yaml's own
+# 2. Add VERIFY_RPC_TOKEN to distopia-env (same value verify-deployment.yaml's own
 #    secretKeyRef reads -- re-run the distopia-env creation command in section 2 above with
 #    this one extra flag added) and VERIFY_RPC_URL to distopia-app's config:
 #      --from-literal=VERIFY_RPC_TOKEN='<a random value, shared by both sides>'
@@ -781,10 +779,10 @@ kubectl create secret generic distopia-verify-plugin -n distopia \
 #    deployment/distopia-verify -n distopia) so they pick up the new env vars.
 ```
 
-Until step 3 is done, `distopia-app` simply never attempts the RPC call at all
+Until step 2 is done, `distopia-app` simply never attempts the RPC call at all
 (`VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` both have to be set for `verifyPlugin.ts` to even
-construct a client) — there's no partial/broken state to worry about, and steps 1-2 can
-happen in any order or be skipped entirely.
+construct a client) — there's no partial/broken state to worry about, and step 1 can happen
+before or after it, or be skipped entirely (no plugin mounted is also a fully valid state).
 
 ## Notes / known constraints
 
