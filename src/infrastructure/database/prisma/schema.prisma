@@ -151,6 +151,14 @@ model GuildVerify {
   channelId     String?
   roleId        String?
   pendingRoleId String?
+  // Every verify attempt is posted here as a log entry (email/VPN result/related-account
+  // hits) when set -- unset means "no log channel configured," not an error.
+  logChannelId  String?
+  // Blocks verification outright when infra-aip's checkVpn flags the request IP as a VPN/
+  // proxy/Tor exit, or when the check itself fails (fail-closed, same reasoning as
+  // verifyTurnstile's own fetch-failure handling in routes/api/verify/+server.ts -- once an
+  // admin opts into a check, its own failure shouldn't silently become an allow).
+  blockVpn      Boolean @default(false)
 }
 
 model UserVerifyLog {
@@ -173,6 +181,17 @@ model UserVerifyLog {
   // Other userIds that shared at least one of those hashes in this guild as of this attempt
   // -- frozen in at write time, not recomputed later. Best-effort sub-account signal.
   relatedUserIds    String[] @default([])
+  // The OAuth2 email on file for this user (UserDiscord.email, set at login) -- captured here
+  // purely for the admin-facing log, e.g. to spot multiple accounts sharing one email.
+  email             String?
+  // infra-aip's checkVpn result for this attempt's IP, flattened. All false/null when the
+  // check wasn't run (blockVpn disabled) or failed outright -- not distinguished from a
+  // genuine "clean IP" result here since the log entry's `success` already reflects whether
+  // that failure caused a block.
+  isVpn             Boolean  @default(false)
+  isProxy           Boolean  @default(false)
+  isTor             Boolean  @default(false)
+  vpnProvider       String?
   createdAt         DateTime @default(now())
 
   @@index([userId])

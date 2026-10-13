@@ -10,6 +10,8 @@ export type GuildVerifyValue = {
   channelId: string | null;
   roleId: string | null;
   pendingRoleId: string | null;
+  logChannelId: string | null;
+  blockVpn: boolean;
   createdAt: Date;
 };
 
@@ -22,6 +24,8 @@ const GuildVerifyValueSchema = z.compile(
     channelId: nullableString,
     roleId: nullableString,
     pendingRoleId: nullableString,
+    logChannelId: nullableString,
+    blockVpn: z.boolean(),
     createdAt: z.date(),
   }) satisfies z.ZodType<GuildVerifyValue>,
 );

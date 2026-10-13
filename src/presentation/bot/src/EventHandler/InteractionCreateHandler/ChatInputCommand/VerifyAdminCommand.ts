@@ -24,6 +24,7 @@ const OptionsSchema = z.object({
   subCommand: z.string(),
   channelId: z.string().nullable(),
   roleId: z.string().nullable(),
+  enabled: z.boolean().nullable(),
 });
 type Options = z.infer<typeof OptionsSchema>;
 
@@ -111,6 +112,34 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
         name: "post",
         description: "設定済みのチャンネルに認証案内を投稿します。",
       },
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "log-channel",
+        description:
+          "認証結果（メール・VPN検知・サブ垢候補）を記録するログチャンネルを設定します。",
+        options: [
+          {
+            type: ApplicationCommandOptionType.Channel,
+            name: "channel",
+            description: "ログを投稿するチャンネル",
+            required: true,
+            channel_types: [ChannelType.GuildText],
+          },
+        ],
+      },
+      {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: "block-vpn",
+        description: "VPN/プロキシ/Tor経由と判定された場合に認証をブロックするか設定します。",
+        options: [
+          {
+            type: ApplicationCommandOptionType.Boolean,
+            name: "enabled",
+            description: "ブロックするか",
+            required: true,
+          },
+        ],
+      },
     ],
   };
 
@@ -122,6 +151,7 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
         subCommand: interaction.options.getSubcommand(),
         channelId: interaction.options.getChannel("channel", false)?.id ?? null,
         roleId: interaction.options.getRole("role", false)?.id ?? null,
+        enabled: interaction.options.getBoolean("enabled", false),
       },
       OptionsSchema,
     );
@@ -137,7 +167,7 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
     }
 
     const guildId = guild.id;
-    const { subCommand, channelId, roleId } = options;
+    const { subCommand, channelId, roleId, enabled } = options;
     const setting = await this.core.verify.getSetting(guildId);
 
     if (subCommand === "channel" && channelId) {
@@ -196,6 +226,16 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
       });
 
       return okReply("認証案内を投稿しました。");
+    }
+
+    if (subCommand === "log-channel" && channelId) {
+      await this.core.verify.saveSetting({ guildId, logChannelId: channelId });
+      return okReply(`ログの投稿先を <#${channelId}> に設定しました。`);
+    }
+
+    if (subCommand === "block-vpn" && enabled !== null) {
+      await this.core.verify.saveSetting({ guildId, blockVpn: enabled });
+      return okReply(`VPN/プロキシ/Torのブロックを${enabled ? "有効" : "無効"}にしました。`);
     }
 
     return errorReply("コマンドが見つかりませんでした");

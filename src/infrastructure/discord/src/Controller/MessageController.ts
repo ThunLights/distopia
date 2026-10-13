@@ -37,4 +37,16 @@ export class MessageController extends Base {
 
     await message.edit({ embeds });
   }
+
+  // Posts a *new* message -- unlike edit() above, there's no existing message to find, so
+  // this just needs the channel to exist and be text-based.
+  public async send(channelId: string, embeds: APIEmbed[]): Promise<{ id: string } | null> {
+    const channel = this.client.channels.cache.get(channelId);
+    if (channel?.type !== ChannelType.GuildText) {
+      return null;
+    }
+
+    const message = await channel.send({ embeds });
+    return { id: message.id };
+  }
 }

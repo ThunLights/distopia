@@ -9,6 +9,8 @@ import {
 } from "$lib/shared/types/routes/api/verify";
 import type { RequestEvent, RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
+import { checkVpn } from "infra-aip";
+import type { GuildVerify, UserVerifyLog } from "infra-database/types";
 import { safeFetch, safeUrl } from "infra-http";
 
 const TURNSTILE_SITEVERIFY_URL = safeUrl`https://challenges.cloudflare.com/turnstile/v0/siteverify`;
@@ -48,6 +50,94 @@ async function verifyTurnstile(token: string): Promise<boolean> {
     return data.success === true;
   } catch {
     return false;
+  }
+}
+
+type VpnFlags = {
+  blocked: boolean;
+  isVpn: boolean;
+  isProxy: boolean;
+  isTor: boolean;
+  provider: string | null;
+};
+
+const CLEAN_VPN_FLAGS: VpnFlags = {
+  blocked: false,
+  isVpn: false,
+  isProxy: false,
+  isTor: false,
+  provider: null,
+};
+
+// No IP, or the lookup itself failing, is treated the same as a confirmed VPN/proxy hit
+// (blocked: true) -- same reasoning as verifyTurnstile's own fetch-failure handling above:
+// once an admin opts into this check (GuildVerify.blockVpn), its own failure shouldn't
+// silently become an allow.
+async function checkVpnFlags(ip: string | null): Promise<VpnFlags> {
+  if (!ip) {
+    return { ...CLEAN_VPN_FLAGS, blocked: true };
+  }
+
+  const result = await checkVpn(ip);
+  if (!result.checked) {
+    return { ...CLEAN_VPN_FLAGS, blocked: true };
+  }
+
+  return {
+    blocked: result.isVpn || result.isProxy || result.isTor,
+    isVpn: result.isVpn,
+    isProxy: result.isProxy,
+    isTor: result.isTor,
+    provider: result.provider,
+  };
+}
+
+// Posts one log entry per verify attempt to the admin-configured log channel -- a no-op when
+// unset. Built here (not in app-core's Verify.ts) so app-core doesn't need a discord.js
+// dependency just for this one JSON-shaped embed.
+async function postVerifyLog(setting: GuildVerify, row: UserVerifyLog): Promise<void> {
+  if (!setting.logChannelId) {
+    return;
+  }
+
+  const fields: { name: string; value: string }[] = [
+    { name: "ユーザー", value: `<@${row.userId}> (${row.userId})` },
+    { name: "結果", value: row.success ? "✅ 成功" : "❌ 失敗" },
+  ];
+
+  if (row.email) {
+    fields.push({ name: "メールアドレス", value: row.email });
+  }
+
+  if (row.isVpn || row.isProxy || row.isTor) {
+    const flags = [row.isVpn && "VPN", row.isProxy && "Proxy", row.isTor && "Tor"]
+      .filter(Boolean)
+      .join(", ");
+    fields.push({
+      name: "VPN/Proxy検知",
+      value: row.vpnProvider ? `${flags} (${row.vpnProvider})` : flags,
+    });
+  }
+
+  if (row.relatedUserIds.length > 0) {
+    fields.push({
+      name: "サブ垢の可能性",
+      value: row.relatedUserIds.map((id) => `<@${id}> (${id})`).join("\n"),
+    });
+  }
+
+  try {
+    await core.state.discord.message.send(setting.logChannelId, [
+      {
+        color: row.success ? 0x57f287 : 0xed4245,
+        fields,
+        timestamp: row.createdAt.toISOString(),
+      },
+    ]);
+  } catch (error) {
+    // Best-effort notification -- a missing channel/permission must never fail the
+    // verification response the user is actually waiting on.
+    console.error(`[verify] failed to post log to ${setting.logChannelId}`, error);
   }
 }
 
@@ -99,13 +189,41 @@ export const POST: RequestHandler = async (e) => {
     return errorJson("対象サーバーのメンバーではありません");
   }
 
-  if (!(await verifyTurnstile(body.turnstileToken))) {
-    await core.verify.logResult({
+  // Captured once up front so every outcome's log entry (including the two early-return
+  // failures below) carries it, not just the final success.
+  const userDiscord = await core.state.database.userDiscord.find(user.id);
+  const email = userDiscord?.email ?? null;
+  const vpn = setting.blockVpn ? await checkVpnFlags(pluginRequestContext.ip) : CLEAN_VPN_FLAGS;
+  const vpnLogFields = {
+    isVpn: vpn.isVpn,
+    isProxy: vpn.isProxy,
+    isTor: vpn.isTor,
+    vpnProvider: vpn.provider,
+  };
+
+  if (vpn.blocked) {
+    const row = await core.verify.logResult({
       userId: user.id,
       guildId: body.guildId,
       success: false,
       fingerprint: body.extra,
+      email,
+      ...vpnLogFields,
     });
+    await postVerifyLog(setting, row);
+    return errorJson("認証に失敗しました");
+  }
+
+  if (!(await verifyTurnstile(body.turnstileToken))) {
+    const row = await core.verify.logResult({
+      userId: user.id,
+      guildId: body.guildId,
+      success: false,
+      fingerprint: body.extra,
+      email,
+      ...vpnLogFields,
+    });
+    await postVerifyLog(setting, row);
     return errorJson("認証に失敗しました");
   }
 
@@ -116,12 +234,15 @@ export const POST: RequestHandler = async (e) => {
     ...pluginRequestContext,
   });
   if (!allowed) {
-    await core.verify.logResult({
+    const row = await core.verify.logResult({
       userId: user.id,
       guildId: body.guildId,
       success: false,
       fingerprint: body.extra,
+      email,
+      ...vpnLogFields,
     });
+    await postVerifyLog(setting, row);
     return errorJson("認証に失敗しました");
   }
 
@@ -135,11 +256,14 @@ export const POST: RequestHandler = async (e) => {
     return errorJson("ロールの付与に失敗しました");
   }
 
-  await core.verify.logResult({
+  const row = await core.verify.logResult({
     userId: user.id,
     guildId: body.guildId,
     success: true,
     fingerprint: body.extra,
+    email,
+    ...vpnLogFields,
   });
+  await postVerifyLog(setting, row);
   return json({ content: "ok" });
 };

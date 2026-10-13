@@ -136,5 +136,13 @@ export const djsController: DiscordClient = {
     async edit(channelId, messageId, embeds) {
       await rpc().editMessage({ channelId, messageId, embedsJson: JSON.stringify(embeds) });
     },
+
+    async send(channelId, embeds) {
+      const { messageId } = await rpc().sendMessage({
+        channelId,
+        embedsJson: JSON.stringify(embeds),
+      });
+      return messageId ? { id: messageId } : null;
+    },
   },
 };

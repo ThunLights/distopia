@@ -27,6 +27,14 @@ export class Verify extends Base {
     guildId: string;
     success: boolean;
     fingerprint?: unknown;
+    // OAuth2 email on file (UserDiscord.email) and infra-aip's checkVpn result, both already
+    // resolved by the caller (routes/api/verify/+server.ts) -- this just persists them
+    // alongside the fingerprint signal, it never fetches or checks either itself.
+    email?: string | null;
+    isVpn?: boolean;
+    isProxy?: boolean;
+    isTor?: boolean;
+    vpnProvider?: string | null;
   }): Promise<UserVerifyLog> {
     const parsed =
       input.fingerprint === undefined ? undefined : FingerprintSchema.safeParse(input.fingerprint);
@@ -44,6 +52,11 @@ export class Verify extends Base {
       fingerprint,
       fingerprintHashes: hashes,
       relatedUserIds,
+      email: input.email ?? null,
+      isVpn: input.isVpn ?? false,
+      isProxy: input.isProxy ?? false,
+      isTor: input.isTor ?? false,
+      vpnProvider: input.vpnProvider ?? null,
     });
   }
 

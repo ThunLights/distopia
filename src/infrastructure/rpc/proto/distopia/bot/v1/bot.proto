@@ -32,6 +32,7 @@ service BotService {
   rpc SetActivity(SetActivityRequest) returns (SetActivityResponse);
 
   rpc EditMessage(EditMessageRequest) returns (EditMessageResponse);
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
 }
 
 message BotGuild {
@@ -76,6 +77,16 @@ message EditMessageRequest {
   string embeds_json = 3;
 }
 message EditMessageResponse {}
+
+// Posts a *new* message (unlike EditMessage, no existing message_id) -- e.g.
+// presentation-web's verify flow posting a log entry to an admin-configured channel.
+message SendMessageRequest {
+  string channel_id = 1;
+  string embeds_json = 2;
+}
+message SendMessageResponse {
+  optional string message_id = 1;
+}
 
 message FetchGuildRequest {
   string guild_id = 1;

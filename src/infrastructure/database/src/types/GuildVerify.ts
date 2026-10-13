@@ -4,6 +4,8 @@ export type GuildVerify = {
   channelId: string | null;
   roleId: string | null;
   pendingRoleId: string | null;
+  logChannelId: string | null;
+  blockVpn: boolean;
 };
 
 export type GuildVerifyUpdateInput = Pick<GuildVerify, "guildId"> & Partial<GuildVerify>;

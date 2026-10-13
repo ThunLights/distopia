@@ -9,6 +9,15 @@ export type UserVerifyLog = {
   fingerprint: unknown;
   fingerprintHashes: string[];
   relatedUserIds: string[];
+  // The OAuth2 email on file for this user at the time of this attempt (UserDiscord.email),
+  // captured purely for the admin-facing log.
+  email: string | null;
+  // infra-aip's checkVpn result for this attempt's IP, flattened -- all false/null when the
+  // check wasn't run or failed outright.
+  isVpn: boolean;
+  isProxy: boolean;
+  isTor: boolean;
+  vpnProvider: string | null;
   createdAt: Date;
 };
 
@@ -18,4 +27,9 @@ export type UserVerifyLogCreateInput = Pick<UserVerifyLog, "userId" | "guildId" 
   fingerprint?: unknown;
   fingerprintHashes?: string[];
   relatedUserIds?: string[];
+  email?: string | null;
+  isVpn?: boolean;
+  isProxy?: boolean;
+  isTor?: boolean;
+  vpnProvider?: string | null;
 };
