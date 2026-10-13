@@ -21,11 +21,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
     const setting = await this.core.verify.getSetting(member.guild.id);
     if (setting?.enabled && setting.pendingRoleId) {
       try {
-        await this.core.state.discord.role.give(
-          member.guild.id,
-          member.id,
-          setting.pendingRoleId,
-        );
+        await this.core.state.discord.role.give(member.guild.id, member.id, setting.pendingRoleId);
       } catch {
         // Role missing/above the bot's own role/missing permission, etc. -- the join log and
         // welcome message below must still happen, same reasoning as enforceBlackList's own
