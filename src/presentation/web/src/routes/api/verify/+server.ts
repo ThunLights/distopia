@@ -24,8 +24,18 @@ async function verifyTurnstile(token: string): Promise<boolean> {
     return false;
   }
 
-  const data = (await result.json()) as { success: boolean };
-  return data.success;
+  // safeFetch resolves to a Response for any HTTP status, including a 5xx error page from
+  // Cloudflare that isn't JSON -- treat both as a normal verification failure, not a thrown
+  // 500 out of this handler.
+  if (!result.ok) {
+    return false;
+  }
+  try {
+    const data = (await result.json()) as { success?: boolean };
+    return data.success === true;
+  } catch {
+    return false;
+  }
 }
 
 // Not authAndValidateHandler -- the body isn't always plain JSON here (see
@@ -101,9 +111,14 @@ export const POST: RequestHandler = async (e) => {
     return errorJson("認証に失敗しました");
   }
 
-  await core.state.discord.role.give(body.guildId, user.id, setting.roleId);
-  if (setting.pendingRoleId) {
-    await core.state.discord.role.deprive(body.guildId, user.id, setting.pendingRoleId);
+  try {
+    await core.state.discord.role.give(body.guildId, user.id, setting.roleId);
+    if (setting.pendingRoleId) {
+      await core.state.discord.role.deprive(body.guildId, user.id, setting.pendingRoleId);
+    }
+  } catch (error) {
+    console.error(`[verify] failed to grant role in ${body.guildId}`, error);
+    return errorJson("ロールの付与に失敗しました");
   }
 
   await core.verify.logResult({

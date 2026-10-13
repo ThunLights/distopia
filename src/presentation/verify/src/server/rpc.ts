@@ -19,12 +19,16 @@ const handler = connectNodeAdapter({
   routes: (router) =>
     router.service(VerifyService, {
       async evaluate({ guildId, userId, extraJson, headers }) {
-        const allowed = await plugin.evaluate({
-          guildId,
-          userId,
-          extra: JSON.parse(extraJson),
-          headers,
-        });
+        // extraJson is attacker-reachable (relayed from the browser's POST body via
+        // presentation-web) and empty is the proto3 default -- fail closed on malformed JSON
+        // rather than letting it throw into an RPC Internal error.
+        let extra: unknown;
+        try {
+          extra = extraJson ? JSON.parse(extraJson) : null;
+        } catch {
+          return { allowed: false };
+        }
+        const allowed = await plugin.evaluate({ guildId, userId, extra, headers });
         return { allowed };
       },
 

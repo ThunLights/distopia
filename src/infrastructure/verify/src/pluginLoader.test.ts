@@ -86,4 +86,14 @@ describe("loadPluginFolder", () => {
     const second = await plugin!.getClientScript();
     expect(first).toBe(second);
   });
+
+  it("does not cache a rejected getClientScript call, so a later call can retry", async () => {
+    await writeFile(
+      join(dir, "a.mjs"),
+      `let calls = 0; export default { getClientScript: () => { calls++; if (calls === 1) { throw new Error("boom"); } return "const ok = true;"; } };`,
+    );
+    const plugin = await loadPluginFolder(dir);
+    await expect(plugin!.getClientScript()).rejects.toThrow("boom");
+    await expect(plugin!.getClientScript()).resolves.toContain("ok");
+  });
 });

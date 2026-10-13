@@ -66,4 +66,11 @@ describe("GuildMemberAddHandler", () => {
 
     expect(roleGive).not.toHaveBeenCalled();
   });
+
+  it("does not reject when giving the pending role fails", async () => {
+    const { core, roleGive } = createCore({ enabled: true, pendingRoleId: "role-1" });
+    roleGive.mockRejectedValueOnce(new Error("missing permissions"));
+
+    await expect(new GuildMemberAddHandler(core).handle(createMember())).resolves.toBeUndefined();
+  });
 });

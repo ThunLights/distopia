@@ -10,6 +10,11 @@ describe("parseRedirectTo", () => {
     expect(parseRedirectTo("//evil.com")).toBeUndefined();
   });
 
+  it("rejects a backslash disguised as a protocol-relative path (open redirect)", () => {
+    expect(parseRedirectTo("/\\evil.com")).toBeUndefined();
+    expect(parseRedirectTo("\\/evil.com")).toBeUndefined();
+  });
+
   it("rejects an absolute URL", () => {
     expect(parseRedirectTo("https://evil.com")).toBeUndefined();
   });

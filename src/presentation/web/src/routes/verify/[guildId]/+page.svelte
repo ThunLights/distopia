@@ -11,6 +11,7 @@
       container: HTMLElement | undefined,
       options: { sitekey: string; callback: (token: string) => void },
     ): void;
+    reset(container?: HTMLElement): void;
   };
 
   const { data } = $props();
@@ -52,6 +53,13 @@
     verifying = true;
     verified = await verifyGuild(guildId, turnstileToken);
     verifying = false;
+    if (!verified) {
+      // A Turnstile token is single-use -- without this, every retry after a failure keeps
+      // sending the same already-used token and fails Turnstile validation again, forcing a
+      // full page reload to get a fresh one.
+      turnstileToken = null;
+      (window as unknown as { turnstile?: Turnstile }).turnstile?.reset(widgetContainer);
+    }
   }
 </script>
 

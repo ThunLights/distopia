@@ -81,7 +81,14 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
           }
         }
         return null;
-      })();
+      })().catch((error) => {
+        // A rejected promise would otherwise stay cached forever (??= only reassigns when
+        // the cache is nullish, and a rejected promise isn't) -- clear it so a transient
+        // failure (a Bun.build error, obfuscate throwing) can be retried on the next call
+        // instead of permanently disabling the client script until the next restart.
+        clientScriptCache = undefined;
+        throw error;
+      });
       return clientScriptCache;
     },
 
