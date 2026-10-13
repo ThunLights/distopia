@@ -101,6 +101,11 @@ const handler = connectNodeAdapter({
         await djsController.message.edit(channelId, messageId, JSON.parse(embedsJson));
         return {};
       },
+
+      async sendMessage({ channelId, embedsJson }) {
+        const message = await djsController.message.send(channelId, JSON.parse(embedsJson));
+        return { messageId: message?.id };
+      },
     }),
   interceptors: [requireBearerAuth(BOT_RPC_TOKEN)],
 });

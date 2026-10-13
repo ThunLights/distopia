@@ -89,6 +89,7 @@ distopia/
 │   │   ├── bot/               # Discord bot (discord.js v14)
 │   │   ├── schedulemanager/   # Cron ticker; calls web's Scheduler RPC on each tick
 │   │   ├── searchengine/      # Orama search index; serves SearchEngine RPC to web
+│   │   ├── verify/            # Optional; serves VerifyService by delegating to a plugin file
 │   │   └── web/               # Web frontend (SvelteKit / Svelte 5)
 │   ├── application/
 │   │   └── core/         # Application core services
@@ -99,7 +100,9 @@ distopia/
 │       ├── database/     # Prisma + PostgreSQL
 │       ├── discord/      # Discord infrastructure
 │       ├── http/         # Security-focused HTTP utilities (SSRF prevention)
+│       ├── js-obf/       # Shared JS obfuscation (wraps javascript-obfuscator)
 │       ├── rpc/          # Connect/Protobuf contracts shared across services
+│       ├── verify/       # Generic plugin-folder loader for presentation-verify
 │       └── voicevox/     # VOICEVOX TTS Quest API client
 ├── lib/
 │   ├── distopia/         # Public library (npm / jsr)
@@ -116,12 +119,15 @@ distopia/
 | `src/presentation/bot` | `presentation-bot` |
 | `src/presentation/schedulemanager` | `presentation-schedulemanager` |
 | `src/presentation/searchengine` | `presentation-searchengine` |
+| `src/presentation/verify` | `presentation-verify` |
 | `src/presentation/web` | `presentation-web` |
 | `src/application/core` | `app-core` |
 | `src/infrastructure/database` | `infra-database` |
 | `src/infrastructure/discord` | `infra-discord` |
 | `src/infrastructure/http` | `infra-http` |
+| `src/infrastructure/js-obf` | `infra-js-obf` |
 | `src/infrastructure/rpc` | `infra-rpc` |
+| `src/infrastructure/verify` | `infra-verify` |
 | `src/infrastructure/voicevox` | `infra-voicevox` |
 | `src/domain/repository/redis` | `repo-redis` |
 | `src/domain/repository/search` | `repo-search` |
@@ -603,7 +609,7 @@ import { myQuery } from "@prisma/client/sql";
 
 `src/infrastructure/rpc` (`infra-rpc`) holds the Protobuf/Connect contracts services use to
 call each other, now that distopia has split from one process into independent `web`/`bot`/
-`schedulemanager`/`searchengine` services. Three services are built this way so far — follow
+`schedulemanager`/`searchengine` services. Four services are built this way so far — follow
 the same shape for the next one, and note that they don't all share one direction:
 
 - `presentation-schedulemanager` — a standalone cron-ticker process that **calls**
@@ -623,6 +629,41 @@ the same shape for the next one, and note that they don't all share one directio
   The pure/stateless half (`oauth2`, `embed`, `guild.iconUrl` — no live cache needed) stays a
   plain local implementation on both sides instead of going over RPC. See `k8s/README.md`'s
   "Bot RPC" section for why this Deployment is `replicas: 1`, same reason as searchengine.
+- `presentation-verify` (`VerifyService`, `proto/distopia/verify/v1/verify.proto`) — a
+  different shape from the other three in what it's *for*, not where it runs: it **is**
+  built and deployed from this repo (same image as `presentation-web`/`presentation-bot`,
+  `command` overridden — see `bot-deployment.yaml`'s own precedent), but it's **optional**
+  and implements nothing itself. Every method (`src/presentation/verify/src/server/rpc.ts`)
+  delegates to `src/presentation/verify/src/plugin.ts`, which delegates to `infra-verify`'s
+  `loadPluginFolder` (`src/infrastructure/verify/src/pluginLoader.ts`) — a generic loader
+  (not in `presentation-verify` itself, so it's reusable) that scans a *folder*
+  (`VERIFY_PLUGIN_DIR`, default `src/presentation/verify/plugins/`) for non-dot-prefixed
+  files, dynamically `import()`s each one, and merges whatever partial `VerifyServerPlugin`s
+  they export into one (`evaluate` AND-combined across all of them; `getClientScript`/
+  `decrypt` from the first file, alphabetically, that defines them). `getClientScript`'s
+  result is cached (computed once per process) and obfuscated via `infra-js-obf`
+  (`src/infrastructure/js-obf`) — individual plugin files just return plain JS source and
+  never need to cache or obfuscate it themselves. That folder ships
+  in the image with exactly two files, both dot-prefixed and therefore always skipped —
+  `plugins/.fingerprint`/`plugins/.anti-scraping`, inert samples with no real logic, there
+  purely to show the shape. Real plugin files are never part of this repo or its image; an
+  optional Kubernetes Secret (`verify-deployment.yaml`'s `verify-plugin` volume) mounts at
+  that exact folder path, replacing the samples with the real, private ones. This dynamic
+  `import()` approach works here specifically because `presentation-verify` is a bare Bun
+  script never bundled by Vite (unlike `presentation-web`, where the same trick would fail:
+  Vite statically resolves a dynamic import at *build* time and errors if the target doesn't
+  exist). `presentation-web` (`lib/server/verifyPlugin.ts`) is the
+  RPC *client* of this service and falls back to always-allow whenever
+  `VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` aren't configured on it — independent of whether
+  `distopia-verify` itself is deployed or has a plugin mounted, so there's no broken
+  intermediate state. The `distopia` npm/jsr package re-exports the RPC contract
+  (`lib/distopia/src/rpc.ts`) and the plugin contract (`lib/distopia/src/plugin.ts` —
+  `VerifyServerPlugin`/`VerifyClientPlugin`) so a plugin file can be authored and
+  type-checked anywhere, without this monorepo. Even the anti-scraping body cipher is
+  plugin-loaded, not hardcoded here: `VerifyClientPlugin`'s optional `encrypt()` (served via
+  `GetClientScript`) and `VerifyServerPlugin.decrypt()` (via `VerifyService.Decrypt`)
+  are the extension points. See `k8s/README.md`'s "Verify RPC" section for the full wiring
+  instructions.
 
 ### Adding a new RPC contract
 

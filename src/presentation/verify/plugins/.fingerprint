@@ -1,0 +1,22 @@
+// Sample/template only -- the leading dot means infra-verify's loadPluginFolder always
+// skips this file (see src/infrastructure/verify/src/pluginLoader.ts). Copy it to a non-dot
+// filename with a real extension (e.g. `fingerprint.mjs` or `fingerprint.ts`) and implement
+// it for real to activate it. No real logic here by design -- see distopia's
+// VerifyServerPlugin for the full contract this (partially) implements.
+import type { VerifyServerPlugin } from "distopia";
+
+const plugin: Partial<VerifyServerPlugin> = {
+  evaluate(_input) {
+    // TODO: inspect _input.extra (whatever your client-side VerifyClientPlugin.collect()
+    // produced) and _input.headers, and return false to block verification.
+    return true;
+  },
+
+  getClientScript() {
+    // TODO: return the raw JS source for your browser-side VerifyClientPlugin -- its
+    // collect(), and optionally encrypt() (see the .anti-scraping sample for that half).
+    return null;
+  },
+};
+
+export default plugin;

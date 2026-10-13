@@ -57,10 +57,13 @@ jobs:
         if: github.event_name == 'pull_request'
         # changeset version (CLI v3) now exits 1 when there are no unreleased changesets --
         # normal for a PR that doesn't add one (see CLAUDE.md) -- so only run version:jsr
-        # when there was actually something to version, instead of failing every PR.
+        # when there was actually something to version, instead of failing every PR. `turbo`
+        # must go through `bunx` here (unlike `bun run build` etc. elsewhere in this repo's
+        # scripts, which get node_modules/.bin on PATH for free) since this step is a raw
+        # shell script, not a `bun run <script>` invocation.
         run: |
           if npx changeset version; then
-            turbo run version:jsr
+            bunx turbo run version:jsr
           fi
 
       - name: Create Tag
@@ -111,9 +114,12 @@ jobs:
       - name: Install Deps
         run: bun ci
 
+      # Via the root turbo build (not `cd lib/distopia && bun run build`) so turbo's own
+      # `^build` dependency graph builds infra-rpc (buf generate -> src/gen/) first --
+      # distopia's src/rpc.ts imports from there via the $infra-rpc/* tsconfig path alias,
+      # which tsdown/rolldown only resolves once that generated code actually exists on disk.
       - name: Build
-        working-directory: ./lib/distopia
-        run: bun run build
+        run: bun run build -- --filter=distopia
 
       - name: Publish
         continue-on-error: true
@@ -161,9 +167,9 @@ jobs:
       - name: Install Deps
         run: bun ci
 
+      # See the npm job's own comment on this step -- same reason.
       - name: Build
-        working-directory: ./lib/distopia
-        run: bun run build
+        run: bun run build -- --filter=distopia
 
       - name: Publish
         working-directory: ./lib/distopia

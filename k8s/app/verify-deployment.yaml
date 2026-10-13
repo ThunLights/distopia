@@ -1,0 +1,94 @@
+# distopia-verify: an OPTIONAL service, same image as distopia-app/distopia-bot (`command`
+# overridden to run presentation-verify, exactly like bot-deployment.yaml does for
+# presentation-bot) -- `bun run build` already builds every workspace package into it, so
+# nothing extra needs to be published for this.
+#
+# What's actually private is the contents of a *folder* this process scans at runtime
+# (infra-verify's loadPluginFolder, see src/infrastructure/verify/src/pluginLoader.ts), never
+# this service's own code: presentation-verify delegates every VerifyService method to
+# whatever plugin file(s) it finds there -- it holds no anti-bot/fingerprinting logic itself.
+# That folder (src/presentation/verify/plugins/) ships in the image with only two inert,
+# dot-prefixed samples (.fingerprint, .anti-scraping -- always skipped, see
+# pluginLoader.ts's own filter); the Kubernetes Secret volume below mounts at that exact
+# path, so when it's present it replaces the folder's contents with your real, private
+# plugin file(s) for this Pod. See k8s/README.md's "Verify RPC" section and infra-rpc's
+# verify.proto.
+#
+# Entirely optional: distopia-app (src/presentation/web/src/lib/server/verifyPlugin.ts) falls
+# back to always-allow whenever VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't set on it, so nothing
+# here needs to exist for member verification (Turnstile + role grant) to work. Deploying
+# this with no plugin Secret mounted is also fine (every method just falls back the same way)
+# -- deploy it to get the wiring in place, mount the Secret whenever you have a plugin ready.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distopia-verify
+  namespace: distopia
+  labels:
+    app.kubernetes.io/name: distopia-verify
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: distopia-verify
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: distopia-verify
+    spec:
+      containers:
+        - name: distopia-verify
+          image: ghcr.io/thunlights/distopia:latest
+          command: ["bun", "run", "src/presentation/verify/src/index.ts"]
+          workingDir: /app
+          ports:
+            - name: rpc
+              containerPort: 8084
+          env:
+            - name: VERIFY_RPC_PORT
+              value: "8084"
+            # Shared with distopia-app's own VERIFY_RPC_TOKEN (same key, same Secret) -- see
+            # k8s/README.md's secret-creation command. The bearer check itself is this
+            # service's own responsibility (infra-rpc's requireBearerAuth), same as
+            # BOT_RPC_TOKEN/bot-deployment.yaml.
+            - name: VERIFY_RPC_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-env
+                  key: VERIFY_RPC_TOKEN
+          volumeMounts:
+            # Optional -- the one thing actually private here. `optional: true` means the
+            # Pod starts fine with no Secret at all, in which case this path just keeps the
+            # image's own two dot-prefixed samples (both always skipped by
+            # loadPluginFolder's own filter) -- src/presentation/verify/src/plugin.ts then
+            # sees an empty plugin set and every VerifyService method falls back accordingly
+            # (allow=true, empty client script, decrypt fails closed). Must match
+            # plugin.ts's DEFAULT_PLUGIN_DIR (import.meta.dirname + "../plugins") exactly, or
+            # set VERIFY_PLUGIN_DIR below to wherever you do mount it instead.
+            - name: verify-plugin
+              mountPath: /app/src/presentation/verify/plugins
+              readOnly: true
+          # TCP, not httpGet -- same reasoning as bot-deployment.yaml's own readinessProbe
+          # (a Connect server only answers POST method paths).
+          readinessProbe:
+            tcpSocket:
+              port: rpc
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: verify-plugin
+          secret:
+            secretName: distopia-verify-plugin
+            optional: true

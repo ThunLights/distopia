@@ -4,5 +4,12 @@
     "composite": true,
     "types": ["node"]
   },
-  "include": ["${configDir}/src"]
+  "include": ["${configDir}/src"],
+  // zod-prisma-types emits code referencing '@prisma/client/runtime/library' (the old
+  // client generator's runtime path) the moment any Json field exists in schema.prisma --
+  // this project's `prisma-client` generator moved that runtime to
+  // '@prisma/client/runtime/client' instead, so that output doesn't typecheck. Nothing
+  // imports from here (see infra-database's package.json exports: only "." and "./types"),
+  // so excluding it costs nothing real.
+  "exclude": ["${configDir}/src/zod"]
 }

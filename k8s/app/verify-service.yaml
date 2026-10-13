@@ -1,0 +1,17 @@
+# Internal-only: distopia-app resolves this as distopia-verify:8084 (set VERIFY_RPC_URL to
+# that on distopia-app -- see k8s/README.md). Never wired to the Cloudflare Tunnel. See
+# verify-networkpolicy.yaml for the matching ingress restriction.
+#
+# Deliberately not pinning a clusterIP, same reasoning as service.yaml's own comment.
+apiVersion: v1
+kind: Service
+metadata:
+  name: distopia-verify
+  namespace: distopia
+spec:
+  selector:
+    app.kubernetes.io/name: distopia-verify
+  ports:
+    - name: rpc
+      port: 8084
+      targetPort: rpc

@@ -15,6 +15,7 @@ import { Record } from "./Record";
 import { StatChannel } from "./StatChannel";
 import { Tts } from "./Tts";
 import { User } from "./User";
+import { Verify } from "./Verify";
 import { VoiceChannel } from "./VoiceChannel";
 
 export class AppCore extends Base {
@@ -34,6 +35,7 @@ export class AppCore extends Base {
   public readonly statChannel = new StatChannel(this.state, this.record, this.guild);
   public readonly tts = new Tts(this.state, this.guild);
   public readonly user = new User(this.state, this.oauth2);
+  public readonly verify = new Verify(this.state);
   public readonly voice = new VoiceChannel(this.state);
 
   private async updateHomeGuildSpecialDirectorsRole(

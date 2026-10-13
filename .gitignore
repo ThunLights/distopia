@@ -24,6 +24,14 @@ vite.config.ts.timestamp-*
 
 important/discord.json
 
+# scripts/sync-verify-plugins.ts copies plugin/.fingerprint, plugin/.anti-scraping (and any
+# other local plugin/.* package) in here with the dot stripped so infra-verify's
+# loadPluginFolder picks them up -- a real, private plugin synced here must never be
+# committed. The two inert dot-prefixed samples stay tracked.
+src/presentation/verify/plugins/*
+!src/presentation/verify/plugins/.fingerprint
+!src/presentation/verify/plugins/.anti-scraping
+
 db/database.sqlite3
 db/database.sqlite3-journal
 

@@ -1,10 +1,12 @@
 import { core } from "$lib/server/core";
+import { parseRedirectTo } from "$lib/server/redirect";
 import { PUBLIC_OAUTH_URL } from "$lib/shared/constant";
 import type { RequestHandler } from "./$types";
 import { redirect } from "@sveltejs/kit";
 
 export const GET: RequestHandler = async (e) => {
-  const { sessionId, sessionKey } = await core.oauth2.savePKCE();
+  const redirectTo = parseRedirectTo(e.url.searchParams.get("redirect"));
+  const { sessionId, sessionKey } = await core.oauth2.savePKCE(redirectTo);
 
   e.cookies.set("session_key", sessionKey, {
     path: "/",

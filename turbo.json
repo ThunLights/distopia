@@ -25,7 +25,12 @@
       "cache": false
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      // "build"/"^build" alongside "^typecheck": some packages' own types only exist after
+      // their own build (infra-rpc's buf-generated src/gen/, distopia's dist/index.d.mts --
+      // see CLAUDE.md's package.json "exports" pointing there, not at src/). Without this, a
+      // bare `bun run typecheck` with no prior build fails on any package depending on one
+      // of those, same reasoning as "test" already depending on "build" above.
+      "dependsOn": ["build", "^build", "^typecheck"]
     },
     "deploy-db": {
       "dependsOn": ["^deploy-db"],

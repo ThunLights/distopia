@@ -15,12 +15,13 @@ export class OAuth2 extends Base {
     super(state);
   }
 
-  public async savePKCE() {
+  public async savePKCE(redirectTo?: string) {
     const sessionId = randomUUID();
     const sessionKey = randomUUID();
     await this.state.memory.oauth2PKCE.set(sessionId, {
       sessionKey,
       createdAt: new Date(),
+      redirectTo,
     });
     return { sessionId, sessionKey };
   }

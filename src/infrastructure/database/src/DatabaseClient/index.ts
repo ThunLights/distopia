@@ -10,6 +10,7 @@ import { GuildReviewTable } from "./GuildReviewTable";
 import { GuildSettingTable } from "./GuildSettingTable";
 import { GuildTable } from "./GuildTable";
 import { GuildTtsIgnoreListTable } from "./GuildTtsIgnoreListTable";
+import { GuildVerifyTable } from "./GuildVerifyTable";
 import { GuildWhiteListTable } from "./GuildWhiteListTable";
 import { JWTKeyTable } from "./JWTKeyTable";
 import { PanelTable } from "./PanelTable";
@@ -17,6 +18,7 @@ import { UserBlackListTable } from "./UserBlackListTable";
 import { UserDictionaryTable } from "./UserDictionaryTable";
 import { UserDiscordTable } from "./UserDiscordTable";
 import { UserTable } from "./UserTable";
+import { UserVerifyLogTable } from "./UserVerifyLogTable";
 import { UserWebTable } from "./UserWebTable";
 
 export class DatabaseClient extends Base {
@@ -31,6 +33,7 @@ export class DatabaseClient extends Base {
   public readonly guildReview = new GuildReviewTable(this.prisma);
   public readonly guildSetting = new GuildSettingTable(this.prisma);
   public readonly guildTtsIgnoreList = new GuildTtsIgnoreListTable(this.prisma);
+  public readonly guildVerify = new GuildVerifyTable(this.prisma);
   public readonly guildWhiteList = new GuildWhiteListTable(this.prisma);
   public readonly jwtKey = new JWTKeyTable(this.prisma);
   public readonly panel = new PanelTable(this.prisma);
@@ -38,5 +41,6 @@ export class DatabaseClient extends Base {
   public readonly userDictionary = new UserDictionaryTable(this.prisma);
   public readonly userDiscord = new UserDiscordTable(this.prisma);
   public readonly user = new UserTable(this.prisma);
+  public readonly userVerifyLog = new UserVerifyLogTable(this.prisma);
   public readonly userWeb = new UserWebTable(this.prisma);
 }

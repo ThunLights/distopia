@@ -9,6 +9,6 @@
   });
 </script>
 
-<Story name="認証成功" args={{ data: { user: mockUser } }} />
+<Story name="認証成功" args={{ data: { user: mockUser, redirectTo: undefined } }} />
 
-<Story name="認証失敗" args={{ data: { user: null } }} />
+<Story name="認証失敗" args={{ data: { user: null, redirectTo: undefined } }} />

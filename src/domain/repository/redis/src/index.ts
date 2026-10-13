@@ -10,6 +10,7 @@ export * from "./GuildEdit";
 export * from "./GuildMemberAdd";
 export * from "./GuildSetting";
 export * from "./GuildTtsIgnoreList";
+export * from "./GuildVerify";
 export * from "./GuildWhiteList";
 export * from "./JWTKey";
 export * from "./MessageCreate";

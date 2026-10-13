@@ -16,3 +16,6 @@ resources:
 - bot-deployment.yaml
 - bot-service.yaml
 - bot-networkpolicy.yaml
+- verify-deployment.yaml
+- verify-service.yaml
+- verify-networkpolicy.yaml
