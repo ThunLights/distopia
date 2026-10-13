@@ -28,7 +28,7 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "buf generate && tsdown",
     "lint": "oxfmt --check --config ../template/oxfmt.config.ts && oxlint --config ../template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../template/oxlint.config.ts",
     "format": "oxfmt --config ../template/oxfmt.config.ts",
@@ -47,8 +47,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "bun": "catalog:",
-    "infra-rpc": "workspace:*"
+    "@bufbuild/buf": "catalog:",
+    "@bufbuild/protoc-gen-es": "catalog:",
+    "bun": "catalog:"
   },
   "peerDependencies": {
     "typescript": "catalog:"

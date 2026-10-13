@@ -31,8 +31,9 @@
         "zod": "catalog:",
       },
       "devDependencies": {
+        "@bufbuild/buf": "catalog:",
+        "@bufbuild/protoc-gen-es": "catalog:",
         "bun": "catalog:",
-        "infra-rpc": "workspace:*",
       },
       "peerDependencies": {
         "typescript": "catalog:",
@@ -252,6 +253,7 @@
       "dependencies": {
         "@bufbuild/protobuf": "catalog:",
         "@connectrpc/connect": "catalog:",
+        "distopia": "workspace:*",
       },
       "devDependencies": {
         "@bufbuild/buf": "catalog:",

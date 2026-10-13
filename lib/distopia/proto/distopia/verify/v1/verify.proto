@@ -7,9 +7,10 @@ package distopia.verify.v1;
 // image) and called by presentation-web (lib/server/verifyPlugin.ts) during the member
 // verification flow. See k8s/README.md's "Verify RPC" section for how that service is wired
 // up -- it's entirely optional; presentation-web falls back to always-allow when
-// VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't configured. The `distopia` npm/jsr package
-// re-exports this contract (lib/distopia/src/rpc.ts) so that private service can depend on it
-// without needing access to this monorepo.
+// VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't configured. Generated here (not infra-rpc) so the
+// `distopia` npm/jsr package (lib/distopia/src/rpc.ts) has zero workspace dependency of its
+// own -- a prerequisite for `bun pm pack`/`npm publish` to work at all -- and infra-rpc
+// depends on `distopia` for this one contract instead, the reverse of every other service.
 service VerifyService {
   // Extra server-side signal on top of the built-in Turnstile check. Return allowed=false to
   // block verification.

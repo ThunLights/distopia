@@ -4,14 +4,8 @@
     "composite": true,
     "paths": {
       "$distopia-template/*": ["../template/src/*"],
-      "$infra-http/*": ["../../src/infrastructure/http/src/*"],
-      "$infra-rpc/*": ["../../src/infrastructure/rpc/src/*"]
+      "$infra-http/*": ["../../src/infrastructure/http/src/*"]
     }
   },
-  "include": [
-    "${configDir}/src",
-    "../template/src/*",
-    "../../src/infrastructure/http/src/**/*",
-    "../../src/infrastructure/rpc/src/**/*"
-  ]
+  "include": ["${configDir}/src", "../template/src/*", "../../src/infrastructure/http/src/**/*"]
 }
