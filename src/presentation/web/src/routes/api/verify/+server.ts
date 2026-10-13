@@ -106,7 +106,16 @@ async function postVerifyLog(setting: GuildVerify, row: UserVerifyLog): Promise<
   ];
 
   if (row.email) {
-    fields.push({ name: "メールアドレス", value: row.email });
+    // Masked, not shown in full -- an admin picks any GuildText channel for this (no
+    // enforced private-channel requirement), and Discord keeps its own copy of the message
+    // long after the DB row is gone. Still enough to eyeball "same email, different
+    // account" without exposing the full address to whoever can read that channel.
+    const [local, domain] = row.email.split("@");
+    const maskedLocal = local ? `${local.slice(0, 1)}***` : "***";
+    fields.push({
+      name: "メールアドレス",
+      value: domain ? `${maskedLocal}@${domain}` : maskedLocal,
+    });
   }
 
   if (row.isVpn || row.isProxy || row.isTor) {
@@ -120,10 +129,15 @@ async function postVerifyLog(setting: GuildVerify, row: UserVerifyLog): Promise<
   }
 
   if (row.relatedUserIds.length > 0) {
-    fields.push({
-      name: "サブ垢の可能性",
-      value: row.relatedUserIds.map((id) => `<@${id}> (${id})`).join("\n"),
-    });
+    // Discord embed field values cap at 1024 chars -- exceeding it rejects the whole embed,
+    // losing the log entry entirely (exactly for the highest-signal case: lots of related
+    // accounts). ~45 chars/entry means >1024 chars by ~23 entries; cap well under that.
+    const MAX_SHOWN = 15;
+    const shown = row.relatedUserIds.slice(0, MAX_SHOWN).map((id) => `<@${id}> (${id})`);
+    if (row.relatedUserIds.length > MAX_SHOWN) {
+      shown.push(`…他 ${row.relatedUserIds.length - MAX_SHOWN} 件`);
+    }
+    fields.push({ name: "サブ垢の可能性", value: shown.join("\n") });
   }
 
   try {
