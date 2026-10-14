@@ -19,7 +19,7 @@
     },
     "lib/distopia": {
       "name": "distopia",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@bufbuild/protobuf": "catalog:",
         "@connectrpc/connect": "catalog:",
@@ -186,7 +186,7 @@
       "devDependencies": {
         "@types/node": "catalog:",
         "bun": "catalog:",
-        "dotenv": "18.0.1",
+        "dotenv": "18.0.7",
         "oxfmt": "catalog:",
         "oxlint": "catalog:",
         "zod-prisma-types": "3.3.11",
@@ -413,7 +413,7 @@
         "app-core": "workspace:*",
         "discord.js": "catalog:",
         "distopia": "workspace:*",
-        "dotenv": "18.0.1",
+        "dotenv": "18.0.7",
         "ffmpeg-static": "catalog:",
         "infra-aip": "workspace:*",
         "infra-database": "workspace:*",
@@ -1870,7 +1870,7 @@
 
     "domain-service": ["domain-service@workspace:src/domain/service"],
 
-    "dotenv": ["dotenv@18.0.1", "", { "bin": { "dotenv": "dist/index.cjs" } }, "sha512-0eR4m4D/jH5eaI3evo2ZqqMii5mrTCR12v12VChdie6O1gPHs7XAjzTep0CWc1Bd+oNx3vVfbi734dK4zghigw=="],
+    "dotenv": ["dotenv@18.0.7", "", { "bin": { "dotenv": "dist/index.cjs" } }, "sha512-QEvMEF8ca3GNZJJnAbOgxpj5ULhBvnMcURp+XKrtvqFNPgjBvYoswQ0Jl2cO7JzCjxZjJhr9ZuIEhlrRxMft/Q=="],
 
     "dts-resolver": ["dts-resolver@3.0.0", "", { "peerDependencies": { "oxc-resolver": ">=11.0.0" }, "optionalPeers": ["oxc-resolver"] }, "sha512-1T1f+z+4tl9XD+m+0HBgWoL/nm0bOIffyWaUuUSBlFg/86IWvfx+wjNaO/ybU0AJzG9/Mi5hBUgGV6zCmWEN7Q=="],
 
