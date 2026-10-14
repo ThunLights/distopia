@@ -287,7 +287,6 @@
       },
       "devDependencies": {
         "@types/node": "catalog:",
-        "vitest": "catalog:",
       },
       "peerDependencies": {
         "typescript": "catalog:",
