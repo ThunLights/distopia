@@ -53,6 +53,7 @@
       "oxlint": "1.86.0",
       "prism-media": "1.3.5",
       "smol-toml": "1.8.0",
+      "stripe": "23.0.0",
       "typescript": "6.0.3",
       "vitest": "5.0.3",
       "zod": "4.6.5"
