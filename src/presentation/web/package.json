@@ -76,7 +76,7 @@
     "app-core": "workspace:*",
     "discord.js": "catalog:",
     "distopia": "workspace:*",
-    "dotenv": "18.0.1",
+    "dotenv": "18.0.7",
     "ffmpeg-static": "catalog:",
     "infra-aip": "workspace:*",
     "infra-database": "workspace:*",

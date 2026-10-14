@@ -30,7 +30,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "bun": "catalog:",
-    "dotenv": "18.0.1",
+    "dotenv": "18.0.7",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "zod-prisma-types": "3.3.11"
