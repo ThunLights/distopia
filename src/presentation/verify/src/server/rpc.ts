@@ -38,7 +38,7 @@ const handler = connectNodeAdapter({
       },
 
       async getClientScript() {
-        return { code: await plugin.getClientScript() };
+        return { code: await plugin.getClientScript(), wasm: await plugin.getClientWasm() };
       },
 
       async decrypt({ encrypted, request }) {

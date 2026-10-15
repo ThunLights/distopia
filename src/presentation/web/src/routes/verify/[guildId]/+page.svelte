@@ -15,7 +15,7 @@
   };
 
   const { data } = $props();
-  const { guildId, guildName } = $derived(data);
+  const { guildId, guildName, clientPlugin } = $derived(data);
 
   const title = $derived(`「${guildName}」のメンバー認証`);
   const description = "下のボックスを確認して認証を完了してください。";
@@ -51,8 +51,13 @@
       return;
     }
     verifying = true;
-    verified = await verifyGuild(guildId, turnstileToken);
-    verifying = false;
+    try {
+      verified = await verifyGuild(guildId, turnstileToken, clientPlugin);
+    } catch {
+      verified = false;
+    } finally {
+      verifying = false;
+    }
     if (!verified) {
       // A Turnstile token is single-use -- without this, every retry after a failure keeps
       // sending the same already-used token and fails Turnstile validation again, forcing a

@@ -1,4 +1,5 @@
 import { core } from "$lib/server/core";
+import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
 import type { PageServerLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
 
@@ -25,5 +26,6 @@ export const load: PageServerLoad = async (e) => {
   return {
     guildId,
     guildName: meta?.name ?? guildId,
+    clientPlugin: await fetchVerifyClientScript(),
   };
 };
