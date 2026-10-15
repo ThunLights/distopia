@@ -75,7 +75,10 @@ export async function evaluateVerifyPlugin(input: {
   }
 }
 
-export async function fetchVerifyClientScript(): Promise<{ code: string; wasm: string | null } | null> {
+export async function fetchVerifyClientScript(): Promise<{
+  code: string;
+  wasm: string | null;
+} | null> {
   const client = rpc();
   if (!client) {
     return null;
@@ -83,7 +86,9 @@ export async function fetchVerifyClientScript(): Promise<{ code: string; wasm: s
 
   try {
     const { code, wasm } = await client.getClientScript({});
-    return code ? { code, wasm: wasm.length > 0 ? Buffer.from(wasm).toString("base64") : null } : null;
+    return code
+      ? { code, wasm: wasm.length > 0 ? Buffer.from(wasm).toString("base64") : null }
+      : null;
   } catch {
     return null;
   }

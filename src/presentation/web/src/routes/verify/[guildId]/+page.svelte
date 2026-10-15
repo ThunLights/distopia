@@ -51,8 +51,13 @@
       return;
     }
     verifying = true;
-    verified = await verifyGuild(guildId, turnstileToken, clientPlugin);
-    verifying = false;
+    try {
+      verified = await verifyGuild(guildId, turnstileToken, clientPlugin);
+    } catch {
+      verified = false;
+    } finally {
+      verifying = false;
+    }
     if (!verified) {
       // A Turnstile token is single-use -- without this, every retry after a failure keeps
       // sending the same already-used token and fails Turnstile validation again, forcing a

@@ -59,8 +59,11 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
   // redoing both on every request. Cache the promise itself (not just its resolution) so
   // concurrent first callers share one in-flight computation rather than racing.
   let clientScriptCache: Promise<string | null> | undefined;
+  // The wasm must come from the same file as the script it's paired with (its init() expects
+  // that exact module), so remember which one won rather than re-scanning in getClientWasm.
+  let scriptProvider: VerifyPluginSlot | undefined;
 
-  return {
+  const merged: VerifyServerPlugin = {
     async evaluate(input) {
       for (const mod of modules) {
         if (mod.evaluate && !(await mod.evaluate(input))) {
@@ -76,6 +79,7 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
           if (mod.getClientScript) {
             const script = await mod.getClientScript();
             if (script) {
+              scriptProvider = mod;
               return obfuscate(script);
             }
           }
@@ -93,12 +97,8 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
     },
 
     async getClientWasm() {
-      for (const mod of modules) {
-        if (mod.getClientWasm) {
-          return await mod.getClientWasm();
-        }
-      }
-      return null;
+      await merged.getClientScript();
+      return (await scriptProvider?.getClientWasm?.()) ?? null;
     },
 
     async decrypt(encrypted, request) {
@@ -110,4 +110,5 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
       return null;
     },
   };
+  return merged;
 }
