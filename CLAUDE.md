@@ -664,8 +664,13 @@ the same shape for the next one, and note that they don't all share one directio
   type-checked anywhere, without this monorepo. Even the anti-scraping body cipher is
   plugin-loaded, not hardcoded here: `VerifyClientPlugin`'s optional `encrypt()` (served via
   `GetClientScript`) and `VerifyServerPlugin.decrypt()` (via `VerifyService.Decrypt`)
-  are the extension points. See `k8s/README.md`'s "Verify RPC" section for the full wiring
-  instructions.
+  are the extension points. The client script (and optional WebAssembly, `getClientWasm()` →
+  `VerifyClientPlugin.init(wasm)`, which must live in the same file as the `getClientScript()`
+  that wins) is **inlined into the SSR'd `/verify/[guildId]` page data** — there is
+  deliberately no fetchable plugin URL (the old `/api/verify/plugin` was removed), so don't
+  reintroduce one. Plugin templates (dot-prefixed, so a loader skips them) live in the
+  top-level `plugin/` folder: `.fingerprint`, `.anti-scraping`, `.wasm`. See `k8s/README.md`'s
+  "Verify RPC" section for the full wiring instructions.
 
 ### Adding a new RPC contract
 

@@ -730,8 +730,14 @@ that may or may not exist on disk really is resolved at runtime, the same trick
 (SvelteKit/Vite statically resolves and fails the build on a dynamic import whose target
 doesn't exist), which is exactly why the plugin lives in its own dedicated service instead.
 
-Two extensibility points exist for anti-scraping signal beyond `Evaluate` itself, both
+Three extensibility points exist for anti-scraping signal beyond `Evaluate` itself, all
 implemented by your plugin file(s), not this repo:
+- **Client script and wasm are inlined into the page, not fetched.** `routes/verify/[guildId]`'s
+  load calls `VerifyService.GetClientScript` and embeds `code` (and `wasm`, base64) in the
+  SSR'd page data, so there is no plugin URL to find or block. A plugin may also define
+  `getClientWasm()`; its bytes reach the client script's optional `init(wasm)`. It must be
+  defined in the same file as the `getClientScript()` that is served -- the loader takes wasm
+  from that file only. See `plugin/.wasm` for a template.
 - **Body obfuscation is plugin-loaded, not built in.** A plugin's `getClientScript()` may
   serve a module that optionally exports `encrypt(json): string` (`distopia`'s
   `VerifyClientPlugin`) -- e.g. a private R25A/R25B-style cipher like
