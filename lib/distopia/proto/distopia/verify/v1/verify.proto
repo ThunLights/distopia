@@ -16,7 +16,7 @@ service VerifyService {
   // block verification.
   rpc Evaluate(EvaluateRequest) returns (EvaluateResponse) {}
   // Raw JS source for the optional browser-side collector/cipher script, served to the
-  // client by presentation-web's routes/api/verify/plugin/+server.ts. Empty `code` means
+  // client by presentation-web, which inlines it (and `wasm`) into the SSR'd verify page. Empty `code` means
   // "nothing to serve" (treated the same as the whole service being unconfigured). The
   // module it default-exports (distopia's VerifyClientPlugin) may optionally provide its own
   // encrypt() -- e.g. a private R25A/R25B-style cipher -- to obfuscate the /api/verify body
@@ -60,6 +60,8 @@ message EvaluateResponse {
 message GetClientScriptRequest {}
 message GetClientScriptResponse {
   string code = 1;
+  // Optional WebAssembly binary handed to the client plugin's init(). Empty means none.
+  bytes wasm = 2;
 }
 
 message DecryptRequest {

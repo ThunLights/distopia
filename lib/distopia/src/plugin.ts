@@ -34,12 +34,20 @@ export interface VerifyServerPlugin {
   // as-is by presentation-web. Return null/"" for "nothing to serve".
   getClientScript(): Promise<string | null> | string | null;
 
+  // Optional WebAssembly binary, inlined into the verify page alongside the script and passed
+  // to VerifyClientPlugin.init().
+  getClientWasm?(): Promise<Uint8Array | null> | Uint8Array | null;
+
   // Reverses whatever the client script's own encrypt() produced. Return null on failure
   // (treated like any other invalid body).
   decrypt(encrypted: string, request: VerifyRequestContext): Promise<string | null> | string | null;
 }
 
 export interface VerifyClientPlugin {
+  // Optional: called once before collect()/encrypt() with the server plugin's getClientWasm()
+  // bytes, or null when it has none.
+  init?(wasm: ArrayBuffer | null): Promise<void> | void;
+
   // Runs in the browser on the verify page. Whatever is returned is sent to
   // VerifyServerPlugin.evaluate as `extra`, JSON-round-tripped.
   collect(): Promise<unknown> | unknown;

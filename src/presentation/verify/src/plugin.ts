@@ -49,6 +49,15 @@ export async function getClientScript(): Promise<string> {
   }
 }
 
+export async function getClientWasm(): Promise<Uint8Array> {
+  const plugin = await getPlugin();
+  try {
+    return (await plugin?.getClientWasm?.()) ?? new Uint8Array();
+  } catch {
+    return new Uint8Array();
+  }
+}
+
 export async function decrypt(
   encrypted: string,
   request: VerifyRequestContext,

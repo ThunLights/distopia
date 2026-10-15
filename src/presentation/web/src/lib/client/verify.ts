@@ -7,29 +7,38 @@ import {
 } from "$lib/shared/types/routes/api/verify";
 import type { VerifyClientPlugin } from "distopia";
 
-// Fetched (not statically imported) so this works whether or not a private plugin is
-// configured on this deployment -- see lib/server/verifyPlugin.ts for the server-side half
-// of the same reasoning. Both collect() (anti-bot signal) and the optional encrypt() (body
-// obfuscation, e.g. a private R25A/R25B-style cipher) come from this one module so a plugin
-// author only has to ship one script.
-async function loadClientPlugin(): Promise<VerifyClientPlugin | null> {
-  const response = await fetch("/api/verify/plugin");
-  if (!response.ok) {
+// The script (and optional wasm) is inlined into the SSR'd page by the verify route's load, so
+// there is no separate plugin URL to find or block. Both collect() (anti-bot signal) and the
+// optional encrypt() (body obfuscation) come from this one module.
+type ClientPluginBundle = { code: string; wasm: string | null };
+
+function base64ToBuffer(base64: string): ArrayBuffer {
+  return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)).buffer;
+}
+
+async function loadClientPlugin(
+  bundle: ClientPluginBundle | null,
+): Promise<VerifyClientPlugin | null> {
+  if (!bundle) {
     return null;
   }
 
-  const code = await response.text();
-  const blobUrl = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
+  const blobUrl = URL.createObjectURL(new Blob([bundle.code], { type: "text/javascript" }));
   try {
     const mod = (await import(/* @vite-ignore */ blobUrl)) as { default: VerifyClientPlugin };
+    await mod.default.init?.(bundle.wasm ? base64ToBuffer(bundle.wasm) : null);
     return mod.default;
   } finally {
     URL.revokeObjectURL(blobUrl);
   }
 }
 
-export async function verifyGuild(guildId: string, turnstileToken: string): Promise<boolean> {
-  const plugin = await loadClientPlugin();
+export async function verifyGuild(
+  guildId: string,
+  turnstileToken: string,
+  bundle: ClientPluginBundle | null,
+): Promise<boolean> {
+  const plugin = await loadClientPlugin(bundle);
   const extra = await plugin?.collect();
   const json = JSON.stringify({ guildId, turnstileToken, extra } satisfies PostBody);
   const encrypted = plugin?.encrypt ? plugin.encrypt(json) : null;

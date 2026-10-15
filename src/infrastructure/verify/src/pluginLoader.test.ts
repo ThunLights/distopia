@@ -94,4 +94,13 @@ describe("loadPluginFolder", () => {
     await expect(plugin!.getClientScript()).rejects.toThrow("boom");
     await expect(plugin!.getClientScript()).resolves.toContain("ok");
   });
+
+  it("returns the first plugin file's client wasm", async () => {
+    await writeFile(
+      join(dir, "a.mjs"),
+      "export default { getClientWasm: () => new Uint8Array([0, 97, 115, 109]) };",
+    );
+    const plugin = await loadPluginFolder(dir);
+    expect(await plugin!.getClientWasm!()).toEqual(new Uint8Array([0, 97, 115, 109]));
+  });
 });

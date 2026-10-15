@@ -92,6 +92,15 @@ export async function loadPluginFolder(dir: string): Promise<VerifyServerPlugin 
       return clientScriptCache;
     },
 
+    async getClientWasm() {
+      for (const mod of modules) {
+        if (mod.getClientWasm) {
+          return await mod.getClientWasm();
+        }
+      }
+      return null;
+    },
+
     async decrypt(encrypted, request) {
       for (const mod of modules) {
         if (mod.decrypt) {
