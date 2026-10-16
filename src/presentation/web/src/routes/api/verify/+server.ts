@@ -1,7 +1,12 @@
 import { env } from "$env/dynamic/private";
 import { core } from "$lib/server/core";
 import { errorJson } from "$lib/server/res";
-import { decryptPluginBody, evaluateVerifyPlugin, pluginHeaders } from "$lib/server/verifyPlugin";
+import {
+  decryptPluginBody,
+  evaluateVerifyPlugin,
+  isVerifyPluginConfigured,
+  pluginHeaders,
+} from "$lib/server/verifyPlugin";
 import {
   ENCRYPTED_BODY_HEADER,
   ENCRYPTED_BODY_VALUE,
@@ -166,6 +171,10 @@ export const POST: RequestHandler = async (e) => {
   const text = await e.request.text();
   const isPluginEncrypted = e.request.headers.get(ENCRYPTED_BODY_HEADER) === ENCRYPTED_BODY_VALUE;
   const pluginRequestContext = { headers: pluginHeaders(e.request.headers), ip: clientIp(e) };
+
+  if (isVerifyPluginConfigured() && !isPluginEncrypted) {
+    return errorJson("Invalid Body");
+  }
 
   let parsedJson: unknown;
   try {
