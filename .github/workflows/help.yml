@@ -94,5 +94,8 @@ jobs:
           git add -A
           git diff --cached --quiet && exit 0
           git commit -m "Deploy help site (${GITHUB_SHA::7})"
-          git pull --rebase origin gh-pages
-          git push origin gh-pages
+          for i in 1 2 3; do
+            git pull --rebase origin gh-pages && git push origin gh-pages && exit 0
+            sleep $((i * 3))
+          done
+          exit 1

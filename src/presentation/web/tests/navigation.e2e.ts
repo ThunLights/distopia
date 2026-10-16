@@ -29,11 +29,12 @@ test("フレンド募集 nav link navigates to /friends", async ({ page }) => {
   await expect(page).toHaveTitle(/フレンド募集/);
 });
 
-test("ヘルプ nav link navigates to /help", async ({ page }) => {
+test("ヘルプ nav link points to the docs site", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: "ヘルプ" }).click();
-  await expect(page).toHaveURL(/\/help/);
-  await expect(page).toHaveTitle(/Help/);
+  await expect(page.getByRole("link", { name: "ヘルプ" })).toHaveAttribute(
+    "href",
+    "https://docs.distopia.top",
+  );
 });
 
 test("その他 nav link navigates to /other", async ({ page }) => {
@@ -109,9 +110,6 @@ test("page title updates correctly as the user navigates between pages", async (
 
   await page.goto("/ranking");
   await expect(page).toHaveTitle(/サーバーランキング/);
-
-  await page.goto("/help");
-  await expect(page).toHaveTitle(/Help/);
 
   await page.goto("/staff");
   await expect(page).toHaveTitle(/スタッフ情報/);

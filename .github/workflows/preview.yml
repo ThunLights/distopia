@@ -86,6 +86,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    concurrency:
+      group: gh-pages-help-deploy
+      cancel-in-progress: false
 
     steps:
       - name: Checkout gh-pages
@@ -143,6 +146,9 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    concurrency:
+      group: gh-pages-help-deploy
+      cancel-in-progress: false
 
     steps:
       - name: Checkout gh-pages
@@ -156,4 +162,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-            git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" && git pull --rebase origin gh-pages && git push origin gh-pages || echo "No changes to commit"
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}"
+          git pull --rebase origin gh-pages
+          git push origin gh-pages
