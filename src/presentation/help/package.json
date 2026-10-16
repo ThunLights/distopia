@@ -6,6 +6,7 @@
     "dev": "vitepress dev docs --host",
     "docs:build": "vitepress build docs",
     "preview": "vitepress preview docs",
+    "typecheck": "tsc --noEmit",
     "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts docs/.vitepress/config.ts && oxlint --config ../../../lib/template/oxlint.config.ts docs/.vitepress/config.ts",
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts docs/.vitepress/config.ts"
   },
