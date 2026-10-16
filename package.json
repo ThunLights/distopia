@@ -15,7 +15,9 @@
     "version": "npx changeset version && turbo run version:jsr",
     "prepare": "husky",
     "storybook": "turbo run storybook",
-    "build-storybook": "turbo run build-storybook"
+    "build-storybook": "turbo run build-storybook",
+    "docs:dev": "bun run --filter presentation-help dev",
+    "docs:build": "bun run --filter presentation-help docs:build"
   },
   "packageManager": "bun@1.4.2",
   "devDependencies": {
