@@ -1,22 +1,36 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { DISCORD_INVITE_LINK } from "$lib/shared/constant";
 
   const { fixed = false } = $props();
 </script>
 
 <footer class={fixed ? "footer-fixed" : ""}>
-  <p>Contact: <a href={DISCORD_INVITE_LINK} rel="external">Official Discord Server</a></p>
-  <p>Supported by <a href="https://www.thunlights.com">Team ThunLights</a></p>
-  <p>Distopia</p>
+  <nav aria-label="フッター">
+    <a href={resolve("/terms")}>利用規約</a>
+    <a href={resolve("/privacy")}>プライバシーポリシー</a>
+    <a href={resolve("/specific-commercial-transaction-act")}>特定商取引法に基づく表記</a>
+    <a href={resolve("/guideline")}>ガイドライン</a>
+    <a href={DISCORD_INVITE_LINK} rel="external">お問い合わせ</a>
+  </nav>
+  <p>
+    Supported by <a href="https://www.thunlights.com">Team ThunLights</a> · © Distopia
+  </p>
 </footer>
 
 <style>
   footer {
     background-color: #212227;
-  }
-  footer p {
-    padding: 3px 5px;
+    padding: 12px 16px;
+    text-align: center;
     color: #9ca3af;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 16px;
+    margin-bottom: 6px;
   }
   a {
     color: rgb(88, 212, 228);
