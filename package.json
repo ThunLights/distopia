@@ -16,8 +16,8 @@
     "prepare": "husky",
     "storybook": "turbo run storybook",
     "build-storybook": "turbo run build-storybook",
-    "docs:dev": "bun run --cwd src/presentation/help dev",
-    "docs:build": "bun run --cwd src/presentation/help docs:build"
+    "docs:dev": "bun run --filter presentation-help dev",
+    "docs:build": "bun run --filter presentation-help docs:build"
   },
   "packageManager": "bun@1.4.2",
   "devDependencies": {
