@@ -32,6 +32,10 @@ function rpc(): Client<typeof VerifyService> | null {
   return rpcClient;
 }
 
+export function isVerifyPluginConfigured(): boolean {
+  return rpc() !== null;
+}
+
 // Headers a private VerifyService implementation has no legitimate reason to see -- this
 // request's own session credentials, not anti-bot signal.
 const STRIPPED_HEADERS = new Set(["cookie", "authorization"]);

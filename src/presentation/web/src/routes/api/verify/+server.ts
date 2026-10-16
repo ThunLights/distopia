@@ -1,7 +1,12 @@
 import { env } from "$env/dynamic/private";
 import { core } from "$lib/server/core";
 import { errorJson } from "$lib/server/res";
-import { decryptPluginBody, evaluateVerifyPlugin, pluginHeaders } from "$lib/server/verifyPlugin";
+import {
+  decryptPluginBody,
+  evaluateVerifyPlugin,
+  isVerifyPluginConfigured,
+  pluginHeaders,
+} from "$lib/server/verifyPlugin";
 import {
   ENCRYPTED_BODY_HEADER,
   ENCRYPTED_BODY_VALUE,
@@ -167,6 +172,10 @@ export const POST: RequestHandler = async (e) => {
   const isPluginEncrypted = e.request.headers.get(ENCRYPTED_BODY_HEADER) === ENCRYPTED_BODY_VALUE;
   const pluginRequestContext = { headers: pluginHeaders(e.request.headers), ip: clientIp(e) };
 
+  if (isVerifyPluginConfigured() && !isPluginEncrypted) {
+    return errorJson("Invalid Body");
+  }
+
   let parsedJson: unknown;
   try {
     if (isPluginEncrypted) {
@@ -192,6 +201,9 @@ export const POST: RequestHandler = async (e) => {
     );
   }
   const body = result.data;
+  // Only a body the plugin actually decrypted may contribute a fingerprint; a plain-JSON body
+  // is attacker-controlled and must never be stored or evaluated as one.
+  const extra = isPluginEncrypted ? body.extra : undefined;
 
   const setting = await core.verify.getSetting(body.guildId);
   if (!setting?.enabled || !setting.roleId) {
@@ -220,7 +232,7 @@ export const POST: RequestHandler = async (e) => {
       userId: user.id,
       guildId: body.guildId,
       success: false,
-      fingerprint: body.extra,
+      fingerprint: extra,
       email,
       ...vpnLogFields,
     });
@@ -233,7 +245,7 @@ export const POST: RequestHandler = async (e) => {
       userId: user.id,
       guildId: body.guildId,
       success: false,
-      fingerprint: body.extra,
+      fingerprint: extra,
       email,
       ...vpnLogFields,
     });
@@ -244,7 +256,7 @@ export const POST: RequestHandler = async (e) => {
   const allowed = await evaluateVerifyPlugin({
     guildId: body.guildId,
     userId: user.id,
-    extra: body.extra,
+    extra,
     ...pluginRequestContext,
   });
   if (!allowed) {
@@ -252,7 +264,7 @@ export const POST: RequestHandler = async (e) => {
       userId: user.id,
       guildId: body.guildId,
       success: false,
-      fingerprint: body.extra,
+      fingerprint: extra,
       email,
       ...vpnLogFields,
     });
@@ -274,7 +286,7 @@ export const POST: RequestHandler = async (e) => {
     userId: user.id,
     guildId: body.guildId,
     success: true,
-    fingerprint: body.extra,
+    fingerprint: extra,
     email,
     ...vpnLogFields,
   });
