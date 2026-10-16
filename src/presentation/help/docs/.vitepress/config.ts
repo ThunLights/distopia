@@ -1,7 +1,11 @@
-import { buildBotInviteUrl } from "infra-discord/oauth-url";
-import { defineConfig } from "vitepress";
+import { fileURLToPath } from "node:url";
 
-const botId = process.env.PUBLIC_BOT_ID;
+import { buildBotInviteUrl } from "infra-discord/oauth-url";
+import { defineConfig, loadEnv } from "vitepress";
+
+// Reads the repo-root .env when present (local/devcontainer); real env vars win, so CI needs no file.
+const repoRoot = fileURLToPath(new URL("../../../../..", import.meta.url));
+const botId = loadEnv("", repoRoot, "PUBLIC_").PUBLIC_BOT_ID;
 if (!botId) {
   throw new Error("PUBLIC_BOT_ID is required to build the bot invite link");
 }
