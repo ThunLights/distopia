@@ -204,6 +204,7 @@
       },
       "devDependencies": {
         "@types/node": "catalog:",
+        "vitest": "catalog:",
       },
       "peerDependencies": {
         "typescript": "catalog:",
@@ -356,6 +357,7 @@
     "src/presentation/help": {
       "name": "presentation-help",
       "dependencies": {
+        "infra-discord": "workspace:*",
         "vitepress": "1.6.4",
       },
       "devDependencies": {

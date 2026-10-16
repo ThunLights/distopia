@@ -1,3 +1,4 @@
+import { buildBotInviteUrl } from "infra-discord/oauth-url";
 import { defineConfig } from "vitepress";
 
 const botId = process.env.PUBLIC_BOT_ID;
@@ -5,12 +6,7 @@ if (!botId) {
   throw new Error("PUBLIC_BOT_ID is required to build the bot invite link");
 }
 
-const botInviteLink = `https://discord.com/oauth2/authorize?${new URLSearchParams({
-  client_id: botId,
-  permissions: "8",
-  integration_type: "0",
-  scope: "bot",
-})}`;
+const botInviteLink = buildBotInviteUrl(botId);
 
 export default defineConfig({
   lang: "ja",

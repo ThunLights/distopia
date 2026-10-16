@@ -11,6 +11,7 @@
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts docs/.vitepress/config.ts"
   },
   "dependencies": {
+    "infra-discord": "workspace:*",
     "vitepress": "1.6.4"
   },
   "devDependencies": {
