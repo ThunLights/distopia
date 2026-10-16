@@ -28,7 +28,7 @@ export class HelpCommand extends ChatInputCommandBase<Options> {
     _options: Options,
   ): Promise<string | InteractionReplyOptions | MessagePayload> {
     return {
-      content: "https://distopia.top/help",
+      content: "https://docs.distopia.top",
       flags: [MessageFlags.Ephemeral],
     } satisfies InteractionReplyOptions;
   }
