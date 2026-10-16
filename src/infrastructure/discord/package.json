@@ -5,12 +5,16 @@
   "exports": {
     ".": {
       "import": "./src/index.ts"
+    },
+    "./oauth-url": {
+      "import": "./src/oauthUrl.ts"
     }
   },
   "scripts": {
     "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
     "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
     "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -19,7 +23,8 @@
     "infra-http": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "catalog:"
+    "@types/node": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "typescript": "catalog:"

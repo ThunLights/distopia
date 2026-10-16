@@ -16,26 +16,26 @@
 
 ## 1位
 
-![image](/help/1.webp)
+![image](/images/1.webp)
 
 ## 2位
 
-![image](/help/2.webp)
+![image](/images/2.webp)
 
 ## 3位
 
-![image](/help/3.webp)
+![image](/images/3.webp)
 
 ## 4～10位
 
-![image](/help/10.webp)
+![image](/images/10.webp)
 
 ## 11～30位
 
-![image](/help/30.webp)
+![image](/images/30.webp)
 
 ## 31～50位
 
-![image](/help/50.webp)
+![image](/images/50.webp)
 
 ※50位より下には枠は付きません

@@ -13,6 +13,7 @@ import {
   staffsKeyValue as baseStaff,
   supportersKeyValue as baseSupporters,
 } from "app-core/constant";
+import { buildBotInviteUrl, buildLoginUrl } from "infra-discord/oauth-url";
 
 export * from "app-core/constant";
 
@@ -87,26 +88,6 @@ export const supporters = [
   },
 ] satisfies Supporter[];
 
-function buildDiscordOAuthUrl(params: Record<string, string>): string {
-  const url = new URL("https://discord.com/oauth2/authorize");
+export const PUBLIC_OAUTH_URL = buildLoginUrl(env.PUBLIC_BOT_ID!, `${env.PUBLIC_URL}/auth`);
 
-  for (const [key, value] of Object.entries(params)) {
-    url.searchParams.set(key, value);
-  }
-
-  return url.toString();
-}
-
-export const PUBLIC_OAUTH_URL = buildDiscordOAuthUrl({
-  client_id: env.PUBLIC_BOT_ID!,
-  response_type: "code",
-  redirect_uri: `${env.PUBLIC_URL}/auth`,
-  scope: "identify guilds email guilds.join",
-});
-
-export const PUBLIC_BOT_INVITE_LINK = buildDiscordOAuthUrl({
-  client_id: env.PUBLIC_BOT_ID!,
-  permissions: "8",
-  integration_type: "0",
-  scope: "bot",
-});
+export const PUBLIC_BOT_INVITE_LINK = buildBotInviteUrl(env.PUBLIC_BOT_ID!);

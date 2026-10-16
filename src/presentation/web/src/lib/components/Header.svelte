@@ -61,7 +61,7 @@
         </a>
       </div>
       <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("/help")}>
+        <a href="https://docs.distopia.top">
           <p class="header-other-content">ヘルプ</p>
         </a>
       </div>
