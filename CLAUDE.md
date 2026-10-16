@@ -311,11 +311,14 @@ All input validation uses Zod 4 (`import { z } from "zod"`). Key patterns:
 
 ## Help Site (`presentation-help`)
 
-VitePress site for `docs.distopia.top`; the old `/help` routes in `presentation-web` only redirect there.
-Pages live in `src/presentation/help/docs/*.md`. Its build script is `docs:build` (not `build`), so
+VitePress site for `docs.distopia.top`, hosted on Cloudflare Pages (Git integration, not a GitHub
+Actions workflow); the old `/help` routes in `presentation-web` only redirect there. Pages live in
+`src/presentation/help/docs/*.md`. Its build script is `docs:build` (not `build`), so
 `bun run build` and the production image skip it. `PUBLIC_BOT_ID` is required to build (it fills the
-bot invite link). `.github/workflows/help.yml` publishes it to the `gh-pages` branch root on push to
-`main`; Storybook PR previews live under `gh-pages:storybook/` (`preview.yml`) and must be preserved.
+bot invite link). Cloudflare Pages settings: build command
+`bun install --frozen-lockfile && cd src/presentation/help && bun run docs:build`, output directory
+`src/presentation/help/docs/.vitepress/dist`, env `PUBLIC_BOT_ID` and `BUN_VERSION`. `gh-pages` is
+only used for Storybook PR previews (`preview.yml`).
 
 ---
 

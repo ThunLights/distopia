@@ -86,9 +86,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    concurrency:
-      group: gh-pages-help-deploy
-      cancel-in-progress: false
 
     steps:
       - name: Checkout gh-pages
@@ -111,6 +108,13 @@ jobs:
           fi
           mv -f tmp/storybook-static/* storybook/${{ env.PAGE_DIR }}
 
+      - name: Clean Dir
+        run: |
+          find . -maxdepth 1 -mindepth 1 \
+          ! -name 'storybook' \
+          ! -name '.git' \
+          -exec rm -rf {} +
+
       - name: Create .nojekyll
         run: touch .nojekyll
 
@@ -120,7 +124,6 @@ jobs:
           git config --global user.email "action@github.com"
           git add .
           git commit -m "Deploy PR preview for #${{ github.event.pull_request.number }}"
-          git pull --rebase origin gh-pages
           git push origin gh-pages
 
       - name: Comment PR
@@ -146,9 +149,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    concurrency:
-      group: gh-pages-help-deploy
-      cancel-in-progress: false
 
     steps:
       - name: Checkout gh-pages
@@ -162,7 +162,4 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}"
-          git pull --rebase origin gh-pages
-          git push origin gh-pages
+            git commit -m "Remove PR preview for #${{ github.event.pull_request.number }}" && git push origin gh-pages || echo "No changes to commit"
