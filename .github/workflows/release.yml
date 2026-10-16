@@ -34,7 +34,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.0'
+          bun-version: '1.4.3'
 
       - name: Install Deps
         run: bun ci
@@ -106,7 +106,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.0'
+          bun-version: '1.4.3'
 
       - name: Update NPM
         run: npm i -g npm@11.18.0
@@ -159,7 +159,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.4.0'
+          bun-version: '1.4.3'
 
       - name: Update NPM
         run: npm i -g npm@11.18.0

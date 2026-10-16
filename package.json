@@ -19,7 +19,7 @@
     "docs:dev": "bun run --filter presentation-help dev",
     "docs:build": "bun run --filter presentation-help docs:build"
   },
-  "packageManager": "bun@1.4.2",
+  "packageManager": "bun@1.4.3",
   "devDependencies": {
     "@changesets/cli": "3.0.3",
     "bun": "catalog:",
@@ -48,7 +48,7 @@
       "@noble/ciphers": "2.4.0",
       "@standard-schema/spec": "1.1.0",
       "@types/node": "24.13.3",
-      "bun": "1.4.2",
+      "bun": "1.4.3",
       "discord.js": "14.27.0",
       "ffmpeg-static": "5.3.0",
       "opusscript": "0.1.1",
