@@ -35,7 +35,8 @@
   "workspaces": {
     "packages": [
       "./lib/*",
-      "./src/**/*"
+      "./src/*/*",
+      "./src/domain/repository/*"
     ],
     "catalog": {
       "@bufbuild/buf": "1.73.0",
