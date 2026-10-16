@@ -192,6 +192,9 @@ export const POST: RequestHandler = async (e) => {
     );
   }
   const body = result.data;
+  // Only a body the plugin actually decrypted may contribute a fingerprint; a plain-JSON body
+  // is attacker-controlled and must never be stored or evaluated as one.
+  const extra = isPluginEncrypted ? body.extra : undefined;
 
   const setting = await core.verify.getSetting(body.guildId);
   if (!setting?.enabled || !setting.roleId) {
@@ -220,7 +223,7 @@ export const POST: RequestHandler = async (e) => {
       userId: user.id,
       guildId: body.guildId,
       success: false,
-      fingerprint: body.extra,
+      fingerprint: extra,
       email,
       ...vpnLogFields,
     });
@@ -233,7 +236,7 @@ export const POST: RequestHandler = async (e) => {
       userId: user.id,
       guildId: body.guildId,
       success: false,
-      fingerprint: body.extra,
+      fingerprint: extra,
       email,
       ...vpnLogFields,
     });
@@ -244,7 +247,7 @@ export const POST: RequestHandler = async (e) => {
   const allowed = await evaluateVerifyPlugin({
     guildId: body.guildId,
     userId: user.id,
-    extra: body.extra,
+    extra,
     ...pluginRequestContext,
   });
   if (!allowed) {
@@ -252,7 +255,7 @@ export const POST: RequestHandler = async (e) => {
       userId: user.id,
       guildId: body.guildId,
       success: false,
-      fingerprint: body.extra,
+      fingerprint: extra,
       email,
       ...vpnLogFields,
     });
@@ -274,7 +277,7 @@ export const POST: RequestHandler = async (e) => {
     userId: user.id,
     guildId: body.guildId,
     success: true,
-    fingerprint: body.extra,
+    fingerprint: extra,
     email,
     ...vpnLogFields,
   });
