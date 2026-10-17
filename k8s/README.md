@@ -182,6 +182,7 @@ kubectl create secret generic distopia-env -n distopia \
   --from-literal=PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID='...' \
   --from-literal=PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID='...' \
   --from-literal=PUBLIC_BOT_ID='...' \
+  --from-literal=PUBLIC_SELLER_NAME='...' \
   --from-literal=BOT_TOKEN='...' \
   --from-literal=BOT_SECRET='...' \
   --from-literal=SENTRY_ORG='thunlights' \
