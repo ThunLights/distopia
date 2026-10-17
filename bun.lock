@@ -412,6 +412,8 @@
         "@connectrpc/connect": "catalog:",
         "@connectrpc/connect-node": "catalog:",
         "distopia": "workspace:*",
+        "infra-aip": "workspace:*",
+        "infra-http": "workspace:*",
         "infra-rpc": "workspace:*",
         "infra-verify": "workspace:*",
       },

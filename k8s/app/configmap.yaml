@@ -25,6 +25,10 @@
 # distopia-app calls it (see bot-deployment.yaml/bot-networkpolicy.yaml and
 # src/presentation/web/src/lib/server/discord.ts). Change them together with
 # bot-deployment.yaml's containerPort and bot-service.yaml's `rpc` port.
+#
+# VERIFY_RPC_URL is how distopia-app reaches distopia-verify (verify-deployment.yaml/
+# verify-service.yaml, port 8084). Committed here so it needs no manual setup; only
+# VERIFY_RPC_TOKEN (a Secret) still has to be created.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -38,3 +42,4 @@ data:
   SEARCHENGINE_RPC_URL: "http://distopia-searchengine:8082"
   BOT_RPC_PORT: "8083"
   BOT_RPC_URL: "http://distopia-bot:8083"
+  VERIFY_RPC_URL: "http://distopia-verify:8084"
