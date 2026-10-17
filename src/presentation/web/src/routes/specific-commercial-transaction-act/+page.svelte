@@ -10,10 +10,7 @@
   );
 </script>
 
-<Meta
-  title="特定商取引法に基づく表記"
-  description="Distopiaの特定商取引法に基づく表記です。"
-/>
+<Meta title="特定商取引法に基づく表記" description="Distopiaの特定商取引法に基づく表記です。" />
 
 <Block>
   <h1>特定商取引法に基づく表記</h1>
