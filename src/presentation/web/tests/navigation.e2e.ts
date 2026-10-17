@@ -88,9 +88,9 @@ test("Login button navigates through /login before reaching Discord", async ({ p
 
 // ── Footer navigation ──────────────────────────────────────────────────────────
 
-test("footer 'Official Discord Server' link points to a discord.gg invite", async ({ page }) => {
+test("footer 'お問い合わせ' link points to a discord.gg invite", async ({ page }) => {
   await page.goto("/");
-  const link = page.getByRole("link", { name: "Official Discord Server" });
+  const link = page.getByRole("link", { name: "お問い合わせ" });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute("href", /discord\.gg/);
 });
