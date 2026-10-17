@@ -1,4 +1,4 @@
-# distopia-verify: an OPTIONAL service, same image as distopia-app/distopia-bot (`command`
+# distopia-verify: a REQUIRED service (only its plugin Secret is optional), same image as distopia-app/distopia-bot (`command`
 # overridden to run presentation-verify, exactly like bot-deployment.yaml does for
 # presentation-bot) -- `bun run build` already builds every workspace package into it, so
 # nothing extra needs to be published for this.

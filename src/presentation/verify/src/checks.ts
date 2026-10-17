@@ -15,15 +15,15 @@ export type EvaluateResult =
   | { allowed: false; reason: string; vpn: Vpn };
 
 export async function verifyTurnstile(token: string, secret: string): Promise<boolean> {
-  const result = await safeFetch(TURNSTILE_SITEVERIFY_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ secret, response: token }).toString(),
-  });
-  if (result instanceof Error || !result.ok) {
-    return false;
-  }
   try {
+    const result = await safeFetch(TURNSTILE_SITEVERIFY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ secret, response: token }).toString(),
+    });
+    if (result instanceof Error || !result.ok) {
+      return false;
+    }
     const data = (await result.json()) as { success?: boolean };
     return data.success === true;
   } catch {

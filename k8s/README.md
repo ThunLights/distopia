@@ -764,9 +764,9 @@ implemented by your plugin file(s), not this repo:
 Wiring it up is two remaining steps once the Deployment/Service/NetworkPolicy themselves are
 live (`k8s/app/kustomization.yaml` lists all three, so the normal GitOps sync applies them
 automatically on every merge to main -- no separate `kubectl apply` needed, unlike the
-per-resource commands below for everything after that). Having them applied is already a
-complete, safe no-op-by-default state: every `VerifyService` method just falls back, and
-`distopia-app` doesn't even attempt the RPC call until the last step below.
+per-resource commands below for everything after that). Applying them alone is not enough:
+member verification is refused for every guild until `VERIFY_RPC_TOKEN` is set (step 2).
+With no plugin mounted, the plugin step just allows.
 
 ```bash
 # 1. Mount your actual plugin file(s) -- one or more bundled modules, each default-exporting
