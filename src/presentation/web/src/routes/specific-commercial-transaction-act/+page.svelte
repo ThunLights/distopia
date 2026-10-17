@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { env } from "$env/dynamic/public";
   import Block from "$lib/components/Block.svelte";
   import MarkDown from "$lib/components/MarkDown.svelte";
   import Meta from "$lib/components/Meta.svelte";
   import SpecificCommercialTransactionAct from "$lib/contents/SpecificCommercialTransactionAct.md?raw";
 
-  const content = SpecificCommercialTransactionAct.replaceAll(
-    "SELLER_NAME",
-    env.PUBLIC_SELLER_NAME ?? "",
+  const { data } = $props();
+  const content = $derived(
+    SpecificCommercialTransactionAct.replaceAll("SELLER_NAME", data.sellerName),
   );
 </script>
 
