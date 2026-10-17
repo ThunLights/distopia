@@ -2,18 +2,18 @@ syntax = "proto3";
 
 package distopia.verify.v1;
 
-// Implemented by a private, closed-source service that is NOT part of this repo (anti-bot/
-// fingerprinting logic the operator deliberately keeps out of the public thunlights/distopia
-// image) and called by presentation-web (lib/server/verifyPlugin.ts) during the member
+// Implemented by presentation-verify (anti-bot/fingerprinting logic stays in an optional,
+// privately-mounted plugin folder, never in the public image) and called by presentation-web (lib/server/verifyPlugin.ts) during the member
 // verification flow. See k8s/README.md's "Verify RPC" section for how that service is wired
-// up -- it's entirely optional; presentation-web falls back to always-allow when
+// up -- it is required for member verification; presentation-web refuses every attempt when
 // VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't configured. Generated here (not infra-rpc) so the
 // `distopia` npm/jsr package (lib/distopia/src/rpc.ts) has zero workspace dependency of its
 // own -- a prerequisite for `bun pm pack`/`npm publish` to work at all -- and infra-rpc
 // depends on `distopia` for this one contract instead, the reverse of every other service.
 service VerifyService {
-  // Extra server-side signal on top of the built-in Turnstile check. Return allowed=false to
-  // block verification.
+  // Runs the whole server-side verification decision: the optional VPN/proxy/Tor block, the
+  // Cloudflare Turnstile check, then the plugin's own evaluate(), in that order, stopping at the
+  // first rejection. allowed=false always carries a `reason` saying which step refused.
   rpc Evaluate(EvaluateRequest) returns (EvaluateResponse) {}
   // Raw JS source for the optional browser-side collector/cipher script, served to the
   // client by presentation-web, which inlines it (and `wasm`) into the SSR'd verify page. Empty `code` means
@@ -52,9 +52,25 @@ message EvaluateRequest {
   // (GetClientScript) returned from its own collect(), round-tripped here unchanged.
   string extra_json = 3;
   RequestContext request = 4;
+  // Cloudflare Turnstile token the browser obtained; single-use, verified by this service.
+  string turnstile_token = 5;
+  // The guild's opt-in VPN/proxy/Tor block (GuildVerify.blockVpn). When false the IP lookup is
+  // skipped entirely and `vpn` below comes back all-false.
+  bool block_vpn = 6;
 }
 message EvaluateResponse {
   bool allowed = 1;
+  // Why verification was refused, e.g. "Used VPN", "Turnstile verification failed". Unset when
+  // allowed. Shown to the user and written to the guild's verify log.
+  optional string reason = 2;
+  // Raw VPN lookup outcome, returned even on success so presentation-web can log it.
+  VpnResult vpn = 3;
+}
+message VpnResult {
+  bool is_vpn = 1;
+  bool is_proxy = 2;
+  bool is_tor = 3;
+  optional string provider = 4;
 }
 
 message GetClientScriptRequest {}

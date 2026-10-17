@@ -1,4 +1,4 @@
-# distopia-verify: an OPTIONAL service, same image as distopia-app/distopia-bot (`command`
+# distopia-verify: a REQUIRED service (only its plugin Secret is optional), same image as distopia-app/distopia-bot (`command`
 # overridden to run presentation-verify, exactly like bot-deployment.yaml does for
 # presentation-bot) -- `bun run build` already builds every workspace package into it, so
 # nothing extra needs to be published for this.
@@ -14,11 +14,10 @@
 # plugin file(s) for this Pod. See k8s/README.md's "Verify RPC" section and infra-rpc's
 # verify.proto.
 #
-# Entirely optional: distopia-app (src/presentation/web/src/lib/server/verifyPlugin.ts) falls
-# back to always-allow whenever VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't set on it, so nothing
-# here needs to exist for member verification (Turnstile + role grant) to work. Deploying
-# this with no plugin Secret mounted is also fine (every method just falls back the same way)
-# -- deploy it to get the wiring in place, mount the Secret whenever you have a plugin ready.
+# Required for member verification: distopia-app (src/presentation/web/src/lib/server/verifyPlugin.ts)
+# refuses every attempt when VERIFY_RPC_TOKEN isn't set on it, because the VPN
+# check and Cloudflare Turnstile run in this service (TURNSTILE_SECRET_KEY below). Only the
+# plugin Secret is optional: with none mounted, the plugin step just allows.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,6 +60,12 @@ spec:
                 secretKeyRef:
                   name: distopia-env
                   key: VERIFY_RPC_TOKEN
+            # Used by checks.ts to verify the Turnstile token server-side.
+            - name: TURNSTILE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-env
+                  key: TURNSTILE_SECRET_KEY
           volumeMounts:
             # Optional -- the one thing actually private here. `optional: true` means the
             # Pod starts fine with no Secret at all, in which case this path just keeps the

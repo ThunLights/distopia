@@ -649,9 +649,14 @@ the same shape for the next one, and note that they don't all share one directio
 - `presentation-verify` (`VerifyService`, `proto/distopia/verify/v1/verify.proto`) — a
   different shape from the other three in what it's *for*, not where it runs: it **is**
   built and deployed from this repo (same image as `presentation-web`/`presentation-bot`,
-  `command` overridden — see `bot-deployment.yaml`'s own precedent), but it's **optional**
-  and implements nothing itself. Every method (`src/presentation/verify/src/server/rpc.ts`)
-  delegates to `src/presentation/verify/src/plugin.ts`, which delegates to `infra-verify`'s
+  `command` overridden — see `bot-deployment.yaml`'s own precedent) and is **required** for
+  member verification; only its plugin folder is optional. `Evaluate`
+  (`src/presentation/verify/src/server/rpc.ts` → `checks.ts`) runs the whole server-side
+  decision — the guild's opt-in VPN/proxy/Tor block (`infra-aip`), the Cloudflare Turnstile
+  check (`TURNSTILE_SECRET_KEY` lives on this service, not on web), then the plugin's own
+  `evaluate` — and stops at the first refusal, returning `allowed=false` plus a `reason` such
+  as `Used VPN` or `Turnstile verification failed` (plus the raw VPN result for logging).
+  The other methods delegate to `src/presentation/verify/src/plugin.ts`, which delegates to `infra-verify`'s
   `loadPluginFolder` (`src/infrastructure/verify/src/pluginLoader.ts`) — a generic loader
   (not in `presentation-verify` itself, so it's reusable) that scans a *folder*
   (`VERIFY_PLUGIN_DIR`, default `src/presentation/verify/plugins/`) for non-dot-prefixed
@@ -670,10 +675,9 @@ the same shape for the next one, and note that they don't all share one directio
   script never bundled by Vite (unlike `presentation-web`, where the same trick would fail:
   Vite statically resolves a dynamic import at *build* time and errors if the target doesn't
   exist). `presentation-web` (`lib/server/verifyPlugin.ts`) is the
-  RPC *client* of this service and falls back to always-allow whenever
-  `VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` aren't configured on it — independent of whether
-  `distopia-verify` itself is deployed or has a plugin mounted, so there's no broken
-  intermediate state. The `distopia` npm/jsr package re-exports the RPC contract
+  RPC *client* of this service and refuses every verification attempt (reason `Verification
+  service is not configured`) whenever `VERIFY_RPC_TOKEN` isn't configured
+  on it (`VERIFY_RPC_URL` defaults to the in-cluster Service via `configmap.yaml`); whether a plugin is mounted on `distopia-verify` is independent of that. The `distopia` npm/jsr package re-exports the RPC contract
   (`lib/distopia/src/rpc.ts`) and the plugin contract (`lib/distopia/src/plugin.ts` —
   `VerifyServerPlugin`/`VerifyClientPlugin`) so a plugin file can be authored and
   type-checked anywhere, without this monorepo. Even the anti-scraping body cipher is
