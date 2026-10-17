@@ -1,12 +1,6 @@
-import { env } from "$env/dynamic/private";
 import { core } from "$lib/server/core";
 import { errorJson } from "$lib/server/res";
-import {
-  decryptPluginBody,
-  evaluateVerifyPlugin,
-  isVerifyPluginConfigured,
-  pluginHeaders,
-} from "$lib/server/verifyPlugin";
+import { decryptPluginBody, evaluateVerify, pluginHeaders } from "$lib/server/verifyPlugin";
 import {
   ENCRYPTED_BODY_HEADER,
   ENCRYPTED_BODY_VALUE,
@@ -14,11 +8,7 @@ import {
 } from "$lib/shared/types/routes/api/verify";
 import type { RequestEvent, RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
-import { checkVpn } from "infra-aip";
 import type { GuildVerify, UserVerifyLog } from "infra-database/types";
-import { safeFetch, safeUrl } from "infra-http";
-
-const TURNSTILE_SITEVERIFY_URL = safeUrl`https://challenges.cloudflare.com/turnstile/v0/siteverify`;
 
 // getClientAddress() can throw (SvelteKit's docs call this out for some adapters/hosts) --
 // treated as "couldn't determine it" rather than failing the whole request over it. Whether
@@ -33,74 +23,14 @@ function clientIp(e: RequestEvent): string | null {
   }
 }
 
-async function verifyTurnstile(token: string): Promise<boolean> {
-  const result = await safeFetch(TURNSTILE_SITEVERIFY_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY!, response: token }).toString(),
-  });
-
-  if (result instanceof Error) {
-    return false;
-  }
-
-  // safeFetch resolves to a Response for any HTTP status, including a 5xx error page from
-  // Cloudflare that isn't JSON -- treat both as a normal verification failure, not a thrown
-  // 500 out of this handler.
-  if (!result.ok) {
-    return false;
-  }
-  try {
-    const data = (await result.json()) as { success?: boolean };
-    return data.success === true;
-  } catch {
-    return false;
-  }
-}
-
-type VpnFlags = {
-  blocked: boolean;
-  isVpn: boolean;
-  isProxy: boolean;
-  isTor: boolean;
-  provider: string | null;
-};
-
-const CLEAN_VPN_FLAGS: VpnFlags = {
-  blocked: false,
-  isVpn: false,
-  isProxy: false,
-  isTor: false,
-  provider: null,
-};
-
-// No IP, or the lookup itself failing, is treated the same as a confirmed VPN/proxy hit
-// (blocked: true) -- same reasoning as verifyTurnstile's own fetch-failure handling above:
-// once an admin opts into this check (GuildVerify.blockVpn), its own failure shouldn't
-// silently become an allow.
-async function checkVpnFlags(ip: string | null): Promise<VpnFlags> {
-  if (!ip) {
-    return { ...CLEAN_VPN_FLAGS, blocked: true };
-  }
-
-  const result = await checkVpn(ip);
-  if (!result.checked) {
-    return { ...CLEAN_VPN_FLAGS, blocked: true };
-  }
-
-  return {
-    blocked: result.isVpn || result.isProxy || result.isTor,
-    isVpn: result.isVpn,
-    isProxy: result.isProxy,
-    isTor: result.isTor,
-    provider: result.provider,
-  };
-}
-
 // Posts one log entry per verify attempt to the admin-configured log channel -- a no-op when
 // unset. Built here (not in app-core's Verify.ts) so app-core doesn't need a discord.js
 // dependency just for this one JSON-shaped embed.
-async function postVerifyLog(setting: GuildVerify, row: UserVerifyLog): Promise<void> {
+async function postVerifyLog(
+  setting: GuildVerify,
+  row: UserVerifyLog,
+  reason: string | null,
+): Promise<void> {
   if (!setting.logChannelId) {
     return;
   }
@@ -109,6 +39,10 @@ async function postVerifyLog(setting: GuildVerify, row: UserVerifyLog): Promise<
     { name: "ユーザー", value: `<@${row.userId}> (${row.userId})` },
     { name: "結果", value: row.success ? "✅ 成功" : "❌ 失敗" },
   ];
+
+  if (reason) {
+    fields.push({ name: "拒否理由", value: reason });
+  }
 
   if (row.email) {
     // Masked, not shown in full -- an admin picks any GuildText channel for this (no
@@ -172,16 +106,11 @@ export const POST: RequestHandler = async (e) => {
   const isPluginEncrypted = e.request.headers.get(ENCRYPTED_BODY_HEADER) === ENCRYPTED_BODY_VALUE;
   const pluginRequestContext = { headers: pluginHeaders(e.request.headers), ip: clientIp(e) };
 
-  if (isVerifyPluginConfigured() && !isPluginEncrypted) {
-    return errorJson("Invalid Body");
-  }
-
   let parsedJson: unknown;
   try {
     if (isPluginEncrypted) {
       // The client only sets this when a loaded plugin actually encrypted the body, so a
-      // decrypt failure here is a real error (bad/missing plugin config), not the usual
-      // always-allow fallback for "no plugin at all".
+      // decrypt failure here is a real error (bad/missing plugin config).
       const decrypted = await decryptPluginBody(text, pluginRequestContext);
       if (decrypted === null) {
         return errorJson("Invalid Body");
@@ -215,51 +144,25 @@ export const POST: RequestHandler = async (e) => {
     return errorJson("対象サーバーのメンバーではありません");
   }
 
-  // Captured once up front so every outcome's log entry (including the two early-return
-  // failures below) carries it, not just the final success.
+  // Captured once up front so every outcome's log entry carries it.
   const userDiscord = await core.state.database.userDiscord.find(user.id);
   const email = userDiscord?.email ?? null;
-  const vpn = setting.blockVpn ? await checkVpnFlags(pluginRequestContext.ip) : CLEAN_VPN_FLAGS;
-  const vpnLogFields = {
-    isVpn: vpn.isVpn,
-    isProxy: vpn.isProxy,
-    isTor: vpn.isTor,
-    vpnProvider: vpn.provider,
-  };
-
-  if (vpn.blocked) {
-    const row = await core.verify.logResult({
-      userId: user.id,
-      guildId: body.guildId,
-      success: false,
-      fingerprint: extra,
-      email,
-      ...vpnLogFields,
-    });
-    await postVerifyLog(setting, row);
-    return errorJson("認証に失敗しました");
-  }
-
-  if (!(await verifyTurnstile(body.turnstileToken))) {
-    const row = await core.verify.logResult({
-      userId: user.id,
-      guildId: body.guildId,
-      success: false,
-      fingerprint: extra,
-      email,
-      ...vpnLogFields,
-    });
-    await postVerifyLog(setting, row);
-    return errorJson("認証に失敗しました");
-  }
-
-  const allowed = await evaluateVerifyPlugin({
+  const outcome = await evaluateVerify({
     guildId: body.guildId,
     userId: user.id,
     extra,
+    turnstileToken: body.turnstileToken,
+    blockVpn: setting.blockVpn,
     ...pluginRequestContext,
   });
-  if (!allowed) {
+  const vpnLogFields = {
+    isVpn: outcome.isVpn,
+    isProxy: outcome.isProxy,
+    isTor: outcome.isTor,
+    vpnProvider: outcome.vpnProvider,
+  };
+
+  if (!outcome.allowed) {
     const row = await core.verify.logResult({
       userId: user.id,
       guildId: body.guildId,
@@ -268,8 +171,8 @@ export const POST: RequestHandler = async (e) => {
       email,
       ...vpnLogFields,
     });
-    await postVerifyLog(setting, row);
-    return errorJson("認証に失敗しました");
+    await postVerifyLog(setting, row, outcome.reason);
+    return errorJson(`認証に失敗しました: ${outcome.reason ?? "Unknown reason"}`);
   }
 
   try {
@@ -290,6 +193,6 @@ export const POST: RequestHandler = async (e) => {
     email,
     ...vpnLogFields,
   });
-  await postVerifyLog(setting, row);
+  await postVerifyLog(setting, row, null);
   return json({ content: "ok" });
 };

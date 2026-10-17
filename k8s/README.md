@@ -701,12 +701,13 @@ from two pods at once causes duplicate event handling. `distopia-redis-allow-int
 `distopia-verify` is a different shape from the three splits above, but less different than
 it first looks: it **is** built from this repo, same image as `distopia-app`/`distopia-bot`
 (`verify-deployment.yaml`'s `command` just runs `presentation-verify` instead), and it is
-entirely **optional**. Member verification (`/verify-admin`,
-`src/presentation/web/src/routes/verify/[guildId]`) only needs two things this public repo
-already ships on its own — Cloudflare Turnstile and the existing `role.give`/`role.deprive`
-RPC through `distopia-bot` — to work end to end. `VerifyService` (`infra-rpc`'s
-`verify.proto`, re-exported publicly as types through the `distopia` npm/jsr package) exists
-purely as an *optional extra signal* on top of that.
+**required** for member verification (`/verify-admin`,
+`src/presentation/web/src/routes/verify/[guildId]`): its `Evaluate` RPC runs the guild's
+opt-in VPN/proxy/Tor block, then Cloudflare Turnstile (so `TURNSTILE_SECRET_KEY` is read by
+`distopia-verify`, from the same `distopia-env` Secret), then the plugin, and on a refusal
+returns a `reason` (`Used VPN`, `Turnstile verification failed`, ...) that `distopia-app`
+shows to the user and writes to the guild's verify log. Role grant/removal still goes
+through `distopia-bot`'s RPC from `distopia-app`. Only the *plugin* is optional.
 
 What's actually private isn't a separate repo or image — it's the **contents of a folder**
 (`src/presentation/verify/plugins/`, `VERIFY_PLUGIN_DIR` env var to override), mounted into
@@ -719,11 +720,12 @@ file, alphabetically, that defines them). The folder ships in the image with exa
 files, both dot-prefixed and therefore always skipped: `plugins/.fingerprint` and
 `plugins/.anti-scraping` -- inert samples showing the expected shape (no real logic in
 either), not loaded by anything until you copy one to a non-dot filename and actually
-implement it. `presentation-verify` itself holds no anti-bot/fingerprinting logic at all --
-every `VerifyService` method (`src/presentation/verify/src/server/rpc.ts`) just delegates to
+implement it. `presentation-verify` itself holds no anti-bot/fingerprinting logic --
+beyond the Turnstile and VPN checks in `checks.ts`, every `VerifyService` method
+(`src/presentation/verify/src/server/rpc.ts`) just delegates to
 `plugin.ts`, which delegates to `loadPluginFolder`, and falls back to allow/empty/fail-closed
-the same way whether the Secret is missing, the whole `distopia-verify` Deployment was never
-applied, or `distopia-app`'s own `VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` are unset. This works
+when no plugin Secret is mounted. If `distopia-verify` was never applied or `distopia-app`'s
+own `VERIFY_RPC_TOKEN` is unset, every verification attempt is refused. This works
 because `presentation-verify` is a plain Bun script like `presentation-bot`/
 `presentation-schedulemanager` — never bundled by Vite — so a dynamic `import()` of a path
 that may or may not exist on disk really is resolved at runtime, the same trick
@@ -779,17 +781,16 @@ kubectl create secret generic distopia-verify-plugin -n distopia \
 
 # 2. Add VERIFY_RPC_TOKEN to distopia-env (same value verify-deployment.yaml's own
 #    secretKeyRef reads -- re-run the distopia-env creation command in section 2 above with
-#    this one extra flag added) and VERIFY_RPC_URL to distopia-app's config:
+#    this one extra flag added). VERIFY_RPC_URL needs no setup: k8s/app/configmap.yaml
+#    already points distopia-app at http://distopia-verify:8084.
 #      --from-literal=VERIFY_RPC_TOKEN='<a random value, shared by both sides>'
-#      kubectl edit configmap distopia-config -n distopia   # add VERIFY_RPC_URL: "http://distopia-verify:8084"
 #    then roll both Deployments (kubectl rollout restart deployment/distopia-app
-#    deployment/distopia-verify -n distopia) so they pick up the new env vars.
+#    deployment/distopia-verify -n distopia) so they pick up the new env var.
 ```
 
-Until step 2 is done, `distopia-app` simply never attempts the RPC call at all
-(`VERIFY_RPC_URL`/`VERIFY_RPC_TOKEN` both have to be set for `verifyPlugin.ts` to even
-construct a client) — there's no partial/broken state to worry about, and step 1 can happen
-before or after it, or be skipped entirely (no plugin mounted is also a fully valid state).
+Until step 2 is done, `distopia-app` has no `VERIFY_RPC_TOKEN` and refuses every verification
+attempt (reason `Verification service is not configured`); step 1 can happen before or after
+it, or be skipped entirely (no plugin mounted is also a fully valid state).
 
 ## Notes / known constraints
 

@@ -9,6 +9,7 @@ export {
   type RequestContext,
   type EvaluateRequest,
   type EvaluateResponse,
+  type VpnResult,
   type GetClientScriptRequest,
   type GetClientScriptResponse,
   type DecryptRequest,
