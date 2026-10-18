@@ -60,6 +60,7 @@ export class Guild extends Base {
   }
 
   private async removeFromPublicCaches(guildId: string) {
+    this.publicCacheInvalidations++;
     this.rootPage.latestGuilds = this.rootPage.latestGuilds.filter(
       ({ guild }) => guild.guildId !== guildId,
     );
@@ -72,6 +73,37 @@ export class Guild extends Base {
   public async updateRootPage() {
     this.rootPage.latestGuilds = await this.findManySortedBumpTime(40);
     this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
+  }
+
+  private latestGuildsRefreshedAt = 0;
+  private latestGuildsRefresh: Promise<void> | null = null;
+  private publicCacheInvalidations = 0;
+
+  // bump() runs in presentation-bot, so this (web) process never sees it in its own memory;
+  // re-read from the shared DB, throttled because each call fetches metadata over RPC.
+  public async refreshLatestGuilds(maxAgeMs = 5000) {
+    if (this.latestGuildsRefresh) {
+      return await this.latestGuildsRefresh;
+    }
+    if (Date.now() - this.latestGuildsRefreshedAt < maxAgeMs) {
+      return;
+    }
+    this.latestGuildsRefreshedAt = Date.now();
+    const invalidations = this.publicCacheInvalidations;
+    this.latestGuildsRefresh = (async () => {
+      try {
+        const latest = await this.findManySortedBumpTime(40);
+        // A guild made private mid-fetch must not be restored by this older snapshot.
+        if (invalidations === this.publicCacheInvalidations) {
+          this.rootPage.latestGuilds = latest;
+        }
+      } catch (error) {
+        console.error("Failed to refresh latest guilds:", error);
+      } finally {
+        this.latestGuildsRefresh = null;
+      }
+    })();
+    return await this.latestGuildsRefresh;
   }
 
   public async updateActiveGuilds() {
