@@ -57,9 +57,11 @@ export const load: PageServerLoad = async (e) => {
       })),
     recordOneDays: recordOneDays
       .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .map(({ date, memberCount, activeRate, level }) => ({
+      .map(({ date, memberCount, newMembers, newMessages, activeRate, level }) => ({
         date,
         memberCount,
+        newMemberCount: newMembers.length,
+        newMessages,
         activeRate: Number(activeRate),
         level: Number(level),
       })),

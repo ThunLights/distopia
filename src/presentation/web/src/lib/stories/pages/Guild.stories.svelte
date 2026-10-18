@@ -33,6 +33,8 @@
   type RecordOneDay = {
     date: Date;
     memberCount: number;
+    newMemberCount: number;
+    newMessages: number;
     activeRate: number;
     level: number;
   };
@@ -95,6 +97,8 @@
       records.push({
         date,
         memberCount: Math.round(100 + progress * 60 + Math.sin(i / 5) * 8),
+        newMemberCount: Math.max(0, Math.round(2 + Math.sin(i / 3) * 2)),
+        newMessages: Math.round(200 + Math.sin(i / 4) * 80 + progress * 100),
         activeRate: Math.round(60 + Math.sin(i / 7) * 20 + progress * 10),
         level: Math.min(30, Math.floor(progress * 30)),
       });
