@@ -7,6 +7,7 @@ import {
   ChannelType,
   EmbedBuilder,
   MessageFlags,
+  OverwriteType,
   PermissionFlagsBits,
   type CacheType,
   type ChatInputCommandInteraction,
@@ -116,7 +117,7 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
         type: ApplicationCommandOptionType.Subcommand,
         name: "log-channel",
         description:
-          "認証結果（メール・VPN検知・サブ垢候補）を記録するログチャンネルを設定します。",
+          "認証結果（メール・IP・VPN検知・サブ垢候補）を記録する管理者限定のチャンネルを設定します。",
         options: [
           {
             type: ApplicationCommandOptionType.Channel,
@@ -229,6 +230,40 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "log-channel" && channelId) {
+      const discordGuild = interaction.guild;
+      const logChannel = await discordGuild?.channels.fetch(channelId);
+      if (
+        !discordGuild ||
+        !logChannel ||
+        logChannel.permissionsFor(discordGuild.roles.everyone).has("ViewChannel") ||
+        !("permissionOverwrites" in logChannel)
+      ) {
+        return errorReply(
+          "ログにはメールアドレスとIPアドレスが含まれるため、@everyone が閲覧できないチャンネルを指定してください。",
+        );
+      }
+
+      const viewableByOthers = logChannel.permissionOverwrites.cache.some(
+        (o) =>
+          o.id !== discordGuild.roles.everyone.id &&
+          o.allow.has("ViewChannel") &&
+          !(
+            o.type === OverwriteType.Role &&
+            discordGuild.roles.cache.get(o.id)?.permissions.has("Administrator")
+          ),
+      );
+      if (viewableByOthers) {
+        return errorReply(
+          "管理者以外のロールまたはメンバーが閲覧できるチャンネルは指定できません。",
+        );
+      }
+
+      const me = discordGuild.members.me;
+      if (!me || !logChannel.permissionsFor(me).has(["ViewChannel", "SendMessages"])) {
+        return errorReply(
+          "Botがこのチャンネルにメッセージを送信できません。権限を確認してください。",
+        );
+      }
       await this.core.verify.saveSetting({ guildId, logChannelId: channelId });
       return okReply(`ログの投稿先を <#${channelId}> に設定しました。`);
     }

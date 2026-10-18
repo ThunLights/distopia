@@ -25,11 +25,14 @@ function clientIp(e: RequestEvent): string | null {
 
 // Posts one log entry per verify attempt to the admin-configured log channel -- a no-op when
 // unset. Built here (not in app-core's Verify.ts) so app-core doesn't need a discord.js
-// dependency just for this one JSON-shaped embed.
+// dependency just for this one JSON-shaped embed. The email and IP are shown in full, so the
+// log channel should be admin-only; the IP is shown only here, never persisted in
+// UserVerifyLog, and Discord keeps its own copy of the message.
 async function postVerifyLog(
   setting: GuildVerify,
   row: UserVerifyLog,
   reason: string | null,
+  ip: string | null,
 ): Promise<void> {
   if (!setting.logChannelId) {
     return;
@@ -45,16 +48,11 @@ async function postVerifyLog(
   }
 
   if (row.email) {
-    // Masked, not shown in full -- an admin picks any GuildText channel for this (no
-    // enforced private-channel requirement), and Discord keeps its own copy of the message
-    // long after the DB row is gone. Still enough to eyeball "same email, different
-    // account" without exposing the full address to whoever can read that channel.
-    const [local, domain] = row.email.split("@");
-    const maskedLocal = local ? `${local.slice(0, 1)}***` : "***";
-    fields.push({
-      name: "メールアドレス",
-      value: domain ? `${maskedLocal}@${domain}` : maskedLocal,
-    });
+    fields.push({ name: "メールアドレス", value: row.email });
+  }
+
+  if (ip) {
+    fields.push({ name: "IPアドレス", value: ip });
   }
 
   if (row.isVpn || row.isProxy || row.isTor) {
@@ -171,7 +169,7 @@ export const POST: RequestHandler = async (e) => {
       email,
       ...vpnLogFields,
     });
-    await postVerifyLog(setting, row, outcome.reason);
+    await postVerifyLog(setting, row, outcome.reason, pluginRequestContext.ip);
     return errorJson(`認証に失敗しました: ${outcome.reason ?? "Unknown reason"}`);
   }
 
@@ -193,6 +191,6 @@ export const POST: RequestHandler = async (e) => {
     email,
     ...vpnLogFields,
   });
-  await postVerifyLog(setting, row, null);
+  await postVerifyLog(setting, row, null, pluginRequestContext.ip);
   return json({ content: "ok" });
 };
