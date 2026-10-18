@@ -74,6 +74,22 @@ export class Guild extends Base {
     this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
   }
 
+  private latestGuildsRefreshedAt = 0;
+
+  // bump() runs in presentation-bot, so this (web) process never sees it in its own memory;
+  // re-read from the shared DB, throttled because each call fetches metadata over RPC.
+  public async refreshLatestGuilds(maxAgeMs = 5000) {
+    if (Date.now() - this.latestGuildsRefreshedAt < maxAgeMs) {
+      return;
+    }
+    this.latestGuildsRefreshedAt = Date.now();
+    try {
+      this.rootPage.latestGuilds = await this.findManySortedBumpTime(40);
+    } catch (error) {
+      console.error("Failed to refresh latest guilds:", error);
+    }
+  }
+
   public async updateActiveGuilds() {
     this.rootPage.activeGuilds = await this.findManySortedActiveRate(10);
   }
