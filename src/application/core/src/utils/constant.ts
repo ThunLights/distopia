@@ -42,7 +42,7 @@ export const supportersKeyValue = {
     guildId: "838734004718665758",
   },
   sumire: {
-    name: "Sumire's Cafe",
+    name: "☾.*·̩͙ Sumire's cafe˖⊹",
     invite: "https://discord.gg/eNwcThMeZZ",
     guildId: "1481293851057721618",
   },
