@@ -33,7 +33,7 @@ export class Member extends Base {
       query.push({
         guildId,
         date,
-        newMembers: Array.from(new Set([...(record?.vcMembers ?? []), ...value.memberIds])),
+        newMembers: Array.from(new Set([...(record?.newMembers ?? []), ...value.memberIds])),
       });
     }
 
