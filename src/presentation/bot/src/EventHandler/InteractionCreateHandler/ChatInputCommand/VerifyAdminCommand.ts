@@ -229,6 +229,17 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "log-channel" && channelId) {
+      const discordGuild = interaction.guild;
+      const logChannel = await discordGuild?.channels.fetch(channelId);
+      if (
+        !discordGuild ||
+        !logChannel ||
+        logChannel.permissionsFor(discordGuild.roles.everyone).has("ViewChannel")
+      ) {
+        return errorReply(
+          "ログにはメールアドレスとIPアドレスが含まれるため、@everyone が閲覧できないチャンネルを指定してください。",
+        );
+      }
       await this.core.verify.saveSetting({ guildId, logChannelId: channelId });
       return okReply(`ログの投稿先を <#${channelId}> に設定しました。`);
     }
