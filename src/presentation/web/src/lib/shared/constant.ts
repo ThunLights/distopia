@@ -9,6 +9,7 @@ import bykIcon from "$lib/assets/supporter/byk.webp";
 import cappuccinoIcon from "$lib/assets/supporter/cappuccino.webp";
 import himaIcon from "$lib/assets/supporter/hima.webp";
 import lemonIcon from "$lib/assets/supporter/lemon.webp";
+import sumireCafeIcon from "$lib/assets/supporter/sumire.webp";
 import {
   staffsKeyValue as baseStaff,
   supportersKeyValue as baseSupporters,
@@ -85,6 +86,10 @@ export const supporters = [
   {
     ...baseSupporters.lemon,
     icon: lemonIcon,
+  },
+  {
+    ...baseSupporters.sumire,
+    icon: sumireCafeIcon,
   },
 ] satisfies Supporter[];
 
