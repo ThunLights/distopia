@@ -6,11 +6,13 @@
   type RecordOneDay = {
     date: Date;
     memberCount: number;
+    newMemberCount: number;
+    newMessages: number;
     activeRate: number;
     level: number;
   };
 
-  type Metric = "activeRate" | "memberCount" | "level";
+  type Metric = "activeRate" | "memberCount" | "newMemberCount" | "newMessages" | "level";
 
   type Props = {
     data: RecordOneDay[];
@@ -23,6 +25,8 @@
   const metricLabels: Record<Metric, string> = {
     activeRate: "アクティブレート",
     memberCount: "メンバー数",
+    newMemberCount: "新規メンバー数",
+    newMessages: "メッセージ数",
     level: "レベル",
   };
 
@@ -33,9 +37,9 @@
   <div class="header">
     <BlockTitle {title} />
     <select bind:value={metric} aria-label="グラフに表示する指標">
-      <option value="activeRate">{metricLabels.activeRate}</option>
-      <option value="memberCount">{metricLabels.memberCount}</option>
-      <option value="level">{metricLabels.level}</option>
+      {#each Object.entries(metricLabels) as [value, label] (value)}
+        <option {value}>{label}</option>
+      {/each}
     </select>
   </div>
   {#if data.length}
