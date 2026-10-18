@@ -116,7 +116,7 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
         type: ApplicationCommandOptionType.Subcommand,
         name: "log-channel",
         description:
-          "認証結果（メール・VPN検知・サブ垢候補）を記録するログチャンネルを設定します。",
+          "認証結果（メール・IP・VPN検知・サブ垢候補）を記録する管理者限定のチャンネルを設定します。",
         options: [
           {
             type: ApplicationCommandOptionType.Channel,
