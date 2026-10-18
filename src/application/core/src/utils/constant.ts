@@ -41,6 +41,11 @@ export const supportersKeyValue = {
     invite: "https://discord.gg/BgZddsVPMH",
     guildId: "838734004718665758",
   },
+  sumire: {
+    name: "☾.*·̩͙ Sumire's cafe˖⊹",
+    invite: "https://discord.gg/eNwcThMeZZ",
+    guildId: "1481293851057721618",
+  },
 };
 
 export const supporters = [
@@ -49,6 +54,7 @@ export const supporters = [
   supportersKeyValue.cappuccino,
   supportersKeyValue.hima,
   supportersKeyValue.lemon,
+  supportersKeyValue.sumire,
 ] as const satisfies Array<SupporterServer>;
 
 export const SUPPORTER_SERVER_GUILD_IDS: string[] = supporters.map(
