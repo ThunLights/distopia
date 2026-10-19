@@ -88,19 +88,37 @@ export class Ranking extends Base {
     return users;
   }
 
+  private generation = 0;
+
   // Rebuild in place and swap, so readers keep getting the old data instead of a cold miss.
   // The 100-entry lists backing /api/ranking are always (re)built, even if nothing read them yet.
+  // A refresh that finishes after a newer one started is dropped, and a failed one evicts its
+  // key so the next read retries instead of serving stale data until the next tick.
   public async cleanCache() {
+    const generation = ++this.generation;
+    const refresh = async <T>(map: Map<number, T>, num: number, load: () => Promise<T>) => {
+      try {
+        const data = await load();
+        if (generation === this.generation) {
+          map.set(num, data);
+        }
+      } catch (error) {
+        console.error("[ranking] cache refresh failed", error);
+        if (generation === this.generation) {
+          map.delete(num);
+        }
+      }
+    };
     const nums = (map: Map<number, unknown>) => new Set([...map.keys(), WARM_NUM]);
     await Promise.all([
-      ...[...nums(this.guildLevel)].map(async (num) =>
-        this.guildLevel.set(num, await this.loadGuild("level", num)),
+      ...[...nums(this.guildLevel)].map((num) =>
+        refresh(this.guildLevel, num, () => this.loadGuild("level", num)),
       ),
-      ...[...nums(this.guildActiveRate)].map(async (num) =>
-        this.guildActiveRate.set(num, await this.loadGuild("activeRate", num)),
+      ...[...nums(this.guildActiveRate)].map((num) =>
+        refresh(this.guildActiveRate, num, () => this.loadGuild("activeRate", num)),
       ),
-      ...[...nums(this.userBump)].map(async (num) =>
-        this.userBump.set(num, await this.loadUser(num)),
+      ...[...nums(this.userBump)].map((num) =>
+        refresh(this.userBump, num, () => this.loadUser(num)),
       ),
     ]);
   }
