@@ -115,6 +115,13 @@ async function start() {
     console.error("Failed to load SearchEngine:", error);
   }
 
+  try {
+    await core.ranking.cleanCache();
+    console.log("Warmed ranking cache.");
+  } catch (error) {
+    console.error("Failed to warm ranking cache:", error);
+  }
+
   startSchedulerRpcServer();
   console.log("Scheduler RPC server started.");
 }
