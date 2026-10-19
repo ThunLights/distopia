@@ -25,6 +25,13 @@ export default defineConfig({
       { text: "目次", link: "/" },
       { text: "サーバー登録の仕方", link: "/register" },
       { text: "アクティブレートとは", link: "/rate" },
+      { text: "コマンド一覧", link: "/commands" },
+      { text: "Bump", link: "/bump" },
+      { text: "サーバー設定", link: "/settings" },
+      { text: "メンバー認証", link: "/verify" },
+      { text: "読み上げ (TTS)", link: "/tts" },
+      { text: "ブラックリスト", link: "/blacklist" },
+      { text: "レビュー", link: "/review" },
     ],
   },
   vite: {
