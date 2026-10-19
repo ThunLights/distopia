@@ -23,32 +23,27 @@ export class Ranking extends Base {
 
   public async fetchGuild(rankingType: "level" | "activeRate", options?: RankingFetchOptions) {
     const num = options?.num ?? 20;
-    const cache =
-      rankingType === "level" ? this.guildLevel.get(num) : this.guildActiveRate.get(num);
+    const map = rankingType === "level" ? this.guildLevel : this.guildActiveRate;
+    const cache = map.get(num);
 
     if (cache) {
       return cache;
     }
 
-    const data = (
+    const data = await this.loadGuild(rankingType, num);
+    map.set(num, data);
+    return data;
+  }
+
+  private async loadGuild(rankingType: "level" | "activeRate", num: number) {
+    return (
       await Promise.all(
-        (rankingType === "level"
-          ? await this.state.database.guildRecord.ranking("level", num)
-          : await this.state.database.guildRecord.ranking("activeRate", num)
-        ).map(async (guild) => {
+        (await this.state.database.guildRecord.ranking(rankingType, num)).map(async (guild) => {
           const meta = await this.state.discord.guild.fetch(guild.guildId);
           return meta ? { ...guild, name: meta.name } : null;
         }),
       )
     ).filter((guild) => guild !== null);
-
-    if (rankingType === "level") {
-      this.guildLevel.set(num, data);
-    } else {
-      this.guildActiveRate.set(num, data);
-    }
-
-    return data;
   }
 
   public async fetchUser(
@@ -62,6 +57,12 @@ export class Ranking extends Base {
       return cache;
     }
 
+    const users = await this.loadUser(num);
+    this.userBump.set(num, users);
+    return users;
+  }
+
+  private async loadUser(num: number) {
     const users: UserBumpRanking[] = [];
 
     const dbUsers = await this.state.database.user.ranking("userBump", num);
@@ -82,14 +83,21 @@ export class Ranking extends Base {
       }
     }
 
-    this.userBump.set(num, users);
-
     return users;
   }
 
+  // Rebuild in place and swap, so readers keep getting the old data instead of a cold miss.
   public async cleanCache() {
-    this.guildLevel.clear();
-    this.guildActiveRate.clear();
-    this.userBump.clear();
+    await Promise.all([
+      ...[...this.guildLevel.keys()].map(async (num) =>
+        this.guildLevel.set(num, await this.loadGuild("level", num)),
+      ),
+      ...[...this.guildActiveRate.keys()].map(async (num) =>
+        this.guildActiveRate.set(num, await this.loadGuild("activeRate", num)),
+      ),
+      ...[...this.userBump.keys()].map(async (num) =>
+        this.userBump.set(num, await this.loadUser(num)),
+      ),
+    ]);
   }
 }
