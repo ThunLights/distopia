@@ -4,6 +4,8 @@ import { Base } from "./Base";
 import type { RankingFetchOptions } from "./types/RankingFetchOptions";
 import type { UserBumpRanking } from "./types/UserBumpRanking";
 
+const WARM_NUM = 100;
+
 export class Ranking extends Base {
   private guildLevel = new Map<number, (GuildRecordRanking & { name: string })[]>();
   private guildActiveRate = new Map<number, (GuildRecordRanking & { name: string })[]>();
@@ -87,15 +89,17 @@ export class Ranking extends Base {
   }
 
   // Rebuild in place and swap, so readers keep getting the old data instead of a cold miss.
+  // The 100-entry lists backing /api/ranking are always (re)built, even if nothing read them yet.
   public async cleanCache() {
+    const nums = (map: Map<number, unknown>) => new Set([...map.keys(), WARM_NUM]);
     await Promise.all([
-      ...[...this.guildLevel.keys()].map(async (num) =>
+      ...[...nums(this.guildLevel)].map(async (num) =>
         this.guildLevel.set(num, await this.loadGuild("level", num)),
       ),
-      ...[...this.guildActiveRate.keys()].map(async (num) =>
+      ...[...nums(this.guildActiveRate)].map(async (num) =>
         this.guildActiveRate.set(num, await this.loadGuild("activeRate", num)),
       ),
-      ...[...this.userBump.keys()].map(async (num) =>
+      ...[...nums(this.userBump)].map(async (num) =>
         this.userBump.set(num, await this.loadUser(num)),
       ),
     ]);
