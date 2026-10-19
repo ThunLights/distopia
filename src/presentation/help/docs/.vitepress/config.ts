@@ -20,18 +20,65 @@ export default defineConfig({
   head: [["link", { rel: "icon", href: "/favicon.ico", sizes: "any" }]],
   sitemap: { hostname: "https://docs.distopia.top" },
   themeConfig: {
-    nav: [{ text: "Distopia", link: "https://distopia.top" }],
-    sidebar: [
-      { text: "目次", link: "/" },
-      { text: "サーバー登録の仕方", link: "/register" },
-      { text: "アクティブレートとは", link: "/rate" },
+    logo: "/logo.webp",
+    nav: [
+      { text: "はじめに", link: "/register" },
       { text: "コマンド一覧", link: "/commands" },
-      { text: "Bump", link: "/bump" },
-      { text: "サーバー設定", link: "/settings" },
-      { text: "メンバー認証", link: "/verify" },
-      { text: "読み上げ (TTS)", link: "/tts" },
-      { text: "ブラックリスト", link: "/blacklist" },
-      { text: "レビュー", link: "/review" },
+      { text: "Distopia", link: "https://distopia.top" },
+    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/ThunLights/distopia" }],
+    search: {
+      provider: "local",
+      options: {
+        translations: {
+          button: { buttonText: "検索", buttonAriaLabel: "検索" },
+          modal: {
+            displayDetails: "詳細を表示",
+            resetButtonTitle: "リセット",
+            backButtonTitle: "戻る",
+            noResultsText: "結果が見つかりません",
+            footer: {
+              selectText: "選択",
+              selectKeyAriaLabel: "Enter",
+              navigateText: "移動",
+              navigateUpKeyAriaLabel: "上矢印",
+              navigateDownKeyAriaLabel: "下矢印",
+              closeText: "閉じる",
+              closeKeyAriaLabel: "Esc",
+            },
+          },
+        },
+      },
+    },
+    outline: { label: "このページの内容" },
+    docFooter: { prev: "前のページ", next: "次のページ" },
+    sidebarMenuLabel: "メニュー",
+    returnToTopLabel: "トップへ戻る",
+    darkModeSwitchLabel: "外観",
+    editLink: {
+      pattern: "https://github.com/ThunLights/distopia/edit/main/src/presentation/help/docs/:path",
+      text: "このページを編集",
+    },
+    sidebar: [
+      {
+        text: "はじめに",
+        items: [
+          { text: "サーバー登録の仕方", link: "/register" },
+          { text: "アクティブレートとは", link: "/rate" },
+          { text: "コマンド一覧", link: "/commands" },
+        ],
+      },
+      {
+        text: "機能",
+        items: [
+          { text: "Bump", link: "/bump" },
+          { text: "サーバー設定", link: "/settings" },
+          { text: "メンバー認証", link: "/verify" },
+          { text: "読み上げ (TTS)", link: "/tts" },
+          { text: "ブラックリスト", link: "/blacklist" },
+          { text: "レビュー", link: "/review" },
+        ],
+      },
     ],
   },
   vite: {
