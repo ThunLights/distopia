@@ -17,6 +17,7 @@ export default defineConfig({
   title: "Distopia Help",
   description: "Discordサーバー用掲示板 Distopia のヘルプ",
   cleanUrls: true,
+  head: [["link", { rel: "icon", href: "/favicon.ico", sizes: "any" }]],
   sitemap: { hostname: "https://docs.distopia.top" },
   themeConfig: {
     nav: [{ text: "Distopia", link: "https://distopia.top" }],
