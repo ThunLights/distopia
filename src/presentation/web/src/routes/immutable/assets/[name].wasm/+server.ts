@@ -1,6 +1,6 @@
 import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
-import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { error } from "@sveltejs/kit";
 
 // Companion of routes/immutable/chunks/[name].js -- same disguise, same rules.
 export const GET: RequestHandler = async (e) => {

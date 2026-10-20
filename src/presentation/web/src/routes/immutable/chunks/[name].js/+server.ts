@@ -1,6 +1,6 @@
 import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
-import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { error } from "@sveltejs/kit";
 
 // Deliberately shaped like a SvelteKit build chunk (SvelteKit itself reserves /_app, so this
 // can't live under it) so the verify client plugin doesn't stand out among the page's scripts.
