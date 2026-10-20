@@ -7,14 +7,11 @@ import {
 } from "$lib/shared/types/routes/api/verify";
 import type { VerifyClientPlugin } from "distopia";
 
-// The script (and optional wasm) is inlined into the SSR'd page by the verify route's load, so
-// there is no separate plugin URL to find or block. Both collect() (anti-bot signal) and the
-// optional encrypt() (body obfuscation) come from this one module.
-type ClientPluginBundle = { code: string; wasm: string | null };
-
-function base64ToBuffer(base64: string): ArrayBuffer {
-  return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)).buffer;
-}
+// The script and optional wasm are served from build-asset-lookalike paths
+// (routes/immutable/chunks/[name].js, routes/immutable/assets/[name].wasm) under a random
+// per-page-load name. Both collect() (anti-bot signal) and the optional encrypt() (body
+// obfuscation) come from this one module.
+type ClientPluginBundle = { name: string; hasWasm: boolean };
 
 async function loadClientPlugin(
   bundle: ClientPluginBundle | null,
@@ -23,14 +20,14 @@ async function loadClientPlugin(
     return null;
   }
 
-  const blobUrl = URL.createObjectURL(new Blob([bundle.code], { type: "text/javascript" }));
-  try {
-    const mod = (await import(/* @vite-ignore */ blobUrl)) as { default: VerifyClientPlugin };
-    await mod.default.init?.(bundle.wasm ? base64ToBuffer(bundle.wasm) : null);
-    return mod.default;
-  } finally {
-    URL.revokeObjectURL(blobUrl);
-  }
+  const mod = (await import(/* @vite-ignore */ `/immutable/chunks/${bundle.name}.js`)) as {
+    default: VerifyClientPlugin;
+  };
+  const wasm = bundle.hasWasm
+    ? await (await fetch(`/immutable/assets/${bundle.name}.wasm`)).arrayBuffer()
+    : null;
+  await mod.default.init?.(wasm);
+  return mod.default;
 }
 
 export async function verifyGuild(
