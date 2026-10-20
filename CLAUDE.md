@@ -685,9 +685,11 @@ the same shape for the next one, and note that they don't all share one directio
   `GetClientScript`) and `VerifyServerPlugin.decrypt()` (via `VerifyService.Decrypt`)
   are the extension points. The client script (and optional WebAssembly, `getClientWasm()` →
   `VerifyClientPlugin.init(wasm)`, which must live in the same file as the `getClientScript()`
-  that wins) is **inlined into the SSR'd `/verify/[guildId]` page data** — there is
-  deliberately no fetchable plugin URL (the old `/api/verify/plugin` was removed), so don't
-  reintroduce one. Plugin templates (dot-prefixed, so a loader skips them) live in the
+  that wins): the script and wasm are served (logged-in users only, `no-store`) from
+  build-asset-lookalike routes, `routes/immutable/chunks/[name].js` and
+  `routes/immutable/assets/[name].wasm`, under a random per-page-load name (SvelteKit reserves
+  `/_app`, so it can't live there) — deliberately not a descriptive plugin URL like the
+  removed `/api/verify/plugin`. Plugin templates (dot-prefixed, so a loader skips them) live in the
   top-level `plugin/` folder: `.fingerprint`, `.anti-scraping`, `.wasm`. See `k8s/README.md`'s
   "Verify RPC" section for the full wiring instructions.
 

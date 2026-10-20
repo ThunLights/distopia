@@ -2,6 +2,7 @@ import { core } from "$lib/server/core";
 import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
 import type { PageServerLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
+import { randomBytes } from "node:crypto";
 
 export const load: PageServerLoad = async (e) => {
   const guildId = e.params.guildId;
@@ -26,6 +27,9 @@ export const load: PageServerLoad = async (e) => {
   return {
     guildId,
     guildName: meta?.name ?? guildId,
-    clientPlugin: await fetchVerifyClientScript(),
+    clientPlugin: await fetchVerifyClientScript().then(
+      (bundle) =>
+        bundle && { name: randomBytes(6).toString("base64url"), hasWasm: bundle.wasm !== null },
+    ),
   };
 };
