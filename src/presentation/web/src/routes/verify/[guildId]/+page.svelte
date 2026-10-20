@@ -7,7 +7,11 @@
   type Turnstile = {
     render(
       container: HTMLElement | undefined,
-      options: { sitekey: string; callback: (token: string) => void },
+      options: {
+        sitekey: string;
+        size?: "normal" | "compact";
+        callback: (token: string) => void;
+      },
     ): void;
     reset(container?: HTMLElement): void;
   };
@@ -32,6 +36,7 @@
       const turnstile = (window as unknown as { turnstile?: Turnstile }).turnstile;
       turnstile?.render(widgetContainer, {
         sitekey: env.PUBLIC_TURNSTILE_SITE_KEY ?? "",
+        size: window.matchMedia("(max-width: 400px)").matches ? "compact" : "normal",
         callback: (token: string) => {
           turnstileToken = token;
         },
@@ -112,6 +117,7 @@
 
   .card {
     --accent: var(--a-tag-color, #6969d5);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -182,6 +188,7 @@
   }
 
   button {
+    box-sizing: border-box;
     width: 100%;
     padding: 12px 16px;
     font: inherit;
