@@ -79,7 +79,9 @@
 
 <Block>
   <div class="center">
-    <Icon iconUrl={data.iconUrl} width="72px" height="72px" />
+    <div class="icon">
+      <Icon iconUrl={data.iconUrl} width="100%" height="100%" />
+    </div>
     <Title content={title} />
     {#if verified}
       <p>認証が完了しました。サーバーに戻ってご利用ください。</p>
@@ -94,6 +96,11 @@
 </Block>
 
 <style>
+  .icon {
+    width: 120px;
+    height: 120px;
+  }
+
   .center {
     display: flex;
     flex-direction: column;
