@@ -79,7 +79,7 @@
 
 <Block>
   <div class="center">
-    <Icon iconUrl={data.iconUrl} width={96} height={96} />
+    <Icon iconUrl={data.iconUrl} width="72px" height="72px" />
     <Title content={title} />
     {#if verified}
       <p>認証が完了しました。サーバーに戻ってご利用ください。</p>
