@@ -1,6 +1,6 @@
-import { defineConfig } from "oxfmt";
+import type { OxfmtConfig } from "oxfmt";
 
-export const config = defineConfig({
+export const config = {
   printWidth: 100,
   semi: true,
   useTabs: false,
@@ -9,4 +9,4 @@ export const config = defineConfig({
   trailingComma: "all",
   sortImports: true,
   ignorePatterns: ["*.auto.ts", "dist/**"],
-});
+} satisfies OxfmtConfig;
