@@ -10,7 +10,7 @@
     "@types/node": "npm:@types/node@24.13.3",
     "jsr": "npm:jsr@0.14.3",
     "oxfmt": "npm:oxfmt@0.71.0",
-    "oxlint": "npm:oxlint@1.86.0",
+    "oxlint": "npm:oxlint@1.88.0",
     "tsdown": "npm:tsdown@0.23.0",
     "zod": "npm:zod@4.6.5"
   },
