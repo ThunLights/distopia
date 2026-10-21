@@ -27,6 +27,7 @@ export const load: PageServerLoad = async (e) => {
   return {
     guildId,
     guildName: meta?.name ?? guildId,
+    iconUrl: meta?.iconUrl,
     clientPlugin: await fetchVerifyClientScript().then(
       (bundle) =>
         bundle && { name: randomBytes(6).toString("base64url"), hasWasm: bundle.wasm !== null },

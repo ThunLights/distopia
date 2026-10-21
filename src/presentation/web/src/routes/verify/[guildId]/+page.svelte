@@ -2,6 +2,8 @@
   import { env } from "$env/dynamic/public";
   import { verifyGuild } from "$lib/client/verify";
   import Block from "$lib/components/Block.svelte";
+  import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
+  import Icon from "$lib/components/Guild/Icon.svelte";
   import Meta from "$lib/components/Meta.svelte";
   import Title from "$lib/components/Title.svelte";
   import { onMount } from "svelte";
@@ -9,7 +11,11 @@
   type Turnstile = {
     render(
       container: HTMLElement | undefined,
-      options: { sitekey: string; callback: (token: string) => void },
+      options: {
+        sitekey: string;
+        size?: "normal" | "compact";
+        callback: (token: string) => void;
+      },
     ): void;
     reset(container?: HTMLElement): void;
   };
@@ -34,6 +40,7 @@
       const turnstile = (window as unknown as { turnstile?: Turnstile }).turnstile;
       turnstile?.render(widgetContainer, {
         sitekey: env.PUBLIC_TURNSTILE_SITE_KEY ?? "",
+        size: window.matchMedia("(max-width: 400px)").matches ? "compact" : "normal",
         callback: (token: string) => {
           turnstileToken = token;
         },
@@ -71,16 +78,34 @@
 <Meta {title} {description} />
 
 <Block>
-  <Title content={title} />
-  <p>{description}</p>
-
-  <div bind:this={widgetContainer}></div>
-
-  {#if verified}
-    <p>認証が完了しました。</p>
-  {:else}
-    <button disabled={!turnstileToken || verifying} onclick={submit}>
-      {verifying ? "確認中..." : "認証する"}
-    </button>
-  {/if}
+  <div class="center">
+    <div class="icon">
+      <Icon iconUrl={data.iconUrl} width="100%" height="100%" />
+    </div>
+    <Title content={title} />
+    {#if verified}
+      <p>認証が完了しました。サーバーに戻ってご利用ください。</p>
+    {:else}
+      <p>{description}</p>
+      <div bind:this={widgetContainer}></div>
+      <PrimaryButton disabled={!turnstileToken || verifying} onclick={submit}>
+        {verifying ? "確認中..." : "認証する"}
+      </PrimaryButton>
+    {/if}
+  </div>
 </Block>
+
+<style>
+  .icon {
+    width: 120px;
+    height: 120px;
+  }
+
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+  }
+</style>
