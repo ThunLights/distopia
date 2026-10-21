@@ -1,12 +1,14 @@
 import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
+import { hasPluginGrant } from "$lib/server/verifyPluginGrant";
 import type { RequestHandler } from "./$types";
 import { error } from "@sveltejs/kit";
 
 // Deliberately shaped like a SvelteKit build chunk (SvelteKit itself reserves /_app, so this
 // can't live under it) so the verify client plugin doesn't stand out among the page's scripts.
-// The name is random per page load and carries no meaning; any well-formed name serves the script.
+// The name is random per page load and only served to the user it was issued to (see
+// verifyPluginGrant.ts), so the script is gated by the verify page's own guild checks.
 export const GET: RequestHandler = async (e) => {
-  if (!e.locals.user || !/^[\w-]{8}$/.test(e.params.name)) {
+  if (!e.locals.user || !(await hasPluginGrant(e.params.name, e.locals.user.id))) {
     return error(404, { message: "Not found" });
   }
 
