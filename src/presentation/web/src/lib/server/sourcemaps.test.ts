@@ -18,7 +18,7 @@ vi.mock("repo-redis", () => ({
   releaseSourcemapUploadClaim,
 }));
 vi.mock("@sentry/cli", () => ({
-  default: class {
+  SentryCli: class {
     public execute = execute;
   },
 }));
@@ -63,7 +63,7 @@ describe("uploadSourceMapsOnce", () => {
         expect.stringContaining(".sourcemaps/client"),
         expect.stringContaining(".sourcemaps/server"),
       ],
-      "rejectOnError",
+      true,
     );
     expect(markSourcemapUploadDone).toHaveBeenCalledWith(expect.anything(), "web", "abc123");
     expect(releaseSourcemapUploadClaim).not.toHaveBeenCalled();

@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import SentryCli from "@sentry/cli";
+import { SentryCli } from "@sentry/cli";
 import type { RedisClient } from "infra-redis";
 import path from "node:path";
 import {
@@ -55,7 +55,7 @@ export async function uploadSourceMapsOnce(redis: RedisClient): Promise<void> {
         path.join(process.cwd(), ".sourcemaps/client"),
         path.join(process.cwd(), ".sourcemaps/server"),
       ],
-      "rejectOnError",
+      true,
     );
     await markSourcemapUploadDone(redis, "web", gitSha);
     console.log(`Uploaded source maps to Sentry for ${gitSha}.`);
