@@ -95,11 +95,11 @@ test("footer 'お問い合わせ' link points to a discord.gg invite", async ({ 
   await expect(link).toHaveAttribute("href", /discord\.gg/);
 });
 
-test("footer 'Team ThunLights' link points to thunlights.com", async ({ page }) => {
+test("footer 'Team ThunLights' link points to ro80t.com", async ({ page }) => {
   await page.goto("/");
   const link = page.getByRole("link", { name: "Team ThunLights" });
   await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute("href", "https://www.thunlights.com");
+  await expect(link).toHaveAttribute("href", "https://ro80t.com");
 });
 
 // ── Page title changes on navigation ─────────────────────────────────────────

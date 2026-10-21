@@ -8,7 +8,7 @@ Discordのサーバーのための掲示板です。
 
 ## 運営元
 
-本サイトの運営は[Team ThunLights](https://www.thunlights.com/)が行っています。
+本サイトの運営は[ROBOT](https://ro80t.com/)が行っています。
 
 法人ではなく有志の集まりなので更新頻度には限界がありますが精一杯運営しています。
 
