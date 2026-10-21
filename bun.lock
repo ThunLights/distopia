@@ -23,17 +23,17 @@
       "dependencies": {
         "@bufbuild/protobuf": "catalog:",
         "@connectrpc/connect": "catalog:",
-        "@types/node": "catalog:",
-        "jsr": "0.14.3",
-        "oxfmt": "catalog:",
-        "oxlint": "catalog:",
-        "tsdown": "0.23.0",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@bufbuild/buf": "catalog:",
         "@bufbuild/protoc-gen-es": "catalog:",
+        "@types/node": "catalog:",
         "bun": "catalog:",
+        "jsr": "0.14.3",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+        "tsdown": "0.23.0",
       },
       "peerDependencies": {
         "typescript": "catalog:",
