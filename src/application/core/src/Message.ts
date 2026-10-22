@@ -1,5 +1,5 @@
 import { findUrls, levelUp } from "domain-service";
-import type { GuildRecordOneDayUpsertInput } from "infra-database/types";
+import type { GuildRecordOneDayUpsertInput, GuildRecordUpsertInput } from "infra-database/types";
 import { isInviteLink } from "infra-http";
 
 import { Base } from "./Base";
@@ -63,6 +63,7 @@ export class Message extends Base {
   public async syncDB() {
     const date = await formatYMD(new Date());
     const query: GuildRecordOneDayUpsertInput[] = [];
+    const guildQuery: GuildRecordUpsertInput[] = [];
     const guilds = new Map(
       (await this.state.database.guildRecord.findAll()).map((value) => [value.guildId, value]),
     );
@@ -85,6 +86,7 @@ export class Message extends Base {
         point = score.point;
       }
 
+      guildQuery.push({ guildId, level, point });
       query.push({
         guildId,
         date,
@@ -95,6 +97,7 @@ export class Message extends Base {
     await this.state.memory.messageCreate.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
+    await this.state.database.guildRecord.upsertAll(guildQuery);
   }
 
   public async includeInviteLink(content: string): Promise<string[]> {
