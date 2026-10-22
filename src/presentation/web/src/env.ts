@@ -1,0 +1,32 @@
+import { defineEnvVars } from "@sveltejs/kit/env";
+
+// @migration-task Review usage of dynamic environment variables. They fall back to the empty string if not present, which may not be what you want.
+export const variables = defineEnvVars({
+  PUBLIC_SENTRY_DSN: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_TURNSTILE_SITE_KEY: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_SELLER_NAME: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_BOT_ID: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_URL: { public: true, schema: (input) => input ?? "" },
+  VOICEVOX_API_KEY: { schema: (input) => input ?? "" },
+  SAKURA_AI_ENGINE_API_KEY: { schema: (input) => input ?? "" },
+  PUBLIC_OWNER_ID: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_HOME_SERVER_ID: { public: true, schema: (input) => input ?? "" },
+  DATABASE_URL: { schema: (input) => input ?? "" },
+  BOT_SECRET: { schema: (input) => input ?? "" },
+  BOT_TOKEN: { schema: (input) => input ?? "" },
+  REDIS_URL: { schema: (input) => input ?? "" },
+  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: { public: true, schema: (input) => input ?? "" },
+  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: { public: true, schema: (input) => input ?? "" },
+  SENTRY_AUTH_TOKEN: { schema: (input) => input ?? "" },
+  SENTRY_ORG: { schema: (input) => input ?? "" },
+  SENTRY_PROJECT: { schema: (input) => input ?? "" },
+  BOT_RPC_URL: { schema: (input) => input ?? "" },
+  BOT_RPC_TOKEN: { schema: (input) => input ?? "" },
+  SEARCHENGINE_RPC_URL: { schema: (input) => input ?? "" },
+  SEARCHENGINE_RPC_TOKEN: { schema: (input) => input ?? "" },
+  SCHEDULEMANAGER_RPC_PORT: { schema: (input) => input ?? "" },
+  SCHEDULEMANAGER_RPC_TOKEN: { schema: (input) => input ?? "" },
+  VERIFY_RPC_URL: { schema: (input) => input ?? "" },
+  VERIFY_RPC_TOKEN: { schema: (input) => input ?? "" },
+});

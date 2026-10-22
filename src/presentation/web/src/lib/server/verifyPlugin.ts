@@ -1,4 +1,4 @@
-import { env as privateEnv } from "$env/dynamic/private";
+import { VERIFY_RPC_TOKEN, VERIFY_RPC_URL } from "$app/env/private";
 import { type Client, createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-node";
 import { createBearerAuthInterceptor, VerifyService } from "infra-rpc";
@@ -16,7 +16,6 @@ let rpcClient: Client<typeof VerifyService> | undefined | null;
 // evaluateVerify turns into a refusal instead of throwing at startup.
 function rpc(): Client<typeof VerifyService> | null {
   if (rpcClient === undefined) {
-    const { VERIFY_RPC_URL, VERIFY_RPC_TOKEN } = privateEnv;
     rpcClient = VERIFY_RPC_TOKEN
       ? createClient(
           VerifyService,

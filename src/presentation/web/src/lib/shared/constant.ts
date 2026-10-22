@@ -1,15 +1,15 @@
-import { env } from "$env/dynamic/public";
-import githubIcon from "$lib/assets/service/github.webp";
-import tiktokIcon from "$lib/assets/service/tiktok.webp";
-import twitterIcon from "$lib/assets/service/twitter.webp";
-import robotIcon from "$lib/assets/staff/robot.webp";
-import sumireIcon from "$lib/assets/staff/sumire.webp";
-import breadIcon from "$lib/assets/supporter/bread.webp";
-import bykIcon from "$lib/assets/supporter/byk.webp";
-import cappuccinoIcon from "$lib/assets/supporter/cappuccino.webp";
-import himaIcon from "$lib/assets/supporter/hima.webp";
-import lemonIcon from "$lib/assets/supporter/lemon.webp";
-import sumireCafeIcon from "$lib/assets/supporter/sumire.webp";
+import githubIcon from "#lib/assets/service/github.webp";
+import tiktokIcon from "#lib/assets/service/tiktok.webp";
+import twitterIcon from "#lib/assets/service/twitter.webp";
+import robotIcon from "#lib/assets/staff/robot.webp";
+import sumireIcon from "#lib/assets/staff/sumire.webp";
+import breadIcon from "#lib/assets/supporter/bread.webp";
+import bykIcon from "#lib/assets/supporter/byk.webp";
+import cappuccinoIcon from "#lib/assets/supporter/cappuccino.webp";
+import himaIcon from "#lib/assets/supporter/hima.webp";
+import lemonIcon from "#lib/assets/supporter/lemon.webp";
+import sumireCafeIcon from "#lib/assets/supporter/sumire.webp";
+import { PUBLIC_BOT_ID, PUBLIC_URL } from "$app/env/public";
 import {
   staffsKeyValue as baseStaff,
   supportersKeyValue as baseSupporters,
@@ -93,6 +93,6 @@ export const supporters = [
   },
 ] satisfies Supporter[];
 
-export const PUBLIC_OAUTH_URL = buildLoginUrl(env.PUBLIC_BOT_ID!, `${env.PUBLIC_URL}/auth`);
+export const PUBLIC_OAUTH_URL = buildLoginUrl(PUBLIC_BOT_ID!, `${PUBLIC_URL}/auth`);
 
-export const PUBLIC_BOT_INVITE_LINK = buildBotInviteUrl(env.PUBLIC_BOT_ID!);
+export const PUBLIC_BOT_INVITE_LINK = buildBotInviteUrl(PUBLIC_BOT_ID!);

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import MarkDown from "$lib/components/MarkDown.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import SpecificCommercialTransactionAct from "$lib/contents/SpecificCommercialTransactionAct.md?raw";
+  import Block from "#lib/components/Block.svelte";
+  import MarkDown from "#lib/components/MarkDown.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import SpecificCommercialTransactionAct from "#lib/contents/SpecificCommercialTransactionAct.md?raw";
 
   const { data } = $props();
   const content = $derived(

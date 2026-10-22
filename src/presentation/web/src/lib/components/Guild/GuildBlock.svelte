@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Block from "#lib/components/Block.svelte";
+  import type { UserAuth } from "#lib/shared/types/UserAuth.js";
   import { resolve } from "$app/paths";
-  import Block from "$lib/components/Block.svelte";
-  import type { UserAuth } from "$lib/shared/types/UserAuth";
   import BlockTitle from "./BlockTitle.svelte";
   import Icon from "./Icon.svelte";
   import JoinButton from "./JoinButton.svelte";
@@ -67,11 +67,9 @@
       <BlockTitle title="タグ一覧" />
       <div class="tags">
         {#each tags as tag (tag)}
-          <a class="tag" href={resolve(`/search?w=${encodeURIComponent(tag)}`)}>
-            <div class="content">
-              <p>{tag}</p>
-            </div>
-          </a>
+          <a class="tag" href={resolve(`search?w=${encodeURIComponent(tag)}`)}
+            ><div class="content"><p>{tag}</p></div></a
+          >
         {/each}
       </div>
     </div>

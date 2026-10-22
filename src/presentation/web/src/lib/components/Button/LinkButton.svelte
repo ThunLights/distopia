@@ -1,7 +1,7 @@
 <script lang="ts">
   /* eslint svelte/no-navigation-without-resolve: "off" */
+  import { createRedirectEvent } from "#lib/client/redirect.js";
   import type { ResolvedPathname } from "$app/types";
-  import { createRedirectEvent } from "$lib/client/redirect";
   import PrimaryButton from "./PrimaryButton.svelte";
 
   type Props = {

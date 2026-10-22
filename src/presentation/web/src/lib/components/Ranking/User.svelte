@@ -1,5 +1,5 @@
 <script lang="ts">
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
+  import DiscordIcon from "#lib/assets/icon/discord.webp";
   import type { Snippet } from "svelte";
 
   type Props = {

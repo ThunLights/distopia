@@ -1,13 +1,13 @@
-import type { AppTypes, LayoutParams } from "$app/types";
-import type { MaybePromise } from "$lib/shared/types/Promise";
-import type { UserAuth } from "$lib/shared/types/UserAuth";
+import type { MaybePromise } from "#lib/shared/types/Promise.js";
+import type { UserAuth } from "#lib/shared/types/UserAuth.js";
+import type { LayoutParams, RouteId as AppRouteId } from "$app/types";
 import { errorJson } from "./res";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { json, type RequestEvent } from "@sveltejs/kit";
 
 export async function authHandler<
-  RouteParams extends LayoutParams<RouteId>,
-  RouteId extends ReturnType<AppTypes["RouteId"]>,
+  RouteParams extends LayoutParams<"/">,
+  RouteId extends AppRouteId | null,
 >(
   handler: (
     event: RequestEvent<RouteParams, RouteId> & { locals: { user: UserAuth } },
@@ -32,8 +32,8 @@ export async function authHandler<
 export async function validateHandler<
   SchemaInput,
   SchemaOutput,
-  RouteParams extends LayoutParams<RouteId>,
-  RouteId extends ReturnType<AppTypes["RouteId"]>,
+  RouteParams extends LayoutParams<"/">,
+  RouteId extends AppRouteId | null,
 >(
   schema: StandardSchemaV1<SchemaInput, SchemaOutput>,
   handler: (
@@ -55,8 +55,8 @@ export async function validateHandler<
 export async function authAndValidateHandler<
   SchemaInput,
   SchemaOutput,
-  RouteParams extends LayoutParams<RouteId>,
-  RouteId extends ReturnType<AppTypes["RouteId"]>,
+  RouteParams extends LayoutParams<"/">,
+  RouteId extends AppRouteId | null,
 >(
   schema: StandardSchemaV1<SchemaInput, SchemaOutput>,
   handler: (

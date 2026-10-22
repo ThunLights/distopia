@@ -1,6 +1,9 @@
-import { core } from "$lib/server/core";
-import { validateHandler } from "$lib/server/handler";
-import { PostBodySchema, type ResponseMethodPost } from "$lib/shared/types/routes/api/guild/search";
+import { core } from "#lib/server/core.js";
+import { validateHandler } from "#lib/server/handler.js";
+import {
+  PostBodySchema,
+  type ResponseMethodPost,
+} from "#lib/shared/types/routes/api/guild/search.js";
 import type { RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 

@@ -1,10 +1,10 @@
-import { env } from "$env/dynamic/public";
+import { PUBLIC_SELLER_NAME } from "$app/env/public";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = () => {
-  if (!env.PUBLIC_SELLER_NAME) {
+  if (!PUBLIC_SELLER_NAME) {
     return error(500, { message: "PUBLIC_SELLER_NAME is not configured" });
   }
-  return { sellerName: env.PUBLIC_SELLER_NAME };
+  return { sellerName: PUBLIC_SELLER_NAME };
 };

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import BlackStar from "$lib/assets/icon/blackstar.webp";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
-  import Star from "$lib/assets/icon/star.webp";
+  import BlackStar from "#lib/assets/icon/blackstar.webp";
+  import DiscordIcon from "#lib/assets/icon/discord.webp";
+  import Star from "#lib/assets/icon/star.webp";
 
   type Props = {
     username: string | null;

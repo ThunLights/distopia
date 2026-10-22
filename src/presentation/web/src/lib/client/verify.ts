@@ -1,10 +1,10 @@
-import { parseErrRes } from "$lib/client/error";
-import { Toast } from "$lib/client/toast";
+import { parseErrRes } from "#lib/client/error.js";
+import { Toast } from "#lib/client/toast.js";
 import {
   ENCRYPTED_BODY_HEADER,
   ENCRYPTED_BODY_VALUE,
   type PostBody,
-} from "$lib/shared/types/routes/api/verify";
+} from "#lib/shared/types/routes/api/verify.js";
 import type { VerifyClientPlugin } from "distopia";
 
 // The script and optional wasm are served from build-asset-lookalike paths

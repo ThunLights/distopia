@@ -1,6 +1,6 @@
-import { core } from "$lib/server/core";
-import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
-import { issuePluginGrant } from "$lib/server/verifyPluginGrant";
+import { core } from "#lib/server/core.js";
+import { fetchVerifyClientScript } from "#lib/server/verifyPlugin.js";
+import { issuePluginGrant } from "#lib/server/verifyPluginGrant.js";
 import type { PageServerLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
 

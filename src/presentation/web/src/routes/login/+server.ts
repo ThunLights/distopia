@@ -1,6 +1,6 @@
-import { core } from "$lib/server/core";
-import { parseRedirectTo } from "$lib/server/redirect";
-import { PUBLIC_OAUTH_URL } from "$lib/shared/constant";
+import { core } from "#lib/server/core.js";
+import { parseRedirectTo } from "#lib/server/redirect.js";
+import { PUBLIC_OAUTH_URL } from "#lib/shared/constant.js";
 import type { RequestHandler } from "./$types";
 import { redirect } from "@sveltejs/kit";
 
@@ -17,5 +17,5 @@ export const GET: RequestHandler = async (e) => {
 
   oauthUrl.searchParams.set("state", sessionId);
 
-  return redirect(302, oauthUrl.toString());
+  return redirect(302, oauthUrl.toString(), { external: [oauthUrl.origin] });
 };

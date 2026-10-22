@@ -1,6 +1,6 @@
-import { core } from "$lib/server/core";
-import { authAndValidateHandler } from "$lib/server/handler";
-import type { ResponseBodyTypeGuild } from "$lib/shared/types/routes/api/user/cache";
+import { core } from "#lib/server/core.js";
+import { authAndValidateHandler } from "#lib/server/handler.js";
+import type { ResponseBodyTypeGuild } from "#lib/shared/types/routes/api/user/cache.js";
 import type { RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 import { z } from "zod";

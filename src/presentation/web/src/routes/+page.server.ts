@@ -1,4 +1,4 @@
-import { core } from "$lib/server/core";
+import { core } from "#lib/server/core.js";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {

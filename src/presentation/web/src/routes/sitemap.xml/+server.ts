@@ -1,4 +1,4 @@
-import { database } from "$lib/server/database";
+import { database } from "#lib/server/database.js";
 import type { RequestHandler } from "@sveltejs/kit";
 import * as sitemap from "super-sitemap/sveltekit";
 

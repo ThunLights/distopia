@@ -19,12 +19,12 @@
 
 <div class="guild">
   <div>
-    <a href={resolve(`/user/guilds/${id}`)} aria-label={name}>
-      <DiscordIcon {iconUrl} size={128} alt="" class="icon" />
-    </a>
+    <a href={resolve(`user/guilds/${id}`)} aria-label={name}
+      ><DiscordIcon {iconUrl} size={128} alt="" class="icon" /></a
+    >
   </div>
   <div>
-    <p class="name"><a href={resolve(`/user/guilds/${id}`)}>{name}</a></p>
+    <p class="name"><a href={resolve(`user/guilds/${id}`)}>{name}</a></p>
     <div class="informations">
       <p>ID: {id}</p>
       <p>

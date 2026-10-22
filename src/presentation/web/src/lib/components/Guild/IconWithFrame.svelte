@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildDiscordIconUrl, type DiscordIconSize } from "$lib/utils/discordIcon";
+  import { buildDiscordIconUrl, type DiscordIconSize } from "#lib/utils/discordIcon.js";
 
   type Props = {
     height: number | string;

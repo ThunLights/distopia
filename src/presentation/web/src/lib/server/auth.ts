@@ -1,4 +1,4 @@
-import type { UserAuth } from "$lib/shared/types/UserAuth";
+import type { UserAuth } from "#lib/shared/types/UserAuth.js";
 import { core } from "./core";
 import { jwt } from "./jwt";
 import type { Cookies } from "@sveltejs/kit";

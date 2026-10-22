@@ -1,6 +1,6 @@
-import type { UserAuth } from "$lib/shared/types/UserAuth";
-import type { Guild as SearchGuild } from "$lib/shared/types/routes/api/guild/search";
-import type { GuildRanking, UserRanking } from "$lib/shared/types/routes/api/ranking";
+import type { UserAuth } from "#lib/shared/types/UserAuth.js";
+import type { Guild as SearchGuild } from "#lib/shared/types/routes/api/guild/search.js";
+import type { GuildRanking, UserRanking } from "#lib/shared/types/routes/api/ranking.js";
 
 export const mockUser: UserAuth = {
   id: "123456789012345678",

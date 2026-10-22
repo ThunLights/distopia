@@ -1,5 +1,5 @@
-import { env as privateEnv } from "$env/dynamic/private";
-import { env } from "$env/dynamic/public";
+import { VOICEVOX_API_KEY, SAKURA_AI_ENGINE_API_KEY } from "$app/env/private";
+import { PUBLIC_OWNER_ID, PUBLIC_HOME_SERVER_ID, PUBLIC_URL } from "$app/env/public";
 import { database } from "./database";
 import { djsController } from "./discord";
 import { memory } from "./memory";
@@ -16,11 +16,11 @@ export function genCore(state: AppState) {
 }
 
 export const core = genCore({
-  owner: { id: env.PUBLIC_OWNER_ID! },
-  homeServerId: env.PUBLIC_HOME_SERVER_ID!,
-  url: env.PUBLIC_URL!,
-  voicevoxApiKey: privateEnv.VOICEVOX_API_KEY ?? null,
-  sakuraApiKey: privateEnv.SAKURA_AI_ENGINE_API_KEY ?? null,
+  owner: { id: PUBLIC_OWNER_ID! },
+  homeServerId: PUBLIC_HOME_SERVER_ID!,
+  url: PUBLIC_URL!,
+  voicevoxApiKey: VOICEVOX_API_KEY ?? null,
+  sakuraApiKey: SAKURA_AI_ENGINE_API_KEY ?? null,
   memory,
   searchEngine,
   discord: djsController,
@@ -36,6 +36,7 @@ export async function updatePanels() {
         : panel.type === "LevelRanking"
           ? await levelRatePage(core)
           : await userBumpPage(core);
+
     await djsController.message.edit(
       panel.channelId,
       panel.messageId,

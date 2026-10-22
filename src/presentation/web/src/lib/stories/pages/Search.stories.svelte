@@ -1,5 +1,5 @@
 <script lang="ts" module>
-  import type { ResponseMethodPost } from "$lib/shared/types/routes/api/guild/search";
+  import type { ResponseMethodPost } from "#lib/shared/types/routes/api/guild/search.js";
   import { globalFetchMock } from "../../../mocks/fetch";
   import Page from "../../../routes/search/+page.svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";

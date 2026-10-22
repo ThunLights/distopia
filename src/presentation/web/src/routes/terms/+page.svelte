@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import Terms from "$lib/components/Main/Terms.svelte";
-  import Meta from "$lib/components/Meta.svelte";
+  import Block from "#lib/components/Block.svelte";
+  import Terms from "#lib/components/Main/Terms.svelte";
+  import Meta from "#lib/components/Meta.svelte";
 </script>
 
 <Meta

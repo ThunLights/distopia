@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { parseErrRes } from "$lib/client/error.js";
-  import Block from "$lib/components/Block.svelte";
-  import Card from "$lib/components/Guild/Card.svelte";
-  import CardLayout from "$lib/components/Layout/CardLayout.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Search from "$lib/components/Search.svelte";
+  import { parseErrRes } from "#lib/client/error.js";
+  import Block from "#lib/components/Block.svelte";
+  import Card from "#lib/components/Guild/Card.svelte";
+  import CardLayout from "#lib/components/Layout/CardLayout.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Search from "#lib/components/Search.svelte";
   import type {
     Guild,
     PostBody,
     ResponseMethodPost,
-  } from "$lib/shared/types/routes/api/guild/search";
+  } from "#lib/shared/types/routes/api/guild/search.js";
 
   const { data } = $props();
   const { user } = $derived(data);

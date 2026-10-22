@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { env } from "$env/dynamic/public";
-  import { verifyGuild } from "$lib/client/verify";
-  import Block from "$lib/components/Block.svelte";
-  import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
-  import Icon from "$lib/components/Guild/Icon.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Title from "$lib/components/Title.svelte";
+  import { verifyGuild } from "#lib/client/verify.js";
+  import Block from "#lib/components/Block.svelte";
+  import PrimaryButton from "#lib/components/Button/PrimaryButton.svelte";
+  import Icon from "#lib/components/Guild/Icon.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Title from "#lib/components/Title.svelte";
+  import { PUBLIC_TURNSTILE_SITE_KEY } from "$app/env/public";
   import { onMount } from "svelte";
 
   type Turnstile = {
@@ -39,7 +39,7 @@
     script.onload = () => {
       const turnstile = (window as unknown as { turnstile?: Turnstile }).turnstile;
       turnstile?.render(widgetContainer, {
-        sitekey: env.PUBLIC_TURNSTILE_SITE_KEY ?? "",
+        sitekey: PUBLIC_TURNSTILE_SITE_KEY ?? "",
         size: window.matchMedia("(max-width: 400px)").matches ? "compact" : "normal",
         callback: (token: string) => {
           turnstileToken = token;

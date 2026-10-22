@@ -1,7 +1,7 @@
-import { core } from "$lib/server/core";
-import { authAndValidateHandler } from "$lib/server/handler";
-import { errorJson } from "$lib/server/res";
-import { PostBodySchema } from "$lib/shared/types/routes/api/guild/join";
+import { core } from "#lib/server/core.js";
+import { authAndValidateHandler } from "#lib/server/handler.js";
+import { errorJson } from "#lib/server/res.js";
+import { PostBodySchema } from "#lib/shared/types/routes/api/guild/join.js";
 import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = await authAndValidateHandler(

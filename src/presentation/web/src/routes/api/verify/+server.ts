@@ -1,11 +1,11 @@
-import { core } from "$lib/server/core";
-import { errorJson } from "$lib/server/res";
-import { decryptPluginBody, evaluateVerify, pluginHeaders } from "$lib/server/verifyPlugin";
+import { core } from "#lib/server/core.js";
+import { errorJson } from "#lib/server/res.js";
+import { decryptPluginBody, evaluateVerify, pluginHeaders } from "#lib/server/verifyPlugin.js";
 import {
   ENCRYPTED_BODY_HEADER,
   ENCRYPTED_BODY_VALUE,
   PostBodySchema,
-} from "$lib/shared/types/routes/api/verify";
+} from "#lib/shared/types/routes/api/verify.js";
 import type { RequestEvent, RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 import type { GuildVerify, UserVerifyLog } from "infra-database/types";

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import LinkButton from "$lib/components/Button/LinkButton.svelte";
-  import Profile from "$lib/components/Guild/Profile.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import SubTitle from "$lib/components/SubTitle.svelte";
+  import Block from "#lib/components/Block.svelte";
+  import LinkButton from "#lib/components/Button/LinkButton.svelte";
+  import Profile from "#lib/components/Guild/Profile.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import SubTitle from "#lib/components/SubTitle.svelte";
 
   const { data } = $props();
   const { guildId, meta, guild, record } = $derived(data);

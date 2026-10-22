@@ -1,7 +1,7 @@
 <script lang="ts">
-  import CopyIcon from "$lib/assets/icon/copy.webp";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
-  import Block from "$lib/components/Block.svelte";
+  import CopyIcon from "#lib/assets/icon/copy.webp";
+  import DiscordIcon from "#lib/assets/icon/discord.webp";
+  import Block from "#lib/components/Block.svelte";
   import Copy from "../Button/Copy.svelte";
   import TagsLayout from "../Layout/TagsLayout.svelte";
 

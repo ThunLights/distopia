@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import BlockTitle from "$lib/components/Guild/BlockTitle.svelte";
-  import Evaluation from "$lib/components/Guild/Evaluation.svelte";
-  import Graph from "$lib/components/Guild/Graph.svelte";
-  import GuildBlock from "$lib/components/Guild/GuildBlock.svelte";
-  import Review from "$lib/components/Guild/Review.svelte";
-  import Meta from "$lib/components/Meta.svelte";
+  import Block from "#lib/components/Block.svelte";
+  import BlockTitle from "#lib/components/Guild/BlockTitle.svelte";
+  import Evaluation from "#lib/components/Guild/Evaluation.svelte";
+  import Graph from "#lib/components/Guild/Graph.svelte";
+  import GuildBlock from "#lib/components/Guild/GuildBlock.svelte";
+  import Review from "#lib/components/Guild/Review.svelte";
+  import Meta from "#lib/components/Meta.svelte";
 
   const { data } = $props();
   const { guild, user } = $derived(data);

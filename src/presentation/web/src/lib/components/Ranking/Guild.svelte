@@ -32,7 +32,7 @@
 
 <div class="guild">
   <div>
-    <a class="white" href={resolve(`/guilds/${guildId}`)} aria-label={name}>
+    <a class="white" href={resolve(`guilds/${guildId}`)} aria-label={name}>
       {#if useFrameIcon}
         <Icon width="10vw" height="10vw" {iconUrl} size={256} rank={index + 1} />
       {:else}
@@ -41,7 +41,10 @@
     </a>
   </div>
   <div>
-    <p><a class="name white" href={resolve(`/guilds/${guildId}`)}>{index + 1}: {name}</a></p>
+    <p>
+      <a class="name white" href={resolve(`guilds/${guildId}`)}>{index + 1}: {name}</a>
+    </p>
+
     <div class="informations">
       <p>
         Rate {Number(activeRate ?? 0n)} Lv.{Number(level ?? 0n)}
@@ -50,9 +53,8 @@
       <p>{memberCount ?? 0}人(アクティブ: {onlineMemberCount ?? 0})</p>
     </div>
   </div>
-  <div>
-    <a href={resolve(`/guilds/${guildId}`)}><p class="move-page">詳細→</p></a>
-  </div>
+
+  <div><a href={resolve(`guilds/${guildId}`)}><p class="move-page">詳細→</p></a></div>
 </div>
 
 <style>

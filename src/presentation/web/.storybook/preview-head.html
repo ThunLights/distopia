@@ -1,0 +1,20 @@
+<script>
+  // SvelteKit's $app/env/public reads its values from this payload, which only SvelteKit's
+  // own server fills in. Storybook never runs that server, so every story that transitively
+  // imports $lib/shared/constant.ts would otherwise throw "__SVELTEKIT_PAYLOAD__ is not
+  // defined". Keep the values in sync with src/mocks/env.ts by hand.
+  window.__SVELTEKIT_PAYLOAD__ = {
+    env: {
+      PUBLIC_URL: "http://localhost:3000",
+      PUBLIC_OWNER_ID: "0",
+      PUBLIC_HOME_SERVER_ID: "0",
+      PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "0",
+      PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "0",
+      PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "0",
+      PUBLIC_BOT_ID: "0",
+      PUBLIC_SENTRY_DSN: "",
+      PUBLIC_TURNSTILE_SITE_KEY: "",
+      PUBLIC_SELLER_NAME: "",
+    },
+  };
+</script>

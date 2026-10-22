@@ -1,4 +1,4 @@
-import { env } from "$env/dynamic/private";
+import { SENTRY_AUTH_TOKEN, SENTRY_ORG, SENTRY_PROJECT } from "$app/env/private";
 import { SentryCli } from "@sentry/cli";
 import type { RedisClient } from "infra-redis";
 import path from "node:path";
@@ -28,7 +28,6 @@ import {
 // (see hooks.server.ts), so an uncaught rejection here would otherwise surface as an unhandled
 // promise rejection.
 export async function uploadSourceMapsOnce(redis: RedisClient): Promise<void> {
-  const { SENTRY_AUTH_TOKEN, SENTRY_ORG, SENTRY_PROJECT } = env;
   const gitSha = process.env.GIT_SHA;
 
   if (!SENTRY_AUTH_TOKEN || !SENTRY_ORG || !SENTRY_PROJECT || !gitSha || gitSha === "unknown") {
