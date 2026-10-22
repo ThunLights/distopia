@@ -10,12 +10,17 @@ import type { RequestEvent, RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 import type { GuildVerify, UserVerifyLog } from "infra-database/types";
 
-// getClientAddress() can throw (SvelteKit's docs call this out for some adapters/hosts) --
-// treated as "couldn't determine it" rather than failing the whole request over it. Whether
-// this is the real client IP or a reverse proxy's depends on the deployment's own
-// trust-proxy configuration; that's not this repo's concern, only the (optional, private)
-// plugin's.
+// Behind Cloudflare Tunnel the socket peer is cloudflared, so the real client IP comes from
+// CF-Connecting-IP (set by Cloudflare, overwriting any client-supplied value). Falls back to
+// getClientAddress(), which can throw on some adapters/hosts -- treated as "couldn't determine".
 function clientIp(e: RequestEvent): string | null {
+  const cfIp =
+    e.request.headers.get("cf-connecting-ip")?.trim() ||
+    e.request.headers.get("cf-pseudo-ipv4")?.trim();
+  if (cfIp) {
+    return cfIp;
+  }
+
   try {
     return e.getClientAddress();
   } catch {
@@ -32,7 +37,7 @@ async function postVerifyLog(
   setting: GuildVerify,
   row: UserVerifyLog,
   reason: string | null,
-  ip: string | null,
+  { ip, headers }: { ip: string | null; headers: Record<string, string> },
 ): Promise<void> {
   if (!setting.logChannelId) {
     return;
@@ -53,6 +58,16 @@ async function postVerifyLog(
 
   if (ip) {
     fields.push({ name: "IPアドレス", value: ip });
+  }
+
+  const country = headers["cf-ipcountry"];
+  if (country) {
+    fields.push({ name: "国", value: country });
+  }
+
+  const ray = headers["cf-ray"];
+  if (ray) {
+    fields.push({ name: "CF-Ray", value: ray });
   }
 
   if (row.isVpn || row.isProxy || row.isTor) {
@@ -169,7 +184,7 @@ export const POST: RequestHandler = async (e) => {
       email,
       ...vpnLogFields,
     });
-    await postVerifyLog(setting, row, outcome.reason, pluginRequestContext.ip);
+    await postVerifyLog(setting, row, outcome.reason, pluginRequestContext);
     return errorJson(`認証に失敗しました: ${outcome.reason ?? "Unknown reason"}`);
   }
 
@@ -191,6 +206,6 @@ export const POST: RequestHandler = async (e) => {
     email,
     ...vpnLogFields,
   });
-  await postVerifyLog(setting, row, null, pluginRequestContext.ip);
+  await postVerifyLog(setting, row, null, pluginRequestContext);
   return json({ content: "ok" });
 };
