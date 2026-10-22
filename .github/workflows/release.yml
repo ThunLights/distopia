@@ -41,8 +41,8 @@ jobs:
 
       - name: Install tools
         run: |
-          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
-          git clone https://github.com/gitleaks/gitleaks.git "$RUNNER_TEMP/gitleaks"
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/v3.96.0/scripts/install.sh | sh -s -- -b /usr/local/bin v3.96.0
+          git clone -b v8.30.1 --depth 1 https://github.com/gitleaks/gitleaks.git "$RUNNER_TEMP/gitleaks"
           cd "$RUNNER_TEMP/gitleaks" && make build
           sudo mv gitleaks /usr/local/bin
           sudo curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.8.2/jq-linux64 && sudo chmod +x /usr/local/bin/jq
