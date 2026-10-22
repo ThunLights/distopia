@@ -11,10 +11,12 @@ import { json } from "@sveltejs/kit";
 import type { GuildVerify, UserVerifyLog } from "infra-database/types";
 
 // Behind Cloudflare Tunnel the socket peer is cloudflared, so the real client IP comes from
-// CF-Connecting-IP (set by Cloudflare, overwriting any client-supplied value). Falls back to
+// CF-Connecting-IPv6 (the real address when Pseudo IPv4 overwrites CF-Connecting-IP), then
+// CF-Connecting-IP / CF-Pseudo-IPv4 (set by Cloudflare). Falls back to
 // getClientAddress(), which can throw on some adapters/hosts -- treated as "couldn't determine".
 function clientIp(e: RequestEvent): string | null {
   const cfIp =
+    e.request.headers.get("cf-connecting-ipv6")?.trim() ||
     e.request.headers.get("cf-connecting-ip")?.trim() ||
     e.request.headers.get("cf-pseudo-ipv4")?.trim();
   if (cfIp) {
