@@ -58,6 +58,11 @@ RUN cp -a src/presentation/web/build .sourcemaps && \
 RUN rm -f .env
 
 FROM oven/bun:${BUN_VERSION}-slim AS runtime
+# Rank cards (presentation-bot /rank) are drawn with @napi-rs/canvas, which only sees system
+# fonts -- the slim image has none, so Japanese text would render as tofu boxes.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends fonts-noto-cjk \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=builder /app .
 ENV NODE_ENV=production

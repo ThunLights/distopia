@@ -13,6 +13,7 @@ import { GuildTtsIgnoreListTable } from "./GuildTtsIgnoreListTable";
 import { GuildVerifyTable } from "./GuildVerifyTable";
 import { GuildWhiteListTable } from "./GuildWhiteListTable";
 import { JWTKeyTable } from "./JWTKeyTable";
+import { MemberLevelTable } from "./MemberLevelTable";
 import { PanelTable } from "./PanelTable";
 import { UserBlackListTable } from "./UserBlackListTable";
 import { UserDictionaryTable } from "./UserDictionaryTable";
@@ -36,6 +37,7 @@ export class DatabaseClient extends Base {
   public readonly guildVerify = new GuildVerifyTable(this.prisma);
   public readonly guildWhiteList = new GuildWhiteListTable(this.prisma);
   public readonly jwtKey = new JWTKeyTable(this.prisma);
+  public readonly memberLevel = new MemberLevelTable(this.prisma);
   public readonly panel = new PanelTable(this.prisma);
   public readonly userBlackList = new UserBlackListTable(this.prisma);
   public readonly userDictionary = new UserDictionaryTable(this.prisma);

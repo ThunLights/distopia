@@ -17,7 +17,12 @@ export class MessageCreateHandler extends BaseHandler<
     }
 
     if (message.guildId && message.member?.id) {
-      await this.core.message.increase(message.guildId, message.member.id, message.content);
+      await this.core.message.increase(
+        message.guildId,
+        message.member.id,
+        message.content,
+        message.author.bot,
+      );
     }
 
     if (message.guildId) {

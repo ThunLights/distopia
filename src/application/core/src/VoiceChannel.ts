@@ -1,6 +1,8 @@
 import { levelUpSync } from "domain-service";
+import type { MemberLevelGain } from "infra-database/types";
 
 import { Base } from "./Base";
+import { Level } from "./Level";
 import { formatYMD } from "./utils/date";
 
 export type UpsertVcMembersQuery = {
@@ -14,6 +16,8 @@ export type UpsertQuery = {
 }[];
 
 export class VoiceChannel extends Base {
+  private readonly level = new Level(this.state);
+
   // Known gap: VoiceChannelMember.pushMemberCounts does its own get()-then-set() internally
   // (see VoiceChannelMember.ts) -- same class of race as Message.increase(). update() only
   // calls it once per guild per run here, so in practice this would require two overlapping
@@ -23,13 +27,19 @@ export class VoiceChannel extends Base {
     const upsertVcMemberUpperTwoQuery: string[] = [];
     const upsertVcMembersQuery: UpsertVcMembersQuery = [];
     const upsertQuery: UpsertQuery = [];
+    const memberGains: MemberLevelGain[] = [];
     const voiceChannels = await this.state.discord.channel.fetchVoiceChannel();
 
     for (const vc of voiceChannels) {
       if (vc.activeMemberCount >= 2) {
         upsertVcMemberUpperTwoQuery.push(vc.guildId);
       }
+      // A member alone in a channel earns nothing, so sitting in an empty VC can't farm points.
+      const earnsPoint = vc.activeMemberCount >= 2;
       for (const member of vc.members.filter((member) => member.isActive)) {
+        if (earnsPoint) {
+          memberGains.push({ guildId: vc.guildId, userId: member.id, point: Level.VOICE_POINT });
+        }
         upsertVcMembersQuery.push({
           guildId: vc.guildId,
           vcMember: member.id,
@@ -68,6 +78,7 @@ export class VoiceChannel extends Base {
       upsertVcMembersQuery,
       await formatYMD(new Date()),
     );
+    await this.level.addAll(memberGains);
     await this.state.database.guildRecord.upsertAll(
       upsertQuery.map(({ guildId, plusPoint }) => {
         const record = records.get(guildId);
