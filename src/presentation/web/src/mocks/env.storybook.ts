@@ -17,3 +17,5 @@ export const PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID = "0";
 export const PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID = "0";
 export const PUBLIC_BOT_ID = "0";
 export const PUBLIC_SENTRY_DSN = "";
+export const PUBLIC_SELLER_NAME = "";
+export const PUBLIC_TURNSTILE_SITE_KEY = "";

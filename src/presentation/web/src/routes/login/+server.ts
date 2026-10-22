@@ -17,5 +17,5 @@ export const GET: RequestHandler = async (e) => {
 
   oauthUrl.searchParams.set("state", sessionId);
 
-  return redirect(302, oauthUrl.toString());
+  return redirect(302, oauthUrl.toString(), { external: [oauthUrl.origin] });
 };

@@ -29,4 +29,6 @@ vi.mock("$app/env/public", () => ({
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "0",
   PUBLIC_BOT_ID: "0",
   PUBLIC_SENTRY_DSN: "",
+  PUBLIC_SELLER_NAME: "",
+  PUBLIC_TURNSTILE_SITE_KEY: "",
 }));
