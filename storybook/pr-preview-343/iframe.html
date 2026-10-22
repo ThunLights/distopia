@@ -519,15 +519,35 @@
     console.warn('unable to connect to top frame for connecting dev tools');
   }
 </script>
+<script>
+  // SvelteKit's $app/env/public reads its values from this payload, which only SvelteKit's
+  // own server fills in. Storybook never runs that server, so every story that transitively
+  // imports $lib/shared/constant.ts would otherwise throw "__SVELTEKIT_PAYLOAD__ is not
+  // defined". Keep the values in sync with src/mocks/env.ts by hand.
+  window.__SVELTEKIT_PAYLOAD__ = {
+    env: {
+      PUBLIC_URL: "http://localhost:3000",
+      PUBLIC_OWNER_ID: "0",
+      PUBLIC_HOME_SERVER_ID: "0",
+      PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID: "0",
+      PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID: "0",
+      PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID: "0",
+      PUBLIC_BOT_ID: "0",
+      PUBLIC_SENTRY_DSN: "",
+      PUBLIC_TURNSTILE_SITE_KEY: "",
+      PUBLIC_SELLER_NAME: "",
+    },
+  };
+</script>
 
-    <script type="module" crossorigin src="./assets/iframe-WceyUECS.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-CeR8t5uJ.js">
-    <link rel="modulepreload" crossorigin href="./assets/preload-helper-DVSi4jzy.js">
-    <link rel="modulepreload" crossorigin href="./assets/chunk-7PIQR4A3-BvPV__oY.js">
-    <link rel="modulepreload" crossorigin href="./assets/chunk-IMSF75WX-X3y6lU7_.js">
-    <link rel="modulepreload" crossorigin href="./assets/client-kgI_Yk4h.js">
-    <link rel="modulepreload" crossorigin href="./assets/data-DVXGpm4B.js">
-    <link rel="modulepreload" crossorigin href="./assets/iframe-DbXKJLka.js">
+    <script type="module" crossorigin src="./assets/iframe-BUSvyfqd.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-1BsCaszL.js">
+    <link rel="modulepreload" crossorigin href="./assets/preload-helper-u0uwCiON.js">
+    <link rel="modulepreload" crossorigin href="./assets/chunk-7PIQR4A3-Bc5wAPU9.js">
+    <link rel="modulepreload" crossorigin href="./assets/chunk-IMSF75WX-DGe0He43.js">
+    <link rel="modulepreload" crossorigin href="./assets/client-ExvxXH9X.js">
+    <link rel="modulepreload" crossorigin href="./assets/data-ZjOS2R4t.js">
+    <link rel="modulepreload" crossorigin href="./assets/iframe-BUw0cBhk.js">
     <link rel="stylesheet" crossorigin href="./assets/iframe-BBGHF9E3.css">
   </head>
 
