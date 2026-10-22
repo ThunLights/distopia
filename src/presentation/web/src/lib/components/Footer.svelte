@@ -14,7 +14,7 @@
     <a href={DISCORD_INVITE_LINK} rel="external">お問い合わせ</a>
   </nav>
   <p>
-    Supported by <a href="https://www.thunlights.com">Team ThunLights</a> · © Distopia
+    Supported by <a href="https://ro80t.com">ro80t</a> · © Distopia
   </p>
 </footer>
 
