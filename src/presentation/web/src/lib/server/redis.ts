@@ -1,4 +1,4 @@
-import { env } from "$env/dynamic/private";
+import { REDIS_URL } from "$app/env/private";
 import { createRedisClient } from "infra-redis";
 
-export const redis = createRedisClient(env.REDIS_URL!);
+export const redis = createRedisClient(REDIS_URL!);

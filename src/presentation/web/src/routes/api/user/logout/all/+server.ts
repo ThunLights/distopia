@@ -1,5 +1,5 @@
-import { core } from "$lib/server/core";
-import { authHandler } from "$lib/server/handler";
+import { core } from "#lib/server/core.js";
+import { authHandler } from "#lib/server/handler.js";
 import type { RequestHandler } from "./$types";
 
 export const DELETE: RequestHandler = await authHandler(async (e) => {

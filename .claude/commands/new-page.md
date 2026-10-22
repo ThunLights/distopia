@@ -29,7 +29,7 @@ export const load: PageServerLoad = async (e) => {
 
 ```svelte
 <script lang="ts">
-  import Meta from "$lib/components/Meta.svelte";
+  import Meta from "#lib/components/Meta.svelte";
 
   const { data } = $props();
   // const { someField } = $derived(data);

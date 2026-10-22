@@ -1,6 +1,6 @@
-import type { ResponseMethodPost } from "$lib/shared/types/routes/api/guild/search";
-import type { ResponseMethodGet } from "$lib/shared/types/routes/api/ranking";
-import type { ResponseBodyTypeGuild } from "$lib/shared/types/routes/api/user/cache";
+import type { ResponseMethodPost } from "#lib/shared/types/routes/api/guild/search.js";
+import type { ResponseMethodGet } from "#lib/shared/types/routes/api/ranking.js";
+import type { ResponseBodyTypeGuild } from "#lib/shared/types/routes/api/user/cache.js";
 import { mockGuildCards, mockGuildRankings, mockUserGuilds, mockUserRankings } from "./data";
 import { spyOn } from "storybook/test";
 

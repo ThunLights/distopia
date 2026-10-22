@@ -1,4 +1,3 @@
-import { env } from "$env/dynamic/private";
 import { uploadSourceMapsOnce } from "./sourcemaps";
 import type { RedisClient } from "infra-redis";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -11,6 +10,11 @@ const { claimSourcemapUpload, markSourcemapUploadDone, releaseSourcemapUploadCla
   }),
 );
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }));
+const privateEnv = vi.hoisted(() => ({
+  SENTRY_AUTH_TOKEN: "token",
+  SENTRY_ORG: "org",
+  SENTRY_PROJECT: "project",
+}));
 
 vi.mock("repo-redis", () => ({
   claimSourcemapUpload,
@@ -22,11 +26,15 @@ vi.mock("@sentry/cli", () => ({
     public execute = execute;
   },
 }));
-vi.mock("$env/dynamic/private", () => ({
-  env: {
-    SENTRY_AUTH_TOKEN: "token",
-    SENTRY_ORG: "org",
-    SENTRY_PROJECT: "project",
+vi.mock("$app/env/private", () => ({
+  get SENTRY_AUTH_TOKEN() {
+    return privateEnv.SENTRY_AUTH_TOKEN;
+  },
+  get SENTRY_ORG() {
+    return privateEnv.SENTRY_ORG;
+  },
+  get SENTRY_PROJECT() {
+    return privateEnv.SENTRY_PROJECT;
   },
 }));
 
@@ -39,9 +47,9 @@ describe("uploadSourceMapsOnce", () => {
 
   beforeEach(() => {
     process.env.GIT_SHA = "abc123";
-    env.SENTRY_AUTH_TOKEN = "token";
-    env.SENTRY_ORG = "org";
-    env.SENTRY_PROJECT = "project";
+    privateEnv.SENTRY_AUTH_TOKEN = "token";
+    privateEnv.SENTRY_ORG = "org";
+    privateEnv.SENTRY_PROJECT = "project";
     claimSourcemapUpload.mockReset().mockResolvedValue(true);
     markSourcemapUploadDone.mockReset().mockResolvedValue(undefined);
     releaseSourcemapUploadClaim.mockReset().mockResolvedValue(undefined);
@@ -88,9 +96,7 @@ describe("uploadSourceMapsOnce", () => {
   });
 
   test("skips entirely when SENTRY_AUTH_TOKEN is not configured", async () => {
-    // $env/dynamic/private types env as Record<string, string> (never `| undefined`) --
-    // Reflect.deleteProperty removes the key without fighting that type at the call site.
-    Reflect.deleteProperty(env, "SENTRY_AUTH_TOKEN");
+    privateEnv.SENTRY_AUTH_TOKEN = "";
 
     await uploadSourceMapsOnce(fakeRedis());
 

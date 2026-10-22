@@ -479,13 +479,13 @@ src/
 └── app.html
 ```
 
-Path aliases: `$lib` → `src/lib/`, `$env/dynamic/private` for server env vars.
+Path alias: `#lib` → `src/lib/` (package.json `imports`; include the `.js`/`.ts` extension, e.g. `#lib/server/handler.js`). Env vars must be declared in `src/env.ts` (`defineEnvVars`) and imported from `$app/env/private` / `$app/env/public`. SvelteKit config lives in `vite.config.ts` (no `svelte.config.js`).
 
 ### API Endpoint Pattern
 
 ```typescript
 // src/routes/api/[resource]/+server.ts
-import { authAndValidateHandler } from "$lib/server/handler";
+import { authAndValidateHandler } from "#lib/server/handler.js";
 import type { RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 import z from "zod";

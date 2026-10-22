@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { joinGuild } from "$lib/client/join";
-  import type { UserAuth } from "$lib/shared/types/UserAuth";
+  import { joinGuild } from "#lib/client/join.js";
+  import type { UserAuth } from "#lib/shared/types/UserAuth.js";
 
   type Props = {
     guildId: string;

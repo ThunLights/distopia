@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { parseErrRes } from "$lib/client/error.js";
-  import Block from "$lib/components/Block.svelte";
-  import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import SubTitle from "$lib/components/SubTitle.svelte";
-  import Profile from "$lib/components/User/Profile.svelte";
+  import { parseErrRes } from "#lib/client/error.js";
+  import Block from "#lib/components/Block.svelte";
+  import PrimaryButton from "#lib/components/Button/PrimaryButton.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import SubTitle from "#lib/components/SubTitle.svelte";
+  import Profile from "#lib/components/User/Profile.svelte";
 
   const { data } = $props();
   const { user } = $derived(data);

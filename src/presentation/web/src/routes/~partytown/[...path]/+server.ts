@@ -1,4 +1,4 @@
-import { dev } from "$app/environment";
+import { dev } from "$app/env";
 import type { RequestHandler } from "./$types";
 import { libDirPath } from "@qwik.dev/partytown/utils";
 import { error } from "@sveltejs/kit";

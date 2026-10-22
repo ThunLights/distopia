@@ -1,13 +1,12 @@
-import { dev } from "$app/environment";
-import { deleteToken, setToken, verifyToken } from "$lib/server/auth";
-import { core } from "$lib/server/core";
-import { redis } from "$lib/server/redis";
-import { startSchedulerRpcServer } from "$lib/server/schedulerRpcListener";
-import { uploadSourceMapsOnce } from "$lib/server/sourcemaps";
+import { deleteToken, setToken, verifyToken } from "#lib/server/auth.js";
+import { core } from "#lib/server/core.js";
+import { redis } from "#lib/server/redis.js";
+import { startSchedulerRpcServer } from "#lib/server/schedulerRpcListener.js";
+import { uploadSourceMapsOnce } from "#lib/server/sourcemaps.js";
+import { dev } from "$app/env";
 import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
-import { type Handle, type HandleServerError } from "@sveltejs/kit";
-import { sequence } from "@sveltejs/kit/hooks";
+import { sequence, type Handle, type HandleServerError } from "@sveltejs/kit/hooks";
 import { resetEphemeralMemory } from "repo-redis";
 
 // +layout.svelte embeds these literal tokens in its partytown <script> tags; substituted below
@@ -130,7 +129,7 @@ export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }
   const oldToken = event.cookies.get("authorization");
   const user = await verifyToken(event.cookies);
 
-  event.locals = { user: user?.public ?? null };
+  event.locals.user = user?.public ?? null;
 
   if (user?.private.token) {
     const newToken = user.private.token;
@@ -160,11 +159,14 @@ export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }
   return response;
 }) satisfies Handle);
 
-export const handleError = Sentry.handleErrorWithSentry((async (input) => {
-  if (input.status === 404) {
+export const handleError = Sentry.handleErrorWithSentry((async ({ kind, error }) => {
+  if (kind !== "framework") {
+    return;
+  }
+  if (error.status === 404) {
     return { message: "Page Not found" };
   }
-  if (input.status === 405) {
+  if (error.status === 405) {
     return { message: "Method Not Allowed" };
   }
 }) satisfies HandleServerError);

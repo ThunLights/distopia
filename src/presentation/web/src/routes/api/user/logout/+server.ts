@@ -1,5 +1,5 @@
-import { deleteToken } from "$lib/server/auth";
-import { authHandler } from "$lib/server/handler";
+import { deleteToken } from "#lib/server/auth.js";
+import { authHandler } from "#lib/server/handler.js";
 import type { RequestHandler } from "./$types";
 
 export const DELETE: RequestHandler = await authHandler(async (e) => {

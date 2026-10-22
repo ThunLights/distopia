@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { UserAuth } from "$lib/shared/types/UserAuth";
+  import type { UserAuth } from "#lib/shared/types/UserAuth.js";
   import type { Snippet } from "svelte";
 
   type Props = {

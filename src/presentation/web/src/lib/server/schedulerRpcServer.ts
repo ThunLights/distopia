@@ -1,4 +1,9 @@
-import { env as publicEnv } from "$env/dynamic/public";
+import {
+  PUBLIC_HOME_SERVER_ID,
+  PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
+  PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
+  PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
+} from "$app/env/public";
 import { core, updatePanels } from "./core";
 import type { ConnectRouter } from "@connectrpc/connect";
 import { SchedulerService } from "infra-rpc";
@@ -29,10 +34,10 @@ export function schedulerRoutes(router: ConnectRouter) {
       await core.activeRate.update();
       await core.ranking.cleanCache();
       await core.updateHomeGuildRoles(
-        publicEnv.PUBLIC_HOME_SERVER_ID!,
-        publicEnv.PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
-        publicEnv.PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
-        publicEnv.PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_HOME_SERVER_ID!,
+        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
       );
       await core.record.update();
       await core.statChannel.update();

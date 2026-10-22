@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Profile from "$lib/components/Staff/Profile.svelte";
-  import Recruitment from "$lib/components/Staff/Recruitment.svelte";
-  import Title from "$lib/components/Title.svelte";
-  import { staffs } from "$lib/shared/constant";
+  import Block from "#lib/components/Block.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Profile from "#lib/components/Staff/Profile.svelte";
+  import Recruitment from "#lib/components/Staff/Recruitment.svelte";
+  import Title from "#lib/components/Title.svelte";
+  import { staffs } from "#lib/shared/constant.js";
 </script>
 
 <Meta

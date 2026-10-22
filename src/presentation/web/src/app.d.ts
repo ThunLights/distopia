@@ -1,4 +1,4 @@
-import type { UserAuth } from "$lib/shared/types/UserAuth";
+import type { UserAuth } from "#lib/shared/types/UserAuth.js";
 
 declare global {
   namespace App {

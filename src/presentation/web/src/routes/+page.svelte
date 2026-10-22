@@ -1,9 +1,9 @@
 <script lang="ts">
-  import Banner from "$lib/components/Banner.svelte";
-  import Card from "$lib/components/Guild/Card.svelte";
-  import CardLayout from "$lib/components/Layout/CardLayout.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Search from "$lib/components/Search.svelte";
+  import Banner from "#lib/components/Banner.svelte";
+  import Card from "#lib/components/Guild/Card.svelte";
+  import CardLayout from "#lib/components/Layout/CardLayout.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Search from "#lib/components/Search.svelte";
 
   const { data } = $props();
   const { latestGuilds, activeGuilds, user } = $derived(data);

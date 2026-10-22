@@ -1,5 +1,5 @@
-import { fetchVerifyClientScript } from "$lib/server/verifyPlugin";
-import { hasPluginGrant } from "$lib/server/verifyPluginGrant";
+import { fetchVerifyClientScript } from "#lib/server/verifyPlugin.js";
+import { hasPluginGrant } from "#lib/server/verifyPluginGrant.js";
 import type { RequestHandler } from "./$types";
 import { error } from "@sveltejs/kit";
 

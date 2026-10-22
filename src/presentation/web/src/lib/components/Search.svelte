@@ -1,6 +1,6 @@
 <script lang="ts">
-  import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
-  import type { MaybePromise } from "$lib/shared/types/Promise";
+  import PrimaryButton from "#lib/components/Button/PrimaryButton.svelte";
+  import type { MaybePromise } from "#lib/shared/types/Promise.js";
   import { CHARACTER_LIMIT } from "app-core/constant";
 
   type Props = {

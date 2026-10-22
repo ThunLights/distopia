@@ -1,5 +1,5 @@
-import { core } from "$lib/server/core";
-import type { Guilds } from "$lib/shared/types/routes/api/user/cache";
+import { core } from "#lib/server/core.js";
+import type { Guilds } from "#lib/shared/types/routes/api/user/cache.js";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async (e) => {

@@ -29,7 +29,7 @@ export const load: PageServerLoad = async (e) => {
 ### B. Protected API endpoint — auth only (`+server.ts`)
 
 ```typescript
-import { authHandler } from "$lib/server/handler";
+import { authHandler } from "#lib/server/handler.js";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
@@ -46,7 +46,7 @@ Returns HTTP 400 `{ content: "Invalid User" }` automatically when not authentica
 ### C. Protected API endpoint — auth + body validation (`+server.ts`)
 
 ```typescript
-import { authAndValidateHandler } from "$lib/server/handler";
+import { authAndValidateHandler } from "#lib/server/handler.js";
 import { json } from "@sveltejs/kit";
 import z from "zod";
 import type { RequestHandler } from "./$types";
@@ -68,7 +68,7 @@ Returns HTTP 400 with validation error messages automatically on bad input.
 
 ### D. Validation-only endpoint (no auth required)
 
-Use `validateHandler` from `$lib/server/handler` — same signature as `authAndValidateHandler` but without the auth check.
+Use `validateHandler` from `#lib/server/handler.js` — same signature as `authAndValidateHandler` but without the auth check.
 
 ---
 

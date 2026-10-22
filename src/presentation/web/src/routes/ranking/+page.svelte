@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { parseErrRes } from "$lib/client/error.js";
-  import Block from "$lib/components/Block.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Guild from "$lib/components/Ranking/Guild.svelte";
-  import User from "$lib/components/Ranking/User.svelte";
+  import { parseErrRes } from "#lib/client/error.js";
+  import Block from "#lib/components/Block.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Guild from "#lib/components/Ranking/Guild.svelte";
+  import User from "#lib/components/Ranking/User.svelte";
   import type {
     GuildRanking,
     ResponseMethodGet,
     UserRanking,
-  } from "$lib/shared/types/routes/api/ranking";
+  } from "#lib/shared/types/routes/api/ranking.js";
   import { onMount } from "svelte";
 
   const { data } = $props();

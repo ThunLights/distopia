@@ -1,4 +1,4 @@
-import { core } from "$lib/server/core";
+import { core } from "#lib/server/core.js";
 import type { LayoutServerLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
 

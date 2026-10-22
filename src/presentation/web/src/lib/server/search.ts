@@ -1,4 +1,4 @@
-import { env as privateEnv } from "$env/dynamic/private";
+import { SEARCHENGINE_RPC_TOKEN, SEARCHENGINE_RPC_URL } from "$app/env/private";
 import { type Client, createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-node";
 import { createBearerAuthInterceptor, SearchEngineService } from "infra-rpc";
@@ -10,12 +10,11 @@ const SEARCH_TIMEOUT_MS = 10_000;
 const LOAD_TIMEOUT_MS = 60_000;
 
 // Built on first call, not at module load: `vite build`'s prerender analysis imports this
-// module with an empty $env/dynamic/private, so an eager env check fails the build.
+// module with an empty $app/env/private, so an eager env check fails the build.
 let client: Client<typeof SearchEngineService> | undefined;
 
 function rpc() {
   if (!client) {
-    const { SEARCHENGINE_RPC_URL, SEARCHENGINE_RPC_TOKEN } = privateEnv;
     if (!SEARCHENGINE_RPC_URL || !SEARCHENGINE_RPC_TOKEN) {
       throw new Error("SEARCHENGINE_RPC_URL and SEARCHENGINE_RPC_TOKEN are required");
     }

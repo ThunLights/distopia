@@ -1,5 +1,8 @@
+import { jsObf } from "@fjst/core";
+import { fjstSvelteKit } from "@fjst/sveltekit";
 import { sentrySvelteKit } from "@sentry/sveltekit/vite";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import adapter from "@sveltejs/adapter-node";
 import { enhancedImages } from "@sveltejs/enhanced-img";
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -33,7 +36,16 @@ export default defineConfig({
     }),
     tailwindcss(),
     enhancedImages(),
-    sveltekit(),
+    sveltekit({
+      compilerOptions: {
+        // Force runes mode for the project, except for libraries. Can be removed in svelte 6.
+        runes: ({ filename }) =>
+          filename.split(/[/\\]/).includes("node_modules") ? undefined : true,
+      },
+      adapter: fjstSvelteKit(adapter(), [jsObf]),
+      env: { dir: "../../../" },
+      tracing: { server: true },
+    }),
     devtoolsJson(),
   ],
   ssr: {

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import "$lib/assets/subtitle-h2.css";
-  import "$lib/assets/title-h1.css";
+  import "#lib/assets/subtitle-h2.css";
+  import "#lib/assets/title-h1.css";
 
   type Props = {
     content: string;

@@ -1,5 +1,5 @@
-import { core } from "$lib/server/core";
-import type { ResponseMethodGet } from "$lib/shared/types/routes/api/ranking";
+import { core } from "#lib/server/core.js";
+import type { ResponseMethodGet } from "#lib/shared/types/routes/api/ranking.js";
 import type { RequestHandler } from "./$types";
 import { json } from "@sveltejs/kit";
 

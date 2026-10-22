@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import Privacy from "$lib/components/Main/Privacy.svelte";
-  import Meta from "$lib/components/Meta.svelte";
+  import Block from "#lib/components/Block.svelte";
+  import Privacy from "#lib/components/Main/Privacy.svelte";
+  import Meta from "#lib/components/Meta.svelte";
 </script>
 
 <Meta

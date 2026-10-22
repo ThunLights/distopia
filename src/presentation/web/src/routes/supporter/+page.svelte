@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Supporter from "$lib/components/Supporter/Content.svelte";
-  import Explain from "$lib/components/Supporter/Explain.svelte";
-  import Title from "$lib/components/Title.svelte";
-  import { supporters } from "$lib/shared/constant";
+  import Block from "#lib/components/Block.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Supporter from "#lib/components/Supporter/Content.svelte";
+  import Explain from "#lib/components/Supporter/Explain.svelte";
+  import Title from "#lib/components/Title.svelte";
+  import { supporters } from "#lib/shared/constant.js";
 </script>
 
 <Meta

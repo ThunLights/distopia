@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Block from "$lib/components/Block.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import Title from "$lib/components/Title.svelte";
+  import Block from "#lib/components/Block.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import Title from "#lib/components/Title.svelte";
   import { onMount } from "svelte";
 
   const { data } = $props();

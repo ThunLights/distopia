@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Supporter } from "$lib/shared/constant";
+  import type { Supporter } from "#lib/shared/constant.js";
 
   type Props = {
     supporter: Supporter;

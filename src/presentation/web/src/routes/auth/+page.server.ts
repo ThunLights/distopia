@@ -1,7 +1,7 @@
-import { setToken } from "$lib/server/auth";
-import { core } from "$lib/server/core";
-import { jwt } from "$lib/server/jwt";
-import type { UserAuth } from "$lib/shared/types/UserAuth";
+import { setToken } from "#lib/server/auth.js";
+import { core } from "#lib/server/core.js";
+import { jwt } from "#lib/server/jwt.js";
+import type { UserAuth } from "#lib/shared/types/UserAuth.js";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async (e) => {

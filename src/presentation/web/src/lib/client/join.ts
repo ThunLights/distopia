@@ -1,6 +1,6 @@
-import { parseErrRes } from "$lib/client/error";
-import { Toast } from "$lib/client/toast";
-import type { PostBody } from "$lib/shared/types/routes/api/guild/join";
+import { parseErrRes } from "#lib/client/error.js";
+import { Toast } from "#lib/client/toast.js";
+import type { PostBody } from "#lib/shared/types/routes/api/guild/join.js";
 
 export async function joinGuildUseOauth2(guildId: string, guildName: string) {
   const response = await fetch("/api/guild/join", {

@@ -1,9 +1,9 @@
 <script lang="ts">
   /* eslint svelte/no-navigation-without-resolve: "off" */
+  import DiscordIcon from "#lib/assets/icon/discord.webp";
+  import type { UserAuth } from "#lib/shared/types/UserAuth.js";
   import { resolve } from "$app/paths";
   import type { ResolvedPathname } from "$app/types";
-  import DiscordIcon from "$lib/assets/icon/discord.webp";
-  import type { UserAuth } from "$lib/shared/types/UserAuth";
   import "@fontsource/inter/900.css";
   import "@fontsource/open-sans/800-italic.css";
 
@@ -40,35 +40,26 @@
       <label for="drawer_input" class="drawer_open"><span></span></label>
     </div>
     <nav class="bager-content">
-      <div class="header-title">
-        <a href={titleLink}>
-          <p>{title}</p>
-        </a>
-      </div>
+      <div class="header-title"><a href={titleLink}><p>{title}</p></a></div>
+
       <div class="header-other" style="display: {showBagerContent ? 'block' : 'none'};">
-        <a href={resolve("/")}>
-          <p class="header-other-content">ホーム</p>
-        </a>
+        <a href={resolve("/")}><p class="header-other-content">ホーム</p></a>
       </div>
+
       <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("/ranking")}>
-          <p class="header-other-content">ランキング</p>
-        </a>
+        <a href={resolve("ranking")}><p class="header-other-content">ランキング</p></a>
       </div>
+
       <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("/friends")}>
-          <p class="header-other-content">フレンド募集</p>
-        </a>
+        <a href={resolve("friends")}><p class="header-other-content">フレンド募集</p></a>
       </div>
+
       <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href="https://docs.distopia.top">
-          <p class="header-other-content">ヘルプ</p>
-        </a>
+        <a href="https://docs.distopia.top"><p class="header-other-content">ヘルプ</p></a>
       </div>
+
       <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("/other")}>
-          <p class="header-other-content">その他</p>
-        </a>
+        <a href={resolve("other")}><p class="header-other-content">その他</p></a>
       </div>
     </nav>
   </div>
@@ -76,14 +67,14 @@
     <div>
       {#if userData === null}
         <div class="discord-login">
-          <a href={resolve("/login")} rel="external">
-            <div class="login-block">
+          <a href={resolve("login")} rel="external"
+            ><div class="login-block">
               <p class="discord-login-content login-text-inline">Login</p>
-            </div>
-          </a>
+            </div></a
+          >
         </div>
       {:else}
-        <a href={resolve("/user")}>
+        <a href={resolve("user")}>
           <div class="discord-profile">
             <img src={userData.avatarUrl ?? DiscordIcon} alt="" />
             <p class="discord-logined-content">{userData.username}</p>

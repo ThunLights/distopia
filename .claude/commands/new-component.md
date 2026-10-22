@@ -53,7 +53,7 @@ Scaffold a new Svelte 5 component. Component name, location, and purpose: $ARGUM
 - **Scoped styles**: CSS in `<style>` is component-scoped by default — no need for BEM or CSS modules
 - **Event handlers**: use `onclick={fn}`, `oninput={fn}`, etc. — not `on:click`
 - **Internal links**: use `resolve()` from `$app/paths` — never raw string paths
-- **Client utilities**: use `Toast` from `$lib/client/toast` for user feedback, `parseErrRes` from `$lib/client/error` for API error display
+- **Client utilities**: use `Toast` from `#lib/client/toast.js` for user feedback, `parseErrRes` from `#lib/client/error.js` for API error display
 
 ## Optional: Storybook story (`<Name>.stories.svelte`)
 

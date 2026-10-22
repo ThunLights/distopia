@@ -1,7 +1,7 @@
 <script lang="ts">
+  import Footer from "#lib/components/Footer.svelte";
+  import Meta from "#lib/components/Meta.svelte";
   import { page } from "$app/state";
-  import Footer from "$lib/components/Footer.svelte";
-  import Meta from "$lib/components/Meta.svelte";
 
   const title = "ページが見つかりませんでした";
   const description = [

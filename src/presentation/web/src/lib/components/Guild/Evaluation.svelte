@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Star from "$lib/assets/icon/star.webp";
-  import Block from "$lib/components/Block.svelte";
-  import BlockTitle from "$lib/components/Guild/BlockTitle.svelte";
+  import Star from "#lib/assets/icon/star.webp";
+  import Block from "#lib/components/Block.svelte";
+  import BlockTitle from "#lib/components/Guild/BlockTitle.svelte";
 
   type Props = {
     reviews: number[];

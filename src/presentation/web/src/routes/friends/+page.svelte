@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Card from "$lib/components/Friend/Card.svelte";
-  import CardLayout from "$lib/components/Layout/CardLayout.svelte";
-  import Meta from "$lib/components/Meta.svelte";
+  import Card from "#lib/components/Friend/Card.svelte";
+  import CardLayout from "#lib/components/Layout/CardLayout.svelte";
+  import Meta from "#lib/components/Meta.svelte";
   import { onMount } from "svelte";
 
   const { data } = $props();

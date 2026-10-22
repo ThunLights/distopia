@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Staff } from "$lib/shared/constant";
+  import type { Staff } from "#lib/shared/constant.js";
 
   type Props = {
     staff: Staff;

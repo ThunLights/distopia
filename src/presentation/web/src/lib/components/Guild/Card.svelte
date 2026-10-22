@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { joinGuild } from "#lib/client/join.js";
+  import type { UserAuth } from "#lib/shared/types/UserAuth.js";
   import { resolve } from "$app/paths";
-  import { joinGuild } from "$lib/client/join";
-  import type { UserAuth } from "$lib/shared/types/UserAuth";
   import LinkButton from "../Button/LinkButton.svelte";
   import PrimaryButton from "../Button/PrimaryButton.svelte";
   import LinkTagsLayout from "../Layout/LinkTagsLayout.svelte";
@@ -32,7 +32,7 @@
 <div class="guild">
   <div class="guild-context">
     <div>
-      <a href={resolve(`/guilds/${guildId}`)} class="no-text-decoration">
+      <a href={resolve(`guilds/${guildId}`)} class="no-text-decoration">
         <div class="guild-info">
           <div>
             <Icon height="60px" width="60px" {iconUrl} rank={rank ?? undefined} />
@@ -53,7 +53,7 @@
           <LinkTagsLayout
             tags={tags.map((label) => ({
               label,
-              link: resolve(`/search?w=${encodeURIComponent(label)}`),
+              link: resolve(`search?w=${encodeURIComponent(label)}`),
             }))}
           />
         {/if}

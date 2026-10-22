@@ -1,5 +1,5 @@
-import { env as privateEnv } from "$env/dynamic/private";
-import { env as publicEnv } from "$env/dynamic/public";
+import { BOT_RPC_TOKEN, BOT_RPC_URL, BOT_SECRET, BOT_TOKEN } from "$app/env/private";
+import { PUBLIC_BOT_ID, PUBLIC_URL } from "$app/env/public";
 import { type Client, createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-node";
 import { Controller, genClient, type DiscordClient } from "infra-discord";
@@ -15,17 +15,16 @@ const BOT_RPC_TIMEOUT_MS = 10_000;
 // work without an actual gateway connection. See infra-discord's DiscordClient for why these
 // stay local instead of going over RPC.
 const local = new Controller(genClient(), {
-  id: publicEnv.PUBLIC_BOT_ID!,
-  secret: privateEnv.BOT_SECRET!,
-  url: `${publicEnv.PUBLIC_URL!}/auth`,
-  token: privateEnv.BOT_TOKEN!,
+  id: PUBLIC_BOT_ID!,
+  secret: BOT_SECRET!,
+  url: `${PUBLIC_URL!}/auth`,
+  token: BOT_TOKEN!,
 });
 
 let rpcClient: Client<typeof BotService> | undefined;
 
 function rpc() {
   if (!rpcClient) {
-    const { BOT_RPC_URL, BOT_RPC_TOKEN } = privateEnv;
     if (!BOT_RPC_URL || !BOT_RPC_TOKEN) {
       throw new Error("BOT_RPC_URL and BOT_RPC_TOKEN are required");
     }

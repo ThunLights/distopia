@@ -37,12 +37,12 @@ const config: StorybookConfig = {
         ...config.resolve,
         alias: {
           ...config.resolve?.alias,
-          // $env/dynamic/public only gets populated by SvelteKit's own request/server
+          // $app/env/public only gets populated by SvelteKit's own request/server
           // lifecycle -- Storybook's static build never runs that lifecycle, so top-level
-          // `env.PUBLIC_X` access in modules like $lib/shared/constant.ts throws
+          // `PUBLIC_X` access in modules like $lib/shared/constant.ts throws
           // "Cannot read properties of undefined" for every story that transitively imports
           // it. Alias to the same static mock env.vitest.ts uses for Vitest-based runs.
-          "$env/dynamic/public": join(
+          "$app/env/public": join(
             dirname(fileURLToPath(import.meta.url)),
             "../src/mocks/env.storybook.ts",
           ),

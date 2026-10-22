@@ -1,16 +1,18 @@
 <script lang="ts">
+  import { DISCORD_INVITE_LINK } from "#lib/shared/constant.js";
   import { resolve } from "$app/paths";
-  import { DISCORD_INVITE_LINK } from "$lib/shared/constant";
 
   const { fixed = false } = $props();
 </script>
 
 <footer class={fixed ? "footer-fixed" : ""}>
   <nav aria-label="フッター">
-    <a href={resolve("/terms")}>利用規約</a>
-    <a href={resolve("/privacy")}>プライバシーポリシー</a>
-    <a href={resolve("/specific-commercial-transaction-act")}>特定商取引法に基づく表記</a>
-    <a href={resolve("/guideline")}>ガイドライン</a>
+    <a href={resolve("terms")}>利用規約</a>
+    <a href={resolve("privacy")}>プライバシーポリシー</a>
+
+    <a href={resolve("specific-commercial-transaction-act")}>特定商取引法に基づく表記</a>
+
+    <a href={resolve("guideline")}>ガイドライン</a>
     <a href={DISCORD_INVITE_LINK} rel="external">お問い合わせ</a>
   </nav>
   <p>

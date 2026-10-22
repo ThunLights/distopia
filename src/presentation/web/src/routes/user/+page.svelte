@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { parseErrRes } from "$lib/client/error";
-  import { Toast } from "$lib/client/toast";
-  import Block from "$lib/components/Block.svelte";
-  import LinkButton from "$lib/components/Button/LinkButton.svelte";
-  import PrimaryButton from "$lib/components/Button/PrimaryButton.svelte";
-  import Meta from "$lib/components/Meta.svelte";
-  import SubTitle from "$lib/components/SubTitle.svelte";
-  import Guild from "$lib/components/User/Guild.svelte";
-  import Profile from "$lib/components/User/Profile.svelte";
+  import { parseErrRes } from "#lib/client/error.js";
+  import { Toast } from "#lib/client/toast.js";
+  import Block from "#lib/components/Block.svelte";
+  import LinkButton from "#lib/components/Button/LinkButton.svelte";
+  import PrimaryButton from "#lib/components/Button/PrimaryButton.svelte";
+  import Meta from "#lib/components/Meta.svelte";
+  import SubTitle from "#lib/components/SubTitle.svelte";
+  import Guild from "#lib/components/User/Guild.svelte";
+  import Profile from "#lib/components/User/Profile.svelte";
   import type {
     DeleteBody,
     Guilds,
     ResponseBodyTypeGuild,
-  } from "$lib/shared/types/routes/api/user/cache";
+  } from "#lib/shared/types/routes/api/user/cache.js";
 
   const { data } = $props();
   const { user } = $derived(data);

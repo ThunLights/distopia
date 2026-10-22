@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Toast } from "$lib/client/toast";
+  import { Toast } from "#lib/client/toast.js";
   import type { Snippet } from "svelte";
 
   type Props = {
