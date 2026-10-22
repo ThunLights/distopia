@@ -40,9 +40,14 @@ export class Message extends Base {
     await ratelimit.set(memberId, new Date(Date.now() + minute));
 
     if (!isBot) {
-      await this.level.addAll([
-        { guildId, userId: memberId, point: Level.messagePoint(messageContent.length) },
-      ]);
+      // A level-tracking failure must not skip the length sample below or reject the handler.
+      try {
+        await this.level.addAll([
+          { guildId, userId: memberId, point: Level.messagePoint(messageContent.length) },
+        ]);
+      } catch (error) {
+        console.error("[level] failed to add message points", error);
+      }
     }
 
     const data = await this.state.memory.messageCreate.get(guildId);

@@ -5,7 +5,11 @@ export class MemberLevelTable extends Base {
   public async findGuildRows(
     keys: { guildId: string; userId: string }[],
   ): Promise<GuildMemberLevelRow[]> {
-    return await this.prisma.guildMemberLevel.findMany({ where: { OR: keys } });
+    // Pick only the identity: callers pass gain objects, and a stray `point` would become a
+    // filter and make existing rows unmatchable.
+    return await this.prisma.guildMemberLevel.findMany({
+      where: { OR: keys.map(({ guildId, userId }) => ({ guildId, userId })) },
+    });
   }
 
   public async findUserRows(userIds: string[]): Promise<UserLevelRow[]> {
