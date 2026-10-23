@@ -53,7 +53,11 @@ jobs:
           gh cache list --ref "$PR_REF" --limit 1000 --json key,sizeInBytes \
             --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
 
-          echo "$ids" | xargs -r -n1 gh cache delete
+          # A cache another run already deleted is not a failure: on every merge, this file's
+          # pr-closed job and the push-triggered scheduled job race to delete the same pull
+          # request's caches, and the loser's `gh cache delete` fails with "Could not find a
+          # cache" (xargs then exits 123). Only that error is tolerated; anything else still fails.
+          echo "$ids" | xargs -r -n1 sh -c 'out=$(gh cache delete "$1" 2>&1) || { case "$out" in *"Could not find a cache"*) echo "  already gone: $1" ;; *) echo "$out" >&2; exit 1 ;; esac; }' _
           echo "Done."
 
   scheduled:
@@ -97,7 +101,7 @@ jobs:
                 gh cache list --ref "$ref" --limit 1000 --json key,sizeInBytes \
                   --jq '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
                 gh cache list --ref "$ref" --limit 1000 --json id --jq '.[].id' \
-                  | xargs -r -n1 gh cache delete
+                  | xargs -r -n1 sh -c 'out=$(gh cache delete "$1" 2>&1) || { case "$out" in *"Could not find a cache"*) echo "  already gone: $1" ;; *) echo "$out" >&2; exit 1 ;; esac; }' _
                 ;;
               OPEN)
                 echo "PR #$pr is open -- keeping its caches."
@@ -132,5 +136,5 @@ jobs:
           echo "Keeping the ${KEEP} most recently used main caches, deleting ${count}:"
           echo "$doomed" | jq -r '.[] | "  \((.sizeInBytes/1048576)|round)MB  \(.key)"'
 
-          echo "$doomed" | jq -r '.[].id' | xargs -r -n1 gh cache delete
+          echo "$doomed" | jq -r '.[].id' | xargs -r -n1 sh -c 'out=$(gh cache delete "$1" 2>&1) || { case "$out" in *"Could not find a cache"*) echo "  already gone: $1" ;; *) echo "$out" >&2; exit 1 ;; esac; }' _
           echo "Done."
