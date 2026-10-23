@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "javascript-obfuscator": "4.1.1"
+    "javascript-obfuscator": "5.9.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
