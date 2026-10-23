@@ -67,11 +67,6 @@ async function postVerifyLog(
     fields.push({ name: "国", value: country });
   }
 
-  const ray = headers["cf-ray"];
-  if (ray) {
-    fields.push({ name: "CF-Ray", value: ray });
-  }
-
   if (row.isVpn || row.isProxy || row.isTor) {
     const flags = [row.isVpn && "VPN", row.isProxy && "Proxy", row.isTor && "Tor"]
       .filter(Boolean)
