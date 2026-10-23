@@ -17,3 +17,4 @@ export * from "./UserDiscord";
 export * from "./User";
 export * from "./UserVerifyLog";
 export * from "./UserWeb";
+export * from "./MemberLevel";

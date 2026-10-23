@@ -1,11 +1,14 @@
 import { findUrls, levelUp } from "domain-service";
-import type { GuildRecordOneDayUpsertInput } from "infra-database/types";
+import type { GuildRecordOneDayUpsertInput, GuildRecordUpsertInput } from "infra-database/types";
 import { isInviteLink } from "infra-http";
 
 import { Base } from "./Base";
+import { Level } from "./Level";
 import { formatYMD } from "./utils/date";
 
 export class Message extends Base {
+  private readonly level = new Level(this.state);
+
   // Known gap: messageCreate.get()-then-set() below is a read-modify-write, not atomic. A
   // plain in-process Map (repo-memory's original backing) made this safe for free -- no
   // await between read and write, so nothing else could run in between. Now that the value
@@ -15,7 +18,12 @@ export class Message extends Base {
   // trigger, and the only consequence is a slightly undercounted message-length sample feeding
   // syncDB's level/point calculation -- not data loss. A real fix (RPUSH onto a per-guild
   // Redis list, or a Lua script) is a heavier storage-shape change; out of scope here.
-  public async increase(guildId: string, memberId: string, messageContent: string) {
+  public async increase(
+    guildId: string,
+    memberId: string,
+    messageContent: string,
+    isBot: boolean = false,
+  ) {
     const ratelimit = this.state.memory.ratelimit.messageCreate;
     const limit = await ratelimit.get(memberId);
 
@@ -30,6 +38,17 @@ export class Message extends Base {
     const minute = 60 * 1000;
 
     await ratelimit.set(memberId, new Date(Date.now() + minute));
+
+    if (!isBot) {
+      // A level-tracking failure must not skip the length sample below or reject the handler.
+      try {
+        await this.level.addAll([
+          { guildId, userId: memberId, point: Level.messagePoint(messageContent.length) },
+        ]);
+      } catch (error) {
+        console.error("[level] failed to add message points", error);
+      }
+    }
 
     const data = await this.state.memory.messageCreate.get(guildId);
 
@@ -49,6 +68,7 @@ export class Message extends Base {
   public async syncDB() {
     const date = await formatYMD(new Date());
     const query: GuildRecordOneDayUpsertInput[] = [];
+    const guildQuery: GuildRecordUpsertInput[] = [];
     const guilds = new Map(
       (await this.state.database.guildRecord.findAll()).map((value) => [value.guildId, value]),
     );
@@ -71,6 +91,7 @@ export class Message extends Base {
         point = score.point;
       }
 
+      guildQuery.push({ guildId, level, point });
       query.push({
         guildId,
         date,
@@ -81,6 +102,7 @@ export class Message extends Base {
     await this.state.memory.messageCreate.clear();
 
     await this.state.database.guildRecordOneDay.upsertAll(query);
+    await this.state.database.guildRecord.upsertAll(guildQuery);
   }
 
   public async includeInviteLink(content: string): Promise<string[]> {

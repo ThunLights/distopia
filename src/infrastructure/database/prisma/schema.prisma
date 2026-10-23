@@ -18,6 +18,10 @@ model User {
   userId       String @id
   bumpCounter  Int?
   ttsSpeakerId Int?
+  level        BigInt @default(0)
+  point        BigInt @default(0)
+
+  @@index([level(sort: Desc), point(sort: Desc)])
 }
 
 model UserDictionary {
@@ -325,4 +329,14 @@ model JWTKey {
 
 enum JWTAlg {
   HS256
+}
+
+model GuildMemberLevel {
+  guildId String
+  userId  String
+  level   BigInt @default(0)
+  point   BigInt @default(0)
+
+  @@id([guildId, userId])
+  @@index([guildId, level(sort: Desc), point(sort: Desc)])
 }
