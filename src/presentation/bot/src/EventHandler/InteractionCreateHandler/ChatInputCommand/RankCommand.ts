@@ -56,16 +56,23 @@ export class RankCommand extends ChatInputCommandBase<Options> {
     // Avatar download + rendering can outlast Discord's 3s initial-response window.
     const deferred = await interaction.deferReply({ withResponse: true });
 
-    const { guild: guildCard, global } = await this.core.level.getCards(guild.id, user.id);
-    const image = await renderRankCard({
-      name: member?.displayName ?? user.displayName,
-      avatarUrl: (member ?? user).displayAvatarURL({ extension: "png", size: 256 }),
-      guildName: interaction.guild?.name ?? "",
-      guild: guildCard,
-      global,
-    });
+    try {
+      const { guild: guildCard, global } = await this.core.level.getCards(guild.id, user.id);
+      const image = await renderRankCard({
+        name: member?.displayName ?? user.displayName,
+        avatarUrl: (member ?? user).displayAvatarURL({ extension: "png", size: 256 }),
+        guildName: interaction.guild?.name ?? "",
+        guild: guildCard,
+        global,
+      });
 
-    await interaction.editReply({ files: [new AttachmentBuilder(image, { name: "rank.png" })] });
+      await interaction.editReply({ files: [new AttachmentBuilder(image, { name: "rank.png" })] });
+    } catch (error) {
+      // Already deferred, so a throw would leave the reply spinning on "thinking..." forever.
+      console.error("[rank] failed to render rank card", error);
+      await interaction.editReply({ content: "ランクカードの生成に失敗しました。" });
+    }
+
     return deferred;
   }
 }
