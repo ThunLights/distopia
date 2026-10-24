@@ -40,6 +40,34 @@ export type Guilds = {
   approximate_presence_count?: number;
 }[];
 
+// Standalone (needs no Client or Config) so a process that never logs in to Discord, like
+// presentation-verify, can still check guild membership from a user's OAuth2 access token.
+export async function fetchOAuth2Guilds(accessToken: string): Promise<Guilds | null> {
+  const response = await safeFetchForDiscord(
+    safeUrl`https://discord.com/api/v10/users/@me/guilds?with_counts=true`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+
+  if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
+    return null;
+  }
+
+  if (response.status === 200) {
+    const body = await response.json().catch(() => null);
+    return body === null ? null : (body as RESTAPIPartialCurrentUserGuild[]);
+  } else if (response.status === 429) {
+    await sleep(1000);
+    return await fetchOAuth2Guilds(accessToken);
+  }
+
+  return null;
+}
+
 export class OAuth2Controller extends Base {
   constructor(
     client: Client,
@@ -49,29 +77,7 @@ export class OAuth2Controller extends Base {
   }
 
   public async fetchGuilds(accessToken: string): Promise<Guilds | null> {
-    const response = await safeFetchForDiscord(
-      safeUrl`https://discord.com/api/v10/users/@me/guilds?with_counts=true`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
-
-    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
-      return null;
-    }
-
-    if (response.status === 200) {
-      const body = await response.json().catch(() => null);
-      return body === null ? null : (body as RESTAPIPartialCurrentUserGuild[]);
-    } else if (response.status === 429) {
-      await sleep(1000);
-      return await this.fetchGuilds(accessToken);
-    }
-
-    return null;
+    return await fetchOAuth2Guilds(accessToken);
   }
 
   public async fetchUserInfo(accessToken: string): Promise<FetchUserInfoResult | null> {

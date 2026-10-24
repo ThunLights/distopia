@@ -702,12 +702,17 @@ from two pods at once causes duplicate event handling. `distopia-redis-allow-int
 it first looks: it **is** built from this repo, same image as `distopia-app`/`distopia-bot`
 (`verify-deployment.yaml`'s `command` just runs `presentation-verify` instead), and it is
 **required** for member verification (`/verify-admin`,
-`src/presentation/web/src/routes/verify/[guildId]`): its `Evaluate` RPC runs the guild's
-opt-in VPN/proxy/Tor block, then Cloudflare Turnstile (so `TURNSTILE_SECRET_KEY` is read by
-`distopia-verify`, from the same `distopia-env` Secret), then the plugin, and on a refusal
-returns a `reason` (`Used VPN`, `Turnstile verification failed`, ...) that `distopia-app`
-shows to the user and writes to the guild's verify log. Role grant/removal still goes
-through `distopia-bot`'s RPC from `distopia-app`. Only the *plugin* is optional.
+`src/presentation/web/src/routes/verify/[guildId]`): `distopia-app` only authenticates the
+session and relays `/api/verify` in one `Submit` RPC, and `distopia-verify` runs the whole
+attempt — body validation, the guild's setting and membership check, the opt-in VPN/proxy/Tor
+block, Cloudflare Turnstile (so `TURNSTILE_SECRET_KEY` is read by `distopia-verify`, from the
+same `distopia-env` Secret), then the plugin — records the result in the DB, posts it to the
+guild's log channel and grants/removes the role through `distopia-bot`'s RPC. That is why
+`verify-deployment.yaml` also sets `DATABASE_URL`, `BOT_RPC_URL` and `BOT_RPC_TOKEN` (listed
+individually, not `envFrom`, so the plugin process doesn't see `BOT_TOKEN` and the rest), and
+why `bot-networkpolicy.yaml` admits `distopia-verify` as well as `distopia-app`. On a refusal
+the user is shown a `reason` (`Used VPN`, `Turnstile verification failed`, ...). Only the
+*plugin* is optional.
 
 What's actually private isn't a separate repo or image — it's the **contents of a folder**
 (`src/presentation/verify/plugins/`, `VERIFY_PLUGIN_DIR` env var to override), mounted into
@@ -733,7 +738,7 @@ that may or may not exist on disk really is resolved at runtime, the same trick
 (SvelteKit/Vite statically resolves and fails the build on a dynamic import whose target
 doesn't exist), which is exactly why the plugin lives in its own dedicated service instead.
 
-Three extensibility points exist for anti-scraping signal beyond `Evaluate` itself, all
+Three extensibility points exist for anti-scraping signal beyond `evaluate()` itself, all
 implemented by your plugin file(s), not this repo:
 - **Client script and wasm are inlined into the page, not fetched.** `routes/verify/[guildId]`'s
   load calls `VerifyService.GetClientScript` and embeds `code` (and `wasm`, base64) in the
@@ -747,11 +752,11 @@ implemented by your plugin file(s), not this repo:
   `thunlights/discord-verify` uses on its own verify endpoint (see `.anti-scraping`'s own
   comments for this exact split). When it does, `lib/client/verify.ts` sends the encrypted
   string instead of plain JSON (flagged with the `X-Verify-Body-Encoding: plugin` header) and
-  `routes/api/verify/+server.ts` reverses it by calling `VerifyService.Decrypt`, which
-  your plugin's `decrypt()` implements. No `encrypt()` on the client plugin (the default,
+  `routes/api/verify/+server.ts` forwards it as-is and `VerifyService.Submit` reverses it with
+  your plugin's `decrypt()`. No `encrypt()` on the client plugin (the default,
   and the only option when no plugin file is mounted at all) means the body is sent as plain
   JSON and `decrypt()` is never called.
-- `RequestContext` (`request` on both `EvaluateRequest` and `DecryptRequest` -- distopia's
+- `RequestContext` (`request` on `SubmitRequest` -- distopia's
   `VerifyRequestContext`) forwards the real incoming `/api/verify` request's headers (minus
   `cookie`/`authorization`, stripped in `verifyPlugin.ts`'s `pluginHeaders`) and its
   best-effort client IP (`RequestEvent.getClientAddress()`) through to your plugin's

@@ -3,30 +3,29 @@ syntax = "proto3";
 package distopia.verify.v1;
 
 // Implemented by presentation-verify (anti-bot/fingerprinting logic stays in an optional,
-// privately-mounted plugin folder, never in the public image) and called by presentation-web (lib/server/verifyPlugin.ts) during the member
-// verification flow. See k8s/README.md's "Verify RPC" section for how that service is wired
-// up -- it is required for member verification; presentation-web refuses every attempt when
-// VERIFY_RPC_URL/VERIFY_RPC_TOKEN aren't configured. Generated here (not infra-rpc) so the
-// `distopia` npm/jsr package (lib/distopia/src/rpc.ts) has zero workspace dependency of its
-// own -- a prerequisite for `bun pm pack`/`npm publish` to work at all -- and infra-rpc
-// depends on `distopia` for this one contract instead, the reverse of every other service.
+// privately-mounted plugin folder, never in the public image) and called by presentation-web
+// (lib/server/verifyPlugin.ts). presentation-verify owns the whole member verification flow:
+// presentation-web only authenticates the session and relays the request. See k8s/README.md's
+// "Verify RPC" section for how that service is wired up -- it is required for member
+// verification; presentation-web refuses every attempt when VERIFY_RPC_URL/VERIFY_RPC_TOKEN
+// aren't configured. Generated here (not infra-rpc) so the `distopia` npm/jsr package
+// (lib/distopia/src/rpc.ts) has zero workspace dependency of its own -- a prerequisite for
+// `bun pm pack`/`npm publish` to work at all -- and infra-rpc depends on `distopia` for this
+// one contract instead, the reverse of every other service.
 service VerifyService {
-  // Runs the whole server-side verification decision: the optional VPN/proxy/Tor block, the
-  // Cloudflare Turnstile check, then the plugin's own evaluate(), in that order, stopping at the
-  // first rejection. allowed=false always carries a `reason` saying which step refused.
-  rpc Evaluate(EvaluateRequest) returns (EvaluateResponse) {}
+  // Runs one whole verification attempt for an already-authenticated user: decrypts and
+  // validates the body, checks the guild's setting and the user's membership, runs the VPN
+  // block, Cloudflare Turnstile and the plugin's evaluate() (in that order, stopping at the
+  // first refusal), records the result, posts it to the guild's log channel and grants the
+  // role. ok=false always carries a user-facing `error`.
+  rpc Submit(SubmitRequest) returns (SubmitResponse) {}
   // Raw JS source for the optional browser-side collector/cipher script, served to the
   // client by presentation-web, which inlines it (and `wasm`) into the SSR'd verify page. Empty `code` means
   // "nothing to serve" (treated the same as the whole service being unconfigured). The
   // module it default-exports (distopia's VerifyClientPlugin) may optionally provide its own
   // encrypt() -- e.g. a private R25A/R25B-style cipher -- to obfuscate the /api/verify body
-  // client-side; if it does, Decrypt below is how presentation-web reverses it.
+  // client-side; if it does, Submit reverses it via the plugin's decrypt().
   rpc GetClientScript(GetClientScriptRequest) returns (GetClientScriptResponse) {}
-  // Reverses whatever the client script's own encrypt() produced. Only ever called when the
-  // client actually flagged its body as plugin-encrypted (see lib/client/verify.ts) -- a
-  // client with no encrypt() just sends plain JSON and this is never called at all. An unset
-  // `json` means decryption failed (treated like any other invalid body).
-  rpc Decrypt(DecryptRequest) returns (DecryptResponse) {}
 }
 
 // Everything about the real incoming /api/verify request that a plugin method might want --
@@ -40,37 +39,25 @@ message RequestContext {
   // is built (see verifyPlugin.ts) since nothing downstream has a legitimate need for this
   // request's own session credentials.
   map<string, string> headers = 1;
-  // Best-effort client IP as presentation-web resolved it (SvelteKit's
-  // event.getClientAddress()) -- unset if it couldn't be determined.
+  // Best-effort client IP as presentation-web resolved it (Cloudflare's connecting-IP headers,
+  // else SvelteKit's event.getClientAddress()) -- unset if it couldn't be determined.
   optional string ip = 2;
 }
 
-message EvaluateRequest {
-  string guild_id = 1;
-  string user_id = 2;
-  // JSON-encoded, opaque to presentation-web -- whatever the browser-side collector script
-  // (GetClientScript) returned from its own collect(), round-tripped here unchanged.
-  string extra_json = 3;
+message SubmitRequest {
+  // The Discord user presentation-web already authenticated from the session. Trusted as-is:
+  // the bearer token plus the NetworkPolicy are what keep anyone else from calling this.
+  string user_id = 1;
+  // The raw POST body exactly as the browser sent it (plain JSON, or plugin-encrypted text).
+  string body = 2;
+  // True when the client flagged the body as plugin-encrypted (see lib/client/verify.ts).
+  bool encrypted = 3;
   RequestContext request = 4;
-  // Cloudflare Turnstile token the browser obtained; single-use, verified by this service.
-  string turnstile_token = 5;
-  // The guild's opt-in VPN/proxy/Tor block (GuildVerify.blockVpn). When false the IP lookup is
-  // skipped entirely and `vpn` below comes back all-false.
-  bool block_vpn = 6;
 }
-message EvaluateResponse {
-  bool allowed = 1;
-  // Why verification was refused, e.g. "Used VPN", "Turnstile verification failed". Unset when
-  // allowed. Shown to the user and written to the guild's verify log.
-  optional string reason = 2;
-  // Raw VPN lookup outcome, returned even on success so presentation-web can log it.
-  VpnResult vpn = 3;
-}
-message VpnResult {
-  bool is_vpn = 1;
-  bool is_proxy = 2;
-  bool is_tor = 3;
-  optional string provider = 4;
+message SubmitResponse {
+  bool ok = 1;
+  // User-facing message shown when ok=false. Unset when ok=true.
+  optional string error = 2;
 }
 
 message GetClientScriptRequest {}
@@ -78,12 +65,4 @@ message GetClientScriptResponse {
   string code = 1;
   // Optional WebAssembly binary handed to the client plugin's init(). Empty means none.
   bytes wasm = 2;
-}
-
-message DecryptRequest {
-  string encrypted = 1;
-  RequestContext request = 2;
-}
-message DecryptResponse {
-  optional string json = 1;
 }

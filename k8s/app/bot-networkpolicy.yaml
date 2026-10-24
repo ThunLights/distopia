@@ -21,3 +21,7 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: distopia-app
+        # distopia-verify grants the role and posts the verification log through this RPC.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: distopia-verify

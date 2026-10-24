@@ -65,4 +65,5 @@ export type DiscordClient = {
   embed: Pick<EmbedController, "detectInviteLinks">;
 };
 
+export { fetchOAuth2Guilds } from "./OAuth2Controller";
 export type { FetchTokenResult, FetchUserInfoResult } from "./OAuth2Controller";

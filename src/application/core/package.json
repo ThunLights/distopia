@@ -17,6 +17,9 @@
     "./Guild": {
       "import": "./src/Guild.ts"
     },
+    "./VerifyLog": {
+      "import": "./src/VerifyLog.ts"
+    },
     "./staff": {
       "import": "./src/utils/staff.ts"
     },
