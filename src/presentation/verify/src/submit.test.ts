@@ -139,6 +139,36 @@ describe("submit", () => {
     });
   });
 
+  it("does not call a rejected OAuth2 token a membership failure", async () => {
+    const { deps, bot } = setup();
+    vi.mocked(deps.fetchGuilds).mockResolvedValue(null);
+
+    const result = await submit(deps, input);
+
+    expect(result).toMatchObject({ ok: false, error: expect.stringContaining("ログインし直して") });
+    expect(bot.giveRole).not.toHaveBeenCalled();
+  });
+
+  it("still succeeds when removing the pending role fails after the grant", async () => {
+    vi.mocked(evaluate).mockResolvedValue({ allowed: true, vpn: clean });
+    const { deps, bot, create } = setup({ enabled: true, roleId: "role", pendingRoleId: "wait" });
+    vi.mocked(bot.depriveRole).mockRejectedValue(new Error("missing permissions"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(await submit(deps, input)).toEqual({ ok: true });
+    expect(bot.giveRole).toHaveBeenCalledOnce();
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+  });
+
+  it("still succeeds when recording the success fails after the grant", async () => {
+    vi.mocked(evaluate).mockResolvedValue({ allowed: true, vpn: clean });
+    const { deps, create } = setup();
+    create.mockRejectedValue(new Error("db down"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(await submit(deps, input)).toEqual({ ok: true });
+  });
+
   it("logs the refusal and grants nothing when a check refuses", async () => {
     vi.mocked(evaluate).mockResolvedValue({
       allowed: false,

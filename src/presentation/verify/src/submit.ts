@@ -89,7 +89,14 @@ export async function submit(deps: SubmitDeps, input: SubmitInput): Promise<Subm
 
   const userDiscord = await database.userDiscord.find(userId);
   const guilds = userDiscord ? await deps.fetchGuilds(userDiscord.accessToken) : null;
-  if (!guilds?.some((guild) => guild.id === body.guildId)) {
+  // null means no stored token or Discord rejected it (revoked/invalid) -- not that the user is
+  // missing from the guild, so say that instead of a misleading membership failure.
+  if (!guilds) {
+    return fail(
+      "Discordアカウントの情報を取得できませんでした。ログインし直してからもう一度お試しください",
+    );
+  }
+  if (!guilds.some((guild) => guild.id === body.guildId)) {
     return fail("対象サーバーのメンバーではありません");
   }
 
@@ -123,15 +130,26 @@ export async function submit(deps: SubmitDeps, input: SubmitInput): Promise<Subm
 
   try {
     await bot.giveRole(body.guildId, userId, setting.roleId);
-    if (setting.pendingRoleId) {
-      await bot.depriveRole(body.guildId, userId, setting.pendingRoleId);
-    }
   } catch (error) {
     console.error(`[verify] failed to grant role in ${body.guildId}`, error);
     return fail("ロールの付与に失敗しました");
   }
 
-  const row = await logVerifyResult(database, { ...logFields, success: true });
-  await postVerifyLog(bot, setting, row, null, request);
+  // From here the role is already granted, so nothing below may turn this into a failure for
+  // the user: a leftover pending role or a missing log row is only worth an error log.
+  if (setting.pendingRoleId) {
+    try {
+      await bot.depriveRole(body.guildId, userId, setting.pendingRoleId);
+    } catch (error) {
+      console.error(`[verify] failed to remove pending role in ${body.guildId}`, error);
+    }
+  }
+
+  try {
+    const row = await logVerifyResult(database, { ...logFields, success: true });
+    await postVerifyLog(bot, setting, row, null, request);
+  } catch (error) {
+    console.error(`[verify] failed to record success in ${body.guildId}`, error);
+  }
   return { ok: true };
 }
