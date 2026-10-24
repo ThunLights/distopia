@@ -102,6 +102,7 @@ distopia/
 │       ├── discord/      # Discord infrastructure
 │       ├── http/         # Security-focused HTTP utilities (SSRF prevention)
 │       ├── js-obf/       # Shared JS obfuscation (wraps javascript-obfuscator)
+│       ├── rankcard/     # Rank card image rendering (@napi-rs/canvas)
 │       ├── rpc/          # Connect/Protobuf contracts shared across services
 │       ├── stripe/       # Stripe client factory
 │       ├── verify/       # Generic plugin-folder loader for presentation-verify
@@ -129,6 +130,7 @@ distopia/
 | `src/infrastructure/discord` | `infra-discord` |
 | `src/infrastructure/http` | `infra-http` |
 | `src/infrastructure/js-obf` | `infra-js-obf` |
+| `src/infrastructure/rankcard` | `infra-rankcard` |
 | `src/infrastructure/rpc` | `infra-rpc` |
 | `src/infrastructure/stripe` | `infra-stripe` |
 | `src/infrastructure/verify` | `infra-verify` |

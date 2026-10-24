@@ -1,4 +1,5 @@
 import { AppCore } from "app-core";
+import { CanvasRankCardRenderer } from "infra-rankcard";
 
 import { database } from "./database";
 import { djsController } from "./discord";
@@ -23,6 +24,7 @@ export const core = new AppCore({
   url: PUBLIC_URL,
   voicevoxApiKey: VOICEVOX_API_KEY ?? null,
   sakuraApiKey: SAKURA_AI_ENGINE_API_KEY ?? null,
+  rankCardRenderer: new CanvasRankCardRenderer(),
   memory,
   searchEngine,
   discord: djsController,

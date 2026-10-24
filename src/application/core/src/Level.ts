@@ -1,14 +1,10 @@
+import type { LevelCard } from "domain-model";
 import { levelUpSync } from "domain-service";
 import type { MemberLevelGain } from "infra-database/types";
 
 import { Base } from "./Base";
 
-export type LevelCard = {
-  level: bigint;
-  point: bigint;
-  nextPoint: bigint;
-  rank: number | null;
-};
+export type RankCardProfile = { name: string; avatarUrl: string; guildName: string };
 
 type Standing = { level: bigint; point: bigint; rank: number } | null;
 
@@ -76,5 +72,18 @@ export class Level extends Base {
       this.state.database.memberLevel.findGlobalStanding(userId),
     ]);
     return { guild: toCard(guild), global: toCard(global) };
+  }
+
+  public async renderRankCard(
+    guildId: string,
+    userId: string,
+    profile: RankCardProfile,
+  ): Promise<Uint8Array> {
+    const { rankCardRenderer } = this.state;
+    if (rankCardRenderer === null) {
+      throw new Error("rankCardRenderer is not configured");
+    }
+
+    return rankCardRenderer.render({ ...profile, ...(await this.getCards(guildId, userId)) });
   }
 }

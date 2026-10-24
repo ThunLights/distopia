@@ -131,4 +131,4 @@ export * from "./types/UserBumpRanking";
 export * from "./types/GuildMetaData";
 export * from "./types/RootPage";
 export type { StatChannelField } from "./StatChannel";
-export type { LevelCard } from "./Level";
+export type { RankCardProfile } from "./Level";

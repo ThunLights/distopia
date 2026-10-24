@@ -1,0 +1,31 @@
+{
+  "name": "infra-rankcard",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
+    "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.13",
+    "domain-model": "workspace:*",
+    "domain-service": "workspace:*",
+    "infra-http": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

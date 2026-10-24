@@ -1,5 +1,6 @@
 import { createCanvas, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
-import type { LevelCard } from "app-core";
+import type { RankCard, RankCardRenderer } from "domain-model";
+import { formatRank, levelProgress } from "domain-service";
 import { safeFetch, validateSafeUrl } from "infra-http";
 
 const WIDTH = 934;
@@ -7,14 +8,6 @@ const HEIGHT = 320;
 // Needs a CJK-capable system font (fonts-noto-cjk in the Docker images); the later families
 // are only fallbacks so a bare host still draws Latin text instead of failing.
 const FONT = '"Noto Sans CJK JP", "Noto Sans JP", "WenQuanYi Zen Hei", sans-serif';
-
-export type RankCardInput = {
-  name: string;
-  avatarUrl: string;
-  guildName: string;
-  guild: LevelCard;
-  global: LevelCard;
-};
 
 async function loadAvatar(url: string) {
   const safe = validateSafeUrl(url);
@@ -68,10 +61,7 @@ function bar(
   }
 }
 
-const ratio = ({ point, nextPoint }: LevelCard) => Number(point) / Number(nextPoint);
-const rankText = ({ rank }: LevelCard) => (rank === null ? "-" : `#${rank.toLocaleString()}`);
-
-export async function renderRankCard(input: RankCardInput): Promise<Buffer> {
+async function draw(input: RankCard): Promise<Buffer> {
   const canvas = createCanvas(WIDTH, HEIGHT);
   const ctx = canvas.getContext("2d");
 
@@ -110,9 +100,9 @@ export async function renderRankCard(input: RankCardInput): Promise<Buffer> {
   ctx.fillText(levelText, 890, 150);
   const levelWidth = ctx.measureText(levelText).width;
   ctx.fillStyle = "#faa61a";
-  ctx.fillText(`RANK ${rankText(input.guild)}`, 890 - levelWidth - 28, 150);
+  ctx.fillText(`RANK ${formatRank(input.guild.rank)}`, 890 - levelWidth - 28, 150);
 
-  bar(ctx, 220, 170, 670, 34, ratio(input.guild), "#5865f2");
+  bar(ctx, 220, 170, 670, 34, levelProgress(input.guild), "#5865f2");
   ctx.textAlign = "right";
   ctx.fillStyle = "#99aab5";
   ctx.font = `600 20px ${FONT}`;
@@ -129,14 +119,20 @@ export async function renderRankCard(input: RankCardInput): Promise<Buffer> {
   ctx.font = `700 20px ${FONT}`;
   ctx.fillText("GLOBAL", 44, 283);
   ctx.fillStyle = "#ffffff";
-  ctx.fillText(`RANK ${rankText(input.global)}`, 140, 283);
+  ctx.fillText(`RANK ${formatRank(input.global.rank)}`, 140, 283);
   ctx.fillText(`LEVEL ${input.global.level}`, 290, 283);
 
-  bar(ctx, 430, 268, 330, 16, ratio(input.global), "#3ba55d");
+  bar(ctx, 430, 268, 330, 16, levelProgress(input.global), "#3ba55d");
   ctx.textAlign = "right";
   ctx.fillStyle = "#99aab5";
   ctx.font = `600 18px ${FONT}`;
   ctx.fillText(`${input.global.point} / ${input.global.nextPoint}`, 906, 283);
 
   return canvas.toBuffer("image/png");
+}
+
+export class CanvasRankCardRenderer implements RankCardRenderer {
+  public render(card: RankCard): Promise<Uint8Array> {
+    return draw(card);
+  }
 }

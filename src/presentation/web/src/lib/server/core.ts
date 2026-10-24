@@ -21,6 +21,7 @@ export const core = genCore({
   url: PUBLIC_URL!,
   voicevoxApiKey: VOICEVOX_API_KEY ?? null,
   sakuraApiKey: SAKURA_AI_ENGINE_API_KEY ?? null,
+  rankCardRenderer: null,
   memory,
   searchEngine,
   discord: djsController,

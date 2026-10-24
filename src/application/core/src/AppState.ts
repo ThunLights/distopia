@@ -1,3 +1,4 @@
+import type { RankCardRenderer } from "domain-model";
 import type { DatabaseClient } from "infra-database/types";
 import type { DiscordClient } from "infra-discord";
 import type { RedisClient } from "infra-redis";
@@ -48,6 +49,8 @@ export type AppState = {
   // Optional -- Tts.synthesize() falls back to VOICEVOX whenever a guild has SakuraAi
   // selected (GuildSetting.ttsProvider) but this key is unset.
   sakuraApiKey: string | null;
+  // Null where nothing draws images (presentation-web); Level.renderRankCard() throws then.
+  rankCardRenderer: RankCardRenderer | null;
   memory: {
     ratelimit: {
       button: ButtonRateLimit;
