@@ -10,7 +10,7 @@ import * as plugin from "./plugin";
 
 // Cloudflare documents Turnstile tokens as at most 2048 characters. The body cap is far above any
 // real fingerprint payload; it only stops an oversized request from being decrypted/parsed.
-const MAX_BODY_LENGTH = 100_000;
+const MAX_BODY_LENGTH = 30_000;
 const SNOWFLAKE = /^\d{1,20}$/;
 
 const PostBodySchema = z.object({
@@ -130,26 +130,15 @@ export async function submit(deps: SubmitDeps, input: SubmitInput): Promise<Subm
 
   try {
     await bot.giveRole(body.guildId, userId, setting.roleId);
+    if (setting.pendingRoleId) {
+      await bot.depriveRole(body.guildId, userId, setting.pendingRoleId);
+    }
   } catch (error) {
     console.error(`[verify] failed to grant role in ${body.guildId}`, error);
     return fail("ロールの付与に失敗しました");
   }
 
-  // From here the role is already granted, so nothing below may turn this into a failure for
-  // the user: a leftover pending role or a missing log row is only worth an error log.
-  if (setting.pendingRoleId) {
-    try {
-      await bot.depriveRole(body.guildId, userId, setting.pendingRoleId);
-    } catch (error) {
-      console.error(`[verify] failed to remove pending role in ${body.guildId}`, error);
-    }
-  }
-
-  try {
-    const row = await logVerifyResult(database, { ...logFields, success: true });
-    await postVerifyLog(bot, setting, row, null, request);
-  } catch (error) {
-    console.error(`[verify] failed to record success in ${body.guildId}`, error);
-  }
+  const row = await logVerifyResult(database, { ...logFields, success: true });
+  await postVerifyLog(bot, setting, row, null, request);
   return { ok: true };
 }

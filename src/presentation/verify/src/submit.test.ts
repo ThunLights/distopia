@@ -84,7 +84,7 @@ describe("submit", () => {
   it("rejects an oversized body before parsing it", async () => {
     const { deps } = setup();
 
-    const body = JSON.stringify({ guildId: "1", turnstileToken: "t", extra: "x".repeat(100_000) });
+    const body = JSON.stringify({ guildId: "1", turnstileToken: "t", extra: "x".repeat(30_000) });
 
     expect(await submit(deps, { ...input, body })).toEqual({ ok: false, error: "Invalid Body" });
     expect(deps.database.guildVerify.find).not.toHaveBeenCalled();
@@ -149,24 +149,13 @@ describe("submit", () => {
     expect(bot.giveRole).not.toHaveBeenCalled();
   });
 
-  it("still succeeds when removing the pending role fails after the grant", async () => {
+  it("fails when removing the pending role fails after the grant", async () => {
     vi.mocked(evaluate).mockResolvedValue({ allowed: true, vpn: clean });
-    const { deps, bot, create } = setup({ enabled: true, roleId: "role", pendingRoleId: "wait" });
+    const { deps, bot } = setup({ enabled: true, roleId: "role", pendingRoleId: "wait" });
     vi.mocked(bot.depriveRole).mockRejectedValue(new Error("missing permissions"));
     vi.spyOn(console, "error").mockImplementation(() => {});
 
-    expect(await submit(deps, input)).toEqual({ ok: true });
-    expect(bot.giveRole).toHaveBeenCalledOnce();
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
-  });
-
-  it("still succeeds when recording the success fails after the grant", async () => {
-    vi.mocked(evaluate).mockResolvedValue({ allowed: true, vpn: clean });
-    const { deps, create } = setup();
-    create.mockRejectedValue(new Error("db down"));
-    vi.spyOn(console, "error").mockImplementation(() => {});
-
-    expect(await submit(deps, input)).toEqual({ ok: true });
+    expect(await submit(deps, input)).toEqual({ ok: false, error: "ロールの付与に失敗しました" });
   });
 
   it("logs the refusal and grants nothing when a check refuses", async () => {
