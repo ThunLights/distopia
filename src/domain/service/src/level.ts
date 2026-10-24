@@ -23,7 +23,10 @@ export function levelUpSync(level: bigint, point: bigint, plus: bigint): Score {
 export const levelUp = useAsync(levelUpSync);
 
 export function levelProgress({ point, nextPoint }: { point: bigint; nextPoint: bigint }): number {
-  return Math.min(Number(point) / Number(nextPoint), 1);
+  if (nextPoint <= 0n) {
+    return 0;
+  }
+  return Math.max(0, Math.min(Number(point) / Number(nextPoint), 1));
 }
 
 export function formatRank(rank: number | null): string {

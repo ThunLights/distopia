@@ -17,6 +17,11 @@ describe("levelProgress", () => {
   test("is the fraction of the way to the next level, capped at 1", () => {
     expect(levelProgress({ point: 3n, nextPoint: 12n })).toBe(0.25);
     expect(levelProgress({ point: 20n, nextPoint: 10n })).toBe(1);
+    expect(levelProgress({ point: -5n, nextPoint: 10n })).toBe(0);
+  });
+  test("is 0 when there is no positive threshold to reach", () => {
+    expect(levelProgress({ point: 5n, nextPoint: 0n })).toBe(0);
+    expect(levelProgress({ point: 5n, nextPoint: -3n })).toBe(0);
   });
 });
 
