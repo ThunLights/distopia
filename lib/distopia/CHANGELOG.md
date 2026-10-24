@@ -1,5 +1,11 @@
 # distopia
 
+## 0.7.0
+
+### Minor Changes
+
+- 61777c6: feat!: replace VerifyService's Evaluate and Decrypt RPCs with a single Submit RPC that runs a whole member-verification attempt; EvaluateRequest, EvaluateResponse, VpnResult, DecryptRequest and DecryptResponse are no longer exported, SubmitRequest and SubmitResponse are
+
 ## 0.6.0
 
 ### Minor Changes
