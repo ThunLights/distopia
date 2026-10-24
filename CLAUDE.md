@@ -650,13 +650,18 @@ the same shape for the next one, and note that they don't all share one directio
   different shape from the other three in what it's *for*, not where it runs: it **is**
   built and deployed from this repo (same image as `presentation-web`/`presentation-bot`,
   `command` overridden — see `bot-deployment.yaml`'s own precedent) and is **required** for
-  member verification; only its plugin folder is optional. `Evaluate`
-  (`src/presentation/verify/src/server/rpc.ts` → `checks.ts`) runs the whole server-side
-  decision — the guild's opt-in VPN/proxy/Tor block (`infra-aip`), the Cloudflare Turnstile
-  check (`TURNSTILE_SECRET_KEY` lives on this service, not on web), then the plugin's own
-  `evaluate` — and stops at the first refusal, returning `allowed=false` plus a `reason` such
-  as `Used VPN` or `Turnstile verification failed` (plus the raw VPN result for logging).
-  The other methods delegate to `src/presentation/verify/src/plugin.ts`, which delegates to `infra-verify`'s
+  member verification; only its plugin folder is optional. It owns the whole verification
+  flow: web only authenticates the session and resolves the client IP, then relays the raw
+  request in one `Submit` call (`src/presentation/verify/src/server/rpc.ts` → `submit.ts`).
+  `submit` decrypts and validates the body, reads the guild's setting and checks the user's
+  membership (DB + the user's OAuth2 token), then `checks.ts` decides — the guild's opt-in
+  VPN/proxy/Tor block (`infra-aip`), the Cloudflare Turnstile check (`TURNSTILE_SECRET_KEY`
+  lives on this service, not on web), then the plugin's own `evaluate`, stopping at the first
+  refusal (a `reason` such as `Used VPN` or `Turnstile verification failed`). It then records
+  the result (`app-core/VerifyLog`'s `logVerifyResult`), posts it to the guild's log channel
+  and grants the role through `presentation-bot`'s RPC (`bot.ts`), so this service needs
+  `DATABASE_URL`, `BOT_RPC_URL` and `BOT_RPC_TOKEN` too. `GetClientScript` and the plugin's
+  `decrypt` delegate to `src/presentation/verify/src/plugin.ts`, which delegates to `infra-verify`'s
   `loadPluginFolder` (`src/infrastructure/verify/src/pluginLoader.ts`) — a generic loader
   (not in `presentation-verify` itself, so it's reusable) that scans a *folder*
   (`VERIFY_PLUGIN_DIR`, default `src/presentation/verify/plugins/`) for non-dot-prefixed
@@ -682,7 +687,7 @@ the same shape for the next one, and note that they don't all share one directio
   `VerifyServerPlugin`/`VerifyClientPlugin`) so a plugin file can be authored and
   type-checked anywhere, without this monorepo. Even the anti-scraping body cipher is
   plugin-loaded, not hardcoded here: `VerifyClientPlugin`'s optional `encrypt()` (served via
-  `GetClientScript`) and `VerifyServerPlugin.decrypt()` (via `VerifyService.Decrypt`)
+  `GetClientScript`) and `VerifyServerPlugin.decrypt()` (called by `Submit`)
   are the extension points. The client script (and optional WebAssembly, `getClientWasm()` →
   `VerifyClientPlugin.init(wasm)`, which must live in the same file as the `getClientScript()`
   that wins): the script and wasm are served (logged-in users only, `no-store`) from

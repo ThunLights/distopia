@@ -7,13 +7,10 @@
 export {
   VerifyService,
   type RequestContext,
-  type EvaluateRequest,
-  type EvaluateResponse,
-  type VpnResult,
+  type SubmitRequest,
+  type SubmitResponse,
   type GetClientScriptRequest,
   type GetClientScriptResponse,
-  type DecryptRequest,
-  type DecryptResponse,
 } from "./gen/distopia/verify/v1/verify_pb";
 
 import { createHash, timingSafeEqual } from "node:crypto";

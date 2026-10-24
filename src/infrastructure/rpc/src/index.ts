@@ -8,11 +8,8 @@ export * from "./gen/distopia/searchengine/v1/search_pb";
 export {
   VerifyService,
   type RequestContext,
-  type EvaluateRequest,
-  type EvaluateResponse,
-  type VpnResult,
+  type SubmitRequest,
+  type SubmitResponse,
   type GetClientScriptRequest,
   type GetClientScriptResponse,
-  type DecryptRequest,
-  type DecryptResponse,
 } from "distopia";

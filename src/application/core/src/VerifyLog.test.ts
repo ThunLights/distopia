@@ -1,26 +1,23 @@
-import type { UserVerifyLog } from "infra-database/types";
+import type { DatabaseClient, UserVerifyLog } from "infra-database/types";
 import { describe, expect, test, vi } from "vitest";
 
-import type { AppState } from "./AppState";
-import { Verify } from "./Verify";
+import { logVerifyResult } from "./VerifyLog";
 
 function fakeState(existing: UserVerifyLog[]) {
   const create = vi.fn(
     async (input: Partial<UserVerifyLog>) => ({ id: 1, ...input }) as UserVerifyLog,
   );
   const findByFingerprintHashes = vi.fn(async (_guildId: string, _hashes: string[]) => existing);
-  const state = {
-    database: {
-      userVerifyLog: { create, findByFingerprintHashes },
-    },
-  } as unknown as AppState;
-  return { state, create, findByFingerprintHashes };
+  const database = {
+    userVerifyLog: { create, findByFingerprintHashes },
+  } as unknown as Pick<DatabaseClient, "userVerifyLog">;
+  return { database, create, findByFingerprintHashes };
 }
 
-describe("Verify.logResult", () => {
+describe("logVerifyResult", () => {
   test("stores no related users when fingerprint is absent", async () => {
-    const { state, create } = fakeState([]);
-    await new Verify(state).logResult({ userId: "u1", guildId: "g1", success: true });
+    const { database, create } = fakeState([]);
+    await logVerifyResult(database, { userId: "u1", guildId: "g1", success: true });
 
     expect(create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -37,9 +34,9 @@ describe("Verify.logResult", () => {
       { userId: "u3" },
       { userId: "u1" }, // the requester's own prior attempt
     ] as UserVerifyLog[];
-    const { state, create, findByFingerprintHashes } = fakeState(existing);
+    const { database, create, findByFingerprintHashes } = fakeState(existing);
 
-    await new Verify(state).logResult({
+    await logVerifyResult(database, {
       userId: "u1",
       guildId: "g1",
       success: true,

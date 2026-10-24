@@ -3,8 +3,9 @@ import { type Client, createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-node";
 import { createBearerAuthInterceptor, VerifyService } from "infra-rpc";
 
-// Same reasoning as lib/server/discord.ts's own BOT_RPC_TIMEOUT_MS.
-const VERIFY_RPC_TIMEOUT_MS = 10_000;
+// Longer than discord.ts's BOT_RPC_TIMEOUT_MS: a Submit runs the Turnstile and VPN lookups,
+// the DB writes and two bot RPCs back to back inside presentation-verify.
+const VERIFY_RPC_TIMEOUT_MS = 30_000;
 
 // Local-dev default (matches .env.example's VERIFY_RPC_PORT); k8s sets VERIFY_RPC_URL itself via
 // the distopia-config ConfigMap.
@@ -13,7 +14,7 @@ const DEFAULT_VERIFY_RPC_URL = "http://localhost:8084";
 let rpcClient: Client<typeof VerifyService> | undefined | null;
 
 // Same shape as discord.ts's rpc(), except null (not configured) is a normal state here, which
-// evaluateVerify turns into a refusal instead of throwing at startup.
+// submitVerify turns into a refusal instead of throwing at startup.
 function rpc(): Client<typeof VerifyService> | null {
   if (rpcClient === undefined) {
     rpcClient = VERIFY_RPC_TOKEN
@@ -50,60 +51,32 @@ export function pluginHeaders(headers: Headers): Record<string, string> {
   return result;
 }
 
-export type VerifyOutcome = {
-  allowed: boolean;
-  reason: string | null;
-  isVpn: boolean;
-  isProxy: boolean;
-  isTor: boolean;
-  vpnProvider: string | null;
-};
+export type SubmitVerifyResult = { ok: true } | { ok: false; error: string };
 
-const REFUSED: VerifyOutcome = {
-  allowed: false,
-  reason: null,
-  isVpn: false,
-  isProxy: false,
-  isTor: false,
-  vpnProvider: null,
-};
-
-// Turnstile, the VPN check and the plugin all run inside presentation-verify now, so an
-// unconfigured or unreachable service refuses the attempt (with a reason) instead of
-// silently skipping the checks.
-export async function evaluateVerify(input: {
-  guildId: string;
+// The whole verification attempt runs inside presentation-verify; an unconfigured or
+// unreachable service refuses the attempt (with a reason) instead of silently skipping it.
+export async function submitVerify(input: {
   userId: string;
-  extra?: unknown;
-  turnstileToken: string;
-  blockVpn: boolean;
-  headers?: Record<string, string>;
-  ip?: string | null;
-}): Promise<VerifyOutcome> {
+  body: string;
+  encrypted: boolean;
+  headers: Record<string, string>;
+  ip: string | null;
+}): Promise<SubmitVerifyResult> {
   const client = rpc();
   if (!client) {
-    return { ...REFUSED, reason: "Verification service is not configured" };
+    return { ok: false, error: "Verification service is not configured" };
   }
 
   try {
-    const { allowed, reason, vpn } = await client.evaluate({
-      guildId: input.guildId,
+    const { ok, error } = await client.submit({
       userId: input.userId,
-      extraJson: JSON.stringify(input.extra ?? null),
-      turnstileToken: input.turnstileToken,
-      blockVpn: input.blockVpn,
-      request: { headers: input.headers ?? {}, ip: input.ip ?? undefined },
+      body: input.body,
+      encrypted: input.encrypted,
+      request: { headers: input.headers, ip: input.ip ?? undefined },
     });
-    return {
-      allowed,
-      reason: reason ?? null,
-      isVpn: vpn?.isVpn ?? false,
-      isProxy: vpn?.isProxy ?? false,
-      isTor: vpn?.isTor ?? false,
-      vpnProvider: vpn?.provider ?? null,
-    };
+    return ok ? { ok: true } : { ok: false, error: error ?? "Unknown reason" };
   } catch {
-    return { ...REFUSED, reason: "Verification service is unavailable" };
+    return { ok: false, error: "Verification service is unavailable" };
   }
 }
 
@@ -121,31 +94,6 @@ export async function fetchVerifyClientScript(): Promise<{
     return code
       ? { code, wasm: wasm.length > 0 ? Buffer.from(wasm).toString("base64") : null }
       : null;
-  } catch {
-    return null;
-  }
-}
-
-// Reverses whatever the client script's own VerifyClientPlugin.encrypt() produced -- only
-// ever called when the client flagged its body as plugin-encrypted in the first place (see
-// lib/client/verify.ts), so "not configured"/"unreachable" here is a real error, not the
-// normal fallback: the client already committed to an encrypted body that only
-// the private service can reverse.
-export async function decryptPluginBody(
-  encrypted: string,
-  context: { headers: Record<string, string>; ip: string | null },
-): Promise<string | null> {
-  const client = rpc();
-  if (!client) {
-    return null;
-  }
-
-  try {
-    const { json } = await client.decrypt({
-      encrypted,
-      request: { headers: context.headers, ip: context.ip ?? undefined },
-    });
-    return json ?? null;
   } catch {
     return null;
   }

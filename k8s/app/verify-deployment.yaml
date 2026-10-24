@@ -66,6 +66,26 @@ spec:
                 secretKeyRef:
                   name: distopia-env
                   key: TURNSTILE_SECRET_KEY
+            # The whole verification flow runs here (src/submit.ts), so this pod reads and
+            # writes the DB and calls distopia-bot's RPC to grant the role and post the guild
+            # log. Listed one by one rather than envFrom'ing distopia-env/distopia-config:
+            # the optional plugin runs in this process, so it should see only what the flow
+            # needs, not BOT_TOKEN/BOT_SECRET and the rest.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-db-credentials
+                  key: url
+            - name: BOT_RPC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: distopia-config
+                  key: BOT_RPC_URL
+            - name: BOT_RPC_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-env
+                  key: BOT_RPC_TOKEN
           volumeMounts:
             # Optional -- the one thing actually private here. `optional: true` means the
             # Pod starts fine with no Secret at all, in which case this path just keeps the
