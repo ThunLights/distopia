@@ -1,5 +1,5 @@
 import type { GuildMemberLevelRow, UserLevelRow } from "infra-database/types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AppState } from "./AppState";
 import { Level } from "./Level";
@@ -30,6 +30,34 @@ function levelWith(opts: {
     },
   } as unknown as AppState);
 }
+
+describe("Level.renderRankCard", () => {
+  const profile = { name: "n", avatarUrl: "https://example.com/a.png", guildName: "g" };
+  const database = {
+    memberLevel: {
+      findGuildStanding: async () => ({ level: 3n, point: 1n, rank: 3 }),
+      findGlobalStanding: async () => null,
+    },
+  };
+
+  it("hands the profile and both standings to the renderer", async () => {
+    const render = vi.fn(async () => new Uint8Array([1]));
+    const level = new Level({ database, rankCardRenderer: { render } } as unknown as AppState);
+
+    expect(await level.renderRankCard("g", "u", profile)).toEqual(new Uint8Array([1]));
+    expect(render).toHaveBeenCalledWith({
+      ...profile,
+      guild: { level: 3n, point: 1n, nextPoint: 9n, rank: 3 },
+      global: { level: 1n, point: 0n, nextPoint: 1n, rank: null },
+    });
+  });
+
+  it("throws when no renderer is configured", async () => {
+    const level = new Level({ database, rankCardRenderer: null } as unknown as AppState);
+
+    await expect(level.renderRankCard("g", "u", profile)).rejects.toThrow("rankCardRenderer");
+  });
+});
 
 describe("Level", () => {
   it("scores a message as the ceiling of the square root of its length", () => {

@@ -10,7 +10,6 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 
-import { renderRankCard } from "../../../utils/rankCard";
 import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 import { GuildParseError } from "../Base/Error/GuildParseError";
 
@@ -57,16 +56,15 @@ export class RankCommand extends ChatInputCommandBase<Options> {
     const deferred = await interaction.deferReply({ withResponse: true });
 
     try {
-      const { guild: guildCard, global } = await this.core.level.getCards(guild.id, user.id);
-      const image = await renderRankCard({
+      const image = await this.core.level.renderRankCard(guild.id, user.id, {
         name: member?.displayName ?? user.displayName,
         avatarUrl: (member ?? user).displayAvatarURL({ extension: "png", size: 256 }),
         guildName: interaction.guild?.name ?? "",
-        guild: guildCard,
-        global,
       });
 
-      await interaction.editReply({ files: [new AttachmentBuilder(image, { name: "rank.png" })] });
+      await interaction.editReply({
+        files: [new AttachmentBuilder(Buffer.from(image), { name: "rank.png" })],
+      });
     } catch (error) {
       // Already deferred, so a throw would leave the reply spinning on "thinking..." forever.
       console.error("[rank] failed to render rank card", error);
