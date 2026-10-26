@@ -9,8 +9,8 @@
     "@connectrpc/connect": "npm:@connectrpc/connect@2.2.0",
     "@types/node": "npm:@types/node@24.13.3",
     "jsr": "npm:jsr@0.14.3",
-    "oxfmt": "npm:oxfmt@0.71.0",
-    "oxlint": "npm:oxlint@1.88.0",
+    "oxfmt": "npm:oxfmt@0.74.0",
+    "oxlint": "npm:oxlint@1.89.0",
     "tsdown": "npm:tsdown@0.23.0",
     "zod": "npm:zod@4.6.5"
   },
