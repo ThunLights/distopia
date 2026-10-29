@@ -195,6 +195,19 @@
         "typescript": "catalog:",
       },
     },
+    "src/infrastructure/diff": {
+      "name": "infra-diff",
+      "dependencies": {
+        "diff": "9.0.0",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "vitest": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
     "src/infrastructure/discord": {
       "name": "infra-discord",
       "dependencies": {
@@ -349,6 +362,7 @@
         "domain-model": "workspace:*",
         "ffmpeg-static": "catalog:",
         "infra-database": "workspace:*",
+        "infra-diff": "workspace:*",
         "infra-discord": "workspace:*",
         "infra-http": "workspace:*",
         "infra-rankcard": "workspace:*",
@@ -2041,6 +2055,8 @@
 
     "devlop": ["devlop@1.1.0", "", { "dependencies": { "dequal": "^2.0.0" } }, "sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA=="],
 
+    "diff": ["diff@9.0.0", "", {}, "sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw=="],
+
     "discord-api-types": ["discord-api-types@0.38.55", "", {}, "sha512-ytuaRTzdnHUCXJ6KjL9MrItQX0xKncBKEeYI1Bst4+ud47eejH3cG6gaesYakjpPcUhh68XYS2YwGq3mmujFsA=="],
 
     "discord.js": ["discord.js@14.27.0", "", { "dependencies": { "@discordjs/builders": "^1.14.1", "@discordjs/collection": "1.5.3", "@discordjs/formatters": "^0.6.2", "@discordjs/rest": "^2.6.2", "@discordjs/util": "^1.2.0", "@discordjs/ws": "^1.2.3", "@sapphire/snowflake": "3.5.5", "discord-api-types": "^0.38.49", "fast-deep-equal": "3.1.3", "lodash.snakecase": "4.1.1", "magic-bytes.js": "^1.13.0", "tslib": "^2.6.3", "undici": "^6.27.0" } }, "sha512-qHbFlFG2N7y3LjPySYsL6A1+BnX6bkTVgo842EX0CqVPk/KTMwZkojPHEXKsQUpWZNyz5BISNHK1cPpQw0+m4A=="],
@@ -2268,6 +2284,8 @@
     "infra-aip": ["infra-aip@workspace:src/infrastructure/aip"],
 
     "infra-database": ["infra-database@workspace:src/infrastructure/database"],
+
+    "infra-diff": ["infra-diff@workspace:src/infrastructure/diff"],
 
     "infra-discord": ["infra-discord@workspace:src/infrastructure/discord"],
 

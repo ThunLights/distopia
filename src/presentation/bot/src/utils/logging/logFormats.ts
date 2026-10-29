@@ -10,6 +10,7 @@ import type {
   Role,
   User,
 } from "discord.js";
+import { lineDiff } from "infra-diff";
 
 import { codeBlock, codeBlockPages } from "../codeblock";
 import type { AllLogField, ChannelLogField } from "./log";
@@ -155,7 +156,8 @@ export const logFormats = {
     title: "メッセージ編集",
     build: async (
       message: OmitPartialGroupDMChannel<Message<boolean>>,
-      oldContent: string,
+      /** null when the pre-edit message wasn't cached, so there's nothing to diff against. */
+      oldContent: string | null,
       newContent: string,
       oldAttachments?: AttachmentCollection,
     ) => {
@@ -164,12 +166,27 @@ export const logFormats = {
         (attachment) => !message.attachments.has(attachment.id),
       );
 
-      const [oldValue, oldOverflow] = codeBlockPages(oldContent);
-      const [newValue, newOverflow] = codeBlockPages(newContent);
-      const overflowFields: LogEmbedField[] = [
-        ...(oldOverflow ? [{ name: "編集前 (続き)", value: oldOverflow }] : []),
-        ...(newOverflow ? [{ name: "編集後 (続き)", value: newOverflow }] : []),
-      ];
+      const contentFields: LogEmbedField[] = [];
+      const overflowFields: LogEmbedField[] = [];
+      if (oldContent === null) {
+        const [newValue, newOverflow] = codeBlockPages(newContent || "(空)");
+        contentFields.push(
+          { name: "編集前", value: "(内容不明)" },
+          { name: "編集後", value: newValue },
+        );
+        if (newOverflow) {
+          overflowFields.push({ name: "編集後 (続き)", value: newOverflow });
+        }
+      } else {
+        const diff = lineDiff(oldContent, newContent);
+        const [diffValue, diffOverflow] = diff
+          ? codeBlockPages(diff, "diff")
+          : ["(本文の変更なし)"];
+        contentFields.push({ name: "変更内容", value: diffValue });
+        if (diffOverflow) {
+          overflowFields.push({ name: "変更内容 (続き)", value: diffOverflow });
+        }
+      }
 
       return {
         description: [
@@ -178,8 +195,7 @@ export const logFormats = {
         ].join("\n"),
         image,
         fields: [
-          { name: "編集前", value: oldValue },
-          { name: "編集後", value: newValue },
+          ...contentFields,
           ...attachmentFields,
           ...(removedAttachments?.size
             ? [
