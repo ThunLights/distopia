@@ -44,7 +44,7 @@
     "@vitest/browser-playwright": "5.0.5",
     "@zerodevx/svelte-toast": "0.9.6",
     "bun": "catalog:",
-    "eslint": "10.11.0",
+    "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-storybook": "10.6.0",
     "eslint-plugin-svelte": "3.23.0",
