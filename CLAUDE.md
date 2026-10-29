@@ -99,6 +99,7 @@ distopia/
 │   │   └── repository/   # Repository interfaces (memory / search)
 │   └── infrastructure/
 │       ├── database/     # Prisma + PostgreSQL
+│       ├── diff/         # Line diff for edit logs (wraps jsdiff)
 │       ├── discord/      # Discord infrastructure
 │       ├── http/         # Security-focused HTTP utilities (SSRF prevention)
 │       ├── js-obf/       # Shared JS obfuscation (wraps javascript-obfuscator)
@@ -127,6 +128,7 @@ distopia/
 | `src/presentation/web` | `presentation-web` |
 | `src/application/core` | `app-core` |
 | `src/infrastructure/database` | `infra-database` |
+| `src/infrastructure/diff` | `infra-diff` |
 | `src/infrastructure/discord` | `infra-discord` |
 | `src/infrastructure/http` | `infra-http` |
 | `src/infrastructure/js-obf` | `infra-js-obf` |

@@ -4,6 +4,8 @@ import { EmbedBuilder, type Guild } from "discord.js";
 import type { AllLogField, ChannelLogField } from "./log";
 import { logFormats, type LogFormat } from "./logFormats";
 
+const OVERFLOW_FIELDS_PER_EMBED = 5;
+
 export class Logger {
   constructor(private readonly core: AppCore) {}
 
@@ -62,11 +64,14 @@ export class Logger {
 
       await channel.send({ embeds: [embed] });
 
-      if (content.overflowFields?.length) {
+      // Discord caps one embed at 6000 characters in total; 5 fields of up to 1024 each (plus
+      // their names and the title) stay under that, so long content spills into more messages.
+      const overflowFields = content.overflowFields ?? [];
+      for (let i = 0; i < overflowFields.length; i += OVERFLOW_FIELDS_PER_EMBED) {
         const overflowEmbed = new EmbedBuilder()
           .setColor(format.color ?? "Navy")
           .setTitle(`${format.title} (続き)`)
-          .addFields(content.overflowFields)
+          .addFields(overflowFields.slice(i, i + OVERFLOW_FIELDS_PER_EMBED))
           .setTimestamp();
 
         await channel.send({ embeds: [overflowEmbed] });

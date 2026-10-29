@@ -32,8 +32,8 @@ export class MessageUpdateHandler extends BaseHandler<
       return;
     }
 
-    const oldContent = oldMessage.partial ? "(内容不明)" : oldMessage.content || "(空)";
-    const newContent = newMessage.content || "(空)";
+    const oldContent = oldMessage.partial ? null : oldMessage.content;
+    const newContent = newMessage.content;
     const oldAttachments = oldMessage.partial ? undefined : oldMessage.attachments;
 
     await this.logger.log(

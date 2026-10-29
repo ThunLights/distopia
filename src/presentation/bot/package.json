@@ -36,6 +36,7 @@
     "domain-model": "workspace:*",
     "ffmpeg-static": "catalog:",
     "infra-database": "workspace:*",
+    "infra-diff": "workspace:*",
     "infra-discord": "workspace:*",
     "infra-http": "workspace:*",
     "infra-rankcard": "workspace:*",
