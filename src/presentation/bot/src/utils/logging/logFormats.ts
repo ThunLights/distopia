@@ -12,7 +12,7 @@ import type {
 } from "discord.js";
 import { lineDiff } from "infra-diff";
 
-import { codeBlock, codeBlockPages } from "../codeblock";
+import { codeBlock, codeBlockChunks } from "../codeblock";
 import type { AllLogField, ChannelLogField } from "./log";
 
 export type LogEmbedField = { name: string; value: string; inline?: boolean };
@@ -58,6 +58,14 @@ export type LogFormat<Args extends unknown[] = unknown[]> = {
   color?: ColorResolvable;
   build: (...args: Args) => LogContent | Promise<LogContent>;
 };
+
+// Numbered so a reader can tell the pages apart once they span several follow-up messages.
+function continuationFields(name: string, pages: string[]): LogEmbedField[] {
+  return pages.map((value, index) => ({
+    name: `${name} (続き ${index + 2}/${pages.length + 1})`,
+    value,
+  }));
+}
 
 function executorLine(executor: User | PartialUser | null): string {
   return `実行者: ${executor ? `<@${executor.id}> (${executor.id})` : "不明"}`;
@@ -169,23 +177,17 @@ export const logFormats = {
       const contentFields: LogEmbedField[] = [];
       const overflowFields: LogEmbedField[] = [];
       if (oldContent === null) {
-        const [newValue, newOverflow] = codeBlockPages(newContent || "(空)");
+        const [first, ...rest] = codeBlockChunks(newContent || "(空)");
         contentFields.push(
           { name: "編集前", value: "(内容不明)" },
-          { name: "編集後", value: newValue },
+          { name: "編集後", value: first },
         );
-        if (newOverflow) {
-          overflowFields.push({ name: "編集後 (続き)", value: newOverflow });
-        }
+        overflowFields.push(...continuationFields("編集後", rest));
       } else {
         const diff = lineDiff(oldContent, newContent);
-        const [diffValue, diffOverflow] = diff
-          ? codeBlockPages(diff, "diff")
-          : ["(本文の変更なし)"];
-        contentFields.push({ name: "変更内容", value: diffValue });
-        if (diffOverflow) {
-          overflowFields.push({ name: "変更内容 (続き)", value: diffOverflow });
-        }
+        const [first, ...rest] = diff ? codeBlockChunks(diff, "diff") : ["(本文の変更なし)"];
+        contentFields.push({ name: "変更内容", value: first });
+        overflowFields.push(...continuationFields("変更内容", rest));
       }
 
       return {
@@ -216,7 +218,8 @@ export const logFormats = {
     title: "メッセージ削除",
     build: async (message: OmitPartialGroupDMChannel<Message<boolean>>, content: string) => {
       const { image, fields: attachmentFields } = summarizeAttachments(message.attachments);
-      const [value, overflow] = codeBlockPages(content);
+      const [value, ...rest] = codeBlockChunks(content);
+      const overflowFields = continuationFields("内容", rest);
 
       return {
         description: [
@@ -225,7 +228,7 @@ export const logFormats = {
         ].join("\n"),
         image,
         fields: [{ name: "内容", value }, ...attachmentFields],
-        ...(overflow ? { overflowFields: [{ name: "内容 (続き)", value: overflow }] } : {}),
+        ...(overflowFields.length ? { overflowFields } : {}),
       };
     },
   },
