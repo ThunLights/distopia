@@ -12,7 +12,7 @@ export class Logger {
     field: F,
     ...args: Parameters<(typeof logFormats)[F]["build"]>
   ): Promise<void> {
-    const settings = await this.core.guild.getSetting(guild.id);
+    const settings = await this.core.log.getSetting(guild.id);
 
     await this.send(guild, settings?.[field], field, args);
   }

@@ -26,7 +26,7 @@ export class AntiRaidLogChannelSelectMenu extends ChannelSelectMenuInteractionBa
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({ guildId: guild.id, logAntiRaid: options.channelId });
+    await this.core.log.saveSetting({ guildId: guild.id, logAntiRaid: options.channelId });
 
     const antiRaidPagePayload = await antiRaidPage(this.core, guild);
 

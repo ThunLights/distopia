@@ -11,23 +11,6 @@ export type GuildSettingValue = {
   bumpNoticeRole: string | null;
   bumpNoticeContent: string | null;
   inviteLinkBlock: boolean;
-  logAntiRaid: string | null;
-  logMemberJoin: string | null;
-  logMemberLeave: string | null;
-  logMemberTimeout: string | null;
-  logMemberKick: string | null;
-  logMemberBan: string | null;
-  logMemberUnban: string | null;
-  logRoleCreate: string | null;
-  logRoleEdit: string | null;
-  logRoleDelete: string | null;
-  logChannelCreate: string | null;
-  logChannelEdit: string | null;
-  logChannelDelete: string | null;
-  logMessageEdit: string | null;
-  logMessageDelete: string | null;
-  logVoiceJoin: string | null;
-  logVoiceLeave: string | null;
   welcomeMessageChannel: string | null;
   welcomeMessageContent: string | null;
   leaveMessageChannel: string | null;
@@ -55,23 +38,6 @@ const GuildSettingValueSchema = z.compile(
     bumpNoticeRole: nullableString,
     bumpNoticeContent: nullableString,
     inviteLinkBlock: z.boolean(),
-    logAntiRaid: nullableString,
-    logMemberJoin: nullableString,
-    logMemberLeave: nullableString,
-    logMemberTimeout: nullableString,
-    logMemberKick: nullableString,
-    logMemberBan: nullableString,
-    logMemberUnban: nullableString,
-    logRoleCreate: nullableString,
-    logRoleEdit: nullableString,
-    logRoleDelete: nullableString,
-    logChannelCreate: nullableString,
-    logChannelEdit: nullableString,
-    logChannelDelete: nullableString,
-    logMessageEdit: nullableString,
-    logMessageDelete: nullableString,
-    logVoiceJoin: nullableString,
-    logVoiceLeave: nullableString,
     welcomeMessageChannel: nullableString,
     welcomeMessageContent: nullableString,
     leaveMessageChannel: nullableString,

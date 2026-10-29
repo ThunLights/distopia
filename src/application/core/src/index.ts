@@ -6,6 +6,7 @@ import { Friend } from "./Friend";
 import { Guild } from "./Guild";
 import { JWT } from "./JWT";
 import { Level } from "./Level";
+import { Log } from "./Log";
 import { Member } from "./Member";
 import { Message } from "./Message";
 import { OAuth2 } from "./OAuth2";
@@ -30,6 +31,7 @@ export class AppCore extends Base {
   public readonly jwt = new JWT(this.state);
   public readonly friend = new Friend(this.state);
   public readonly level = new Level(this.state);
+  public readonly log = new Log(this.state);
   public readonly member = new Member(this.state);
   public readonly message = new Message(this.state);
   public readonly oauth2 = new OAuth2(this.state, this.guild);

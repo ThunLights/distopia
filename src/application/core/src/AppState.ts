@@ -17,6 +17,7 @@ import type {
   GuildBumpRateLimit,
   GuildDictionary,
   GuildEdit,
+  GuildLogSetting,
   GuildMemberAdd,
   GuildSetting,
   GuildStickyMessage,
@@ -63,6 +64,7 @@ export type AppState = {
     guildBlackList: GuildBlackList;
     guildDictionary: GuildDictionary;
     guildEdit: GuildEdit;
+    guildLogSetting: GuildLogSetting;
     guildSetting: GuildSetting;
     guildStickyMessage: GuildStickyMessage;
     guildTtsIgnoreList: GuildTtsIgnoreList;

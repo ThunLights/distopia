@@ -4,6 +4,7 @@ export * from "./Guild";
 export * from "./GuildRecord";
 export * from "./GuildRecordOneDay";
 export * from "./GuildDictionary";
+export * from "./GuildLogSetting";
 export * from "./GuildReview";
 export * from "./GuildSetting";
 export * from "./GuildStickyMessage";

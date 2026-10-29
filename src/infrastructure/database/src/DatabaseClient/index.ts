@@ -4,6 +4,7 @@ import { BlackListTargetTable } from "./BlackListTargetTable";
 import { FriendTable } from "./FriendTable";
 import { GuildBlackListTable } from "./GuildBlackListTable";
 import { GuildDictionaryTable } from "./GuildDictionaryTable";
+import { GuildLogSettingTable } from "./GuildLogSettingTable";
 import { GuildRecordOneDayTable } from "./GuildRecordOneDayTable";
 import { GuildRecordTable } from "./GuildRecordTable";
 import { GuildReviewTable } from "./GuildReviewTable";
@@ -30,6 +31,7 @@ export class DatabaseClient extends Base {
   public readonly guild = new GuildTable(this.prisma);
   public readonly guildBlackList = new GuildBlackListTable(this.prisma);
   public readonly guildDictionary = new GuildDictionaryTable(this.prisma);
+  public readonly guildLogSetting = new GuildLogSettingTable(this.prisma);
   public readonly guildRecord = new GuildRecordTable(this.prisma);
   public readonly guildRecordOneDay = new GuildRecordOneDayTable(this.prisma);
   public readonly guildReview = new GuildReviewTable(this.prisma);

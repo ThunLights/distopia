@@ -56,7 +56,7 @@ export class LogBulkSetFieldsSelectMenu extends MessageComponentInteractionBase<
       return acc;
     }, {});
 
-    await this.core.guild.saveSetting({ guildId: guild.id, ...updates });
+    await this.core.log.saveSetting({ guildId: guild.id, ...updates });
 
     const logPagePayload = await logPage(this.core, guild);
 

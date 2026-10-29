@@ -13,6 +13,9 @@ function createCore(setting: { enabled: boolean; pendingRoleId: string | null })
     guild: {
       getSetting: vi.fn().mockResolvedValue(null),
     },
+    log: {
+      getSetting: vi.fn().mockResolvedValue(null),
+    },
     blackList: {
       matchOnJoin: vi.fn().mockResolvedValue([]),
     },

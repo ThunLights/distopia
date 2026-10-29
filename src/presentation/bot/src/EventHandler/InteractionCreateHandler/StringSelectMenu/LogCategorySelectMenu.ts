@@ -42,7 +42,7 @@ export class LogCategorySelectMenu extends StringSelectMenuInteractionBase {
     }
 
     const label = logFieldLabels[value];
-    const settings = await this.core.guild.getSetting(guild.id);
+    const settings = await this.core.log.getSetting(guild.id);
     const currentChannelId = settings?.[value];
 
     const embed = new EmbedBuilder()
