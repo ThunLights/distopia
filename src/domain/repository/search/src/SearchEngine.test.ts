@@ -80,6 +80,43 @@ describe("Search Engine", async () => {
     await expect(new SearchEngine().delete("55555555555")).resolves.toBeUndefined();
   });
 
+  // Removing a document with 2+ tags used to turn Orama's tag-length average into NaN, after
+  // which every tag match scored NaN and ranking fell back to insertion order.
+  test("re-upserting a multi-tag guild keeps tag matches ranked", async () => {
+    const engine = new SearchEngine();
+    const nameOnly = {
+      guildId: "77777777777",
+      name: "ゲーム",
+      description: "",
+      nsfw: false,
+      tags: [],
+    };
+    const tagged = { ...nameOnly, guildId: "88888888888", tags: ["ゲーム", "雑談"] };
+    await engine.upsert(tagged);
+    await engine.upsert(nameOnly);
+    await engine.upsert(tagged);
+
+    const result = await engine.search("ゲーム");
+
+    expect(result.hits).toEqual([tagged, nameOnly]);
+  });
+
+  // upsertMultiple defers removals past 1,000 documents, so a large re-index used to throw.
+  test("upsertAll re-indexes more than 1,000 existing guilds", async () => {
+    const engine = new SearchEngine();
+    const guilds = Array.from({ length: 1001 }, (_, i) => ({
+      guildId: `${100000 + i}`,
+      name: "大量サーバー",
+      description: "",
+      nsfw: false,
+      tags: [],
+    }));
+
+    await engine.upsertAll(guilds);
+    await expect(engine.upsertAll(guilds)).resolves.toBeUndefined();
+    expect((await engine.search("大量", { filter: {} })).count).toBe(1001);
+  });
+
   test("hits don't leak the internal document id", async () => {
     const engine = new SearchEngine();
     await engine.upsert({
@@ -93,6 +130,7 @@ describe("Search Engine", async () => {
     const [hit] = (await engine.search("作業")).hits;
 
     expect(hit).not.toHaveProperty("id");
+    expect(hit).not.toHaveProperty("tagText");
     expect(hit?.guildId).toBe("66666666666");
   });
 });
