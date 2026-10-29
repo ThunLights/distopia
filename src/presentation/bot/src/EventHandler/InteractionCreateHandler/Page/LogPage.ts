@@ -14,7 +14,7 @@ import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
 import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function logPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
-  const settings = await core.guild.getSetting(guild.id);
+  const settings = await core.log.getSetting(guild.id);
 
   const embed = new EmbedBuilder()
     .setColor("Navy")

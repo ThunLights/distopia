@@ -111,23 +111,6 @@ model GuildSetting {
   bumpNoticeRole               String?
   bumpNoticeContent            String?
   inviteLinkBlock              Boolean     @default(false)
-  logAntiRaid                  String?
-  logMemberJoin                String?
-  logMemberLeave               String?
-  logMemberTimeout             String?
-  logMemberKick                String?
-  logMemberBan                 String?
-  logMemberUnban               String?
-  logRoleCreate                String?
-  logRoleEdit                  String?
-  logRoleDelete                String?
-  logChannelCreate             String?
-  logChannelEdit               String?
-  logChannelDelete             String?
-  logMessageEdit               String?
-  logMessageDelete             String?
-  logVoiceJoin                 String?
-  logVoiceLeave                String?
   welcomeMessageChannel        String?
   welcomeMessageContent        String?
   leaveMessageChannel          String?
@@ -147,6 +130,29 @@ model GuildSetting {
 enum TtsProvider {
   WebVoiceVox
   SakuraAi
+}
+
+// Log-destination channel IDs, split out of GuildSetting. Field names keep their "log" prefix
+// because they double as identifiers in the bot (LOG_FIELDS, customIds like logChannel:<field>).
+model GuildLogSetting {
+  guildId          String  @id
+  logAntiRaid      String?
+  logMemberJoin    String?
+  logMemberLeave   String?
+  logMemberTimeout String?
+  logMemberKick    String?
+  logMemberBan     String?
+  logMemberUnban   String?
+  logRoleCreate    String?
+  logRoleEdit      String?
+  logRoleDelete    String?
+  logChannelCreate String?
+  logChannelEdit   String?
+  logChannelDelete String?
+  logMessageEdit   String?
+  logMessageDelete String?
+  logVoiceJoin     String?
+  logVoiceLeave    String?
 }
 
 model GuildVerify {

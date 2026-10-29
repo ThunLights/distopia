@@ -41,7 +41,7 @@ export class LogChannelSelectMenu extends ChannelSelectMenuInteractionBase {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({ guildId: guild.id, [field]: options.channelId });
+    await this.core.log.saveSetting({ guildId: guild.id, [field]: options.channelId });
 
     const logPagePayload = await logPage(this.core, guild);
 

@@ -13,6 +13,7 @@ import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButt
 
 export async function antiRaidPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const settings = await core.guild.getSetting(guild.id);
+  const logSettings = await core.log.getSetting(guild.id);
 
   const inviteLinkBlockStatus =
     settings?.inviteLinkBlock === undefined ? "未設定" : settings.inviteLinkBlock ? "On" : "Off";
@@ -29,7 +30,7 @@ export async function antiRaidPage(core: AppCore, guild: Guild): Promise<Interac
       },
       {
         name: "ログチャンネル",
-        value: settings?.logAntiRaid ? `<#${settings.logAntiRaid}>` : "未設定",
+        value: logSettings?.logAntiRaid ? `<#${logSettings.logAntiRaid}>` : "未設定",
         inline: false,
       },
     );

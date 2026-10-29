@@ -7,6 +7,7 @@ export * from "./GuildBlackList";
 export * from "./GuildBumpRateLimit";
 export * from "./GuildDictionary";
 export * from "./GuildEdit";
+export * from "./GuildLogSetting";
 export * from "./GuildMemberAdd";
 export * from "./GuildSetting";
 export * from "./GuildStickyMessage";

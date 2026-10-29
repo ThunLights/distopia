@@ -38,7 +38,7 @@ export class LogChannelResetButton extends ButtonInteractionBase {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.guild.saveSetting({ guildId: guild.id, [field]: null });
+    await this.core.log.saveSetting({ guildId: guild.id, [field]: null });
 
     const logPagePayload = await logPage(this.core, guild);
 
