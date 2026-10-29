@@ -50,6 +50,9 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder().setLabel("ホワイトリスト設定").setValue("whiteList"),
       new StringSelectMenuOptionBuilder().setLabel("ブラックリスト設定").setValue("blackList"),
       new StringSelectMenuOptionBuilder().setLabel("統計チャンネル設定").setValue("statChannel"),
+      new StringSelectMenuOptionBuilder()
+        .setLabel("ピン止めメッセージ設定")
+        .setValue("stickyMessage"),
     );
 
   return {

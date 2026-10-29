@@ -99,6 +99,8 @@ export const CHARACTER_LIMIT = {
   tag: 25,
   review: 150,
   searchTerm: 500,
+  // Posted as an embed description, which Discord caps at 4096.
+  stickyMessage: 4000,
 } as const;
 
 export const NUM_TAG_LIMIT = 5;

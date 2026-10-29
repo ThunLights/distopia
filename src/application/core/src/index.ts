@@ -14,6 +14,7 @@ import { Ranking } from "./Ranking";
 import { RateLimit } from "./RateLimit";
 import { Record } from "./Record";
 import { StatChannel } from "./StatChannel";
+import { StickyMessage } from "./StickyMessage";
 import { Tts } from "./Tts";
 import { User } from "./User";
 import { Verify } from "./Verify";
@@ -35,6 +36,7 @@ export class AppCore extends Base {
   public readonly panel = new Panel(this.state);
   public readonly ratelimit = new RateLimit(this.state);
   public readonly statChannel = new StatChannel(this.state, this.record, this.guild);
+  public readonly stickyMessage = new StickyMessage(this.state);
   public readonly tts = new Tts(this.state, this.guild);
   public readonly user = new User(this.state, this.oauth2);
   public readonly verify = new Verify(this.state);

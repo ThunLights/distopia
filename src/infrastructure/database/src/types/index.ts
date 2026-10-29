@@ -6,6 +6,7 @@ export * from "./GuildRecordOneDay";
 export * from "./GuildDictionary";
 export * from "./GuildReview";
 export * from "./GuildSetting";
+export * from "./GuildStickyMessage";
 export * from "./GuildTtsIgnoreList";
 export * from "./GuildVerify";
 export * from "./GuildWhiteList";

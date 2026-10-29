@@ -10,6 +10,7 @@ import {
   GuildEdit,
   GuildMemberAdd,
   GuildSetting,
+  GuildStickyMessage,
   GuildTtsIgnoreList,
   GuildVerify,
   GuildWhiteList,
@@ -30,7 +31,7 @@ import {
 // Ownership notes:
 // - The four ratelimit stores, unJoinedGuild, urlCacheInMemory, guildMemberAdd,
 //   messageCreate, voiceChannelMember, ttsSynthesisCache, and every guild-settings-shaped
-//   store below (guildBlackList/guildDictionary/guildEdit/guildSetting/
+//   store below (guildBlackList/guildDictionary/guildEdit/guildSetting/guildStickyMessage/
 //   guildTtsIgnoreList/guildVerify/guildWhiteList/userDictionary/friend) are bot-owned -- all
 //   written from Discord slash commands/buttons/modals (presentation-bot) or bot-driven cron
 //   jobs, confirmed by grepping every call site.
@@ -54,6 +55,7 @@ export const memory: AppState["memory"] = {
   guildDictionary: new GuildDictionary(redis, "bot"),
   guildEdit: new GuildEdit(redis, "bot"),
   guildSetting: new GuildSetting(redis, "bot"),
+  guildStickyMessage: new GuildStickyMessage(redis, "bot"),
   guildTtsIgnoreList: new GuildTtsIgnoreList(redis, "bot"),
   guildVerify: new GuildVerify(redis, "bot"),
   guildWhiteList: new GuildWhiteList(redis, "bot"),

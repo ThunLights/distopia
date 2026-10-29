@@ -49,4 +49,21 @@ export class MessageController extends Base {
     const message = await channel.send({ embeds });
     return { id: message.id };
   }
+
+  // An already-deleted message (Unknown Message) is the desired end state, not a failure.
+  public async delete(channelId: string, messageId: string): Promise<void> {
+    const channel = this.client.channels.cache.get(channelId);
+    if (channel?.type !== ChannelType.GuildText) {
+      return;
+    }
+
+    try {
+      await channel.messages.delete(messageId);
+    } catch (error) {
+      if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownMessage) {
+        return;
+      }
+      throw error;
+    }
+  }
 }
