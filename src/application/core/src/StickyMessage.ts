@@ -10,6 +10,13 @@ function toEmbed(content: string): Embed {
 }
 
 export class StickyMessage extends Base {
+  // Reposts of one channel run one at a time: two overlapping runs would both read the same
+  // messageId and leave one posted copy untracked. Because save() queues behind an in-flight
+  // repost, the last run always posts the newest content even if the row was replaced
+  // meanwhile.
+  // ponytail: process-local queue, fine while only presentation-bot (replicas: 1) reposts.
+  private readonly queues = new Map<string, Promise<unknown>>();
+
   public async getAll(guildId: string): Promise<GuildStickyMessage[]> {
     const cached = await this.state.memory.guildStickyMessage.get(guildId);
     if (cached) {
@@ -31,25 +38,49 @@ export class StickyMessage extends Base {
   public async save(guildId: string, channelId: string, content: string): Promise<boolean> {
     await this.state.database.guildStickyMessage.upsert({ guildId, channelId, content });
     await this.state.memory.guildStickyMessage.delete(guildId);
-    return await this.repost(guildId, channelId).then(
-      () => true,
-      () => false,
-    );
+    return await this.repost(guildId, channelId).catch(() => false);
   }
 
-  public async delete(guildId: string, channelId: string): Promise<void> {
-    const deleted = await this.state.database.guildStickyMessage.delete(guildId, channelId);
-    await this.state.memory.guildStickyMessage.delete(guildId);
-    if (deleted?.messageId) {
-      await this.state.discord.message.delete(channelId, deleted.messageId);
+  // The posted copy is removed before the row, so a failed Discord delete (e.g. missing
+  // permissions) keeps the messageId around for a retry instead of orphaning the message.
+  public async delete(guildId: string, channelId: string): Promise<boolean> {
+    const sticky = await this.find(guildId, channelId);
+    if (sticky?.messageId) {
+      const removed = await this.state.discord.message
+        .delete(channelId, sticky.messageId)
+        .then(() => true)
+        .catch(() => false);
+      if (!removed) {
+        return false;
+      }
     }
+
+    await this.state.database.guildStickyMessage.delete(guildId, channelId);
+    await this.state.memory.guildStickyMessage.delete(guildId);
+    return true;
   }
 
   // Moves the sticky to the bottom of the channel: drops the previous copy, posts a new one.
-  public async repost(guildId: string, channelId: string): Promise<void> {
+  // Returns whether a copy is now posted.
+  public repost(guildId: string, channelId: string): Promise<boolean> {
+    const run = (this.queues.get(channelId) ?? Promise.resolve())
+      .catch(() => {})
+      .then(() => this.repostNow(guildId, channelId));
+    this.queues.set(channelId, run);
+    void run
+      .finally(() => {
+        if (this.queues.get(channelId) === run) {
+          this.queues.delete(channelId);
+        }
+      })
+      .catch(() => {});
+    return run;
+  }
+
+  private async repostNow(guildId: string, channelId: string): Promise<boolean> {
     const sticky = await this.find(guildId, channelId);
     if (!sticky) {
-      return;
+      return false;
     }
 
     if (sticky.messageId) {
@@ -58,19 +89,27 @@ export class StickyMessage extends Base {
 
     const sent = await this.state.discord.message.send(channelId, [toEmbed(sticky.content)]);
     if (!sent) {
-      return;
+      return false;
     }
 
-    const updated = await this.state.database.guildStickyMessage.update({
-      guildId,
-      channelId,
-      messageId: sent.id,
-    });
+    let updated: GuildStickyMessage | null;
+    try {
+      updated = await this.state.database.guildStickyMessage.update({
+        guildId,
+        channelId,
+        messageId: sent.id,
+      });
+    } catch (error) {
+      await this.state.discord.message.delete(channelId, sent.id).catch(() => {});
+      throw error;
+    }
     await this.state.memory.guildStickyMessage.delete(guildId);
 
     // Removed while this repost was in flight -- don't leave an orphaned copy behind.
     if (!updated) {
       await this.state.discord.message.delete(channelId, sent.id);
+      return false;
     }
+    return true;
   }
 }

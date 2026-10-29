@@ -1,7 +1,9 @@
 import type { AppCore } from "app-core";
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
 
-// Coalesces a burst of chat into one repost instead of deleting/sending on every message.
+// A throttle, not a debounce: the timer starts at the first message and is never extended,
+// so under continuous chat the sticky still resurfaces about every 5s instead of waiting for
+// the channel to go quiet.
 const REPOST_DELAY_MS = 5_000;
 // channelId -> "a message arrived after the current repost started". Messages during the
 // wait are already covered by the upcoming repost, but one landing while it's in flight may

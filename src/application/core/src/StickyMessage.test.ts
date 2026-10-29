@@ -44,4 +44,43 @@ describe("StickyMessage.repost", () => {
     await stickyMessage.repost("g", "c");
     expect(discord.delete).toHaveBeenCalledExactlyOnceWith("c", "new");
   });
+
+  test("overlapping reposts of one channel run one after another", async () => {
+    const { stickyMessage, discord } = setup(null, true);
+    let inFlight = 0;
+    let maxInFlight = 0;
+    discord.send.mockImplementation(async () => {
+      maxInFlight = Math.max(maxInFlight, ++inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      inFlight--;
+      return { id: "new" };
+    });
+    await Promise.all([stickyMessage.repost("g", "c"), stickyMessage.repost("g", "c")]);
+    expect(discord.send).toHaveBeenCalledTimes(2);
+    expect(maxInFlight).toBe(1);
+  });
+
+  test("deletes the fresh copy and rethrows when recording its id fails", async () => {
+    const { stickyMessage, discord, table } = setup(null, true);
+    table.update.mockRejectedValue(new Error("db down"));
+    await expect(stickyMessage.repost("g", "c")).rejects.toThrow("db down");
+    expect(discord.delete).toHaveBeenCalledExactlyOnceWith("c", "new");
+  });
+
+  test("reports a failed post when the channel is gone", async () => {
+    const { stickyMessage, discord } = setup(null, true);
+    discord.send.mockResolvedValue(null);
+    expect(await stickyMessage.repost("g", "c")).toBe(false);
+  });
+});
+
+describe("StickyMessage.delete", () => {
+  test("keeps the row when the posted copy can't be removed", async () => {
+    const { stickyMessage, discord, table } = setup("old", true);
+    const rowDelete = vi.fn();
+    Object.assign(table, { delete: rowDelete });
+    discord.delete.mockRejectedValue(new Error("Missing Permissions"));
+    expect(await stickyMessage.delete("g", "c")).toBe(false);
+    expect(rowDelete).not.toHaveBeenCalled();
+  });
 });

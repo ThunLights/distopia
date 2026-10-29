@@ -32,7 +32,12 @@ export class StickyMessageDeleteButton extends ButtonInteractionBase {
     }
 
     const channelId = interaction.customId.slice(customIdPrefix.length);
-    await this.core.stickyMessage.delete(guild.id, channelId);
+    if (!(await this.core.stickyMessage.delete(guild.id, channelId))) {
+      return {
+        content: "投稿済みのメッセージを削除できませんでした。ボットの権限を確認してください。",
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
 
     const { content, components, embeds, allowedMentions, files } = await stickyMessagePage(
       this.core,
