@@ -106,6 +106,11 @@ const handler = connectNodeAdapter({
         const message = await djsController.message.send(channelId, JSON.parse(embedsJson));
         return { messageId: message?.id };
       },
+
+      async deleteMessage({ channelId, messageId }) {
+        await djsController.message.delete(channelId, messageId);
+        return {};
+      },
     }),
   interceptors: [requireBearerAuth(BOT_RPC_TOKEN)],
 });

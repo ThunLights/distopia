@@ -226,6 +226,18 @@ enum TtsIgnoreIdType {
   ChannelId
 }
 
+model GuildStickyMessage {
+  guildId   String
+  channelId String
+  content   String
+  // The currently posted copy, deleted and replaced on every repost -- null until first posted.
+  messageId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([guildId, channelId])
+}
+
 model GuildWhiteList {
   guildId        String
   targetId       String

@@ -143,5 +143,9 @@ export const djsController: DiscordClient = {
       });
       return messageId ? { id: messageId } : null;
     },
+
+    async delete(channelId, messageId) {
+      await rpc().deleteMessage({ channelId, messageId });
+    },
   },
 };

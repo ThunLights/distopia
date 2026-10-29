@@ -21,6 +21,7 @@ import { blackListPage } from "../Page/BlackListPage";
 import { bumpPage } from "../Page/BumpPage";
 import { logPage } from "../Page/LogPage";
 import { statChannelPage } from "../Page/StatChannelPage";
+import { stickyMessagePage } from "../Page/StickyMessagePage";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
 import { whiteListPage } from "../Page/WhiteListPage";
 
@@ -176,6 +177,25 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
       const statChannelPagePayload = await statChannelPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
+
+      return await interaction.update({
+        content,
+        components,
+        embeds,
+        allowedMentions,
+        files,
+      });
+    } else if (value === "stickyMessage") {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const { content, components, embeds, allowedMentions, files } = await stickyMessagePage(
+        this.core,
+        guild,
+      );
 
       return await interaction.update({
         content,

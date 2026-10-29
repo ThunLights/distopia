@@ -33,6 +33,7 @@ service BotService {
 
   rpc EditMessage(EditMessageRequest) returns (EditMessageResponse);
   rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse);
 }
 
 message BotGuild {
@@ -87,6 +88,12 @@ message SendMessageRequest {
 message SendMessageResponse {
   optional string message_id = 1;
 }
+
+message DeleteMessageRequest {
+  string channel_id = 1;
+  string message_id = 2;
+}
+message DeleteMessageResponse {}
 
 message FetchGuildRequest {
   string guild_id = 1;

@@ -19,6 +19,7 @@ import type {
   GuildEdit,
   GuildMemberAdd,
   GuildSetting,
+  GuildStickyMessage,
   GuildTtsIgnoreList,
   GuildVerify,
   GuildWhiteList,
@@ -63,6 +64,7 @@ export type AppState = {
     guildDictionary: GuildDictionary;
     guildEdit: GuildEdit;
     guildSetting: GuildSetting;
+    guildStickyMessage: GuildStickyMessage;
     guildTtsIgnoreList: GuildTtsIgnoreList;
     guildVerify: GuildVerify;
     guildWhiteList: GuildWhiteList;

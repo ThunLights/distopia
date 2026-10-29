@@ -9,6 +9,7 @@ export * from "./GuildDictionary";
 export * from "./GuildEdit";
 export * from "./GuildMemberAdd";
 export * from "./GuildSetting";
+export * from "./GuildStickyMessage";
 export * from "./GuildTtsIgnoreList";
 export * from "./GuildVerify";
 export * from "./GuildWhiteList";

@@ -60,7 +60,7 @@ export type DiscordClient = {
   >;
   role: Pick<RoleController, "fetchGuild" | "give" | "deprive">;
   user: Pick<UserController, "find" | "setActivity">;
-  message: Pick<MessageController, "edit" | "send">;
+  message: Pick<MessageController, "edit" | "send" | "delete">;
   oauth2: OAuth2Controller;
   embed: Pick<EmbedController, "detectInviteLinks">;
 };

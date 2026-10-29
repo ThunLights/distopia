@@ -8,6 +8,7 @@ import { GuildRecordOneDayTable } from "./GuildRecordOneDayTable";
 import { GuildRecordTable } from "./GuildRecordTable";
 import { GuildReviewTable } from "./GuildReviewTable";
 import { GuildSettingTable } from "./GuildSettingTable";
+import { GuildStickyMessageTable } from "./GuildStickyMessageTable";
 import { GuildTable } from "./GuildTable";
 import { GuildTtsIgnoreListTable } from "./GuildTtsIgnoreListTable";
 import { GuildVerifyTable } from "./GuildVerifyTable";
@@ -33,6 +34,7 @@ export class DatabaseClient extends Base {
   public readonly guildRecordOneDay = new GuildRecordOneDayTable(this.prisma);
   public readonly guildReview = new GuildReviewTable(this.prisma);
   public readonly guildSetting = new GuildSettingTable(this.prisma);
+  public readonly guildStickyMessage = new GuildStickyMessageTable(this.prisma);
   public readonly guildTtsIgnoreList = new GuildTtsIgnoreListTable(this.prisma);
   public readonly guildVerify = new GuildVerifyTable(this.prisma);
   public readonly guildWhiteList = new GuildWhiteListTable(this.prisma);
