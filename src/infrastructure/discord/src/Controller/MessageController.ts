@@ -46,7 +46,10 @@ export class MessageController extends Base {
       return null;
     }
 
-    const message = await channel.send({ embeds });
+    // Embeds never ping on their own; parse: [] makes that explicit so admin-written content
+    // (e.g. a sticky message containing @everyone) can't notify anyone if this ever grows a
+    // `content` field.
+    const message = await channel.send({ embeds, allowedMentions: { parse: [] } });
     return { id: message.id };
   }
 
