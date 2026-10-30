@@ -126,9 +126,11 @@ test("search input on the home page navigates to /search with the term in the UR
   await page.goto("/");
   // Use an ASCII term to avoid URL-encoding ambiguity in the assertion
   // (the home page encodes the term with encodeURIComponent before placing it in ?w).
-  await page.locator("#search-input").fill("discord");
-  await page.locator("#search-input").press("Enter");
-  await page.waitForURL(/\/search/);
+  await expect(async () => {
+    await page.locator("#search-input").fill("discord");
+    await page.locator("#search-input").press("Enter");
+    await page.waitForURL(/\/search/, { timeout: 1000 });
+  }).toPass();
 
   expect(page.url()).toContain("discord");
 });

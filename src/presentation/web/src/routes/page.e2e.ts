@@ -29,9 +29,12 @@ test("shows the active-guilds section heading", async ({ page }) => {
 
 test("pressing Enter in the search box navigates to /search with the term", async ({ page }) => {
   await page.goto("/");
-  await page.locator("#search-input").fill("playwright");
-  await page.locator("#search-input").press("Enter");
-  await page.waitForURL(/\/search/);
+  // Retried because keyup/click events fired before hydration are dropped.
+  await expect(async () => {
+    await page.locator("#search-input").fill("playwright");
+    await page.locator("#search-input").press("Enter");
+    await page.waitForURL(/\/search/, { timeout: 1000 });
+  }).toPass();
   expect(page.url()).toContain("/search");
   expect(page.url()).toContain("playwright");
 });
@@ -40,7 +43,9 @@ test("clicking the search button navigates to /search", async ({ page }) => {
   await page.goto("/");
   await page.locator("#search-input").fill("button-click");
   // The search button is a <label> wrapping the search input; click the PrimaryButton text
-  await page.getByText("検索").click();
-  await page.waitForURL(/\/search/);
+  await expect(async () => {
+    await page.getByText("検索").click();
+    await page.waitForURL(/\/search/, { timeout: 1000 });
+  }).toPass();
   expect(page.url()).toContain("/search");
 });
