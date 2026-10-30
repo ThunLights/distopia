@@ -25,6 +25,9 @@ export type GuildSettingValue = {
   ttsSkipUrl: boolean;
   ttsSkipCodeBlock: boolean;
   ttsProvider: "WebVoiceVox" | "SakuraAi";
+  ticketCategory: string | null;
+  ticketRole: string | null;
+  ticketLogChannel: string | null;
   createdAt: Date;
 };
 
@@ -52,6 +55,9 @@ const GuildSettingValueSchema = z.compile(
     ttsSkipUrl: z.boolean(),
     ttsSkipCodeBlock: z.boolean(),
     ttsProvider: z.enum(["WebVoiceVox", "SakuraAi"]),
+    ticketCategory: nullableString,
+    ticketRole: nullableString,
+    ticketLogChannel: nullableString,
     createdAt: z.date(),
   }) satisfies z.ZodType<GuildSettingValue>,
 );

@@ -17,6 +17,7 @@ import { GuildWhiteListTable } from "./GuildWhiteListTable";
 import { JWTKeyTable } from "./JWTKeyTable";
 import { MemberLevelTable } from "./MemberLevelTable";
 import { PanelTable } from "./PanelTable";
+import { TicketTable } from "./TicketTable";
 import { UserBlackListTable } from "./UserBlackListTable";
 import { UserDictionaryTable } from "./UserDictionaryTable";
 import { UserDiscordTable } from "./UserDiscordTable";
@@ -43,6 +44,7 @@ export class DatabaseClient extends Base {
   public readonly jwtKey = new JWTKeyTable(this.prisma);
   public readonly memberLevel = new MemberLevelTable(this.prisma);
   public readonly panel = new PanelTable(this.prisma);
+  public readonly ticket = new TicketTable(this.prisma);
   public readonly userBlackList = new UserBlackListTable(this.prisma);
   public readonly userDictionary = new UserDictionaryTable(this.prisma);
   public readonly userDiscord = new UserDiscordTable(this.prisma);
