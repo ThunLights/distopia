@@ -8,9 +8,11 @@ import { evaluate } from "./checks";
 import { postVerifyLog } from "./log";
 import * as plugin from "./plugin";
 
-// Cloudflare documents Turnstile tokens as at most 2048 characters. The body cap is far above any
-// real fingerprint payload; it only stops an oversized request from being decrypted/parsed.
-const MAX_BODY_LENGTH = 30_000;
+// Cloudflare documents Turnstile tokens as at most 2048 characters. The body cap matches
+// adapter-node's default BODY_SIZE_LIMIT on presentation-web: a plugin cipher can inflate the
+// JSON 20x or more (a few KB of WebGL dump already exceeds 30k), so a tighter cap rejects real
+// users. It only stops an oversized request from being decrypted/parsed.
+const MAX_BODY_LENGTH = 512 * 1024;
 const SNOWFLAKE = /^\d{1,20}$/;
 
 const PostBodySchema = z.object({

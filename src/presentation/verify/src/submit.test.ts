@@ -84,7 +84,11 @@ describe("submit", () => {
   it("rejects an oversized body before parsing it", async () => {
     const { deps } = setup();
 
-    const body = JSON.stringify({ guildId: "1", turnstileToken: "t", extra: "x".repeat(30_000) });
+    const body = JSON.stringify({
+      guildId: "1",
+      turnstileToken: "t",
+      extra: "x".repeat(512 * 1024),
+    });
 
     expect(await submit(deps, { ...input, body })).toEqual({ ok: false, error: "Invalid Body" });
     expect(deps.database.guildVerify.find).not.toHaveBeenCalled();
