@@ -11,7 +11,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { staffOverwrites } from "../../../utils/ticket/access";
+import { isTicketStaff, staffOverwrites } from "../../../utils/ticket/access";
 import { fetchMessages, formatTranscript } from "../../../utils/ticket/transcript";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 
@@ -22,7 +22,6 @@ export class TicketCloseConfirmButton extends ButtonInteractionBase {
   ];
   public override customId: string = "ticketCloseConfirm";
 
-  // Only the opener, the support role and admins can see the channel, so no user check is needed.
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
   ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
@@ -31,6 +30,9 @@ export class TicketCloseConfirmButton extends ButtonInteractionBase {
 
     if (!guild || !ticket || channel?.type !== ChannelType.GuildText) {
       return { content: "ここはチケットではありません。", flags: [MessageFlags.Ephemeral] };
+    }
+    if (user.id !== ticket.userId && !(await isTicketStaff(this.core, guild, user.id))) {
+      return { content: "作成者とスタッフのみ操作できます。", flags: [MessageFlags.Ephemeral] };
     }
 
     const res = await interaction.update({

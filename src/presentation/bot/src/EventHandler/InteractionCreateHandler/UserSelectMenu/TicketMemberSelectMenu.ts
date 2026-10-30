@@ -38,22 +38,20 @@ export class TicketMemberSelectMenu extends UserSelectMenuInteractionBase {
       };
     }
 
-    if (channel.permissionOverwrites.cache.has(userId)) {
+    const remove = channel.permissionOverwrites.cache.has(userId);
+    if (remove) {
       await channel.permissionOverwrites.delete(userId);
-      return {
-        content: `<@${userId}> をチケットから削除しました。`,
-        allowedMentions: { users: [] },
-      };
+    } else {
+      await channel.permissionOverwrites.edit(
+        userId,
+        Object.fromEntries(TICKET_ACCESS.map((permission) => [permission, true])),
+        { type: OverwriteType.Member },
+      );
     }
 
-    await channel.permissionOverwrites.edit(
-      userId,
-      Object.fromEntries(TICKET_ACCESS.map((permission) => [permission, true])),
-      { type: OverwriteType.Member },
-    );
-    return {
-      content: `<@${userId}> をチケットに追加しました。`,
-      allowedMentions: { users: [userId] },
-    };
+    const content = `<@${userId}> をチケット${remove ? "から削除" : "に追加"}しました。`;
+    const res = await interaction.update({ content, allowedMentions: { users: [] } });
+    await channel.send({ content, allowedMentions: { users: remove ? [] : [userId] } });
+    return res;
   }
 }

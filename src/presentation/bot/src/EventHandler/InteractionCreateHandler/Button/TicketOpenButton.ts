@@ -1,8 +1,10 @@
 import {
+  DiscordAPIError,
   InteractionResponse,
   LabelBuilder,
   MessageFlags,
   ModalBuilder,
+  RESTJSONErrorCodes,
   TextInputBuilder,
   TextInputStyle,
   type ButtonInteraction,
@@ -26,11 +28,16 @@ export class TicketOpenButton extends ButtonInteractionBase {
     if (!ticket) {
       return null;
     }
-    if (await guild.channels.fetch(ticket.channelId).catch(() => null)) {
-      return ticket.channelId;
+    try {
+      await guild.channels.fetch(ticket.channelId);
+    } catch (error) {
+      // Any other error is inconclusive: dropping the row could give the user a second ticket.
+      if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownChannel) {
+        await this.core.ticket.delete(ticket.channelId);
+        return null;
+      }
     }
-    await this.core.ticket.delete(ticket.channelId);
-    return null;
+    return ticket.channelId;
   }
 
   protected override async exec(

@@ -26,6 +26,9 @@ const OptionsSchema = z.object({
 
 type Options = z.infer<typeof OptionsSchema>;
 
+const CREATE_FAILED =
+  "チケットを作成できませんでした。管理者はボットの権限と、カテゴリ・ロールの設定を確認してください。";
+
 export class TicketOpenModal extends ModalSubmitInteractionBase<Options> {
   public override requireBotGuildPermissions: PermissionResolvable[] = ["ManageChannels"];
   public override customId: string = "ticketOpenContent";
@@ -71,56 +74,61 @@ export class TicketOpenModal extends ModalSubmitInteractionBase<Options> {
       .catch(() => null);
 
     if (!channel) {
-      await interaction.editReply(
-        "チケットを作成できませんでした。管理者はボットの権限と、カテゴリ・ロールの設定を確認してください。",
-      );
+      await interaction.editReply(CREATE_FAILED);
       return res;
     }
 
-    // Double submit: the second request loses on the unique key and removes its channel.
-    const created = await this.core.ticket.create({
-      channelId: channel.id,
-      guildId: guild.id,
-      userId: user.id,
-    });
-    if (!created) {
-      await channel.delete();
-      const existing = await this.core.ticket.find(guild.id, user.id);
-      await interaction.editReply(`既にチケットを開いています: <#${existing?.channelId}>`);
-      return res;
-    }
+    try {
+      // Double submit: the second request loses on the unique key and removes its channel.
+      const created = await this.core.ticket.create({
+        channelId: channel.id,
+        guildId: guild.id,
+        userId: user.id,
+      });
+      if (!created) {
+        await channel.delete();
+        const existing = await this.core.ticket.find(guild.id, user.id);
+        await interaction.editReply(`既にチケットを開いています: <#${existing?.channelId}>`);
+        return res;
+      }
 
-    await channel.send({
-      content: [`<@${user.id}>`, ...(role ? [`<@&${role}>`] : [])].join(" "),
-      allowedMentions: { users: [user.id], roles: role ? [role] : [] },
-      embeds: [
-        new EmbedBuilder()
-          .setColor("Navy")
-          .setTitle("チケット")
-          .setDescription("スタッフが対応します。\n解決したら下のボタンで閉じてください。")
-          .addFields(
-            { name: "件名", value: options.subject, inline: false },
-            { name: "お問い合わせ内容", value: options.content, inline: false },
-            { name: "担当者", value: "未割り当て", inline: false },
+      await channel.send({
+        content: [`<@${user.id}>`, ...(role ? [`<@&${role}>`] : [])].join(" "),
+        allowedMentions: { users: [user.id], roles: role ? [role] : [] },
+        embeds: [
+          new EmbedBuilder()
+            .setColor("Navy")
+            .setTitle("チケット")
+            .setDescription("スタッフが対応します。\n解決したら下のボタンで閉じてください。")
+            .addFields(
+              { name: "件名", value: options.subject, inline: false },
+              { name: "お問い合わせ内容", value: options.content, inline: false },
+              { name: "担当者", value: "未割り当て", inline: false },
+            ),
+        ],
+        components: [
+          new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId("ticketClose")
+              .setLabel("チケットを閉じる")
+              .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+              .setCustomId("ticketClaim")
+              .setLabel("担当する / 解除")
+              .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+              .setCustomId("ticketMembers")
+              .setLabel("メンバー管理")
+              .setStyle(ButtonStyle.Secondary),
           ),
-      ],
-      components: [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setCustomId("ticketClose")
-            .setLabel("チケットを閉じる")
-            .setStyle(ButtonStyle.Danger),
-          new ButtonBuilder()
-            .setCustomId("ticketClaim")
-            .setLabel("担当する / 解除")
-            .setStyle(ButtonStyle.Primary),
-          new ButtonBuilder()
-            .setCustomId("ticketMembers")
-            .setLabel("メンバー管理")
-            .setStyle(ButtonStyle.Secondary),
-        ),
-      ],
-    });
+        ],
+      });
+    } catch {
+      // A half-made ticket would leave an orphan channel or block the user from opening another.
+      await Promise.allSettled([this.core.ticket.delete(channel.id), channel.delete()]);
+      await interaction.editReply(CREATE_FAILED);
+      return res;
+    }
 
     await interaction.editReply(`チケットを作成しました: <#${channel.id}>`);
     return res;
