@@ -36,7 +36,7 @@ test("an entry written by set() is read back by get()", async () => {
     ttsSkipCodeBlock: true,
     ttsProvider: "WebVoiceVox",
     ticketCategory: null,
-    ticketRole: null,
+    ticketRoles: ["1", "2"],
     ticketLogChannel: null,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
   };

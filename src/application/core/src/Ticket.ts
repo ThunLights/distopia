@@ -20,7 +20,7 @@ export class Ticket extends Base {
     }
 
     const settings = await this.guild.getSetting(guildId);
-    return !!settings?.ticketRole && actor.roleIds.includes(settings.ticketRole);
+    return !!settings?.ticketRoles.some((role) => actor.roleIds.includes(role));
   }
 
   // Added members can see the channel too, so visibility alone is not enough.

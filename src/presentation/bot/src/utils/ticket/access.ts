@@ -9,7 +9,7 @@ export const TICKET_ACCESS: PermissionsString[] = [
   "EmbedLinks",
 ];
 
-// Drops every member overwrite except the bot's; @everyone's deny and the support role stay.
+// Drops every member overwrite except the bot's; @everyone's deny and the support roles stay.
 export function staffOverwrites<T extends { id: string; type: OverwriteType }>(
   overwrites: Collection<string, T>,
   botId: string,

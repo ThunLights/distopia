@@ -126,7 +126,7 @@ model GuildSetting {
   ttsSkipCodeBlock             Boolean     @default(true)
   ttsProvider                  TtsProvider @default(WebVoiceVox)
   ticketCategory               String?
-  ticketRole                   String?
+  ticketRoles                  String[]    @default([])
   ticketLogChannel             String?
 }
 

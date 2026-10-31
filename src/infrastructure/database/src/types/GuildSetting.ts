@@ -22,7 +22,7 @@ export type GuildSetting = {
   ttsSkipCodeBlock: boolean;
   ttsProvider: TtsProvider;
   ticketCategory: string | null;
-  ticketRole: string | null;
+  ticketRoles: string[];
   ticketLogChannel: string | null;
 };
 
