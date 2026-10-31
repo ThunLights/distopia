@@ -126,6 +126,8 @@ model GuildSetting {
   ttsSkipCodeBlock             Boolean     @default(true)
   ttsProvider                  TtsProvider @default(WebVoiceVox)
   ticketCategory               String?
+  // Unused; kept for pods on the previous version during the rollout. Drop in a later migration.
+  ticketRole                   String?
   ticketRoles                  String[]    @default([])
   ticketLogChannel             String?
 }
