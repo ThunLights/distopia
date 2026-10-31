@@ -1,4 +1,4 @@
-import type { AppCore } from "app-core";
+import type { TicketActor } from "app-core/Ticket";
 import { OverwriteType, type Collection, type Guild, type PermissionsString } from "discord.js";
 
 export const TICKET_ACCESS: PermissionsString[] = [
@@ -17,17 +17,14 @@ export function staffOverwrites<T extends { id: string; type: OverwriteType }>(
   return overwrites.filter(({ id, type }) => type === OverwriteType.Role || id === botId);
 }
 
-// The opener and added members can see the channel too, so visibility alone is not enough.
-export async function isTicketStaff(
-  core: Pick<AppCore, "guild">,
-  guild: Pick<Guild, "id" | "members">,
+export async function ticketActor(
+  guild: Pick<Guild, "members">,
   userId: string,
-): Promise<boolean> {
+): Promise<TicketActor> {
   const member = await guild.members.fetch(userId);
-  if (member.permissions.has("Administrator")) {
-    return true;
-  }
-
-  const settings = await core.guild.getSetting(guild.id);
-  return !!settings?.ticketRole && member.roles.cache.has(settings.ticketRole);
+  return {
+    userId,
+    isAdministrator: member.permissions.has("Administrator"),
+    roleIds: [...member.roles.cache.keys()],
+  };
 }

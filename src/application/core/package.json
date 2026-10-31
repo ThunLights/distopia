@@ -17,6 +17,9 @@
     "./Guild": {
       "import": "./src/Guild.ts"
     },
+    "./Ticket": {
+      "import": "./src/Ticket.ts"
+    },
     "./VerifyLog": {
       "import": "./src/VerifyLog.ts"
     },

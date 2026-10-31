@@ -10,7 +10,7 @@ import {
   type UserSelectMenuInteraction,
 } from "discord.js";
 
-import { isTicketStaff, TICKET_ACCESS } from "../../../utils/ticket/access";
+import { TICKET_ACCESS, ticketActor } from "../../../utils/ticket/access";
 import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 
 export class TicketMemberSelectMenu extends UserSelectMenuInteractionBase {
@@ -28,7 +28,7 @@ export class TicketMemberSelectMenu extends UserSelectMenuInteractionBase {
     if (!guild || !ticket || channel?.type !== ChannelType.GuildText) {
       return { content: "ここはチケットではありません。", flags: [MessageFlags.Ephemeral] };
     }
-    if (!(await isTicketStaff(this.core, guild, user.id))) {
+    if (!(await this.core.ticket.isStaff(guild.id, await ticketActor(guild, user.id)))) {
       return { content: "スタッフのみ操作できます。", flags: [MessageFlags.Ephemeral] };
     }
     if (userId === ticket.userId || userId === interaction.client.user.id) {

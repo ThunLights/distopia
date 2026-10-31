@@ -8,7 +8,7 @@ import {
   type MessagePayload,
 } from "discord.js";
 
-import { isTicketStaff } from "../../../utils/ticket/access";
+import { ticketActor } from "../../../utils/ticket/access";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 
 export class TicketClaimButton extends ButtonInteractionBase {
@@ -23,17 +23,13 @@ export class TicketClaimButton extends ButtonInteractionBase {
     if (!guild || !ticket) {
       return { content: "ここはチケットではありません。", flags: [MessageFlags.Ephemeral] };
     }
-    if (!(await isTicketStaff(this.core, guild, user.id))) {
+    const actor = await ticketActor(guild, user.id);
+    if (!(await this.core.ticket.isStaff(guild.id, actor))) {
       return { content: "スタッフのみ操作できます。", flags: [MessageFlags.Ephemeral] };
     }
 
-    // Admins can release someone else's claim, e.g. when that staff member has left.
     const { claimedBy } = ticket;
-    if (
-      claimedBy &&
-      claimedBy !== user.id &&
-      !interaction.memberPermissions?.has("Administrator")
-    ) {
+    if (!this.core.ticket.canChangeClaim(ticket, actor)) {
       return { content: `<@${claimedBy}> が担当しています。`, flags: [MessageFlags.Ephemeral] };
     }
 

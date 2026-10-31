@@ -9,7 +9,7 @@ import {
   type MessagePayload,
 } from "discord.js";
 
-import { isTicketStaff } from "../../../utils/ticket/access";
+import { ticketActor } from "../../../utils/ticket/access";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 
 export class TicketMembersButton extends ButtonInteractionBase {
@@ -20,7 +20,7 @@ export class TicketMembersButton extends ButtonInteractionBase {
   ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
     const { guild, user } = interaction;
 
-    if (!guild || !(await isTicketStaff(this.core, guild, user.id))) {
+    if (!guild || !(await this.core.ticket.isStaff(guild.id, await ticketActor(guild, user.id)))) {
       return { content: "スタッフのみ操作できます。", flags: [MessageFlags.Ephemeral] };
     }
 

@@ -11,7 +11,7 @@ import {
   type PermissionResolvable,
 } from "discord.js";
 
-import { isTicketStaff, staffOverwrites } from "../../../utils/ticket/access";
+import { staffOverwrites, ticketActor } from "../../../utils/ticket/access";
 import { fetchMessages, formatTranscript } from "../../../utils/ticket/transcript";
 import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 
@@ -31,7 +31,7 @@ export class TicketCloseConfirmButton extends ButtonInteractionBase {
     if (!guild || !ticket || channel?.type !== ChannelType.GuildText) {
       return { content: "ここはチケットではありません。", flags: [MessageFlags.Ephemeral] };
     }
-    if (user.id !== ticket.userId && !(await isTicketStaff(this.core, guild, user.id))) {
+    if (!(await this.core.ticket.canClose(ticket, await ticketActor(guild, user.id)))) {
       return { content: "作成者とスタッフのみ操作できます。", flags: [MessageFlags.Ephemeral] };
     }
 

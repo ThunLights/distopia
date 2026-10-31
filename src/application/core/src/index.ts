@@ -40,7 +40,7 @@ export class AppCore extends Base {
   public readonly ratelimit = new RateLimit(this.state);
   public readonly statChannel = new StatChannel(this.state, this.record, this.guild);
   public readonly stickyMessage = new StickyMessage(this.state);
-  public readonly ticket = new Ticket(this.state);
+  public readonly ticket = new Ticket(this.state, this.guild);
   public readonly tts = new Tts(this.state, this.guild);
   public readonly user = new User(this.state, this.oauth2);
   public readonly verify = new Verify(this.state);
