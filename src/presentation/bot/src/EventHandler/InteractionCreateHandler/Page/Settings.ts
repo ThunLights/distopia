@@ -53,6 +53,7 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder()
         .setLabel("ピン止めメッセージ設定")
         .setValue("stickyMessage"),
+      new StringSelectMenuOptionBuilder().setLabel("チケット設定").setValue("ticket"),
     );
 
   return {

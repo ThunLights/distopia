@@ -13,6 +13,7 @@ export * from "./GuildVerify";
 export * from "./GuildWhiteList";
 export * from "./JWTKey";
 export * from "./Panel";
+export * from "./Ticket";
 export * from "./UserBlackList";
 export * from "./UserDictionary";
 export * from "./UserDiscord";

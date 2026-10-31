@@ -21,6 +21,9 @@ export type GuildSetting = {
   ttsSkipUrl: boolean;
   ttsSkipCodeBlock: boolean;
   ttsProvider: TtsProvider;
+  ticketCategory: string | null;
+  ticketRole: string | null;
+  ticketLogChannel: string | null;
 };
 
 export type GuildSettingUpdateInput = Pick<GuildSetting, "guildId"> & Partial<GuildSetting>;

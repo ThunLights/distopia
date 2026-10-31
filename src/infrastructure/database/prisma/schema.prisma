@@ -125,6 +125,9 @@ model GuildSetting {
   ttsSkipUrl                   Boolean     @default(true)
   ttsSkipCodeBlock             Boolean     @default(true)
   ttsProvider                  TtsProvider @default(WebVoiceVox)
+  ticketCategory               String?
+  ticketRole                   String?
+  ticketLogChannel             String?
 }
 
 enum TtsProvider {
@@ -321,6 +324,16 @@ model GuildBlackList {
 
   @@id([guildId, blackListId])
   @@index([blackListId])
+}
+
+model Ticket {
+  channelId String   @id
+  guildId   String
+  userId    String
+  claimedBy String?
+  createdAt DateTime @default(now())
+
+  @@unique([guildId, userId])
 }
 
 model Panel {
