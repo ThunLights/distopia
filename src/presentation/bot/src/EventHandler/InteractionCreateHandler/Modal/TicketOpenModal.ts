@@ -124,8 +124,14 @@ export class TicketOpenModal extends ModalSubmitInteractionBase<Options> {
         ],
       });
     } catch {
-      // A half-made ticket would leave an orphan channel or block the user from opening another.
-      await Promise.allSettled([this.core.ticket.delete(channel.id), channel.delete()]);
+      // Channel first: a surviving channel keeps its row, so it stays visible to TicketOpenButton,
+      // and a surviving row is dropped there once the channel is confirmed gone.
+      try {
+        await channel.delete();
+        await this.core.ticket.delete(channel.id);
+      } catch (error) {
+        console.error("[ticket] failed to clean up a half-made ticket", error);
+      }
       await interaction.editReply(CREATE_FAILED);
       return res;
     }

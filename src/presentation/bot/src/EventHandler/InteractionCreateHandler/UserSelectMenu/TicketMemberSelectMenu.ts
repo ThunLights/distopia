@@ -38,6 +38,9 @@ export class TicketMemberSelectMenu extends UserSelectMenuInteractionBase {
       };
     }
 
+    // Acknowledged first: an expired interaction would hide a change a retry would then reverse.
+    const res = await interaction.deferUpdate();
+
     const remove = channel.permissionOverwrites.cache.has(userId);
     if (remove) {
       await channel.permissionOverwrites.delete(userId);
@@ -50,7 +53,7 @@ export class TicketMemberSelectMenu extends UserSelectMenuInteractionBase {
     }
 
     const content = `<@${userId}> をチケット${remove ? "から削除" : "に追加"}しました。`;
-    const res = await interaction.update({ content, allowedMentions: { users: [] } });
+    await interaction.editReply({ content, allowedMentions: { users: [] } });
     await channel.send({ content, allowedMentions: { users: remove ? [] : [userId] } });
     return res;
   }

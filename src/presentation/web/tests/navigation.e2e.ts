@@ -129,7 +129,7 @@ test("search input on the home page navigates to /search with the term in the UR
   await expect(async () => {
     await page.locator("#search-input").fill("discord");
     await page.locator("#search-input").press("Enter");
-    await page.waitForURL(/\/search/, { timeout: 1000 });
+    await page.waitForURL(/\/search/, { timeout: 1000, waitUntil: "commit" });
   }).toPass();
 
   expect(page.url()).toContain("discord");

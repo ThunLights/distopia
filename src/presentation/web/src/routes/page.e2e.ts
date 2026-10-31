@@ -33,7 +33,7 @@ test("pressing Enter in the search box navigates to /search with the term", asyn
   await expect(async () => {
     await page.locator("#search-input").fill("playwright");
     await page.locator("#search-input").press("Enter");
-    await page.waitForURL(/\/search/, { timeout: 1000 });
+    await page.waitForURL(/\/search/, { timeout: 1000, waitUntil: "commit" });
   }).toPass();
   expect(page.url()).toContain("/search");
   expect(page.url()).toContain("playwright");
@@ -45,7 +45,7 @@ test("clicking the search button navigates to /search", async ({ page }) => {
   // The search button is a <label> wrapping the search input; click the PrimaryButton text
   await expect(async () => {
     await page.getByText("検索").click();
-    await page.waitForURL(/\/search/, { timeout: 1000 });
+    await page.waitForURL(/\/search/, { timeout: 1000, waitUntil: "commit" });
   }).toPass();
   expect(page.url()).toContain("/search");
 });
