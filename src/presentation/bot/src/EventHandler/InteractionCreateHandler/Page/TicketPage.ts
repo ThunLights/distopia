@@ -15,6 +15,7 @@ import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButt
 
 export async function ticketPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const settings = await core.guild.getSetting(guild.id);
+  const roles = settings?.ticketRoles ?? [];
 
   const embed = new EmbedBuilder()
     .setColor("Navy")
@@ -30,7 +31,7 @@ export async function ticketPage(core: AppCore, guild: Guild): Promise<Interacti
       },
       {
         name: "対応ロール",
-        value: settings?.ticketRole ? `<@&${settings.ticketRole}>` : "未設定",
+        value: roles.map((id) => `<@&${id}>`).join(" ") || "未設定",
         inline: false,
       },
       {
@@ -46,7 +47,10 @@ export async function ticketPage(core: AppCore, guild: Guild): Promise<Interacti
     .setChannelTypes(ChannelType.GuildCategory);
   const roleSelector = new RoleSelectMenuBuilder()
     .setCustomId("ticketRole")
-    .setPlaceholder("チケットに対応するロール");
+    .setPlaceholder("チケットに対応するロール (複数選択可)")
+    .setMinValues(0)
+    .setMaxValues(25)
+    .setDefaultRoles(...roles);
   const logSelector = new ChannelSelectMenuBuilder()
     .setCustomId("ticketLogChannel")
     .setPlaceholder("ログチャンネル")

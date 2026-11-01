@@ -4,8 +4,8 @@ import { describe, expect, test } from "vitest";
 import type { AppState } from "./AppState";
 import { Ticket, type TicketActor } from "./Ticket";
 
-function setup(ticketRole: string | null) {
-  return new Ticket({} as AppState, { getSetting: async () => ({ ticketRole }) as never });
+function setup(...ticketRoles: string[]) {
+  return new Ticket({} as AppState, { getSetting: async () => ({ ticketRoles }) as never });
 }
 
 const actor = (overrides: Partial<TicketActor> = {}): TicketActor => ({
@@ -24,14 +24,15 @@ const ticket = (claimedBy: string | null = null): TicketModel => ({
 });
 
 describe("isStaff", () => {
-  test("allows administrators and the support role", async () => {
-    expect(await setup(null).isStaff("guild", actor({ isAdministrator: true }))).toBe(true);
+  test("allows administrators and any support role", async () => {
+    expect(await setup().isStaff("guild", actor({ isAdministrator: true }))).toBe(true);
     expect(await setup("9").isStaff("guild", actor({ roleIds: ["9"] }))).toBe(true);
+    expect(await setup("7", "9").isStaff("guild", actor({ roleIds: ["9"] }))).toBe(true);
   });
 
   test("rejects other members, including when no role is set", async () => {
-    expect(await setup("9").isStaff("guild", actor({ roleIds: ["8"] }))).toBe(false);
-    expect(await setup(null).isStaff("guild", actor({ roleIds: ["8"] }))).toBe(false);
+    expect(await setup("7", "9").isStaff("guild", actor({ roleIds: ["8"] }))).toBe(false);
+    expect(await setup().isStaff("guild", actor({ roleIds: ["8"] }))).toBe(false);
   });
 });
 

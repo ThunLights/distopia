@@ -57,7 +57,7 @@ export class TicketOpenModal extends ModalSubmitInteractionBase<Options> {
     const res = await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
     const settings = await this.core.guild.getSetting(guild.id);
-    const role = settings?.ticketRole;
+    const roles = settings?.ticketRoles ?? [];
 
     const channel = await guild.channels
       .create({
@@ -68,7 +68,7 @@ export class TicketOpenModal extends ModalSubmitInteractionBase<Options> {
           { id: guild.id, type: OverwriteType.Role, deny: ["ViewChannel"] },
           { id: interaction.client.user.id, type: OverwriteType.Member, allow: TICKET_ACCESS },
           { id: user.id, type: OverwriteType.Member, allow: TICKET_ACCESS },
-          ...(role ? [{ id: role, type: OverwriteType.Role, allow: TICKET_ACCESS }] : []),
+          ...roles.map((id) => ({ id, type: OverwriteType.Role, allow: TICKET_ACCESS })),
         ],
       })
       .catch(() => null);
@@ -93,8 +93,8 @@ export class TicketOpenModal extends ModalSubmitInteractionBase<Options> {
       }
 
       await channel.send({
-        content: [`<@${user.id}>`, ...(role ? [`<@&${role}>`] : [])].join(" "),
-        allowedMentions: { users: [user.id], roles: role ? [role] : [] },
+        content: [`<@${user.id}>`, ...roles.map((id) => `<@&${id}>`)].join(" "),
+        allowedMentions: { users: [user.id], roles },
         embeds: [
           new EmbedBuilder()
             .setColor("Navy")

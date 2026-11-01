@@ -28,7 +28,7 @@ export class TicketResetButton extends ButtonInteractionBase {
     await this.core.guild.saveSetting({
       guildId: guild.id,
       ticketCategory: null,
-      ticketRole: null,
+      ticketRoles: [],
       ticketLogChannel: null,
     });
 

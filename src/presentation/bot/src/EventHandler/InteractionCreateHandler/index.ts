@@ -7,6 +7,7 @@ import {
   type Interaction,
   type InteractionReplyOptions,
   type MessagePayload,
+  type RoleSelectMenuInteraction,
   type StringSelectMenuInteraction,
 } from "discord.js";
 
@@ -17,7 +18,6 @@ import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
 import type { MessageComponentInteractionBase } from "./Base/MessageComponentInteractionBase";
 import { ModalSended } from "./Base/Modal/ModalSended";
 import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
-import type { RoleSelectMenuInteractionBase } from "./Base/RoleSelectMenuInteractionBase";
 import type { UserSelectMenuInteractionBase } from "./Base/UserSelectMenuInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as channelSelectMenus } from "./ChannelSelectMenus.auto";
@@ -31,7 +31,10 @@ type Commands = {
   chatInput: ChatInputCommandBase[];
   button: ButtonInteractionBase[];
   modal: ModalSubmitInteractionBase[];
-  roleSelectMenu: RoleSelectMenuInteractionBase[];
+  roleSelectMenu: MessageComponentInteractionBase<
+    RoleSelectMenuInteraction<CacheType>,
+    string | MessagePayload | InteractionReplyOptions | InteractionResponse
+  >[];
   channelSelectMenu: ChannelSelectMenuInteractionBase[];
   stringSelectMenu: MessageComponentInteractionBase<
     StringSelectMenuInteraction<CacheType>,
