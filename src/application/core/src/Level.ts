@@ -6,7 +6,11 @@ import { Base } from "./Base";
 
 export type RankCardProfile = { name: string; avatarUrl: string; guildName: string };
 
+export type LeaderboardEntry = { userId: string; level: bigint; rank: number | null };
+
 type Standing = { level: bigint; point: bigint; rank: number } | null;
+
+const LEADERBOARD_SIZE = 10;
 
 // Level 0 / point 0 is the DB default; levelUpSync(0, 0, 0) promotes it to the real level 1.
 function toCard(standing: Standing): LevelCard {
@@ -72,6 +76,31 @@ export class Level extends Base {
       this.state.database.memberLevel.findGlobalStanding(userId),
     ]);
     return { guild: toCard(guild), global: toCard(global) };
+  }
+
+  // `self` is null when the user is already in `top`. Tied scores share a rank, matching
+  // findGuildStanding, so /rank and the leaderboard never disagree.
+  public async getLeaderboard(guildId: string, userId: string) {
+    const db = this.state.database.memberLevel;
+    const rows = await db.findGuildTop(guildId, LEADERBOARD_SIZE);
+
+    const top: LeaderboardEntry[] = [];
+    rows.forEach((row, index) => {
+      const previous = rows[index - 1];
+      const tied = previous?.level === row.level && previous.point === row.point;
+      top.push({
+        userId: row.userId,
+        level: toCard({ ...row, rank: 0 }).level,
+        rank: tied ? (top[index - 1]?.rank ?? null) : index + 1,
+      });
+    });
+
+    if (rows.some((row) => row.userId === userId)) {
+      return { top, self: null };
+    }
+
+    const { level, rank } = toCard(await db.findGuildStanding(guildId, userId));
+    return { top, self: { userId, level, rank } satisfies LeaderboardEntry };
   }
 
   public async renderRankCard(

@@ -59,6 +59,65 @@ describe("Level.renderRankCard", () => {
   });
 });
 
+describe("Level.getLeaderboard", () => {
+  const row = (userId: string, level: bigint, point = 0n): GuildMemberLevelRow => ({
+    guildId: "g",
+    userId,
+    level,
+    point,
+  });
+  const leaderboardWith = (rows: GuildMemberLevelRow[], standing: Standing = null) =>
+    new Level({
+      database: {
+        memberLevel: {
+          findGuildTop: async (_guildId: string, limit: number) => rows.slice(0, limit),
+          findGuildStanding: async () => standing,
+        },
+      },
+    } as unknown as AppState);
+
+  it("has no separate entry for a user already in the top 10", async () => {
+    const { top, self } = await leaderboardWith([row("a", 5n), row("u", 4n)]).getLeaderboard(
+      "g",
+      "u",
+    );
+
+    expect(top).toEqual([
+      { userId: "a", level: 5n, rank: 1 },
+      { userId: "u", level: 4n, rank: 2 },
+    ]);
+    expect(self).toBeNull();
+  });
+
+  it("lists only ten and adds the user outside them", async () => {
+    const rows = Array.from({ length: 12 }, (_, i) => row(`m${i}`, BigInt(20 - i)));
+    const { top, self } = await leaderboardWith(rows, {
+      level: 3n,
+      point: 0n,
+      rank: 40,
+    }).getLeaderboard("g", "u");
+
+    expect(top).toHaveLength(10);
+    expect(self).toEqual({ userId: "u", level: 3n, rank: 40 });
+  });
+
+  it("shows a user with no record as unranked", async () => {
+    const { self } = await leaderboardWith([row("a", 5n)]).getLeaderboard("g", "u");
+
+    expect(self).toEqual({ userId: "u", level: 1n, rank: null });
+  });
+
+  it("gives tied scores the same rank", async () => {
+    const { top } = await leaderboardWith([
+      row("a", 5n, 1n),
+      row("b", 5n, 1n),
+      row("c", 4n),
+    ]).getLeaderboard("g", "a");
+
+    expect(top.map(({ rank }) => rank)).toEqual([1, 1, 3]);
+  });
+});
+
 describe("Level", () => {
   it("scores a message as the ceiling of the square root of its length", () => {
     expect(Level.messagePoint(1)).toBe(1);
