@@ -45,6 +45,14 @@ export class MemberLevelTable extends Base {
     ]);
   }
 
+  public async findGuildTop(guildId: string, limit: number): Promise<GuildMemberLevelRow[]> {
+    return await this.prisma.guildMemberLevel.findMany({
+      where: { guildId },
+      orderBy: [{ level: "desc" }, { point: "desc" }, { userId: "asc" }],
+      take: limit,
+    });
+  }
+
   public async findGuildStanding(
     guildId: string,
     userId: string,
