@@ -17,9 +17,6 @@
     "./Guild": {
       "import": "./src/Guild.ts"
     },
-    "./Level": {
-      "import": "./src/Level.ts"
-    },
     "./Ticket": {
       "import": "./src/Ticket.ts"
     },

@@ -6,7 +6,9 @@ import { Base } from "./Base";
 
 export type RankCardProfile = { name: string; avatarUrl: string; guildName: string };
 
-export type LeaderboardEntry = { userId: string; level: bigint; rank: number | null };
+export type LeaderboardProfile = { name: string; avatarUrl: string };
+
+type LeaderboardEntry = { userId: string; level: bigint; rank: number | null };
 
 type Standing = { level: bigint; point: bigint; rank: number } | null;
 
@@ -101,6 +103,31 @@ export class Level extends Base {
 
     const { level, rank } = toCard(await db.findGuildStanding(guildId, userId));
     return { top, self: { userId, level, rank } satisfies LeaderboardEntry };
+  }
+
+  public async renderLeaderboard(
+    guildId: string,
+    userId: string,
+    guildName: string,
+    getProfile: (userId: string) => Promise<LeaderboardProfile>,
+  ): Promise<Uint8Array> {
+    const { rankCardRenderer } = this.state;
+    if (rankCardRenderer === null) {
+      throw new Error("rankCardRenderer is not configured");
+    }
+
+    const { top, self } = await this.getLeaderboard(guildId, userId);
+    const toRow = async ({ userId: id, level, rank }: LeaderboardEntry) => ({
+      ...(await getProfile(id)),
+      level,
+      rank,
+    });
+
+    return rankCardRenderer.renderLeaderboard({
+      guildName,
+      top: await Promise.all(top.map(toRow)),
+      self: self && (await toRow(self)),
+    });
   }
 
   public async renderRankCard(

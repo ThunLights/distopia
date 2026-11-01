@@ -1,10 +1,12 @@
 import { createCanvas, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
-import type { RankCard, RankCardRenderer } from "domain-model";
+import type { LeaderboardCard, LeaderboardRow, RankCard, RankCardRenderer } from "domain-model";
 import { formatRank, levelProgress } from "domain-service";
 import { safeFetch, validateSafeUrl } from "infra-http";
 
 const WIDTH = 934;
 const HEIGHT = 320;
+const LEADERBOARD_HEADER = 116;
+const LEADERBOARD_ROW = 64;
 // Needs a CJK-capable system font (fonts-noto-cjk in the Docker images); the later families
 // are only fallbacks so a bare host still draws Latin text instead of failing.
 const FONT = '"Noto Sans CJK JP", "Noto Sans JP", "WenQuanYi Zen Hei", sans-serif';
@@ -25,6 +27,26 @@ async function loadAvatar(url: string) {
   } catch {
     return null;
   }
+}
+
+function circleAvatar(
+  ctx: SKRSContext2D,
+  avatar: Awaited<ReturnType<typeof loadAvatar>>,
+  x: number,
+  y: number,
+  size: number,
+) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+  ctx.clip();
+  if (avatar) {
+    ctx.drawImage(avatar, x, y, size, size);
+  } else {
+    ctx.fillStyle = "#5865f2";
+    ctx.fillRect(x, y, size, size);
+  }
+  ctx.restore();
 }
 
 function fit(ctx: SKRSContext2D, text: string, maxWidth: number) {
@@ -70,18 +92,7 @@ async function draw(input: RankCard): Promise<Buffer> {
   ctx.roundRect(0, 0, WIDTH, HEIGHT, 28);
   ctx.fill();
 
-  const avatar = await loadAvatar(input.avatarUrl);
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(110, 110, 70, 0, Math.PI * 2);
-  ctx.clip();
-  if (avatar) {
-    ctx.drawImage(avatar, 40, 40, 140, 140);
-  } else {
-    ctx.fillStyle = "#5865f2";
-    ctx.fillRect(40, 40, 140, 140);
-  }
-  ctx.restore();
+  circleAvatar(ctx, await loadAvatar(input.avatarUrl), 40, 40, 140);
 
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#ffffff";
@@ -131,8 +142,65 @@ async function draw(input: RankCard): Promise<Buffer> {
   return canvas.toBuffer("image/png");
 }
 
+async function drawLeaderboard({ guildName, top, self }: LeaderboardCard): Promise<Buffer> {
+  const rows: (LeaderboardRow & { isSelf: boolean })[] = [
+    ...top.map((row) => ({ ...row, isSelf: false })),
+    ...(self ? [{ ...self, isSelf: true }] : []),
+  ];
+  const avatars = await Promise.all(rows.map(({ avatarUrl }) => loadAvatar(avatarUrl)));
+
+  const height = LEADERBOARD_HEADER + rows.length * LEADERBOARD_ROW + 24;
+  const canvas = createCanvas(WIDTH, height);
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#1e2124";
+  ctx.beginPath();
+  ctx.roundRect(0, 0, WIDTH, height, 28);
+  ctx.fill();
+
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `700 34px ${FONT}`;
+  ctx.fillText("LEADERBOARD", 40, 60);
+  ctx.fillStyle = "#99aab5";
+  ctx.font = `600 22px ${FONT}`;
+  ctx.fillText(fit(ctx, guildName, WIDTH - 80), 40, 92);
+
+  ctx.textBaseline = "middle";
+  rows.forEach(({ name, level, rank, isSelf }, index) => {
+    const y = LEADERBOARD_HEADER + index * LEADERBOARD_ROW;
+    const center = y + (LEADERBOARD_ROW - 8) / 2;
+
+    ctx.fillStyle = isSelf ? "#3b3f45" : "#2b2f33";
+    ctx.beginPath();
+    ctx.roundRect(24, y, WIDTH - 48, LEADERBOARD_ROW - 8, 14);
+    ctx.fill();
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#faa61a";
+    ctx.font = `700 24px ${FONT}`;
+    ctx.fillText(formatRank(rank), 44, center);
+
+    circleAvatar(ctx, avatars[index] ?? null, 140, center - 24, 48);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `600 24px ${FONT}`;
+    ctx.fillText(fit(ctx, name, 520), 204, center);
+
+    ctx.textAlign = "right";
+    ctx.font = `700 24px ${FONT}`;
+    ctx.fillText(`LEVEL ${level}`, 890, center);
+  });
+
+  return canvas.toBuffer("image/png");
+}
+
 export class CanvasRankCardRenderer implements RankCardRenderer {
   public render(card: RankCard): Promise<Uint8Array> {
     return draw(card);
+  }
+
+  public renderLeaderboard(card: LeaderboardCard): Promise<Uint8Array> {
+    return drawLeaderboard(card);
   }
 }

@@ -118,6 +118,41 @@ describe("Level.getLeaderboard", () => {
   });
 });
 
+describe("Level.renderLeaderboard", () => {
+  const database = {
+    memberLevel: {
+      findGuildTop: async () => [{ guildId: "g", userId: "a", level: 5n, point: 0n }],
+      findGuildStanding: async () => ({ level: 3n, point: 0n, rank: 40 }),
+    },
+  };
+  const getProfile = async (userId: string) => ({ name: `n-${userId}`, avatarUrl: userId });
+
+  it("hands resolved profiles for the top and the requester to the renderer", async () => {
+    const renderLeaderboard = vi.fn(async () => new Uint8Array([1]));
+    const level = new Level({
+      database,
+      rankCardRenderer: { renderLeaderboard },
+    } as unknown as AppState);
+
+    expect(await level.renderLeaderboard("g", "u", "guild", getProfile)).toEqual(
+      new Uint8Array([1]),
+    );
+    expect(renderLeaderboard).toHaveBeenCalledWith({
+      guildName: "guild",
+      top: [{ name: "n-a", avatarUrl: "a", level: 5n, rank: 1 }],
+      self: { name: "n-u", avatarUrl: "u", level: 3n, rank: 40 },
+    });
+  });
+
+  it("throws when no renderer is configured", async () => {
+    const level = new Level({ database, rankCardRenderer: null } as unknown as AppState);
+
+    await expect(level.renderLeaderboard("g", "u", "guild", getProfile)).rejects.toThrow(
+      "rankCardRenderer",
+    );
+  });
+});
+
 describe("Level", () => {
   it("scores a message as the ceiling of the square root of its length", () => {
     expect(Level.messagePoint(1)).toBe(1);
