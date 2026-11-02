@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, readdirSync, statSync, existsSync, mkdtempSync, copyFileSync, rmSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync, mkdtempSync, copyFileSync, rmSync, mkdirSync, writeFileSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative, basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -284,6 +284,23 @@ for (const target of clean) {
 }
 
 const FIX = join(ROOT, 'scripts', 'fixtures');
+{
+  const tmp = mkdtempSync(join(tmpdir(), 'hallmark-links-'));
+  try {
+    const project = join(tmp, 'project');
+    const shared = join(tmp, 'shared');
+    mkdirSync(project);
+    mkdirSync(shared);
+    writeFileSync(join(shared, 'style.css'), 'p { color: var(--color-text); }');
+    symlinkSync(shared, join(project, 'a-shared'), process.platform === 'win32' ? 'junction' : 'dir');
+    symlinkSync(shared, join(project, 'b-shared'), process.platform === 'win32' ? 'junction' : 'dir');
+    symlinkSync(project, join(project, 'parent'), process.platform === 'win32' ? 'junction' : 'dir');
+    const run = spawnSync(process.execPath, [join(ROOT, 'scripts', 'sloplint.mjs'), project, '--scope', 'component', '--json'], { encoding: 'utf8', timeout: 5000 });
+    let report = null;
+    try { report = JSON.parse(run.stdout); } catch {}
+    if (!report || report.summary.files !== 1) add('error', SKILL, 1, 'fixture', 'directory symlink cycles must terminate and each real file must be linted once');
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+}
 const lintJson = (t) => { const r = spawnSync(process.execPath, [join(ROOT, 'scripts', 'sloplint.mjs'), t, '--json'], { encoding: 'utf8' }); try { return JSON.parse(r.stdout); } catch { return null; } };
 const gatesOf = (j) => new Set(j.findings.map((x) => String(x.gate)));
 const expectations = [

@@ -36,7 +36,7 @@ function usage() {
 }
 
 function parseHeader(src, file) {
-  const m = /^---\n([\s\S]*?)\n---/.exec(src);
+  const m = /^---\r?\n([\s\S]*?)\r?\n---/.exec(src);
   if (!m) throw new Error(`${file}: no header block`);
   const h = {};
   for (const line of m[1].split('\n')) {
@@ -69,7 +69,7 @@ function buildIndex() {
     if (slugs.has(e.slug)) throw new Error(`duplicate slug ${e.slug}`);
     slugs.add(e.slug);
   }
-  writeFileSync(INDEX, JSON.stringify({ built: new Date().toISOString().slice(0, 10), themes: entries }, null, 1) + '\n');
+  writeFileSync(INDEX, JSON.stringify({ themes: entries }, null, 1) + '\n');
   return entries;
 }
 
