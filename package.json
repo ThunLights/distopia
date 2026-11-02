@@ -26,7 +26,7 @@
     "husky": "9.1.7",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "skills": "1.7.0",
+    "skills": "1.7.4",
     "turbo": "2.11.10"
   },
   "peerDependencies": {
