@@ -8,8 +8,8 @@ const HEIGHT = 320;
 const LEADERBOARD_HEADER = 116;
 const LEADERBOARD_ROW = 64;
 // Discord names mix CJK, symbols, math alphanumerics (𝓐), emoji and other scripts. Skia only
-// falls back through this list (not to every installed font), so each script's family must be
-// named here (fonts-noto-cjk / fonts-noto-core / fonts-noto-color-emoji in the Docker images).
+// falls back through this list (not to every installed font), so a script renders only if its
+// family is named here — this covers the scripts commonly seen in names, not all of fonts-noto-core (fonts-noto-cjk / fonts-noto-core / fonts-noto-color-emoji in the Docker images).
 const FONT = [
   "Noto Sans CJK JP",
   "Noto Sans",
@@ -22,7 +22,13 @@ const FONT = [
   "Noto Sans Hebrew",
   "Noto Sans Devanagari",
   "Noto Sans Bengali",
+  "Noto Sans Gurmukhi",
+  "Noto Sans Gujarati",
+  "Noto Sans Oriya",
   "Noto Sans Tamil",
+  "Noto Sans Telugu",
+  "Noto Sans Kannada",
+  "Noto Sans Malayalam",
   "Noto Sans Sinhala",
   "Noto Sans Khmer",
   "Noto Sans Lao",
