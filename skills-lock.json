@@ -24,6 +24,12 @@
       "sourceType": "github",
       "skillPath": "skills/hush-review/SKILL.md",
       "computedHash": "bfe62505e9a31b5b69bf864bed945ae8ef02b9542f555854977a78b17b9ab035"
+    },
+    "stack-diagram": {
+      "source": "caru-ini/stack-diagram",
+      "sourceType": "github",
+      "skillPath": "skills/stack-diagram/SKILL.md",
+      "computedHash": "ac12c6fff3db519e336ff4b601c5582e499fcefc91e7494453b438401a91cb48"
     }
   }
 }
