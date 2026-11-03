@@ -21,6 +21,8 @@ RUN apt-get update \
     ca-certificates \
     curl \
     fonts-noto-cjk \
+    fonts-noto-color-emoji \
+    fonts-noto-core \
     git \
     gnupg \
     golang \
