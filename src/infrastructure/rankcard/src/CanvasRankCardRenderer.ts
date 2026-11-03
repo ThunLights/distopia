@@ -7,9 +7,46 @@ const WIDTH = 934;
 const HEIGHT = 320;
 const LEADERBOARD_HEADER = 116;
 const LEADERBOARD_ROW = 64;
-// Needs a CJK-capable system font (fonts-noto-cjk in the Docker images); the later families
-// are only fallbacks so a bare host still draws Latin text instead of failing.
-const FONT = '"Noto Sans CJK JP", "Noto Sans JP", "WenQuanYi Zen Hei", sans-serif';
+// Discord names mix CJK, symbols, math alphanumerics (𝓐), emoji and other scripts. Skia only
+// falls back through this list (not to every installed font), so a script renders only if its
+// family is named here — this covers the scripts commonly seen in names, not all of fonts-noto-core (fonts-noto-cjk / fonts-noto-core / fonts-noto-color-emoji in the Docker images).
+const FONT = [
+  "Noto Sans CJK JP",
+  "Noto Sans",
+  "Noto Sans Symbols",
+  "Noto Sans Symbols2",
+  "Noto Sans Math",
+  "Noto Color Emoji",
+  "Noto Sans Thai",
+  "Noto Sans Arabic",
+  "Noto Sans Hebrew",
+  "Noto Sans Devanagari",
+  "Noto Sans Bengali",
+  "Noto Sans Gurmukhi",
+  "Noto Sans Gujarati",
+  "Noto Sans Oriya",
+  "Noto Sans Tamil",
+  "Noto Sans Telugu",
+  "Noto Sans Kannada",
+  "Noto Sans Malayalam",
+  "Noto Sans Sinhala",
+  "Noto Sans Khmer",
+  "Noto Sans Lao",
+  "Noto Sans Myanmar",
+  "Noto Sans Armenian",
+  "Noto Sans Georgian",
+  "Noto Sans Ethiopic",
+  "Noto Sans Cherokee",
+  "Noto Sans Canadian Aboriginal",
+  "Noto Sans Javanese",
+  "Noto Serif Tibetan",
+  "Noto Sans Runic",
+  "Noto Sans Yi",
+  "WenQuanYi Zen Hei",
+]
+  .map((family) => `"${family}"`)
+  .concat("sans-serif")
+  .join(", ");
 
 async function loadAvatar(url: string) {
   const safe = validateSafeUrl(url);
