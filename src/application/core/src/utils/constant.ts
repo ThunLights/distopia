@@ -36,11 +36,6 @@ export const supportersKeyValue = {
     invite: "https://discord.gg/8v43tgwvfQ",
     guildId: "957886649583415296",
   },
-  lemon: {
-    name: "大檸檬帝国",
-    invite: "https://discord.gg/BgZddsVPMH",
-    guildId: "838734004718665758",
-  },
   sumire: {
     name: "☾.*·̩͙ Sumire's cafe˖⊹",
     invite: "https://discord.gg/eNwcThMeZZ",
@@ -53,7 +48,6 @@ export const supporters = [
   supportersKeyValue.bread,
   supportersKeyValue.cappuccino,
   supportersKeyValue.hima,
-  supportersKeyValue.lemon,
   supportersKeyValue.sumire,
 ] as const satisfies Array<SupporterServer>;
 
