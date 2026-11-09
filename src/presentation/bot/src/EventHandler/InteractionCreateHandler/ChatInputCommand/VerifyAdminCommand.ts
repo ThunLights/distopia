@@ -1,4 +1,3 @@
-import { SUPPORTER_SERVER_GUILD_IDS } from "app-core/constant";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
@@ -45,13 +44,6 @@ function okReply(description: string): InteractionReplyOptions {
 
 export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  // Scoped like TTS -- this feature is for distopia's own community, not a general-purpose
-  // per-guild offering, so restrict it to the home server and the supporter organizations'
-  // servers.
-  public override availableGuildId: readonly string[] = [
-    this.core.state.homeServerId,
-    ...SUPPORTER_SERVER_GUILD_IDS,
-  ];
 
   public override register: RESTPostAPIChatInputApplicationCommandsJSONBody = {
     name: "verify-admin",
