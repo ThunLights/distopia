@@ -26,7 +26,7 @@
     "@eslint/js": "10.0.1",
     "@fjst/core": "0.4.0",
     "@fjst/sveltekit": "0.4.0",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.65.0",
     "@storybook/addon-a11y": "10.6.0",
     "@storybook/addon-docs": "10.6.2",
     "@storybook/addon-svelte-csf": "5.1.5",
