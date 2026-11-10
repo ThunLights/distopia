@@ -7,9 +7,9 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 export class WhiteListAddChannelSelectMenu extends ChannelSelectMenuInteractionBase {

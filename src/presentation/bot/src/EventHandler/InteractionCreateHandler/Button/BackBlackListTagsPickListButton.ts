@@ -5,8 +5,8 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { blackListTagsPickListPage } from "../Page/BlackListTagsPickListPage";
 
 export class BackBlackListTagsPickListButton extends ButtonInteractionBase {

@@ -10,10 +10,10 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 
 import { staffOverwrites, ticketActor } from "../../../utils/ticket/access";
 import { fetchMessages, formatTranscript } from "../../../utils/ticket/transcript";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 
 export class TicketCloseConfirmButton extends ButtonInteractionBase {
   public override requireBotGuildPermissions: PermissionResolvable[] = [

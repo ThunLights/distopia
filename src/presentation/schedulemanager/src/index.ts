@@ -1,6 +1,8 @@
 import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-node";
+import { features } from "app-feature-loader/schedule";
 import { ScheduleTaskManager } from "app-schedule";
+import { mergeScheduleFeatures } from "app-schedule/feature";
 import { createBearerAuthInterceptor, SchedulerService } from "infra-rpc";
 
 const { SCHEDULEMANAGER_RPC_URL, SCHEDULEMANAGER_RPC_TOKEN } = process.env;
@@ -42,5 +44,17 @@ await manager.add(
   }),
   { noOverlap: true },
 );
+
+// Only the cron keys are used here -- the tasks themselves run on presentation-web, which
+// holds AppCore; this process just ticks each expression over RPC.
+for (const cron of mergeScheduleFeatures(features).keys()) {
+  await manager.add(
+    cron,
+    serialized(async () => {
+      await client.runFeatureTasks({ cron });
+    }),
+    { noOverlap: true },
+  );
+}
 
 console.log("schedulemanager started, ticking against", SCHEDULEMANAGER_RPC_URL);

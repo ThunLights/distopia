@@ -1,0 +1,35 @@
+{
+  "name": "app-feature-loader",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./bot": {
+      "import": "./src/bot.auto.ts"
+    },
+    "./schedule": {
+      "import": "./src/schedule.auto.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun run scripts/gen.ts",
+    "setup": "npm run build",
+    "lint": "oxfmt --check --config ../../../lib/template/oxfmt.config.ts && oxlint --config ../../../lib/template/oxlint.config.ts",
+    "lint:fix": "oxlint --fix --config ../../../lib/template/oxlint.config.ts",
+    "format": "oxfmt --config ../../../lib/template/oxfmt.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "app-schedule": "workspace:*",
+    "feature-stat-channel": "workspace:*",
+    "presentation-bot-kit": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "bun": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:"
+  },
+  "peerDependencies": {
+    "typescript": "catalog:"
+  }
+}

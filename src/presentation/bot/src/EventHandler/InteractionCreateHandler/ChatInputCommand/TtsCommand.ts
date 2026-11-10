@@ -12,14 +12,14 @@ import {
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { joinLinesWithinLimit } from "../../../utils/discordLimits";
 import { ttsEmbed as embed } from "../../../utils/tts/embed";
 import { isJoined, join, leave } from "../../../utils/tts/session";
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 
 const OptionsSchema = z.object({
   subCommandGroup: z.string().nullable(),

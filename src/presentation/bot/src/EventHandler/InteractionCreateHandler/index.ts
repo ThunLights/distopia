@@ -1,3 +1,4 @@
+import { features } from "app-feature-loader/bot";
 import {
   EmbedBuilder,
   InteractionCallbackResponse,
@@ -5,20 +6,11 @@ import {
   MessageFlags,
   type CacheType,
   type Interaction,
-  type InteractionReplyOptions,
-  type MessagePayload,
-  type RoleSelectMenuInteraction,
-  type StringSelectMenuInteraction,
 } from "discord.js";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
+import type { Commands } from "presentation-bot-kit/feature";
 
 import { BaseHandler } from "../BaseHandler";
-import { type ButtonInteractionBase } from "./Base/ButtonInteractionBase";
-import type { ChannelSelectMenuInteractionBase } from "./Base/ChannelSelectMenuInteractionBase";
-import type { ChatInputCommandBase } from "./Base/ChatInputCommandBase";
-import type { MessageComponentInteractionBase } from "./Base/MessageComponentInteractionBase";
-import { ModalSended } from "./Base/Modal/ModalSended";
-import type { ModalSubmitInteractionBase } from "./Base/ModalSubmitInteractionBase";
-import type { UserSelectMenuInteractionBase } from "./Base/UserSelectMenuInteractionBase";
 import { commands as buttonCommands } from "./Buttons.auto";
 import { commands as channelSelectMenus } from "./ChannelSelectMenus.auto";
 import { commands as chatInputCommands } from "./ChatInputCommands.auto";
@@ -26,22 +18,6 @@ import { commands as modalCommands } from "./Modals.auto";
 import { commands as roleSelectMenus } from "./RoleSelectMenus.auto";
 import { commands as stringSelectMenus } from "./StringSelectMenus.auto";
 import { commands as userSelectMenus } from "./UserSelectMenus.auto";
-
-type Commands = {
-  chatInput: ChatInputCommandBase[];
-  button: ButtonInteractionBase[];
-  modal: ModalSubmitInteractionBase[];
-  roleSelectMenu: MessageComponentInteractionBase<
-    RoleSelectMenuInteraction<CacheType>,
-    string | MessagePayload | InteractionReplyOptions | InteractionResponse
-  >[];
-  channelSelectMenu: ChannelSelectMenuInteractionBase[];
-  stringSelectMenu: MessageComponentInteractionBase<
-    StringSelectMenuInteraction<CacheType>,
-    string | MessagePayload | InteractionReplyOptions | InteractionResponse
-  >[];
-  userSelectMenu: UserSelectMenuInteractionBase[];
-};
 
 const rateLimitEmbed = new EmbedBuilder()
   .setTitle("レートリミット")
@@ -52,13 +28,29 @@ export class InteractionCreateHandler extends BaseHandler<
   (interaction: Interaction<CacheType>) => void
 > {
   public readonly commands: Commands = {
-    chatInput: chatInputCommands.map((Command) => new Command(this.core)),
-    button: buttonCommands.map((Command) => new Command(this.core)),
-    modal: modalCommands.map((Command) => new Command(this.core)),
-    roleSelectMenu: roleSelectMenus.map((Menu) => new Menu(this.core)),
-    channelSelectMenu: channelSelectMenus.map((Menu) => new Menu(this.core)),
-    stringSelectMenu: stringSelectMenus.map((Menu) => new Menu(this.core)),
-    userSelectMenu: userSelectMenus.map((Menu) => new Menu(this.core)),
+    chatInput: [...chatInputCommands, ...features.flatMap((f) => f.chatInput ?? [])].map(
+      (Command) => new Command(this.core),
+    ),
+    button: [...buttonCommands, ...features.flatMap((f) => f.button ?? [])].map(
+      (Command) => new Command(this.core),
+    ),
+    modal: [...modalCommands, ...features.flatMap((f) => f.modal ?? [])].map(
+      (Command) => new Command(this.core),
+    ),
+    roleSelectMenu: [...roleSelectMenus, ...features.flatMap((f) => f.roleSelectMenu ?? [])].map(
+      (Menu) => new Menu(this.core),
+    ),
+    channelSelectMenu: [
+      ...channelSelectMenus,
+      ...features.flatMap((f) => f.channelSelectMenu ?? []),
+    ].map((Menu) => new Menu(this.core)),
+    stringSelectMenu: [
+      ...stringSelectMenus,
+      ...features.flatMap((f) => f.stringSelectMenu ?? []),
+    ].map((Menu) => new Menu(this.core)),
+    userSelectMenu: [...userSelectMenus, ...features.flatMap((f) => f.userSelectMenu ?? [])].map(
+      (Menu) => new Menu(this.core),
+    ),
   };
 
   public override async handle(interaction: Interaction<CacheType>): Promise<void> {

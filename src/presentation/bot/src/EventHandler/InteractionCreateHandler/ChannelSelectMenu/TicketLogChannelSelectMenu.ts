@@ -7,9 +7,9 @@ import {
   type PermissionResolvable,
   InteractionResponse,
 } from "discord.js";
+import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { ticketPage } from "../Page/TicketPage";
 
 export class TicketLogChannelSelectMenu extends ChannelSelectMenuInteractionBase {

@@ -7,12 +7,12 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ValidateError, validator } from "../../../utils/validator";
-import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { PermissionError } from "../Base/Error/PermissionError";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const customIdPrefix = "blackListLogChannel:";

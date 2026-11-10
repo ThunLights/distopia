@@ -7,9 +7,9 @@ import {
   type PermissionResolvable,
   type UserSelectMenuInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { UserSelectMenuInteractionBase } from "presentation-bot-kit/base/UserSelectMenuInteractionBase";
 
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 export class WhiteListAddUserSelectMenu extends UserSelectMenuInteractionBase {

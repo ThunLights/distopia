@@ -8,9 +8,9 @@ import {
   type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { page } from "../Page/Settings";
 
 type Options = {};

@@ -8,9 +8,9 @@ import {
   type PermissionResolvable,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
 import { ROLE_PANEL_CUSTOM_ID } from "../../../utils/rolePanel";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
 const BOT_PERMISSION_HINT =
   "\nサーバー管理者に、ボットの「ロールの管理」権限と役職の順位を確認するよう伝えてください。";

@@ -7,11 +7,11 @@ import {
   type PermissionResolvable,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { MessageComponentInteractionBase } from "presentation-bot-kit/base/MessageComponentInteractionBase";
 
 import { isLogField, type LogField } from "../../../utils/logging/log";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { MessageComponentInteractionBase } from "../Base/MessageComponentInteractionBase";
 import { logPage } from "../Page/LogPage";
 
 const customIdPrefix = "logBulkSetFields:";

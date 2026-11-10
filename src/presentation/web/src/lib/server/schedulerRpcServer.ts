@@ -6,7 +6,11 @@ import {
 } from "$app/env/public";
 import { core, updatePanels } from "./core";
 import type { ConnectRouter } from "@connectrpc/connect";
+import { features } from "app-feature-loader/schedule";
+import { mergeScheduleFeatures } from "app-schedule/feature";
 import { SchedulerService } from "infra-rpc";
+
+const featureTasks = mergeScheduleFeatures(features);
 
 // Bodies below are unchanged from the former app-schedule setScheduleTask -- only the
 // trigger moved, from an in-process node-cron tick to an RPC call from
@@ -40,9 +44,16 @@ export function schedulerRoutes(router: ConnectRouter) {
         PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
       );
       await core.record.update();
-      await core.statChannel.update();
       await updatePanels();
       await core.user.setActivity();
+      return {};
+    },
+
+    async runFeatureTasks({ cron }) {
+      for (const task of featureTasks.get(cron) ?? []) {
+        // One feature's failure must not starve the others sharing this tick.
+        await task(core).catch((error) => console.error(`[schedule] ${cron} task failed`, error));
+      }
       return {};
     },
   });

@@ -6,8 +6,7 @@ import {
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
-
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 
 type Options = {};
 

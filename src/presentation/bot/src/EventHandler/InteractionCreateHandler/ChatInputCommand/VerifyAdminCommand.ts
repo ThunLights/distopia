@@ -14,11 +14,10 @@ import {
   type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
-
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 
 const OptionsSchema = z.object({
   subCommand: z.string(),

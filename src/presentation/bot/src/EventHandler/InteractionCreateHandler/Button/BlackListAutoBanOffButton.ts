@@ -7,12 +7,12 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ValidateError, validator } from "../../../utils/validator";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { PermissionError } from "../Base/Error/PermissionError";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const customIdPrefix = "blackListAutoBanOff:";

@@ -13,15 +13,15 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 
 import {
   BlackListTargetRefSchema,
   decodeBlackListTargetRef,
   truncateSelectMenuLabel,
 } from "../../../utils/lists/blackList";
-import { ValidateError, validator } from "../../../utils/validator";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { ModalSended } from "../Base/Modal/ModalSended";
 
 const customIdPrefix = "blackListTargetEditOpen:";
 

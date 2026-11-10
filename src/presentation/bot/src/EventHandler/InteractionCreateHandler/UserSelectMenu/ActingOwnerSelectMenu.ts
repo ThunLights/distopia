@@ -7,10 +7,10 @@ import {
   type PermissionResolvable,
   InteractionResponse,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { UserSelectMenuInteractionBase } from "presentation-bot-kit/base/UserSelectMenuInteractionBase";
 
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 import { page } from "../Page/Settings";
 
 export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {

@@ -6,11 +6,11 @@ import {
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
 } from "discord.js";
+import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { validator, ValidateError, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/lists/blackList";
-import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
-import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManageDetailPage } from "../Page/BlackListTargetManageDetailPage";
 
 const customIdPrefix = "blackListTargetEdit:";

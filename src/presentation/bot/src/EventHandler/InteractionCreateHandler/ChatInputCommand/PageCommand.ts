@@ -9,9 +9,8 @@ import {
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
-
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
 type Options = {};
 

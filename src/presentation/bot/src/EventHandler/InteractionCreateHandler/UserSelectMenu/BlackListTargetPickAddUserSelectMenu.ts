@@ -13,12 +13,12 @@ import {
   type MessagePayload,
   type UserSelectMenuInteraction,
 } from "discord.js";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
+import { UserSelectMenuInteractionBase } from "presentation-bot-kit/base/UserSelectMenuInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { encodeBlackListTargetRef, truncateSelectMenuLabel } from "../../../utils/lists/blackList";
-import { ValidateError, validator } from "../../../utils/validator";
-import { ModalSended } from "../Base/Modal/ModalSended";
-import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 
 const customIdPrefix = "blackListTargetPickAddUser:";
 

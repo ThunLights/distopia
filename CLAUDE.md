@@ -87,13 +87,17 @@ distopia/
 ├── src/
 │   ├── presentation/
 │   │   ├── bot/               # Discord bot (discord.js v14)
+│   │   ├── bot-kit/           # Bot handler base classes + BotFeature contract (shared with features)
 │   │   ├── help/              # VitePress help site (docs.distopia.top, GitHub Pages)
 │   │   ├── schedulemanager/   # Cron ticker; calls web's Scheduler RPC on each tick
 │   │   ├── searchengine/      # Orama search index; serves SearchEngine RPC to web
 │   │   ├── verify/            # Optional; serves VerifyService by delegating to a plugin file
 │   │   └── web/               # Web frontend (SvelteKit / Svelte 5)
 │   ├── application/
-│   │   └── core/         # Application core services
+│   │   ├── core/         # Application core services
+│   │   ├── feature/      # One workspace package per feature, auto-loaded (see "Features" below)
+│   │   ├── feature-loader/   # Generated per-layer registries of every feature
+│   │   └── schedule/     # node-cron wrapper + ScheduleFeature contract
 │   ├── domain/
 │   │   ├── model/        # Domain models
 │   │   └── repository/   # Repository interfaces (memory / search)
@@ -121,12 +125,16 @@ distopia/
 | Directory | Package name |
 |---|---|
 | `src/presentation/bot` | `presentation-bot` |
+| `src/presentation/bot-kit` | `presentation-bot-kit` |
 | `src/presentation/help` | `presentation-help` |
 | `src/presentation/schedulemanager` | `presentation-schedulemanager` |
 | `src/presentation/searchengine` | `presentation-searchengine` |
 | `src/presentation/verify` | `presentation-verify` |
 | `src/presentation/web` | `presentation-web` |
 | `src/application/core` | `app-core` |
+| `src/application/feature/<name>` | `feature-<name>` |
+| `src/application/feature-loader` | `app-feature-loader` |
+| `src/application/schedule` | `app-schedule` |
 | `src/infrastructure/database` | `infra-database` |
 | `src/infrastructure/diff` | `infra-diff` |
 | `src/infrastructure/discord` | `infra-discord` |
@@ -326,6 +334,35 @@ only used for Storybook PR previews (`preview.yml`).
 
 ---
 
+## Features (`src/application/feature/*`)
+
+Each feature is its own workspace package (`feature-<name>`) that presentation layers load
+automatically — no presentation code names a feature. A feature opts into a layer by adding
+that layer's entry to its `package.json` `exports`, whose module default-exports the layer's
+contract type:
+
+| Export | Contract | Loaded by |
+|---|---|---|
+| `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries | `presentation-bot` |
+| `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-web` runs the tasks (`RunFeatureTasks` RPC); `presentation-schedulemanager` ticks each cron key |
+
+`app-feature-loader` is the only package that knows the feature list. Its `build`
+(`scripts/gen.ts`) scans `src/application/feature/`, rewrites its own `dependencies` to list
+every `feature-*` package, and generates `src/<layer>.auto.ts` (`features: <Contract>[]`,
+imported by package name). Presentation layers import `app-feature-loader/<layer>`.
+
+Dependency direction: `feature-*` → `presentation-bot-kit` (handler base classes,
+`validator`, `codeblock`, `component/*`) ← `presentation-bot` → `app-feature-loader` →
+`feature-*`. Features must **never** depend on `presentation-bot` itself — that's a cycle
+turbo rejects; anything a feature needs from the bot belongs in `presentation-bot-kit`.
+
+Adding a feature: create `src/application/feature/<name>/` (copy `stat-channel`'s
+`package.json`/`tsconfig.json`), then `sudo bun run build` (adds it to the loader's deps) and
+`sudo bun install` (links it). `feature-stat-channel` is the reference implementation; the
+rest of the bot handlers and `app-core` services are still being migrated into features.
+
+---
+
 ## Discord Bot Structure (`presentation-bot`)
 
 Key layout under `src/presentation/bot/src/`:
@@ -336,15 +373,6 @@ src/
 │   ├── GuildMemberAddHandler.ts       # member join
 │   ├── MessageCreateHandler.ts        # message receive
 │   └── InteractionCreateHandler/
-│       ├── Base/                      # abstract base classes
-│       │   ├── ChatInputCommandInteractionBase.ts
-│       │   ├── ButtonInteractionBase.ts
-│       │   ├── ModalInteractionBase.ts
-│       │   ├── StringSelectMenuInteractionBase.ts
-│       │   ├── UserSelectMenuInteractionBase.ts
-│       │   ├── RoleSelectMenuInteractionBase.ts
-│       │   └── Error/
-│       │       └── GuildParseError.ts
 │       ├── ChatInputCommand/           # slash commands
 │       ├── Button/                     # button handlers
 │       ├── Modal/                      # modal handlers
@@ -353,8 +381,11 @@ src/
 │       ├── UserSelectMenu/             # user select menus
 │       └── RoleSelectMenu/             # role select menus
 └── utils/
-    └── validator.ts                    # Zod wrapper for Discord input validation
 ```
+
+Handler base classes (`base/*`, incl. `base/Error/GuildParseError`), the Zod `validator`,
+`codeblock` and shared `component/*` live in `presentation-bot-kit` so feature packages can
+use them too — import them as `presentation-bot-kit/base/...`.
 
 `*.auto.ts` files (`Buttons.auto.ts`, `ChatInputCommands.auto.ts`, `StringSelectMenus.auto.ts`,
 etc.) are auto-generated by `bun run build`, which scans these directories and regenerates
@@ -373,8 +404,8 @@ import {
   type CacheType,
   type PermissionResolvable,
 } from "discord.js";
-import { ChatInputCommandInteractionBase } from "../Base/ChatInputCommandInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
+import { ChatInputCommandInteractionBase } from "presentation-bot-kit/base/ChatInputCommandInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
 export class MyCommand extends ChatInputCommandInteractionBase {
   public override commandName: string = "my-command";
@@ -411,7 +442,7 @@ menu bases — replace `exec`'s signature with the relevant interaction type.
 
 ```typescript
 import z from "zod";
-import { validator, type ValidateResult } from "../../../utils/validator";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 
 const OptionsSchema = z.object({
   message: z.string().min(1).max(2000),

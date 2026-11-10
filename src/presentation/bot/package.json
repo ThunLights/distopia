@@ -8,9 +8,6 @@
     },
     "./page/*": {
       "import": "./src/EventHandler/InteractionCreateHandler/Page/*.ts"
-    },
-    "./component/*": {
-      "import": "./src/EventHandler/InteractionCreateHandler/Component/*.ts"
     }
   },
   "scripts": {
@@ -29,9 +26,8 @@
     "@connectrpc/connect-node": "catalog:",
     "@discordjs/voice": "catalog:",
     "@noble/ciphers": "catalog:",
-    "@standard-schema/spec": "catalog:",
     "app-core": "workspace:*",
-    "deepmerge": "4.3.1",
+    "app-feature-loader": "workspace:*",
     "discord.js": "catalog:",
     "domain-model": "workspace:*",
     "ffmpeg-static": "catalog:",
@@ -43,6 +39,7 @@
     "infra-redis": "workspace:*",
     "infra-rpc": "workspace:*",
     "opusscript": "catalog:",
+    "presentation-bot-kit": "workspace:*",
     "prism-media": "catalog:",
     "repo-redis": "workspace:*",
     "repo-search": "workspace:*",

@@ -9,12 +9,12 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 
 import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/lists/blackList";
-import { ValidateError, validator } from "../../../utils/validator";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { ModalSended } from "../Base/Modal/ModalSended";
 
 const customIdPrefix = "blackListEditorPermissionOpen:";
 

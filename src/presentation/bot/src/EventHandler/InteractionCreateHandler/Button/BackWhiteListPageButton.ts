@@ -7,9 +7,9 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 export class BackWhiteListPageButton extends ButtonInteractionBase {

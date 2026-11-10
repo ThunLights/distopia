@@ -13,8 +13,7 @@ import {
   type PermissionResolvable,
   InteractionResponse,
 } from "discord.js";
-
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
 const backAntiRaidPageButton = () =>
   new ButtonBuilder()

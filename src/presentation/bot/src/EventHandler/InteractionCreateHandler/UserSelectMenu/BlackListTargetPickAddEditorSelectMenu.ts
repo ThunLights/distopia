@@ -9,12 +9,11 @@ import {
   type MessagePayload,
   type UserSelectMenuInteraction,
 } from "discord.js";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
+import { UserSelectMenuInteractionBase } from "presentation-bot-kit/base/UserSelectMenuInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
-
-import { ValidateError, validator } from "../../../utils/validator";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { ModalSended } from "../Base/Modal/ModalSended";
-import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 
 const customIdPrefix = "blackListTargetPickAddEditor:";
 

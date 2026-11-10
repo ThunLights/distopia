@@ -1,4 +1,5 @@
 import type { AppCore } from "app-core";
+import { features } from "app-feature-loader/bot";
 import {
   ActionRowBuilder,
   EmbedBuilder,
@@ -49,11 +50,15 @@ export async function page(core: AppCore, guild: Guild): Promise<InteractionRepl
       new StringSelectMenuOptionBuilder().setLabel("ログ設定").setValue("log"),
       new StringSelectMenuOptionBuilder().setLabel("ホワイトリスト設定").setValue("whiteList"),
       new StringSelectMenuOptionBuilder().setLabel("ブラックリスト設定").setValue("blackList"),
-      new StringSelectMenuOptionBuilder().setLabel("統計チャンネル設定").setValue("statChannel"),
       new StringSelectMenuOptionBuilder()
         .setLabel("ピン止めメッセージ設定")
         .setValue("stickyMessage"),
       new StringSelectMenuOptionBuilder().setLabel("チケット設定").setValue("ticket"),
+      ...features
+        .flatMap((f) => f.settings ?? [])
+        .map(({ label, value }) =>
+          new StringSelectMenuOptionBuilder().setLabel(label).setValue(value),
+        ),
     );
 
   return {

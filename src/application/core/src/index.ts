@@ -14,7 +14,6 @@ import { Panel } from "./Panel";
 import { Ranking } from "./Ranking";
 import { RateLimit } from "./RateLimit";
 import { Record } from "./Record";
-import { StatChannel } from "./StatChannel";
 import { StickyMessage } from "./StickyMessage";
 import { Ticket } from "./Ticket";
 import { Tts } from "./Tts";
@@ -38,7 +37,6 @@ export class AppCore extends Base {
   public readonly oauth2 = new OAuth2(this.state, this.guild);
   public readonly panel = new Panel(this.state);
   public readonly ratelimit = new RateLimit(this.state);
-  public readonly statChannel = new StatChannel(this.state, this.record, this.guild);
   public readonly stickyMessage = new StickyMessage(this.state);
   public readonly ticket = new Ticket(this.state, this.guild);
   public readonly tts = new Tts(this.state, this.guild);
@@ -136,5 +134,4 @@ export class AppCore extends Base {
 export * from "./types/UserBumpRanking";
 export * from "./types/GuildMetaData";
 export * from "./types/RootPage";
-export type { StatChannelField } from "./StatChannel";
 export type { RankCardProfile } from "./Level";

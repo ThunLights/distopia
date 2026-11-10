@@ -13,10 +13,10 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
 import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 
 export class LogBulkClearButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

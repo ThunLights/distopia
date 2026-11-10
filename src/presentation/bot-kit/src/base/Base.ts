@@ -1,0 +1,145 @@
+import type { AppCore } from "app-core";
+import {
+  type BaseInteraction,
+  type InteractionReplyOptions,
+  type PermissionResolvable,
+} from "discord.js";
+import type { Guild, User } from "domain-model";
+
+import { codeBlock } from "../codeblock";
+import { GuildParseError } from "./Error/GuildParseError";
+import { PermissionError } from "./Error/PermissionError";
+import { PermissionSuccess } from "./Permission/PermissionSuccess";
+
+export abstract class Base<T extends BaseInteraction, R = void> {
+  public readonly requireBotGuildPermissions: PermissionResolvable[] = [];
+  public readonly requireBotChannelPermissions: PermissionResolvable[] = [];
+  public readonly requireUserGuildPermissions: PermissionResolvable[] = [];
+
+  constructor(protected readonly core: AppCore) {}
+
+  protected async checkPermission(interaction: T) {
+    if (!interaction.guild?.members.me?.permissions.has(this.requireBotGuildPermissions)) {
+      return new PermissionError(
+        [
+          "このコマンドの実行にはボットに以下の権限が必要です。",
+          await codeBlock(this.requireBotGuildPermissions.join(" ")),
+          "サーバー権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
+        ].join("\n"),
+      );
+    }
+    if (
+      !interaction.channelId ||
+      !interaction.guild?.members.me
+        ?.permissionsIn(interaction.channelId)
+        .has(this.requireBotChannelPermissions)
+    ) {
+      return new PermissionError(
+        [
+          "このコマンドの実行にはボットに以下のチャンネル権限が必要です。",
+          await codeBlock(this.requireBotChannelPermissions.join(" ")),
+          "チャンネル権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
+        ].join("\n"),
+      );
+    }
+    if (!interaction.memberPermissions?.has(this.requireUserGuildPermissions)) {
+      return new PermissionError(
+        [
+          "このコマンドの実行にはユーザーに以下の権限が必要です。",
+          await codeBlock(this.requireUserGuildPermissions.join(" ")),
+          "ユーザー権限が足りているのに実行できない場合はボット側のインテント設定が原因の可能性が高いです。",
+        ].join("\n"),
+      );
+    }
+
+    return new PermissionSuccess();
+  }
+
+  protected async checkOwnerPermission(interaction: T) {
+    const { guild, user } = interaction;
+
+    if (!guild) {
+      return new PermissionError("サーバーでの権限かボットのインテントが足りません");
+    }
+
+    if (guild.ownerId === user.id) {
+      return new PermissionSuccess();
+    }
+
+    const setting = await this.core.guild.getSetting(guild.id);
+
+    if (setting?.actingOwner === user.id) {
+      return new PermissionSuccess();
+    }
+
+    return new PermissionError(
+      "このコマンドの実行にはサーバーオーナーまたはオーナー代理の権限が必要です。",
+    );
+  }
+
+  protected async checkBlackListOwnerPermission(blackListId: number, userId: string) {
+    if (await this.core.blackList.isOwner(blackListId, userId)) {
+      return new PermissionSuccess();
+    }
+
+    return new PermissionError("このブラックリストの操作はオーナーのみ行えます。");
+  }
+
+  protected async checkBlackListOwnerOrEditorPermission(blackListId: number, userId: string) {
+    if (await this.core.blackList.isOwnerOrEditor(blackListId, userId)) {
+      return new PermissionSuccess();
+    }
+
+    return new PermissionError("このブラックリストを操作する権限がありません。");
+  }
+
+  protected async parseUser(interaction: T): Promise<User> {
+    const { user } = interaction;
+    return {
+      id: user.id,
+      name: user.username,
+      displayName: user.displayName,
+      globalName: user.globalName ?? undefined,
+      avatarUrl: user.avatarURL() ?? undefined,
+      bannerUrl: user.bannerURL() ?? undefined,
+    };
+  }
+
+  protected async parseGuild(interaction: T): Promise<Guild | GuildParseError> {
+    const { guild } = interaction;
+    if (!guild) {
+      return new GuildParseError("サーバーでの権限かボットのインテントが足りません");
+    }
+
+    return {
+      id: guild.id,
+      name: guild.name,
+      ownerId: guild.ownerId,
+      description: guild.description ?? undefined,
+      icon: guild.icon ?? undefined,
+      banner: guild.banner ?? undefined,
+    };
+  }
+
+  /**
+   * Called by the interaction dispatcher (`EventHandler/InteractionCreateHandler/index.ts`)
+   * for every registered handler of the interaction's kind, in order, until one returns true;
+   * that handler's `run` is then invoked. Typically compares `interaction.commandName` or
+   * `interaction.customId` against a field the concrete handler declares.
+   */
+  public abstract match(interaction: T): Promise<boolean>;
+
+  /**
+   * Called by the dispatcher once `match` returns true. Implemented as a template method by
+   * the concrete base classes (`CommandInteractionBase`, `MessageComponentInteractionBase`,
+   * `ModalSubmitInteractionBase`, ...): check permissions, parse/validate options, then call
+   * the leaf handler's `exec`. Leaf handlers implement `exec` (and `parseOptions` where
+   * applicable) rather than overriding `run` directly.
+   *
+   * Permission and validation failures reply with a plain InteractionReplyOptions object
+   * regardless of what R is narrowed to in a subclass -- included in the return type here
+   * (rather than force-cast to R at each call site) so that narrowing R to e.g. just
+   * `string` doesn't silently lie about what run() can actually return.
+   */
+  public abstract run(interaction: T): Promise<R | InteractionReplyOptions>;
+}

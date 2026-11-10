@@ -7,11 +7,11 @@ import {
   type PermissionResolvable,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ValidateError, validator } from "../../../utils/validator";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const BlackListIdSchema = z.coerce.number().int();

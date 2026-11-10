@@ -18,6 +18,7 @@
   "dependencies": {
     "@connectrpc/connect": "catalog:",
     "@connectrpc/connect-node": "catalog:",
+    "app-feature-loader": "workspace:*",
     "app-schedule": "workspace:*",
     "infra-rpc": "workspace:*",
     "node-cron": "4.6.0"

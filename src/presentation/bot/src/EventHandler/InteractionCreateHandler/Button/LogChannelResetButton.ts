@@ -7,10 +7,10 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
 import { isLogField } from "../../../utils/logging/log";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { logPage } from "../Page/LogPage";
 
 const customIdPrefix = "logChannelReset:";

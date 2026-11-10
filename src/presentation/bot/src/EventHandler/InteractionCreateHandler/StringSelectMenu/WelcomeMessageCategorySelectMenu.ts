@@ -13,10 +13,10 @@ import {
   ChannelType,
   EmbedBuilder,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
 import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
 export class WelcomeMessageCategorySelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

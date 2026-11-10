@@ -7,12 +7,12 @@ import {
   type PermissionResolvable,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ValidateError, validator } from "../../../utils/validator";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 import { blackListDetailPage } from "../Page/BlackListDetailPage";
 
 const customIdPrefix = "blackListBanTags:";

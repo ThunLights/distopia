@@ -7,9 +7,9 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 
 import { ticketActor } from "../../../utils/ticket/access";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 
 export class TicketClaimButton extends ButtonInteractionBase {
   public override customId: string = "ticketClaim";

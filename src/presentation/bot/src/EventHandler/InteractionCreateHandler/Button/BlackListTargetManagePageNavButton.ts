@@ -5,10 +5,10 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ValidateError, validator } from "../../../utils/validator";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";
 
 const customIdPrefix = "blackListTargetManagePageNav:";

@@ -15,9 +15,8 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
-
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { ModalSended } from "../Base/Modal/ModalSended";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
 
 export class BlackListManageCreateOpenButton extends ButtonInteractionBase {
   public override customId: string = "blackListManageCreateOpen";

@@ -9,9 +9,9 @@ import {
   type PermissionResolvable,
   type UserSelectMenuInteraction,
 } from "discord.js";
+import { UserSelectMenuInteractionBase } from "presentation-bot-kit/base/UserSelectMenuInteractionBase";
 
 import { TICKET_ACCESS, ticketActor } from "../../../utils/ticket/access";
-import { UserSelectMenuInteractionBase } from "../Base/UserSelectMenuInteractionBase";
 
 export class TicketMemberSelectMenu extends UserSelectMenuInteractionBase {
   // Editing channel overwrites requires ManageRoles, unlike creating them with the channel.

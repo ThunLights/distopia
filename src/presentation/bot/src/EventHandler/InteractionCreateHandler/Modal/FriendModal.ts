@@ -7,11 +7,11 @@ import {
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { page } from "../Page/Settings";
 
 const OptionsSchema = z.object({

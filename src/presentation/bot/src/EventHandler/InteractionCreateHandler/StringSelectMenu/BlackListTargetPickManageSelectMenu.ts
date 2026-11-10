@@ -10,10 +10,9 @@ import {
   type MessagePayload,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
-
-import { ValidateError, validator } from "../../../utils/validator";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
 const customIdPrefix = "blackListTargetPickManage:";
 

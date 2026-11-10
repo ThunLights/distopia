@@ -9,8 +9,7 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   type User,
 } from "discord.js";
-
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 
 type Options = {
   user: User | null;

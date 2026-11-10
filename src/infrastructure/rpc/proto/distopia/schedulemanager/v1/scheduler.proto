@@ -8,6 +8,8 @@ package distopia.schedulemanager.v1;
 service SchedulerService {
   rpc RunFiveMinuteTasks(RunFiveMinuteTasksRequest) returns (RunFiveMinuteTasksResponse);
   rpc RunTwentyMinuteTasks(RunTwentyMinuteTasksRequest) returns (RunTwentyMinuteTasksResponse);
+  // Runs every src/application/feature/* "./schedule" task registered under `cron`.
+  rpc RunFeatureTasks(RunFeatureTasksRequest) returns (RunFeatureTasksResponse);
 }
 
 message RunFiveMinuteTasksRequest {}
@@ -15,3 +17,8 @@ message RunFiveMinuteTasksResponse {}
 
 message RunTwentyMinuteTasksRequest {}
 message RunTwentyMinuteTasksResponse {}
+
+message RunFeatureTasksRequest {
+  string cron = 1;
+}
+message RunFeatureTasksResponse {}
