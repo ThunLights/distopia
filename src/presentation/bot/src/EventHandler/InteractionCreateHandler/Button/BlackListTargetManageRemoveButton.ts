@@ -6,10 +6,10 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 
 import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/lists/blackList";
-import { ValidateError, validator } from "../../../utils/validator";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
 import { blackListTargetManageDetailPage } from "../Page/BlackListTargetManageDetailPage";
 
 const customIdPrefix = "blackListTargetManageRemove:";

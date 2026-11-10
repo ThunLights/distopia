@@ -7,9 +7,9 @@ import {
   type PermissionResolvable,
   InteractionResponse,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { RoleSelectMenuInteractionBase } from "presentation-bot-kit/base/RoleSelectMenuInteractionBase";
 
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { RoleSelectMenuInteractionBase } from "../Base/RoleSelectMenuInteractionBase";
 import { bumpPage } from "../Page/BumpPage";
 
 export class BumpRoleSelectMenu extends RoleSelectMenuInteractionBase {

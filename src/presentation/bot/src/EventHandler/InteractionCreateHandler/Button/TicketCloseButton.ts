@@ -9,8 +9,7 @@ import {
   type InteractionReplyOptions,
   type MessagePayload,
 } from "discord.js";
-
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 
 export class TicketCloseButton extends ButtonInteractionBase {
   public override customId: string = "ticketClose";

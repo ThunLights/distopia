@@ -7,9 +7,9 @@ import {
   type PermissionResolvable,
   type RoleSelectMenuInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { RoleSelectMenuInteractionBase } from "presentation-bot-kit/base/RoleSelectMenuInteractionBase";
 
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { RoleSelectMenuInteractionBase } from "../Base/RoleSelectMenuInteractionBase";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 export class WhiteListAddRoleSelectMenu extends RoleSelectMenuInteractionBase {

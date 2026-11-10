@@ -10,6 +10,8 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
   type Role,
 } from "discord.js";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import {
@@ -18,8 +20,6 @@ import {
   ROLE_PANEL_MAX_ROLES,
   rolePanelRoleIds,
 } from "../../../utils/rolePanel";
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
 
 const roleOption = {
   type: ApplicationCommandOptionType.Role,

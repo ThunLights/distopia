@@ -15,10 +15,9 @@ import {
   ChannelType,
   type PermissionResolvable,
 } from "discord.js";
-
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { ModalSended } from "../Base/Modal/ModalSended";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
 
 export class WebEditChangeButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

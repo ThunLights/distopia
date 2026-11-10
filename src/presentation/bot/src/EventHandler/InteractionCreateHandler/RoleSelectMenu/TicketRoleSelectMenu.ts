@@ -7,14 +7,14 @@ import {
   type PermissionResolvable,
   InteractionResponse,
 } from "discord.js";
-import z from "zod";
-
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { GuildParseError } from "../Base/Error/GuildParseError";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import {
   RoleSelectMenuInteractionBase,
   type OptionsSchema as BaseOptionsSchema,
-} from "../Base/RoleSelectMenuInteractionBase";
+} from "presentation-bot-kit/base/RoleSelectMenuInteractionBase";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
+import z from "zod";
+
 import { ticketPage } from "../Page/TicketPage";
 
 const OptionsSchema = z.object({

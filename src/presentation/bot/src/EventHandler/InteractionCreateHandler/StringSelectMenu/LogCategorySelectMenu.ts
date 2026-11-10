@@ -13,10 +13,10 @@ import {
   ChannelType,
   EmbedBuilder,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
 import { isLogField, logFieldLabels } from "../../../utils/logging/log";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
 export class LogCategorySelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

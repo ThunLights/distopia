@@ -75,6 +75,8 @@
     "@sentry/sveltekit": "11.4.0",
     "@standard-schema/spec": "catalog:",
     "app-core": "workspace:*",
+    "app-feature-loader": "workspace:*",
+    "app-schedule": "workspace:*",
     "discord.js": "catalog:",
     "distopia": "workspace:*",
     "dotenv": "18.0.7",

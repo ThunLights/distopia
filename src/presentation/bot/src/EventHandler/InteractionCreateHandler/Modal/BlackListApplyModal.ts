@@ -5,12 +5,12 @@ import {
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListPage } from "../Page/BlackListPage";
 
 const OptionsSchema = z.object({

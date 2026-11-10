@@ -12,6 +12,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 import type { Guild } from "domain-model";
+import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
 import {
   buildWhiteListFieldValue,
@@ -21,7 +22,6 @@ import {
   SELECT_MENU_MAX_OPTIONS,
   truncateSelectMenuLabel,
 } from "../../../utils/lists/whiteList";
-import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function whiteListPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const whiteList = await core.guild.getWhiteList(guild.id);

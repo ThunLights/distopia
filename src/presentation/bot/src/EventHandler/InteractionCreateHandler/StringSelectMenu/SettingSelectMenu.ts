@@ -1,3 +1,4 @@
+import { features } from "app-feature-loader/bot";
 import {
   type StringSelectMenuInteraction,
   type CacheType,
@@ -12,15 +13,14 @@ import {
   type PermissionResolvable,
   InteractionResponse,
 } from "discord.js";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
+import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
-import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 import { antiRaidPage } from "../Page/AntiRaidPage";
 import { blackListPage } from "../Page/BlackListPage";
 import { bumpPage } from "../Page/BumpPage";
 import { logPage } from "../Page/LogPage";
-import { statChannelPage } from "../Page/StatChannelPage";
 import { stickyMessagePage } from "../Page/StickyMessagePage";
 import { ticketPage } from "../Page/TicketPage";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
@@ -35,6 +35,25 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
     options: { value: string },
   ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
     const { value } = options;
+
+    const featureSetting = features
+      .flatMap((f) => f.settings ?? [])
+      .find((setting) => setting.value === value);
+
+    if (featureSetting) {
+      const guild = await this.parseGuild(interaction);
+
+      if (guild instanceof GuildParseError) {
+        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
+      }
+
+      const { content, components, embeds, allowedMentions, files } = await featureSetting.page(
+        this.core,
+        guild,
+      );
+
+      return await interaction.update({ content, components, embeds, allowedMentions, files });
+    }
 
     if (value === "actingOwner") {
       const embed = new EmbedBuilder()
@@ -160,24 +179,6 @@ export class SettingSelectMenu extends StringSelectMenuInteractionBase {
       const blackListPagePayload = await blackListPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = blackListPagePayload;
-
-      return await interaction.update({
-        content,
-        components,
-        embeds,
-        allowedMentions,
-        files,
-      });
-    } else if (value === "statChannel") {
-      const guild = await this.parseGuild(interaction);
-
-      if (guild instanceof GuildParseError) {
-        return { content: guild.message, flags: [MessageFlags.Ephemeral] };
-      }
-
-      const statChannelPagePayload = await statChannelPage(this.core, guild);
-
-      const { content, components, embeds, allowedMentions, files } = statChannelPagePayload;
 
       return await interaction.update({
         content,

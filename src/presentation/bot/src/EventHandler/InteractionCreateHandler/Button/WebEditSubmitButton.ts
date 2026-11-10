@@ -7,10 +7,10 @@ import {
   MessageFlags,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import type { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
 
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
-import type { ModalSended } from "../Base/Modal/ModalSended";
 import { page } from "../Page/WebEdit";
 
 export class WebEditSubmitButton extends ButtonInteractionBase {

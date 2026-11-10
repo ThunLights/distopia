@@ -10,8 +10,7 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 import type { Guild } from "domain-model";
-
-import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
+import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
 export async function ticketPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const settings = await core.guild.getSetting(guild.id);

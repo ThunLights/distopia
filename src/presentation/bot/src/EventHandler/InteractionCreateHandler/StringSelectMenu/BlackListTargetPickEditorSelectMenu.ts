@@ -10,12 +10,12 @@ import {
   type MessagePayload,
   type StringSelectMenuInteraction,
 } from "discord.js";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { blackListEditorPermissionSummary } from "../../../utils/lists/blackList";
-import { ValidateError, validator } from "../../../utils/validator";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { StringSelectMenuInteractionBase } from "../Base/StringSelectMenuInteractionBase";
 
 const customIdPrefix = "blackListTargetPickEditor:";
 

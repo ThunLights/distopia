@@ -10,10 +10,9 @@ import {
   type ModalSubmitInteraction,
   type PermissionResolvable,
 } from "discord.js";
+import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
-
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 
 const OptionsSchema = z.object({
   title: z.string().min(1).max(100),

@@ -20,6 +20,10 @@ import {
   type InteractionReplyOptions,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
+import { validator, ValidateError, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import {
@@ -30,10 +34,6 @@ import {
   truncateSelectMenuLabel,
   type BlackListPermission,
 } from "../../../utils/lists/blackList";
-import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { ModalSended } from "../Base/Modal/ModalSended";
 import { blackListShowPage } from "../Page/BlackListShowPage";
 import { blackListTagsPickListPage } from "../Page/BlackListTagsPickListPage";
 import { blackListTargetManagePage } from "../Page/BlackListTargetManagePage";

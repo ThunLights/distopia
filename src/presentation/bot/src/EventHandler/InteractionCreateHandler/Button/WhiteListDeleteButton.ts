@@ -7,11 +7,11 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { ValidateError, validator } from "presentation-bot-kit/validator";
 
 import { WhiteListTargetSchema, decodeWhiteListTargetValue } from "../../../utils/lists/whiteList";
-import { ValidateError, validator } from "../../../utils/validator";
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { whiteListPage } from "../Page/WhiteListPage";
 
 const customIdPrefix = "whiteListDelete:";

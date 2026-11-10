@@ -8,10 +8,10 @@ import {
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
 import { RateLimitError } from "domain-model";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
 import { scheduleBumpNotice } from "../../../utils/bump/notice";
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 
 type Options = {};
 

@@ -9,9 +9,9 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 import type { Guild } from "domain-model";
+import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
 import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
-import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function logPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const settings = await core.log.getSetting(guild.id);

@@ -7,10 +7,10 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
+import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
 import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
-import { ChannelSelectMenuInteractionBase } from "../Base/ChannelSelectMenuInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
 
 const customIdPrefix = "welcomeMessageChannel:";

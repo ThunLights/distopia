@@ -9,10 +9,10 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 import type { Guild } from "domain-model";
+import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
 import { buildBlackListFieldValue } from "../../../utils/lists/blackList";
 import { paginate } from "../../../utils/pagination";
-import { backSettingsPageButton } from "../Component/Button/BackSettingsPageButton";
 
 export async function blackListPage(
   core: AppCore,

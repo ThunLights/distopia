@@ -11,9 +11,8 @@ import {
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
-
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { ModalSended } from "../Base/Modal/ModalSended";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
 
 export class BumpNoticeContentSubmitButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

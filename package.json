@@ -36,6 +36,7 @@
     "packages": [
       "./lib/*",
       "./src/*/*",
+      "./src/application/feature/*",
       "./src/domain/repository/*"
     ],
     "catalog": {

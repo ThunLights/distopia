@@ -6,9 +6,9 @@ import {
   type InteractionResponse,
   type MessagePayload,
 } from "discord.js";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { ButtonInteractionBase } from "../Base/ButtonInteractionBase";
-import { GuildParseError } from "../Base/Error/GuildParseError";
 import { page } from "../Page/Ranking/Level";
 
 export class PanelRankingLevelButton extends ButtonInteractionBase {

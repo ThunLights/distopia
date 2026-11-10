@@ -12,11 +12,11 @@ import {
   type ModalSubmitInteraction,
   type PermissionResolvable,
 } from "discord.js";
+import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { TICKET_ACCESS } from "../../../utils/ticket/access";
-import { validator, type ValidateResult } from "../../../utils/validator";
-import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 
 // Trimmed so a whitespace-only value cannot reach Discord, which rejects blank embed fields.
 const OptionsSchema = z.object({

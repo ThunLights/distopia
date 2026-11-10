@@ -5,12 +5,12 @@ import {
   type InteractionReplyOptions,
   type ModalSubmitInteraction,
 } from "discord.js";
+import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
+import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { validator, ValidateError, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { BlackListTargetRefSchema, decodeBlackListTargetRef } from "../../../utils/lists/blackList";
-import { validator, ValidateError, type ValidateResult } from "../../../utils/validator";
-import { PermissionError } from "../Base/Error/PermissionError";
-import { ModalSubmitInteractionBase } from "../Base/ModalSubmitInteractionBase";
 import { blackListTargetManageEditorsPage } from "../Page/BlackListTargetManageEditorsPage";
 
 const customIdPrefix = "blackListEditorPermission:";

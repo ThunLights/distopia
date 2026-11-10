@@ -12,9 +12,8 @@ import {
   type MessagePayload,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
-
-import { ChatInputCommandBase } from "../Base/ChatInputCommandBase";
-import { ModalSended } from "../Base/Modal/ModalSended";
+import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
+import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
 
 type Options = {};
 

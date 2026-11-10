@@ -11,8 +11,8 @@ import type {
   User,
 } from "discord.js";
 import { lineDiff } from "infra-diff";
+import { codeBlock, codeBlockChunks } from "presentation-bot-kit/codeblock";
 
-import { codeBlock, codeBlockChunks } from "../codeblock";
 import type { AllLogField, ChannelLogField } from "./log";
 
 export type LogEmbedField = { name: string; value: string; inline?: boolean };
