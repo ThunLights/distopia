@@ -8,8 +8,7 @@ import {
 } from "discord.js";
 import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
-
-import { page } from "../Page/Ranking/Rate";
+import { page } from "presentation-bot-kit/page/Ranking/Rate";
 
 export class PanelRankingRateButton extends ButtonInteractionBase {
   public override customId: string = "panelRankingRate";

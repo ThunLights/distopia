@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "app-schedule": "workspace:*",
+    "feature-owner": "workspace:*",
     "feature-stat-channel": "workspace:*",
     "presentation-bot-kit": "workspace:*"
   },

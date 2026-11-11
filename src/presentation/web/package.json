@@ -90,7 +90,7 @@
     "jsonwebtoken": "9.0.3",
     "layerchart": "2.5.0",
     "opusscript": "catalog:",
-    "presentation-bot": "workspace:*",
+    "presentation-bot-kit": "workspace:*",
     "prism-media": "catalog:",
     "repo-redis": "workspace:*",
     "repo-search": "workspace:*",
