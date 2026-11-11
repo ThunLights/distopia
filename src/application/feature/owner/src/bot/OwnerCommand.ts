@@ -17,7 +17,7 @@ import { codeBlock } from "presentation-bot-kit/codeblock";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { SystemStatus } from "../../../utils/status/SystemStatus";
+import { SystemStatus } from "./SystemStatus";
 
 const OptionsSchema = z.object({
   subCommand: z.string(),

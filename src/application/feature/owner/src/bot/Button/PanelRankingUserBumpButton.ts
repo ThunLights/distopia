@@ -8,11 +8,10 @@ import {
 } from "discord.js";
 import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { page } from "presentation-bot-kit/page/Ranking/UserBump";
 
-import { page } from "../Page/Ranking/Level";
-
-export class PanelRankingLevelButton extends ButtonInteractionBase {
-  public override customId: string = "panelRankingLevel";
+export class PanelRankingUserBumpButton extends ButtonInteractionBase {
+  public override customId: string = "panelRankingUserBump";
 
   protected override async exec(
     interaction: ButtonInteraction<CacheType>,
@@ -38,7 +37,7 @@ export class PanelRankingLevelButton extends ButtonInteractionBase {
       guildId: guild.id,
       channelId: interaction.channelId,
       messageId: message.id,
-      type: "LevelRanking",
+      type: "UserBumpRanking",
     });
 
     return response;

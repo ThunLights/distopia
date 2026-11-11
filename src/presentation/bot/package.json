@@ -5,9 +5,6 @@
   "exports": {
     ".": {
       "import": "./src/index.ts"
-    },
-    "./page/*": {
-      "import": "./src/EventHandler/InteractionCreateHandler/Page/*.ts"
     }
   },
   "scripts": {

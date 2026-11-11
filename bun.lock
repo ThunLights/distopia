@@ -84,8 +84,26 @@
       "name": "app-feature-loader",
       "dependencies": {
         "app-schedule": "workspace:*",
+        "feature-owner": "workspace:*",
         "feature-stat-channel": "workspace:*",
         "presentation-bot-kit": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/owner": {
+      "name": "feature-owner",
+      "dependencies": {
+        "discord.js": "catalog:",
+        "presentation-bot-kit": "workspace:*",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -551,7 +569,7 @@
         "jsonwebtoken": "9.0.3",
         "layerchart": "2.5.0",
         "opusscript": "catalog:",
-        "presentation-bot": "workspace:*",
+        "presentation-bot-kit": "workspace:*",
         "prism-media": "catalog:",
         "repo-redis": "workspace:*",
         "repo-search": "workspace:*",
@@ -2228,6 +2246,8 @@
     "fast-wrap-ansi": ["fast-wrap-ansi@0.2.2", "", { "dependencies": { "fast-string-width": "^3.0.2" } }, "sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q=="],
 
     "fdir": ["fdir@6.5.0", "", { "peerDependencies": { "picomatch": "^3 || ^4" }, "optionalPeers": ["picomatch"] }, "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="],
+
+    "feature-owner": ["feature-owner@workspace:src/application/feature/owner"],
 
     "feature-stat-channel": ["feature-stat-channel@workspace:src/application/feature/stat-channel"],
 

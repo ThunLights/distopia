@@ -12,6 +12,9 @@
     "./codeblock": {
       "import": "./src/codeblock.ts"
     },
+    "./page/*": {
+      "import": "./src/page/*.ts"
+    },
     "./feature": {
       "import": "./src/feature.ts"
     },

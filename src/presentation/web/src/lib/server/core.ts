@@ -7,9 +7,9 @@ import { redis } from "./redis";
 import { searchEngine } from "./search";
 import { AppCore } from "app-core";
 import type { AppState } from "app-core/AppState";
-import { page as levelRatePage } from "presentation-bot/page/Ranking/Level";
-import { page as activeRatePage } from "presentation-bot/page/Ranking/Rate";
-import { page as userBumpPage } from "presentation-bot/page/Ranking/UserBump";
+import { page as levelRatePage } from "presentation-bot-kit/page/Ranking/Level";
+import { page as activeRatePage } from "presentation-bot-kit/page/Ranking/Rate";
+import { page as userBumpPage } from "presentation-bot-kit/page/Ranking/UserBump";
 
 export function genCore(state: AppState) {
   return new AppCore(state);
