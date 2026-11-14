@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "discord-api-types": "0.38.55",
+    "discoauth": "0.3.0",
     "discord.js": "catalog:",
     "infra-http": "workspace:*"
   },

@@ -146,8 +146,8 @@ export class OAuth2 extends Base {
               icon,
               banner,
               owner,
-              approximate_member_count,
-              approximate_presence_count,
+              approximate_member_count: approximate_member_count ?? undefined,
+              approximate_presence_count: approximate_presence_count ?? undefined,
               isBotJoined,
               isPublic,
             };

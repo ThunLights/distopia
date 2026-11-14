@@ -1,3 +1,5 @@
+import { DiscordOAuth2 } from "discoauth";
+
 const AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 
 function buildAuthorizeUrl(params: Record<string, string>): string {
@@ -20,10 +22,7 @@ export function buildBotInviteUrl(clientId: string): string {
 }
 
 export function buildLoginUrl(clientId: string, redirectUri: string): string {
-  return buildAuthorizeUrl({
-    client_id: clientId,
-    response_type: "code",
-    redirect_uri: redirectUri,
-    scope: "identify guilds email guilds.join",
+  return new DiscordOAuth2({ clientId, redirectUri }).authorizeUrl({
+    scope: ["identify", "guilds", "email", "guilds.join"],
   });
 }
