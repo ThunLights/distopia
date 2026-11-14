@@ -1,4 +1,11 @@
-import { avatarUrl, bannerUrl, DiscordOAuth2, REST, type PartialGuild } from "discoauth";
+import {
+  avatarUrl,
+  bannerUrl,
+  DiscordOAuth2,
+  DiscordOAuth2Error,
+  REST,
+  type PartialGuild,
+} from "discoauth";
 import { safeFetchForDiscord, validateSafeUrl } from "infra-http";
 
 import type { Config } from ".";
@@ -88,8 +95,15 @@ export class OAuth2Controller {
     return tokens && { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
   }
 
+  // null only for invalid_grant (HTTP 400, RFC 6749 §5.2) — callers delete the stored tokens on
+  // null, so transient failures (network, 429, 5xx) must throw instead.
   public async resetAccessToken(refreshToken: string): Promise<FetchTokenResult | null> {
-    const tokens = await orNull(this.oauth.refreshToken(refreshToken));
+    const tokens = await this.oauth.refreshToken(refreshToken).catch((error: unknown) => {
+      if (error instanceof DiscordOAuth2Error && error.status === 400) {
+        return null;
+      }
+      throw error;
+    });
     return tokens && { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
   }
 
