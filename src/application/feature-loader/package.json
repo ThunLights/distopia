@@ -20,8 +20,16 @@
   },
   "dependencies": {
     "app-schedule": "workspace:*",
+    "feature-anti-raid": "workspace:*",
+    "feature-black-list": "workspace:*",
     "feature-owner": "workspace:*",
+    "feature-rank": "workspace:*",
+    "feature-review": "workspace:*",
+    "feature-role-panel": "workspace:*",
     "feature-stat-channel": "workspace:*",
+    "feature-ticket": "workspace:*",
+    "feature-web": "workspace:*",
+    "feature-white-list": "workspace:*",
     "presentation-bot-kit": "workspace:*"
   },
   "devDependencies": {

@@ -9,8 +9,7 @@ import {
 } from "discord.js";
 import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
-
-import { page } from "../Page/Settings";
+import { settingsPage } from "presentation-bot-kit/settings";
 
 export class BackSettingsPageButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -24,7 +23,10 @@ export class BackSettingsPageButton extends ButtonInteractionBase {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    const { content, components, embeds, allowedMentions, files } = await page(this.core, guild);
+    const { content, components, embeds, allowedMentions, files } = await settingsPage(
+      this.core,
+      guild,
+    );
 
     return await interaction.update({
       content,

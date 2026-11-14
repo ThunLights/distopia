@@ -17,10 +17,13 @@ import { RoleCreateHandler } from "./EventHandler/RoleCreateHandler";
 import { RoleDeleteHandler } from "./EventHandler/RoleDeleteHandler";
 import { RoleUpdateHandler } from "./EventHandler/RoleUpdateHandler";
 import { VoiceStateUpdateHandler } from "./EventHandler/VoiceStateUpdateHandler";
+import { registerSettings } from "./settings";
 import { restoreBumpNotices } from "./utils/bump/notice";
 import { restoreSessions } from "./utils/tts/session";
 
 export function handleClient(client: Client, core: AppCore) {
+  registerSettings();
+
   const interactionCreateHandler = new InteractionCreateHandler(core);
   const messageCreateHandler = new MessageCreateHandler(core);
   const messageUpdateHandler = new MessageUpdateHandler(core);

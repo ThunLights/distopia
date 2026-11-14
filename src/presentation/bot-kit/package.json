@@ -18,6 +18,12 @@
     "./feature": {
       "import": "./src/feature.ts"
     },
+    "./selectMenuFormat": {
+      "import": "./src/selectMenuFormat.ts"
+    },
+    "./settings": {
+      "import": "./src/settings.ts"
+    },
     "./validator": {
       "import": "./src/validator.ts"
     }
