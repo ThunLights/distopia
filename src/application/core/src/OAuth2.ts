@@ -44,7 +44,13 @@ export class OAuth2 extends Base {
       updatedAt,
     } of await this.state.database.userDiscord.findAll()) {
       if (Date.now() > updatedAt.getTime() + 6 * 24 * 60 * 60 * 1000) {
-        const updatedData = await this.state.discord.oauth2.resetAccessToken(refreshToken);
+        // Transient failures throw: keep the tokens and retry on the next run.
+        const updatedData = await this.state.discord.oauth2
+          .resetAccessToken(refreshToken)
+          .catch(() => undefined);
+        if (updatedData === undefined) {
+          continue;
+        }
         if (updatedData) {
           upsertQuery.push({
             userId,
@@ -146,8 +152,8 @@ export class OAuth2 extends Base {
               icon,
               banner,
               owner,
-              approximate_member_count,
-              approximate_presence_count,
+              approximate_member_count: approximate_member_count ?? undefined,
+              approximate_presence_count: approximate_presence_count ?? undefined,
               isBotJoined,
               isPublic,
             };

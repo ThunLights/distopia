@@ -1,14 +1,14 @@
-import type { APIUser } from "discord-api-types/payloads/v10";
-import type {
-  RESTAPIPartialCurrentUserGuild,
-  RESTPostOAuth2AccessTokenResult,
-} from "discord-api-types/v10";
-import type { Client, GuildFeature } from "discord.js";
-import { InvalidDomainError, LocalAddressError, safeFetchForDiscord, safeUrl } from "infra-http";
+import {
+  avatarUrl,
+  bannerUrl,
+  DiscordOAuth2,
+  DiscordOAuth2Error,
+  REST,
+  type PartialGuild,
+} from "discoauth";
+import { safeFetchForDiscord, validateSafeUrl } from "infra-http";
 
 import type { Config } from ".";
-import { sleep } from "../sleep";
-import { Base } from "./Base";
 
 export type FetchUserInfoResult = {
   id: string;
@@ -24,56 +24,50 @@ export type FetchTokenResult = {
   refreshToken: string;
 };
 
-export type Snowflake = string;
+export type Guilds = PartialGuild[];
 
-export type Permissions = string;
-
-export type Guilds = {
-  id: Snowflake;
-  name: string;
-  icon: string | null;
-  banner: string | null;
-  owner: boolean;
-  features: GuildFeature[];
-  permissions: Permissions;
-  approximate_member_count?: number;
-  approximate_presence_count?: number;
-}[];
-
-// Standalone (needs no Client or Config) so a process that never logs in to Discord, like
-// presentation-verify, can still check guild membership from a user's OAuth2 access token.
-export async function fetchOAuth2Guilds(accessToken: string): Promise<Guilds | null> {
-  const response = await safeFetchForDiscord(
-    safeUrl`https://discord.com/api/v10/users/@me/guilds?with_counts=true`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
-  );
-
-  if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
-    return null;
+// Routes discoauth's requests through safeFetchForDiscord so they keep the Discord-domain
+// allowlist and DNS pinning every other outbound call here gets.
+export async function discordFetch(input: string, init: RequestInit): Promise<Response> {
+  const url = validateSafeUrl(input);
+  if (url === null) {
+    throw new Error(`Invalid Discord API URL: ${input}`);
   }
-
-  if (response.status === 200) {
-    const body = await response.json().catch(() => null);
-    return body === null ? null : (body as RESTAPIPartialCurrentUserGuild[]);
-  } else if (response.status === 429) {
-    await sleep(1000);
-    return await fetchOAuth2Guilds(accessToken);
+  const response = await safeFetchForDiscord(url, init);
+  if (response instanceof Error) {
+    throw response;
   }
-
-  return null;
+  return response;
 }
 
-export class OAuth2Controller extends Base {
-  constructor(
-    client: Client,
-    protected readonly config: Config,
-  ) {
-    super(client);
+async function orNull<T>(promise: Promise<T>): Promise<T | null> {
+  return await promise.catch(() => null);
+}
+
+const rest = new REST({ fetch: discordFetch });
+
+// Standalone (needs no Config) so a process that never logs in to Discord, like
+// presentation-verify, can still check guild membership from a user's OAuth2 access token.
+export async function fetchOAuth2Guilds(accessToken: string): Promise<Guilds | null> {
+  return await orNull(
+    rest.request("get", "/users/@me/guilds", {
+      auth: `Bearer ${accessToken}`,
+      query: { with_counts: true },
+    }) as Promise<Guilds>,
+  );
+}
+
+export class OAuth2Controller {
+  private readonly oauth: DiscordOAuth2;
+
+  constructor(config: Config) {
+    this.oauth = new DiscordOAuth2({
+      clientId: config.id,
+      clientSecret: config.secret,
+      redirectUri: config.url,
+      botToken: config.token,
+      fetch: discordFetch,
+    });
   }
 
   public async fetchGuilds(accessToken: string): Promise<Guilds | null> {
@@ -81,106 +75,40 @@ export class OAuth2Controller extends Base {
   }
 
   public async fetchUserInfo(accessToken: string): Promise<FetchUserInfoResult | null> {
-    const response = await safeFetchForDiscord(safeUrl`https://discord.com/api/users/@me`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
+    const user = await orNull(this.oauth.getUser(accessToken));
+    if (!user) {
       return null;
     }
-
-    if (response.status === 200) {
-      const body = await response.json().catch(() => null);
-      if (body === null) return null;
-      const { id, username, email, avatar, banner } = body as APIUser;
-      return {
-        id,
-        username,
-        email,
-        avatar,
-        avatarUrl: avatar && this.client.rest.cdn.avatar(id, avatar),
-        bannerUrl: (banner && this.client.rest.cdn.banner(id, banner)) ?? null,
-      };
-    } else if (response.status === 429) {
-      await sleep(1000);
-      return await this.fetchUserInfo(accessToken);
-    }
-
-    return null;
+    const { id, username, email, avatar } = user;
+    return {
+      id,
+      username,
+      email,
+      avatar: avatar ?? null,
+      avatarUrl: avatarUrl(user),
+      bannerUrl: bannerUrl(user),
+    };
   }
 
   public async parseCode(code: string): Promise<FetchTokenResult | null> {
-    const params = new URLSearchParams();
-    params.append("client_id", this.config.id);
-    params.append("client_secret", this.config.secret);
-    params.append("grant_type", "authorization_code");
-    params.append("redirect_uri", encodeURI(this.config.url));
-    params.append("code", code);
-
-    const response = await safeFetchForDiscord(safeUrl`https://discord.com/api/v10/oauth2/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
-    });
-
-    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
-      return null;
-    }
-
-    if (response.status === 200) {
-      const body = await response.json().catch(() => null);
-      if (body === null) return null;
-      const { access_token, refresh_token } = body as RESTPostOAuth2AccessTokenResult;
-      return {
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      };
-    } else if (response.status === 429) {
-      await sleep(1000);
-      return await this.parseCode(code);
-    } else {
-      return null;
-    }
+    const tokens = await orNull(this.oauth.exchangeCode(code));
+    return tokens && { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
   }
 
+  // null only for invalid_grant (HTTP 400, RFC 6749 §5.2) — callers delete the stored tokens on
+  // null, so transient failures (network, 429, 5xx) must throw instead.
   public async resetAccessToken(refreshToken: string): Promise<FetchTokenResult | null> {
-    const params = new URLSearchParams();
-    params.append("client_id", this.config.id);
-    params.append("client_secret", this.config.secret);
-    params.append("grant_type", "refresh_token");
-    params.append("refresh_token", refreshToken);
-
-    const response = await safeFetchForDiscord(safeUrl`https://discord.com/api/oauth2/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
+    const tokens = await this.oauth.refreshToken(refreshToken).catch((error: unknown) => {
+      if (
+        error instanceof DiscordOAuth2Error &&
+        error.status === 400 &&
+        (error.body as { error?: unknown } | null)?.error === "invalid_grant"
+      ) {
+        return null;
+      }
+      throw error;
     });
-
-    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
-      return null;
-    }
-
-    if (response.status === 200) {
-      const body = await response.json().catch(() => null);
-      if (body === null) return null;
-      const { access_token, refresh_token } = body as RESTPostOAuth2AccessTokenResult;
-      return {
-        accessToken: access_token,
-        refreshToken: refresh_token,
-      };
-    } else if (response.status === 429) {
-      await sleep(1000);
-      return await this.resetAccessToken(refreshToken);
-    }
-
-    return null;
+    return tokens && { accessToken: tokens.access_token, refreshToken: tokens.refresh_token };
   }
 
   public async joinGuild(
@@ -188,29 +116,7 @@ export class OAuth2Controller extends Base {
     guildId: string,
     accessToken: string,
   ): Promise<"join" | "joined" | null> {
-    const response = await safeFetchForDiscord(
-      safeUrl`https://discord.com/api/v10/guilds/${guildId}/members/${userId}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bot ${this.config.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          access_token: accessToken,
-        }),
-      },
-    );
-
-    if (response instanceof LocalAddressError || response instanceof InvalidDomainError) {
-      return null;
-    }
-
-    if (response.status === 429) {
-      await sleep(1000);
-      return await this.joinGuild(userId, guildId, accessToken);
-    }
-
-    return response.status === 201 ? "join" : response.status === 204 ? "joined" : null;
+    const result = await orNull(this.oauth.joinGuild(accessToken, guildId, userId));
+    return result === "added" ? "join" : result === "already_member" ? "joined" : null;
   }
 }

@@ -30,7 +30,7 @@ export class Controller extends Base {
     public readonly config: Config,
   ) {
     super(client);
-    this.oauth2 = new OAuth2Controller(this.client, this.config);
+    this.oauth2 = new OAuth2Controller(this.config);
   }
 }
 
