@@ -99,7 +99,11 @@ export class OAuth2Controller {
   // null, so transient failures (network, 429, 5xx) must throw instead.
   public async resetAccessToken(refreshToken: string): Promise<FetchTokenResult | null> {
     const tokens = await this.oauth.refreshToken(refreshToken).catch((error: unknown) => {
-      if (error instanceof DiscordOAuth2Error && error.status === 400) {
+      if (
+        error instanceof DiscordOAuth2Error &&
+        error.status === 400 &&
+        (error.body as { error?: unknown } | null)?.error === "invalid_grant"
+      ) {
         return null;
       }
       throw error;

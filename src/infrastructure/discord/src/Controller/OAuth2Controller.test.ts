@@ -39,6 +39,8 @@ describe("OAuth2Controller", () => {
   it("returns null only for invalid_grant on refresh, throws on transient failures", async () => {
     mock.mockResolvedValueOnce(json(400, { error: "invalid_grant" }));
     expect(await controller.resetAccessToken("r")).toBeNull();
+    mock.mockResolvedValueOnce(json(400, { error: "invalid_request" }));
+    await expect(controller.resetAccessToken("r")).rejects.toThrow();
     mock.mockResolvedValueOnce(json(500, { message: "down" }));
     await expect(controller.resetAccessToken("r")).rejects.toThrow();
     mock.mockResolvedValueOnce(new LocalAddressError("blocked"));
