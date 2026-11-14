@@ -10,8 +10,7 @@ import {
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
 import { UserSelectMenuInteractionBase } from "presentation-bot-kit/base/UserSelectMenuInteractionBase";
-
-import { page } from "../Page/Settings";
+import { settingsPage } from "presentation-bot-kit/settings";
 
 export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -38,7 +37,7 @@ export class ActingOwnerSelectMenu extends UserSelectMenuInteractionBase {
       actingOwner: options.userId,
     });
 
-    const settingPage = await page(this.core, guild);
+    const settingPage = await settingsPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 

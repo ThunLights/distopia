@@ -9,10 +9,9 @@ import {
 } from "discord.js";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmitInteractionBase";
+import { settingsPage } from "presentation-bot-kit/settings";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
-
-import { page } from "../Page/Settings";
 
 const OptionsSchema = z.object({
   nsfw: z.boolean(),
@@ -62,7 +61,7 @@ export class FriendModal extends ModalSubmitInteractionBase<Options> {
     });
 
     if (interaction.isFromMessage()) {
-      const settingPage = await page(this.core, guild);
+      const settingPage = await settingsPage(this.core, guild);
 
       const { content, components, embeds, allowedMentions, files } = settingPage;
 

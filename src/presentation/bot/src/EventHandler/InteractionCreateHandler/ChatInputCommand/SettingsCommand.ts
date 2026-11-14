@@ -10,8 +10,7 @@ import {
 } from "discord.js";
 import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
-
-import { page } from "../Page/Settings";
+import { settingsPage } from "presentation-bot-kit/settings";
 
 type Options = {};
 
@@ -39,6 +38,6 @@ export class SettingsCommand extends ChatInputCommandBase<Options> {
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    return await page(this.core, guild);
+    return await settingsPage(this.core, guild);
   }
 }

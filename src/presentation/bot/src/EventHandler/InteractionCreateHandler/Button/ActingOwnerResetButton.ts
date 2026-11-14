@@ -10,8 +10,7 @@ import {
 import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
-
-import { page } from "../Page/Settings";
+import { settingsPage } from "presentation-bot-kit/settings";
 
 export class ActingOwnerResetButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
@@ -34,7 +33,7 @@ export class ActingOwnerResetButton extends ButtonInteractionBase {
 
     await this.core.guild.saveSetting({ guildId: guild.id, actingOwner: null });
 
-    const settingPage = await page(this.core, guild);
+    const settingPage = await settingsPage(this.core, guild);
 
     const { content, components, embeds, allowedMentions, files } = settingPage;
 
