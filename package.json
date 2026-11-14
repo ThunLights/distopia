@@ -42,7 +42,7 @@
     "catalog": {
       "@bufbuild/buf": "1.74.0",
       "@bufbuild/protobuf": "2.16.0",
-      "@bufbuild/protoc-gen-es": "2.16.0",
+      "@bufbuild/protoc-gen-es": "2.17.0",
       "@connectrpc/connect": "2.2.0",
       "@connectrpc/connect-node": "2.2.0",
       "@discordjs/voice": "0.19.2",
