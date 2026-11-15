@@ -86,10 +86,14 @@
         "app-schedule": "workspace:*",
         "feature-anti-raid": "workspace:*",
         "feature-black-list": "workspace:*",
+        "feature-friend": "workspace:*",
+        "feature-help": "workspace:*",
         "feature-owner": "workspace:*",
+        "feature-page": "workspace:*",
         "feature-rank": "workspace:*",
         "feature-review": "workspace:*",
         "feature-role-panel": "workspace:*",
+        "feature-staff": "workspace:*",
         "feature-stat-channel": "workspace:*",
         "feature-ticket": "workspace:*",
         "feature-web": "workspace:*",
@@ -143,12 +147,62 @@
         "typescript": "catalog:",
       },
     },
+    "src/application/feature/friend": {
+      "name": "feature-friend",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "presentation-bot-kit": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/help": {
+      "name": "feature-help",
+      "dependencies": {
+        "discord.js": "catalog:",
+        "presentation-bot-kit": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
     "src/application/feature/owner": {
       "name": "feature-owner",
       "dependencies": {
         "discord.js": "catalog:",
         "presentation-bot-kit": "workspace:*",
         "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/page": {
+      "name": "feature-page",
+      "dependencies": {
+        "discord.js": "catalog:",
+        "presentation-bot-kit": "workspace:*",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -207,6 +261,23 @@
         "oxfmt": "catalog:",
         "oxlint": "catalog:",
         "vitest": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/staff": {
+      "name": "feature-staff",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "presentation-bot-kit": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
       },
       "peerDependencies": {
         "typescript": "catalog:",
@@ -2410,13 +2481,21 @@
 
     "feature-black-list": ["feature-black-list@workspace:src/application/feature/black-list"],
 
+    "feature-friend": ["feature-friend@workspace:src/application/feature/friend"],
+
+    "feature-help": ["feature-help@workspace:src/application/feature/help"],
+
     "feature-owner": ["feature-owner@workspace:src/application/feature/owner"],
+
+    "feature-page": ["feature-page@workspace:src/application/feature/page"],
 
     "feature-rank": ["feature-rank@workspace:src/application/feature/rank"],
 
     "feature-review": ["feature-review@workspace:src/application/feature/review"],
 
     "feature-role-panel": ["feature-role-panel@workspace:src/application/feature/role-panel"],
+
+    "feature-staff": ["feature-staff@workspace:src/application/feature/staff"],
 
     "feature-stat-channel": ["feature-stat-channel@workspace:src/application/feature/stat-channel"],
 
