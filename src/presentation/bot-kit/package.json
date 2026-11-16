@@ -15,6 +15,9 @@
     "./page/*": {
       "import": "./src/page/*.ts"
     },
+    "./logging/*": {
+      "import": "./src/logging/*.ts"
+    },
     "./feature": {
       "import": "./src/feature.ts"
     },

@@ -1,5 +1,7 @@
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
+import { SkipOtherProcess } from "presentation-bot-kit/feature";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { detectSpamMessage } from "../utils/moderation/spamDetector";
 import { scheduleStickyRepost } from "../utils/sticky/stickyMessage";
 import { enqueue, getSession, skip as skipCurrentPlayback } from "../utils/tts/session";
@@ -24,6 +26,10 @@ export class MessageCreateHandler extends BaseHandler<
         message.content,
         message.author.bot,
       );
+    }
+
+    if ((await emitFeatureEvent(this.core, "messageCreate", message)) instanceof SkipOtherProcess) {
+      return;
     }
 
     await scheduleStickyRepost(this.core, message).catch((error) =>

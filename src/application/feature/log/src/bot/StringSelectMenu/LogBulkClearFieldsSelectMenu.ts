@@ -11,23 +11,15 @@ import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError
 import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
 import { MessageComponentInteractionBase } from "presentation-bot-kit/base/MessageComponentInteractionBase";
 
-import { isLogField, type LogField } from "../../../utils/logging/log";
+import { isLogField, type LogField } from "../log";
 import { logPage } from "../Page/LogPage";
 
-const customIdPrefix = "logBulkSetFields:";
-
-export class LogBulkSetFieldsSelectMenu extends MessageComponentInteractionBase<
+export class LogBulkClearFieldsSelectMenu extends MessageComponentInteractionBase<
   StringSelectMenuInteraction,
   string | MessagePayload | InteractionReplyOptions | InteractionResponse
 > {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override readonly customId: string = customIdPrefix;
-
-  public override async match(
-    interaction: StringSelectMenuInteraction<CacheType>,
-  ): Promise<boolean> {
-    return interaction.customId.startsWith(customIdPrefix);
-  }
+  public override readonly customId: string = "logBulkClearFields";
 
   public override async run(
     interaction: StringSelectMenuInteraction<CacheType>,
@@ -44,15 +36,14 @@ export class LogBulkSetFieldsSelectMenu extends MessageComponentInteractionBase<
       return { content: guild.message, flags: [MessageFlags.Ephemeral] };
     }
 
-    const channelId = interaction.customId.slice(customIdPrefix.length);
     const fields = interaction.values.filter(isLogField);
 
     if (!fields.length) {
       return { content: "有効なログ種類が選択されていません。", flags: [MessageFlags.Ephemeral] };
     }
 
-    const updates = fields.reduce<Partial<Record<LogField, string>>>((acc, field) => {
-      acc[field] = channelId;
+    const updates = fields.reduce<Partial<Record<LogField, null>>>((acc, field) => {
+      acc[field] = null;
       return acc;
     }, {});
 

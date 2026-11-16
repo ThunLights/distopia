@@ -1,31 +1,34 @@
 import {
   InteractionResponse,
   MessageFlags,
-  type ButtonInteraction,
   type CacheType,
+  type ChannelSelectMenuInteraction,
   type InteractionReplyOptions,
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
-import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { isLogField } from "../../../utils/logging/log";
+import { isLogField } from "../log";
 import { logPage } from "../Page/LogPage";
 
-const customIdPrefix = "logChannelReset:";
+const customIdPrefix = "logChannel:";
 
-export class LogChannelResetButton extends ButtonInteractionBase {
+export class LogChannelSelectMenu extends ChannelSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override customId: string = customIdPrefix;
 
-  public override async match(interaction: ButtonInteraction<CacheType>): Promise<boolean> {
+  public override async match(
+    interaction: ChannelSelectMenuInteraction<CacheType>,
+  ): Promise<boolean> {
     return interaction.customId.startsWith(customIdPrefix);
   }
 
   protected override async exec(
-    interaction: ButtonInteraction<CacheType>,
-  ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
+    interaction: ChannelSelectMenuInteraction<CacheType>,
+    options: { channelId: string },
+  ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -38,7 +41,7 @@ export class LogChannelResetButton extends ButtonInteractionBase {
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    await this.core.log.saveSetting({ guildId: guild.id, [field]: null });
+    await this.core.log.saveSetting({ guildId: guild.id, [field]: options.channelId });
 
     const logPagePayload = await logPage(this.core, guild);
 

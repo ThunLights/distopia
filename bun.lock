@@ -88,6 +88,7 @@
         "feature-black-list": "workspace:*",
         "feature-friend": "workspace:*",
         "feature-help": "workspace:*",
+        "feature-log": "workspace:*",
         "feature-owner": "workspace:*",
         "feature-page": "workspace:*",
         "feature-rank": "workspace:*",
@@ -169,6 +170,25 @@
       "name": "feature-help",
       "dependencies": {
         "discord.js": "catalog:",
+        "presentation-bot-kit": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/log": {
+      "name": "feature-log",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "domain-model": "workspace:*",
+        "infra-diff": "workspace:*",
         "presentation-bot-kit": "workspace:*",
       },
       "devDependencies": {
@@ -643,7 +663,6 @@
         "domain-model": "workspace:*",
         "ffmpeg-static": "catalog:",
         "infra-database": "workspace:*",
-        "infra-diff": "workspace:*",
         "infra-discord": "workspace:*",
         "infra-http": "workspace:*",
         "infra-rankcard": "workspace:*",
@@ -2484,6 +2503,8 @@
     "feature-friend": ["feature-friend@workspace:src/application/feature/friend"],
 
     "feature-help": ["feature-help@workspace:src/application/feature/help"],
+
+    "feature-log": ["feature-log@workspace:src/application/feature/log"],
 
     "feature-owner": ["feature-owner@workspace:src/application/feature/owner"],
 

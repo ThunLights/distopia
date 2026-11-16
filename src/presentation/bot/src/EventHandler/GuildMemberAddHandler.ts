@@ -1,5 +1,8 @@
 import type { GuildMember } from "discord.js";
+import { SkipOtherProcess } from "presentation-bot-kit/feature";
+import { blackListFormat } from "presentation-bot-kit/logging/blackListFormat";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => void> {
@@ -13,7 +16,9 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
     }
 
     await this.applyVerifyPendingRole(member);
-    await this.logger.log(member.guild, "logMemberJoin", member);
+    if ((await emitFeatureEvent(this.core, "guildMemberAdd", member)) instanceof SkipOtherProcess) {
+      return;
+    }
     await this.welcomeMessenger.send(member.guild, member, "join");
   }
 
@@ -62,7 +67,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       await this.logger.logToChannel(
         member.guild,
         channelId,
-        "logBlackList",
+        blackListFormat,
         member,
         channelMatches,
         banned,

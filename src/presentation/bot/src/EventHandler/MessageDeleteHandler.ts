@@ -1,5 +1,6 @@
-import type { Message, OmitPartialGroupDMChannel, PartialMessage } from "discord.js";
+import { type Message, type OmitPartialGroupDMChannel, type PartialMessage } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { BaseHandler } from "./BaseHandler";
 
 export class MessageDeleteHandler extends BaseHandler<
@@ -8,12 +9,6 @@ export class MessageDeleteHandler extends BaseHandler<
   public override async handle(
     message: OmitPartialGroupDMChannel<Message<boolean> | PartialMessage<boolean>>,
   ): Promise<void> {
-    if (!message.guild || message.partial || message.author.bot) {
-      return;
-    }
-
-    const content = message.content || "(空)";
-
-    await this.logger.log(message.guild, "logMessageDelete", message, content);
+    await emitFeatureEvent(this.core, "messageDelete", message);
   }
 }

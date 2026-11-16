@@ -1,5 +1,6 @@
-import type { DMChannel, NonThreadGuildBasedChannel } from "discord.js";
+import { type DMChannel, type NonThreadGuildBasedChannel } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { BaseHandler } from "./BaseHandler";
 
 export class ChannelUpdateHandler extends BaseHandler<
@@ -12,24 +13,6 @@ export class ChannelUpdateHandler extends BaseHandler<
     oldChannel: DMChannel | NonThreadGuildBasedChannel,
     newChannel: DMChannel | NonThreadGuildBasedChannel,
   ): Promise<void> {
-    if (oldChannel.isDMBased() || newChannel.isDMBased()) {
-      return;
-    }
-
-    const changes: string[] = [];
-
-    if (oldChannel.name !== newChannel.name) {
-      changes.push(`名前: ${oldChannel.name} → ${newChannel.name}`);
-    }
-
-    if ("topic" in oldChannel && "topic" in newChannel && oldChannel.topic !== newChannel.topic) {
-      changes.push("トピックが変更されました。");
-    }
-
-    if (changes.length === 0) {
-      return;
-    }
-
-    await this.logger.log(newChannel.guild, "logChannelEdit", newChannel, changes);
+    await emitFeatureEvent(this.core, "channelUpdate", oldChannel, newChannel);
   }
 }

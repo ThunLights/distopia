@@ -16,7 +16,7 @@ import {
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
-import { isLogField, logFieldLabels } from "../../../utils/logging/log";
+import { isLogField, logFieldLabels } from "../log";
 
 export class LogCategorySelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

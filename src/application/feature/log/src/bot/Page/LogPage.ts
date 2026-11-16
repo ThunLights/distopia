@@ -11,7 +11,7 @@ import {
 import type { Guild } from "domain-model";
 import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
-import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
+import { LOG_FIELDS, logFieldLabels } from "../log";
 
 export async function logPage(core: AppCore, guild: Guild): Promise<InteractionReplyOptions> {
   const settings = await core.log.getSetting(guild.id);

@@ -1,5 +1,6 @@
 import type { VoiceState } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { enqueue, getSession, leave } from "../utils/tts/session";
 import { BaseHandler } from "./BaseHandler";
 
@@ -11,19 +12,14 @@ export class VoiceStateUpdateHandler extends BaseHandler<
       return;
     }
 
-    const memberId = newState.id;
-
     // Read before leaveIfVoiceChannelEmpty, which can destroy the session (and thus make
     // getSession return undefined) when this update is the last human leaving the channel.
     await this.announceVoiceStateChange(oldState, newState);
+    // Not skippable: leaving an emptied voice channel is the bot's own cleanup.
+    await emitFeatureEvent(this.core, "voiceStateUpdate", oldState, newState);
 
     if (oldState.channelId) {
-      await this.logger.log(newState.guild, "logVoiceLeave", memberId, oldState.channelId);
       await this.leaveIfVoiceChannelEmpty(oldState);
-    }
-
-    if (newState.channelId) {
-      await this.logger.log(newState.guild, "logVoiceJoin", memberId, newState.channelId);
     }
   }
 

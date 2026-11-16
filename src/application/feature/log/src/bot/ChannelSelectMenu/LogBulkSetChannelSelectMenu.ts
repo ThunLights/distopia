@@ -7,24 +7,25 @@ import {
   MessageFlags,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  type ButtonInteraction,
   type CacheType,
+  type ChannelSelectMenuInteraction,
   type InteractionReplyOptions,
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
-import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
+import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
+import { LOG_FIELDS, logFieldLabels } from "../log";
 
-export class LogBulkClearButton extends ButtonInteractionBase {
+export class LogBulkSetChannelSelectMenu extends ChannelSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
-  public override customId: string = "logBulkClear";
+  public override customId: string = "logBulkSetChannel";
 
   protected override async exec(
-    interaction: ButtonInteraction<CacheType>,
-  ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
+    interaction: ChannelSelectMenuInteraction<CacheType>,
+    options: { channelId: string },
+  ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -33,11 +34,13 @@ export class LogBulkClearButton extends ButtonInteractionBase {
 
     const embed = new EmbedBuilder()
       .setColor("Navy")
-      .setTitle("ログ設定: 一括解除")
-      .setDescription("解除するログの種類を選択してください。(複数選択可)");
+      .setTitle("ログ設定: 一括設定")
+      .setDescription(
+        `<#${options.channelId}> に出力するログの種類を選択してください。(複数選択可)`,
+      );
 
     const fieldSelector = new StringSelectMenuBuilder()
-      .setCustomId("logBulkClearFields")
+      .setCustomId(`logBulkSetFields:${options.channelId}`)
       .setPlaceholder("ログの種類を選択")
       .setMinValues(1)
       .setMaxValues(LOG_FIELDS.length)
