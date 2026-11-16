@@ -3,7 +3,6 @@ import { addSettings } from "presentation-bot-kit/settings";
 
 import { actingOwnerPage } from "./EventHandler/InteractionCreateHandler/Page/ActingOwnerPage";
 import { bumpPage } from "./EventHandler/InteractionCreateHandler/Page/BumpPage";
-import { logPage } from "./EventHandler/InteractionCreateHandler/Page/LogPage";
 import { stickyMessagePage } from "./EventHandler/InteractionCreateHandler/Page/StickyMessagePage";
 import { welcomeMessagePage } from "./EventHandler/InteractionCreateHandler/Page/WelcomeMessagePage";
 
@@ -40,7 +39,6 @@ export function registerSettings() {
       },
     },
     { label: "入退出メッセージ設定", value: "welcomeMessage", page: welcomeMessagePage },
-    { label: "ログ設定", value: "log", page: logPage },
     { label: "ピン止めメッセージ設定", value: "stickyMessage", page: stickyMessagePage },
     ...features.flatMap((feature) => feature.settings ?? []),
   );

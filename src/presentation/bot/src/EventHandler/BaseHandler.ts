@@ -1,6 +1,6 @@
 import type { AppCore } from "app-core";
+import { Logger } from "presentation-bot-kit/logging/Logger";
 
-import { Logger } from "../utils/logging/Logger";
 import { WelcomeMessenger } from "../utils/welcome/WelcomeMessenger";
 
 export abstract class BaseHandler<H extends (...args: any[]) => any> {

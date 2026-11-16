@@ -1,6 +1,7 @@
 import type { AppCore } from "app-core";
 import type {
   CacheType,
+  ClientEvents,
   InteractionReplyOptions,
   InteractionResponse,
   MessagePayload,
@@ -32,6 +33,15 @@ export type Commands = {
   userSelectMenu: UserSelectMenuInteractionBase[];
 };
 
+export type FeatureEventListener<K extends keyof ClientEvents> = (
+  core: AppCore,
+  ...args: ClientEvents[K]
+) => Promise<void>;
+
+// presentation-bot's own handler for each event decides when these run (e.g. not for a
+// message it just deleted as spam), so a listener only sees events that survived that.
+export type FeatureEvents = { [K in keyof ClientEvents]?: FeatureEventListener<K> };
+
 // The "./bot" export of a src/application/feature/* package default-exports one of these;
 // app-feature-loader collects them for presentation-bot.
 export type BotFeature = {
@@ -39,4 +49,5 @@ export type BotFeature = {
 } & {
   // Registered on the /settings panel via addSettings (presentation-bot-kit/settings).
   settings?: SettingsEntry[];
+  events?: FeatureEvents;
 };

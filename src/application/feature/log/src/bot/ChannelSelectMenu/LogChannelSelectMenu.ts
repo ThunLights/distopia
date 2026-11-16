@@ -9,8 +9,8 @@ import {
 } from "discord.js";
 import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { isLogField } from "presentation-bot-kit/logging/log";
 
-import { isLogField } from "../../../utils/logging/log";
 import { logPage } from "../Page/LogPage";
 
 const customIdPrefix = "logChannel:";

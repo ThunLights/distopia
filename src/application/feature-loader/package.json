@@ -24,6 +24,7 @@
     "feature-black-list": "workspace:*",
     "feature-friend": "workspace:*",
     "feature-help": "workspace:*",
+    "feature-log": "workspace:*",
     "feature-owner": "workspace:*",
     "feature-page": "workspace:*",
     "feature-rank": "workspace:*",

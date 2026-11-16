@@ -15,8 +15,7 @@ import {
 } from "discord.js";
 import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
-
-import { LOG_FIELDS, logFieldLabels } from "../../../utils/logging/log";
+import { LOG_FIELDS, logFieldLabels } from "presentation-bot-kit/logging/log";
 
 export class LogBulkSetChannelSelectMenu extends ChannelSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

@@ -1,5 +1,6 @@
 import type { GuildMember } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { BaseHandler } from "./BaseHandler";
 
 export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => void> {
@@ -13,7 +14,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
     }
 
     await this.applyVerifyPendingRole(member);
-    await this.logger.log(member.guild, "logMemberJoin", member);
+    await emitFeatureEvent(this.core, "guildMemberAdd", member);
     await this.welcomeMessenger.send(member.guild, member, "join");
   }
 

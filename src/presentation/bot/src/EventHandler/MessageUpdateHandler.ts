@@ -1,5 +1,6 @@
 import type { Message, OmitPartialGroupDMChannel, PartialMessage } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { detectSpamMessage } from "../utils/moderation/spamDetector";
 import { BaseHandler } from "./BaseHandler";
 
@@ -23,26 +24,6 @@ export class MessageUpdateHandler extends BaseHandler<
       return;
     }
 
-    if (
-      !oldMessage.partial &&
-      oldMessage.content === newMessage.content &&
-      oldMessage.attachments.size === newMessage.attachments.size &&
-      oldMessage.attachments.every((attachment) => newMessage.attachments.has(attachment.id))
-    ) {
-      return;
-    }
-
-    const oldContent = oldMessage.partial ? null : oldMessage.content;
-    const newContent = newMessage.content;
-    const oldAttachments = oldMessage.partial ? undefined : oldMessage.attachments;
-
-    await this.logger.log(
-      newMessage.guild,
-      "logMessageEdit",
-      newMessage,
-      oldContent,
-      newContent,
-      oldAttachments,
-    );
+    await emitFeatureEvent(this.core, "messageUpdate", oldMessage, newMessage);
   }
 }

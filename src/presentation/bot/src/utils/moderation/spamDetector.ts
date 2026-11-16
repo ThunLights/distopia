@@ -5,8 +5,7 @@ import {
   type Message,
   type OmitPartialGroupDMChannel,
 } from "discord.js";
-
-import type { Logger } from "../logging/Logger";
+import type { Logger } from "presentation-bot-kit/logging/Logger";
 
 // `deletable` only reflects cached permissions at read time -- another mod/bot could have
 // already deleted this message by the time the API call lands, which throws "Unknown

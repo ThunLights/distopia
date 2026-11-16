@@ -343,13 +343,22 @@ contract type:
 
 | Export | Contract | Loaded by |
 |---|---|---|
-| `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries | `presentation-bot` |
+| `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries + `events` (gateway event listeners, `(core, ...ClientEvents[K]) => Promise<void>`) | `presentation-bot` |
 | `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-web` runs the tasks (`RunFeatureTasks` RPC); `presentation-schedulemanager` ticks each cron key |
 
 `/settings` panel entries go through `presentation-bot-kit/settings`: a feature lists
 `SettingsEntry`s (`label`, `value`, `page`, optional `fields` shown on the panel embed) in
 its `BotFeature.settings`, and the bot passes them to `addSettings` at startup. To return to
 the panel (e.g. after saving), call `settingsPage(core, guild)`.
+
+`BotFeature.events` listeners are invoked by `presentation-bot`'s `emitFeatureEvent`
+(`src/featureEvents.ts`), called from each `EventHandler/*Handler.ts`. A handler is the place
+for bot-wide gating/middleware before features see the event (e.g. `MessageUpdateHandler`
+skips a message just deleted as spam, `GuildMemberAddHandler` a member banned by the
+blacklist); most handlers just forward. When a feature needs an event no handler covers yet,
+add a handler for it and wire it in `client.ts`. The shared logger
+(`Logger`, log formats, `findRecentAuditLogEntry`) lives in `presentation-bot-kit/logging/*`;
+`feature-log` owns the `/settings` ログ設定 UI and the log listeners.
 
 `app-feature-loader` is the only package that knows the feature list. Its `build`
 (`scripts/gen.ts`) scans `src/application/feature/`, rewrites its own `dependencies` to list

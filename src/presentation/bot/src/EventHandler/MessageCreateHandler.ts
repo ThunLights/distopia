@@ -1,5 +1,6 @@
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { detectSpamMessage } from "../utils/moderation/spamDetector";
 import { scheduleStickyRepost } from "../utils/sticky/stickyMessage";
 import { enqueue, getSession, skip as skipCurrentPlayback } from "../utils/tts/session";
@@ -25,6 +26,8 @@ export class MessageCreateHandler extends BaseHandler<
         message.author.bot,
       );
     }
+
+    await emitFeatureEvent(this.core, "messageCreate", message);
 
     await scheduleStickyRepost(this.core, message).catch((error) =>
       console.error("[sticky] failed to schedule repost", error),

@@ -1,15 +1,12 @@
-import type { DMChannel, NonThreadGuildBasedChannel } from "discord.js";
+import { type DMChannel, type NonThreadGuildBasedChannel } from "discord.js";
 
+import { emitFeatureEvent } from "../featureEvents";
 import { BaseHandler } from "./BaseHandler";
 
 export class ChannelDeleteHandler extends BaseHandler<
   (channel: DMChannel | NonThreadGuildBasedChannel) => void
 > {
   public override async handle(channel: DMChannel | NonThreadGuildBasedChannel): Promise<void> {
-    if (channel.isDMBased()) {
-      return;
-    }
-
-    await this.logger.log(channel.guild, "logChannelDelete", channel);
+    await emitFeatureEvent(this.core, "channelDelete", channel);
   }
 }

@@ -27,18 +27,18 @@ export function handleClient(client: Client, core: AppCore) {
   const interactionCreateHandler = new InteractionCreateHandler(core);
   const messageCreateHandler = new MessageCreateHandler(core);
   const messageUpdateHandler = new MessageUpdateHandler(core);
-  const messageDeleteHandler = new MessageDeleteHandler(core);
   const guildMemberAddHandler = new GuildMemberAddHandler(core);
   const guildMemberRemoveHandler = new GuildMemberRemoveHandler(core);
-  const guildMemberUpdateHandler = new GuildMemberUpdateHandler(core);
+  const channelCreateHandler = new ChannelCreateHandler(core);
+  const channelDeleteHandler = new ChannelDeleteHandler(core);
+  const channelUpdateHandler = new ChannelUpdateHandler(core);
   const guildBanAddHandler = new GuildBanAddHandler(core);
   const guildBanRemoveHandler = new GuildBanRemoveHandler(core);
+  const guildMemberUpdateHandler = new GuildMemberUpdateHandler(core);
+  const messageDeleteHandler = new MessageDeleteHandler(core);
   const roleCreateHandler = new RoleCreateHandler(core);
-  const roleUpdateHandler = new RoleUpdateHandler(core);
   const roleDeleteHandler = new RoleDeleteHandler(core);
-  const channelCreateHandler = new ChannelCreateHandler(core);
-  const channelUpdateHandler = new ChannelUpdateHandler(core);
-  const channelDeleteHandler = new ChannelDeleteHandler(core);
+  const roleUpdateHandler = new RoleUpdateHandler(core);
   const voiceStateUpdateHandler = new VoiceStateUpdateHandler(core);
 
   client.on("clientReady", async (client) => {
