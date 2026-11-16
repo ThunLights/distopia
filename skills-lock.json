@@ -5,7 +5,7 @@
       "source": "nutlope/hallmark",
       "sourceType": "github",
       "skillPath": "skills/hallmark/SKILL.md",
-      "computedHash": "1465546d7971f57d428a0cbccfe0fa0426d1c309bec28ceefeb70e76f38c640e"
+      "computedHash": "fc2c1acfe7c57734c16f1565f24e8074db2898616723a9f7b75b99fe0e51067c"
     },
     "hush": {
       "source": "ro80t/hush",
@@ -29,7 +29,7 @@
       "source": "caru-ini/stack-diagram",
       "sourceType": "github",
       "skillPath": "skills/stack-diagram/SKILL.md",
-      "computedHash": "aabb52c70c558033e103360c9b152111da1db5f39da46e4675c7a1b028ce6f25"
+      "computedHash": "fac60710721d6f284fb83418bc206148d2932daaabde315c1abf7ee851703dff"
     }
   }
 }
