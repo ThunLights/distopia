@@ -55,4 +55,33 @@ describe("emitFeatureEvent", () => {
     expect(await emitFeatureEvent({} as AppCore, "roleCreate", role)).toBeUndefined();
     expect(later).toHaveBeenCalledWith(role);
   });
+
+  it("builds listeners once per core and only runs those for the emitted event", async () => {
+    const cores: AppCore[] = [];
+    const otherEvent = vi.fn();
+    class Tracked extends FeatureEventBase<"roleCreate"> {
+      public override readonly event = "roleCreate";
+      constructor(core: AppCore) {
+        super(core);
+        cores.push(core);
+      }
+      public override async handle() {}
+    }
+    class Other extends FeatureEventBase<"roleDelete"> {
+      public override readonly event = "roleDelete";
+      public override handle = otherEvent;
+    }
+    features.splice(0, features.length, { events: [Tracked, Other] });
+
+    const coreA = {} as AppCore;
+    const coreB = {} as AppCore;
+    await emitFeatureEvent(coreA, "roleCreate", role);
+    await emitFeatureEvent(coreA, "roleCreate", role);
+    await emitFeatureEvent(coreB, "roleCreate", role);
+
+    expect(cores).toEqual([coreA, coreB]);
+    expect(cores[0]).toBe(coreA);
+    expect(cores[1]).toBe(coreB);
+    expect(otherEvent).not.toHaveBeenCalled();
+  });
 });
