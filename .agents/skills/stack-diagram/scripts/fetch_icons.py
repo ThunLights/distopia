@@ -11,6 +11,7 @@ Spec forms:
   name:aws/Service  -> official AWS icon     (e.g. lambda:aws/AWS-Lambda)
   name:gcp/Product  -> official Google Cloud icon (e.g. run:gcp/Cloud-Run)
   name:azure/Service -> official Azure icon  (e.g. vault:azure/Key-Vaults)
+  name:k8s/Resource -> official Kubernetes icon (e.g. pod:k8s/pod, web:k8s/deployment, lb:k8s/ingress)
 
 Sources tried in order:
   1. svgl              api.svgl.app?search={s} -> route (light variant when split)
@@ -28,6 +29,10 @@ gcp/ specs and the slugs gcp-* and google-cloud-* do the same with Google's pack
 
 azure/ specs and the slugs azure, microsoft-azure and azure-* do the same with Microsoft's package
 (learn.microsoft.com/azure/architecture/icons).
+
+k8s/ specs and the slugs k8s-* and kubernetes-* read official Kubernetes community
+icons (github.com/kubernetes/community/tree/master/icons). The slugs k8s and kubernetes
+fetch the Kubernetes mark through the chain.
 
 svgl is matched by normalized title equality (search is fuzzy — a loose match would
 silently ship the wrong brand's logo, so non-exact hits fall through to next source).
@@ -143,6 +148,53 @@ AZURE_ALIASES = {
     "appinsights": "Application-Insights", "loganalytics": "Log-Analytics-Workspaces",
     "datafactory": "Data-Factories", "synapse": "Azure-Synapse-Analytics", "resourcegroup": "Resource-Groups",
     "rg": "Resource-Groups", "managedidentity": "Managed-Identities",
+}
+K8S_ICON_BASE = "https://raw.githubusercontent.com/kubernetes/community/307ae50e8e4246de172f195c73e3f026b4f0c7ff/icons/svg/"
+K8S_RESOURCES = ("c-role", "cm", "crb", "crd", "cronjob", "deploy", "ds", "ep", "group", "hpa", "ing", "job",
+                 "limits", "netpol", "ns", "pod", "psp", "pv", "pvc", "quota", "rb", "role", "rs", "sa", "sc",
+                 "secret", "sts", "svc", "user", "vol")
+K8S_INFRASTRUCTURE = ("control-plane", "etcd", "node")
+K8S_CONTROL_PLANE = {
+    "api": "api", "apiserver": "api", "kubeapiserver": "api",
+    "controllermanager": "c-m", "kubecontrollermanager": "c-m",
+    "cloudcontrollermanager": "c-c-m", "ccm": "c-c-m",
+    "kubeproxy": "k-proxy", "kproxy": "k-proxy", "proxy": "k-proxy",
+    "kubelet": "kubelet",
+    "sched": "sched", "scheduler": "sched", "kubescheduler": "sched",
+}
+K8S_ALIASES = {
+    "service": "svc", "services": "svc",
+    "ingress": "ing", "ingresses": "ing",
+    "deployment": "deploy", "deployments": "deploy",
+    "configmap": "cm", "configmaps": "cm",
+    "statefulset": "sts", "statefulsets": "sts",
+    "daemonset": "ds", "daemonsets": "ds",
+    "replicaset": "rs", "replicasets": "rs",
+    "persistentvolume": "pv", "persistentvolumes": "pv",
+    "persistentvolumeclaim": "pvc", "persistentvolumeclaims": "pvc",
+    "namespace": "ns", "namespaces": "ns",
+    "serviceaccount": "sa", "serviceaccounts": "sa",
+    "storageclass": "sc", "storageclasses": "sc",
+    "networkpolicy": "netpol", "networkpolicies": "netpol",
+    "horizontalpodautoscaler": "hpa", "horizontalpodautoscalers": "hpa",
+    "endpoints": "ep", "endpoint": "ep",
+    "role": "role", "roles": "role",
+    "rolebinding": "rb", "rolebindings": "rb",
+    "clusterrole": "crole", "clusterroles": "crole",
+    "clusterrolebinding": "crb", "clusterrolebindings": "crb",
+    "customresourcedefinition": "crd", "customresourcedefinitions": "crd", "crds": "crd",
+    "resourcequota": "quota", "resourcequotas": "quota", "quotas": "quota",
+    "limitrange": "limits", "limitranges": "limits", "limit": "limits",
+    "volume": "vol", "volumes": "vol",
+    "podsecuritypolicy": "psp", "podsecuritypolicies": "psp",
+    "secret": "secret", "secrets": "secret",
+    "pod": "pod", "pods": "pod", "po": "pod",
+    "job": "job", "jobs": "job",
+    "cronjob": "cronjob", "cronjobs": "cronjob", "cj": "cronjob",
+    "node": "node", "nodes": "node", "no": "node",
+    "user": "user", "users": "user",
+    "group": "group", "groups": "group",
+    "master": "controlplane",
 }
 PACKAGES = {}
 
@@ -301,6 +353,26 @@ def azure_sources(query):
     print(f"Azure {query!r} is not a name in the package. Names: {', '.join(sorted(v[0] for v in index.values()))}")
     return []
 
+def k8s_index():
+    index = {norm(n): f"resources/unlabeled/{n}.svg" for n in K8S_RESOURCES}
+    index.update({norm(n): f"infrastructure_components/unlabeled/{n}.svg" for n in K8S_INFRASTRUCTURE})
+    index.update({k: f"control_plane_components/labeled/{n}.svg" for k, n in K8S_CONTROL_PLANE.items()})
+    return index
+
+def k8s_sources(query):
+    query = (query or "").strip()
+    if not query:
+        return []
+    if norm(query) in ("k8s", "kubernetes"):
+        return sources("kubernetes")
+    index = k8s_index()
+    key = norm(query)
+    hit = index.get(K8S_ALIASES.get(key, key))
+    if hit:
+        return [("k8s", K8S_ICON_BASE + hit, None)]
+    print(f"Kubernetes {query!r} is not an icon name. Names: {', '.join(sorted({*index, *K8S_ALIASES}))}")
+    return []
+
 def sources(slug):
     # concept icons: slug "lucide/<icon-name>" -> Lucide line icon (browse: lucide.dev/icons)
     if slug.startswith("lucide/"):
@@ -316,6 +388,11 @@ def sources(slug):
     azure = re.fullmatch(r"azure[/-](.+)", slug, re.IGNORECASE)
     if azure:
         return azure_sources(azure.group(1))
+    if norm(slug) == "k8s":
+        slug = "kubernetes"
+    k8s = re.fullmatch(r"(?:k8s|kubernetes)[/-](.+)", slug, re.IGNORECASE)
+    if k8s:
+        return k8s_sources(k8s.group(1))
     if norm(slug) in ("gcp", "googlecloudplatform"):
         slug = "google-cloud"
     gcp = re.fullmatch(r"(?:gcp/|gcp-|google-cloud-)(.+)", slug, re.IGNORECASE)
