@@ -1,7 +1,12 @@
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import type { Role } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
-export const roleDelete: FeatureEventListener<"roleDelete"> = async (core, role) => {
-  await sendLog(core, role.guild, "logRoleDelete", role);
-};
+export class RoleDeleteEvent extends FeatureEventBase<"roleDelete"> {
+  public override readonly event = "roleDelete";
+
+  public override async handle(role: Role) {
+    await sendLog(this.core, role.guild, "logRoleDelete", role);
+  }
+}

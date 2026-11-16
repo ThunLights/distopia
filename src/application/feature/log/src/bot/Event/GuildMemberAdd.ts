@@ -1,7 +1,12 @@
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import type { GuildMember } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
-export const guildMemberAdd: FeatureEventListener<"guildMemberAdd"> = async (core, member) => {
-  await sendLog(core, member.guild, "logMemberJoin", member);
-};
+export class GuildMemberAddEvent extends FeatureEventBase<"guildMemberAdd"> {
+  public override readonly event = "guildMemberAdd";
+
+  public override async handle(member: GuildMember) {
+    await sendLog(this.core, member.guild, "logMemberJoin", member);
+  }
+}
