@@ -1,4 +1,5 @@
 import type { GuildMember } from "discord.js";
+import { blackListFormat } from "presentation-bot-kit/logging/blackListFormat";
 
 import { emitFeatureEvent } from "../featureEvents";
 import { BaseHandler } from "./BaseHandler";
@@ -63,7 +64,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       await this.logger.logToChannel(
         member.guild,
         channelId,
-        "logBlackList",
+        blackListFormat,
         member,
         channelMatches,
         banned,

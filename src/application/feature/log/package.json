@@ -17,6 +17,7 @@
     "app-core": "workspace:*",
     "discord.js": "catalog:",
     "domain-model": "workspace:*",
+    "infra-diff": "workspace:*",
     "presentation-bot-kit": "workspace:*"
   },
   "devDependencies": {

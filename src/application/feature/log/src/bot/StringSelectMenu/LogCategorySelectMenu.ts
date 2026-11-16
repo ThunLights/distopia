@@ -15,7 +15,8 @@ import {
 } from "discord.js";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
-import { isLogField, logFieldLabels } from "presentation-bot-kit/logging/log";
+
+import { isLogField, logFieldLabels } from "../log";
 
 export class LogCategorySelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

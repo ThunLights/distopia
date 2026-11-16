@@ -15,7 +15,8 @@ import {
 } from "discord.js";
 import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
-import { LOG_FIELDS, logFieldLabels } from "presentation-bot-kit/logging/log";
+
+import { LOG_FIELDS, logFieldLabels } from "../log";
 
 export class LogBulkClearButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

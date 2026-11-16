@@ -5,6 +5,7 @@ import {
   type Message,
   type OmitPartialGroupDMChannel,
 } from "discord.js";
+import { antiRaidFormat } from "presentation-bot-kit/logging/antiRaidFormat";
 import type { Logger } from "presentation-bot-kit/logging/Logger";
 
 // `deletable` only reflects cached permissions at read time -- another mod/bot could have
@@ -53,7 +54,7 @@ export async function detectSpamMessage(
         await deleteIgnoringUnknownMessage(message);
       }
       if (message.guild) {
-        await logger.log(message.guild, "logAntiRaid", message, inviteLinks);
+        await logger.log(message.guild, "logAntiRaid", antiRaidFormat, message, inviteLinks);
       }
       return true;
     }
@@ -78,7 +79,7 @@ export async function detectSpamMessage(
       }
 
       if (message.guild) {
-        await logger.log(message.guild, "logAntiRaid", message, embedInviteLinks);
+        await logger.log(message.guild, "logAntiRaid", antiRaidFormat, message, embedInviteLinks);
       }
 
       return true;

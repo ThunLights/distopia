@@ -10,8 +10,8 @@ import {
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { PermissionError } from "presentation-bot-kit/base/Error/PermissionError";
 import { MessageComponentInteractionBase } from "presentation-bot-kit/base/MessageComponentInteractionBase";
-import { isLogField, type LogField } from "presentation-bot-kit/logging/log";
 
+import { isLogField, type LogField } from "../log";
 import { logPage } from "../Page/LogPage";
 
 export class LogBulkClearFieldsSelectMenu extends MessageComponentInteractionBase<

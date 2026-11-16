@@ -9,8 +9,8 @@ import {
 } from "discord.js";
 import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
-import { isLogField } from "presentation-bot-kit/logging/log";
 
+import { isLogField } from "../log";
 import { logPage } from "../Page/LogPage";
 
 const customIdPrefix = "logChannelReset:";

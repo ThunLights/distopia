@@ -1,5 +1,4 @@
 import type {
-  ColorResolvable,
   GuildBan,
   GuildMember,
   Message,
@@ -11,19 +10,10 @@ import type {
   User,
 } from "discord.js";
 import { lineDiff } from "infra-diff";
+import { codeBlockChunks } from "presentation-bot-kit/codeblock";
+import type { LogEmbedField, LogFormat } from "presentation-bot-kit/logging/format";
 
-import { codeBlock, codeBlockChunks } from "../codeblock";
-import type { AllLogField, ChannelLogField } from "./log";
-
-export type LogEmbedField = { name: string; value: string; inline?: boolean };
-
-export type LogContent = {
-  description: string;
-  image?: string;
-  fields?: LogEmbedField[];
-  /** Fields too long to fit alongside `fields` — sent as a follow-up message. */
-  overflowFields?: LogEmbedField[];
-};
+import type { LogField } from "./log";
 
 type AttachmentCollection = OmitPartialGroupDMChannel<Message<boolean>>["attachments"];
 
@@ -52,12 +42,6 @@ function summarizeAttachments(attachments: AttachmentCollection): {
 
   return { image: images.first()?.url, fields };
 }
-
-export type LogFormat<Args extends unknown[] = unknown[]> = {
-  title: string;
-  color?: ColorResolvable;
-  build: (...args: Args) => LogContent | Promise<LogContent>;
-};
 
 // Numbered so a reader can tell the pages apart once they span several follow-up messages.
 function continuationFields(name: string, pages: string[]): LogEmbedField[] {
@@ -244,66 +228,4 @@ export const logFormats = {
       description: `<@${memberId}> (${memberId}) が <#${channelId}> から退出しました。`,
     }),
   },
-  logAntiRaid: {
-    title: "荒らし対策: 招待リンクを検知しました",
-    color: "Red",
-    build: async (message: OmitPartialGroupDMChannel<Message<boolean>>, inviteLinks: string[]) => ({
-      description: [
-        `ユーザー: <@${message.author.id}> (${message.author.id})`,
-        `チャンネル: <#${message.channelId}>`,
-      ].join("\n"),
-      fields: [{ name: "検知したリンク", value: await codeBlock(inviteLinks.join("\n")) }],
-    }),
-  },
-  logBlackList: {
-    title: "ブラックリスト: 該当ユーザーが参加しました",
-    color: "Red",
-    build: (
-      member: GuildMember,
-      matches: { description: string; tags: string[]; banned: boolean }[],
-      banned: boolean,
-    ) => {
-      const maxFields = 24;
-      const maxChars = 5000;
-
-      const fields: LogEmbedField[] = [];
-      let usedChars = 0;
-
-      for (const [index, match] of matches.entries()) {
-        if (fields.length >= maxFields) {
-          break;
-        }
-
-        const name = `該当ブラックリスト ${index + 1}${match.banned ? " (BAN対象)" : ""}`;
-        const value = [
-          match.description,
-          match.tags.length ? `タグ: ${match.tags.join(", ")}` : null,
-        ]
-          .filter(Boolean)
-          .join("\n");
-
-        if (usedChars + name.length + value.length > maxChars) {
-          break;
-        }
-
-        fields.push({ name, value });
-        usedChars += name.length + value.length;
-      }
-
-      if (fields.length < matches.length) {
-        fields.push({
-          name: "省略",
-          value: `他 ${matches.length - fields.length} 件のブラックリストへの該当は表示上限のため省略されました。`,
-        });
-      }
-
-      return {
-        description: [
-          `ユーザー: <@${member.id}> (${member.id})`,
-          `実行した処理: ${banned ? "BAN" : "ログのみ"}`,
-        ].join("\n"),
-        fields,
-      };
-    },
-  },
-} satisfies Record<AllLogField | ChannelLogField, LogFormat<any>>;
+} satisfies Record<LogField, LogFormat<any>>;

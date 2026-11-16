@@ -44,7 +44,6 @@
     "deepmerge": "4.3.1",
     "discord.js": "catalog:",
     "domain-model": "workspace:*",
-    "infra-diff": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

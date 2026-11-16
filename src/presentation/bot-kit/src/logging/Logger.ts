@@ -1,38 +1,35 @@
 import type { AppCore } from "app-core";
 import { EmbedBuilder, type Guild } from "discord.js";
 
-import type { AllLogField, ChannelLogField } from "./log";
-import { logFormats, type LogFormat } from "./logFormats";
+import type { LogFormat } from "./format";
 
 const OVERFLOW_FIELDS_PER_EMBED = 5;
+
+/** A GuildLogSetting column holding a log-destination channel ID. */
+export type LogSettingField = Exclude<
+  keyof NonNullable<Awaited<ReturnType<AppCore["log"]["getSetting"]>>>,
+  "guildId"
+>;
 
 export class Logger {
   constructor(private readonly core: AppCore) {}
 
-  public async log<F extends AllLogField>(
+  public async log<A extends unknown[]>(
     guild: Guild,
-    field: F,
-    ...args: Parameters<(typeof logFormats)[F]["build"]>
+    field: LogSettingField,
+    format: LogFormat<A>,
+    ...args: A
   ): Promise<void> {
     const settings = await this.core.log.getSetting(guild.id);
 
-    await this.send(guild, settings?.[field], field, args);
+    await this.logToChannel(guild, settings?.[field], format, ...args);
   }
 
-  public async logToChannel<F extends ChannelLogField>(
-    guild: Guild,
-    channelId: string,
-    field: F,
-    ...args: Parameters<(typeof logFormats)[F]["build"]>
-  ): Promise<void> {
-    await this.send(guild, channelId, field, args);
-  }
-
-  private async send<F extends AllLogField | ChannelLogField>(
+  public async logToChannel<A extends unknown[]>(
     guild: Guild,
     channelId: string | null | undefined,
-    field: F,
-    args: Parameters<(typeof logFormats)[F]["build"]>,
+    format: LogFormat<A>,
+    ...args: A
   ): Promise<void> {
     try {
       if (!channelId) {
@@ -45,7 +42,6 @@ export class Logger {
         return;
       }
 
-      const format = logFormats[field] as LogFormat;
       const content = await format.build(...args);
 
       const embed = new EmbedBuilder()
@@ -77,7 +73,7 @@ export class Logger {
         await channel.send({ embeds: [overflowEmbed] });
       }
     } catch (error) {
-      console.error(`Failed to send log for ${field}:`, error);
+      console.error(`Failed to send log "${format.title}":`, error);
     }
   }
 }

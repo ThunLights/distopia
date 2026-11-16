@@ -356,9 +356,14 @@ the panel (e.g. after saving), call `settingsPage(core, guild)`.
 for bot-wide gating/middleware before features see the event (e.g. `MessageUpdateHandler`
 skips a message just deleted as spam, `GuildMemberAddHandler` a member banned by the
 blacklist); most handlers just forward. When a feature needs an event no handler covers yet,
-add a handler for it and wire it in `client.ts`. The shared logger
-(`Logger`, log formats, `findRecentAuditLogEntry`) lives in `presentation-bot-kit/logging/*`;
-`feature-log` owns the `/settings` ログ設定 UI and the log listeners.
+add a handler for it and wire it in `client.ts`.
+
+Logging: `presentation-bot-kit/logging/*` holds only what's shared — `Logger` (sends a
+`LogFormat` to the channel stored in a `GuildLogSetting` column, or to an explicit channel),
+the `LogFormat` types, `findRecentAuditLogEntry`, and the formats the bot itself still uses
+(`antiRaidFormat`, `blackListFormat`). `feature-log` owns everything else: the ログ設定 UI,
+its field list/labels (`log.ts`), the per-event formats (`logFormats.ts`), and one listener
+file per gateway event under `src/bot/Event/`.
 
 `app-feature-loader` is the only package that knows the feature list. Its `build`
 (`scripts/gen.ts`) scans `src/application/feature/`, rewrites its own `dependencies` to list
