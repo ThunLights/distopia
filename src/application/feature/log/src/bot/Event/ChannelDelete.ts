@@ -1,11 +1,16 @@
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import type { DMChannel, NonThreadGuildBasedChannel } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
-export const channelDelete: FeatureEventListener<"channelDelete"> = async (core, channel) => {
-  if (channel.isDMBased()) {
-    return;
-  }
+export class ChannelDeleteEvent extends FeatureEventBase<"channelDelete"> {
+  public override readonly event = "channelDelete";
 
-  await sendLog(core, channel.guild, "logChannelDelete", channel);
-};
+  public override async handle(channel: DMChannel | NonThreadGuildBasedChannel) {
+    if (channel.isDMBased()) {
+      return;
+    }
+
+    await sendLog(this.core, channel.guild, "logChannelDelete", channel);
+  }
+}

@@ -1,34 +1,33 @@
-import { AuditLogEvent } from "discord.js";
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 import { findRecentAuditLogEntry } from "presentation-bot-kit/logging/auditLog";
 
 import { sendLog } from "../sendLog";
 
-export const guildMemberRemove: FeatureEventListener<"guildMemberRemove"> = async (
-  core,
-  member,
-) => {
-  const banEntry = await findRecentAuditLogEntry(
-    member.guild,
-    AuditLogEvent.MemberBanAdd,
-    member.id,
-  );
+export class GuildMemberRemoveEvent extends FeatureEventBase<"guildMemberRemove"> {
+  public override readonly event = "guildMemberRemove";
 
-  if (banEntry) {
-    // Already logged by guildBanAdd.
-    return;
+  public override async handle(member: GuildMember | PartialGuildMember) {
+    const banEntry = await findRecentAuditLogEntry(
+      member.guild,
+      AuditLogEvent.MemberBanAdd,
+      member.id,
+    );
+    if (banEntry) {
+      // Already logged by guildBanAdd.
+      return;
+    }
+
+    const kickEntry = await findRecentAuditLogEntry(
+      member.guild,
+      AuditLogEvent.MemberKick,
+      member.id,
+    );
+    if (kickEntry) {
+      await sendLog(this.core, member.guild, "logMemberKick", member, kickEntry.executor);
+      return;
+    }
+
+    await sendLog(this.core, member.guild, "logMemberLeave", member);
   }
-
-  const kickEntry = await findRecentAuditLogEntry(
-    member.guild,
-    AuditLogEvent.MemberKick,
-    member.id,
-  );
-
-  if (kickEntry) {
-    await sendLog(core, member.guild, "logMemberKick", member, kickEntry.executor);
-    return;
-  }
-
-  await sendLog(core, member.guild, "logMemberLeave", member);
-};
+}

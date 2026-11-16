@@ -1,21 +1,21 @@
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import type { VoiceState } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
-export const voiceStateUpdate: FeatureEventListener<"voiceStateUpdate"> = async (
-  core,
-  oldState,
-  newState,
-) => {
-  if (oldState.channelId === newState.channelId) {
-    return;
-  }
+export class VoiceStateUpdateEvent extends FeatureEventBase<"voiceStateUpdate"> {
+  public override readonly event = "voiceStateUpdate";
 
-  if (oldState.channelId) {
-    await sendLog(core, newState.guild, "logVoiceLeave", newState.id, oldState.channelId);
-  }
+  public override async handle(oldState: VoiceState, newState: VoiceState) {
+    if (oldState.channelId === newState.channelId) {
+      return;
+    }
 
-  if (newState.channelId) {
-    await sendLog(core, newState.guild, "logVoiceJoin", newState.id, newState.channelId);
+    if (oldState.channelId) {
+      await sendLog(this.core, newState.guild, "logVoiceLeave", newState.id, oldState.channelId);
+    }
+    if (newState.channelId) {
+      await sendLog(this.core, newState.guild, "logVoiceJoin", newState.id, newState.channelId);
+    }
   }
-};
+}

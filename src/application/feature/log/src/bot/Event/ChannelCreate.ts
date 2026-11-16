@@ -1,7 +1,12 @@
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import type { NonThreadGuildBasedChannel } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
-export const channelCreate: FeatureEventListener<"channelCreate"> = async (core, channel) => {
-  await sendLog(core, channel.guild, "logChannelCreate", channel);
-};
+export class ChannelCreateEvent extends FeatureEventBase<"channelCreate"> {
+  public override readonly event = "channelCreate";
+
+  public override async handle(channel: NonThreadGuildBasedChannel) {
+    await sendLog(this.core, channel.guild, "logChannelCreate", channel);
+  }
+}

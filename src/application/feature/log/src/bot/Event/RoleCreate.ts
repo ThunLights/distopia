@@ -1,7 +1,12 @@
-import type { FeatureEventListener } from "presentation-bot-kit/feature";
+import type { Role } from "discord.js";
+import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
-export const roleCreate: FeatureEventListener<"roleCreate"> = async (core, role) => {
-  await sendLog(core, role.guild, "logRoleCreate", role);
-};
+export class RoleCreateEvent extends FeatureEventBase<"roleCreate"> {
+  public override readonly event = "roleCreate";
+
+  public override async handle(role: Role) {
+    await sendLog(this.core, role.guild, "logRoleCreate", role);
+  }
+}

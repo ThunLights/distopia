@@ -343,7 +343,7 @@ contract type:
 
 | Export | Contract | Loaded by |
 |---|---|---|
-| `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries + `events` (gateway event listeners, `(core, ...ClientEvents[K]) => Promise<void>`) | `presentation-bot` |
+| `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries + `events` (`FeatureEventBase` subclasses from `presentation-bot-kit/base/FeatureEventBase`: `event` names the `ClientEvents` key, `handle(...args)` receives its arguments) | `presentation-bot` |
 | `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-web` runs the tasks (`RunFeatureTasks` RPC); `presentation-schedulemanager` ticks each cron key |
 
 `/settings` panel entries go through `presentation-bot-kit/settings`: a feature lists
@@ -351,7 +351,7 @@ contract type:
 its `BotFeature.settings`, and the bot passes them to `addSettings` at startup. To return to
 the panel (e.g. after saving), call `settingsPage(core, guild)`.
 
-`BotFeature.events` listeners are invoked by `presentation-bot`'s `emitFeatureEvent`
+`BotFeature.events` classes are instantiated once with `core` and invoked by `presentation-bot`'s `emitFeatureEvent`
 (`src/featureEvents.ts`), called from each `EventHandler/*Handler.ts`. A handler is the place
 for bot-wide gating/middleware before features see the event (e.g. `MessageUpdateHandler`
 skips a message just deleted as spam, `GuildMemberAddHandler` a member banned by the
@@ -366,8 +366,8 @@ Logging: `presentation-bot-kit/logging/*` holds only what's shared — `Logger` 
 `LogFormat` to the channel stored in a `GuildLogSetting` column, or to an explicit channel),
 the `LogFormat` types, `findRecentAuditLogEntry`, and the formats the bot itself still uses
 (`antiRaidFormat`, `blackListFormat`). `feature-log` owns everything else: the ログ設定 UI,
-its field list/labels (`log.ts`), the per-event formats (`logFormats.ts`), and one listener
-file per gateway event under `src/bot/Event/`.
+its field list/labels (`log.ts`), the per-event formats (`logFormats.ts`), and one
+`FeatureEventBase` subclass per gateway event under `src/bot/Event/`.
 
 `app-feature-loader` is the only package that knows the feature list. Its `build`
 (`scripts/gen.ts`) scans `src/application/feature/`, rewrites its own `dependencies` to list
