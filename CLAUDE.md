@@ -355,7 +355,11 @@ the panel (e.g. after saving), call `settingsPage(core, guild)`.
 (`src/featureEvents.ts`), called from each `EventHandler/*Handler.ts`. A handler is the place
 for bot-wide gating/middleware before features see the event (e.g. `MessageUpdateHandler`
 skips a message just deleted as spam, `GuildMemberAddHandler` a member banned by the
-blacklist); most handlers just forward. When a feature needs an event no handler covers yet,
+blacklist); most handlers just forward. A listener can return `new SkipOtherProcess()`
+(`presentation-bot-kit/feature`) to stop there: later features (loader order, i.e.
+alphabetical) don't run, and the handler skips its remaining work (sticky/TTS on
+`messageCreate`, welcome messages on member add/remove) — except `voiceStateUpdate`, whose
+empty-channel disconnect always runs. When a feature needs an event no handler covers yet,
 add a handler for it and wire it in `client.ts`.
 
 Logging: `presentation-bot-kit/logging/*` holds only what's shared — `Logger` (sends a

@@ -1,4 +1,5 @@
 import type { GuildMember } from "discord.js";
+import { SkipOtherProcess } from "presentation-bot-kit/feature";
 import { blackListFormat } from "presentation-bot-kit/logging/blackListFormat";
 
 import { emitFeatureEvent } from "../featureEvents";
@@ -15,7 +16,9 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
     }
 
     await this.applyVerifyPendingRole(member);
-    await emitFeatureEvent(this.core, "guildMemberAdd", member);
+    if ((await emitFeatureEvent(this.core, "guildMemberAdd", member)) instanceof SkipOtherProcess) {
+      return;
+    }
     await this.welcomeMessenger.send(member.guild, member, "join");
   }
 

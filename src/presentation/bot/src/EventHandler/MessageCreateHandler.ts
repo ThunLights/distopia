@@ -1,4 +1,5 @@
 import type { Message, OmitPartialGroupDMChannel } from "discord.js";
+import { SkipOtherProcess } from "presentation-bot-kit/feature";
 
 import { emitFeatureEvent } from "../featureEvents";
 import { detectSpamMessage } from "../utils/moderation/spamDetector";
@@ -27,7 +28,9 @@ export class MessageCreateHandler extends BaseHandler<
       );
     }
 
-    await emitFeatureEvent(this.core, "messageCreate", message);
+    if ((await emitFeatureEvent(this.core, "messageCreate", message)) instanceof SkipOtherProcess) {
+      return;
+    }
 
     await scheduleStickyRepost(this.core, message).catch((error) =>
       console.error("[sticky] failed to schedule repost", error),

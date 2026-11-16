@@ -33,10 +33,14 @@ export type Commands = {
   userSelectMenu: UserSelectMenuInteractionBase[];
 };
 
+// Returned by a listener to stop the event there: later features' listeners don't run, and
+// the bot handler skips whatever it would have done after emitting.
+export class SkipOtherProcess {}
+
 export type FeatureEventListener<K extends keyof ClientEvents> = (
   core: AppCore,
   ...args: ClientEvents[K]
-) => Promise<void>;
+) => Promise<void | SkipOtherProcess>;
 
 // presentation-bot's own handler for each event decides when these run (e.g. not for a
 // message it just deleted as spam), so a listener only sees events that survived that.

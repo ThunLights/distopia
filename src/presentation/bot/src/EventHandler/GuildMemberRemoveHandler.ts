@@ -1,4 +1,5 @@
 import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
+import { SkipOtherProcess } from "presentation-bot-kit/feature";
 import { findRecentAuditLogEntry } from "presentation-bot-kit/logging/auditLog";
 
 import { emitFeatureEvent } from "../featureEvents";
@@ -15,9 +16,9 @@ export class GuildMemberRemoveHandler extends BaseHandler<
       findRecentAuditLogEntry(member.guild, AuditLogEvent.MemberKick, member.id),
     ]);
 
-    await emitFeatureEvent(this.core, "guildMemberRemove", member);
+    const result = await emitFeatureEvent(this.core, "guildMemberRemove", member);
 
-    if (banEntry || kickEntry) {
+    if (result instanceof SkipOtherProcess || banEntry || kickEntry) {
       return;
     }
 

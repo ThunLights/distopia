@@ -15,6 +15,7 @@ export class VoiceStateUpdateHandler extends BaseHandler<
     // Read before leaveIfVoiceChannelEmpty, which can destroy the session (and thus make
     // getSession return undefined) when this update is the last human leaving the channel.
     await this.announceVoiceStateChange(oldState, newState);
+    // Not skippable: leaving an emptied voice channel is the bot's own cleanup.
     await emitFeatureEvent(this.core, "voiceStateUpdate", oldState, newState);
 
     if (oldState.channelId) {
