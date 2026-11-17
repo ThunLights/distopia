@@ -17,8 +17,8 @@ import { RoleCreateHandler } from "./EventHandler/RoleCreateHandler";
 import { RoleDeleteHandler } from "./EventHandler/RoleDeleteHandler";
 import { RoleUpdateHandler } from "./EventHandler/RoleUpdateHandler";
 import { VoiceStateUpdateHandler } from "./EventHandler/VoiceStateUpdateHandler";
+import { emitFeatureEvent } from "./featureEvents";
 import { registerSettings } from "./settings";
-import { restoreBumpNotices } from "./utils/bump/notice";
 import { restoreSessions } from "./utils/tts/session";
 
 export function handleClient(client: Client, core: AppCore) {
@@ -50,11 +50,9 @@ export function handleClient(client: Client, core: AppCore) {
       console.error("[tts] failed to restore voice sessions", error),
     );
 
-    // Fire-and-forget, same reasoning: re-arming pending bump notices must not block command
-    // registration below.
-    void restoreBumpNotices(client, core).catch((error) =>
-      console.error("[bump] failed to restore bump notices", error),
-    );
+    // Fire-and-forget, same reasoning: features' startup work (e.g. re-arming pending bump
+    // notices) must not block command registration below.
+    void emitFeatureEvent(core, "clientReady", client);
 
     const commands = interactionCreateHandler.commands.chatInput
       .filter((command) => command.availableGuildId === null)

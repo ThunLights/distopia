@@ -14,10 +14,10 @@ import {
 } from "discord.js";
 import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
+import { joinLinesWithinLimit } from "presentation-bot-kit/discordLimits";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { joinLinesWithinLimit } from "../../../utils/discordLimits";
 import { ttsEmbed as embed } from "../../../utils/tts/embed";
 import { isJoined, join, leave } from "../../../utils/tts/session";
 

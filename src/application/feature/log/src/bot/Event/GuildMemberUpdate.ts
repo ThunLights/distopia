@@ -1,11 +1,12 @@
 import { AuditLogEvent, type GuildMember, type PartialGuildMember } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 import { findRecentAuditLogEntry } from "presentation-bot-kit/logging/auditLog";
 
 import { sendLog } from "../sendLog";
 
 export class GuildMemberUpdateEvent extends FeatureEventBase<"guildMemberUpdate"> {
   public override readonly event = "guildMemberUpdate";
+  public override readonly priority = EventPriority.Logging;
 
   public override async handle(
     oldMember: GuildMember | PartialGuildMember,

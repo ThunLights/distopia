@@ -9,6 +9,9 @@
     "./component/*": {
       "import": "./src/component/*.ts"
     },
+    "./discordLimits": {
+      "import": "./src/discordLimits.ts"
+    },
     "./codeblock": {
       "import": "./src/codeblock.ts"
     },

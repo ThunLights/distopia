@@ -3,7 +3,6 @@ import { SkipOtherProcess } from "presentation-bot-kit/feature";
 
 import { emitFeatureEvent } from "../featureEvents";
 import { detectSpamMessage } from "../utils/moderation/spamDetector";
-import { scheduleStickyRepost } from "../utils/sticky/stickyMessage";
 import { enqueue, getSession, skip as skipCurrentPlayback } from "../utils/tts/session";
 import { BaseHandler } from "./BaseHandler";
 
@@ -31,10 +30,6 @@ export class MessageCreateHandler extends BaseHandler<
     if ((await emitFeatureEvent(this.core, "messageCreate", message)) instanceof SkipOtherProcess) {
       return;
     }
-
-    await scheduleStickyRepost(this.core, message).catch((error) =>
-      console.error("[sticky] failed to schedule repost", error),
-    );
 
     if (message.guildId) {
       try {

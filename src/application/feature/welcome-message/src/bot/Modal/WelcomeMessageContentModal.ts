@@ -12,8 +12,8 @@ import { ModalSubmitInteractionBase } from "presentation-bot-kit/base/ModalSubmi
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
+import { WelcomeMessenger } from "../WelcomeMessenger";
 
 const OptionsSchema = z.object({
   content: z.string().min(1).max(CHARACTER_LIMIT.description),

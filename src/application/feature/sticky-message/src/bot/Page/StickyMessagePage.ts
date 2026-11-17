@@ -10,8 +10,7 @@ import {
 } from "discord.js";
 import type { Guild } from "domain-model";
 import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
-
-import { joinLinesWithinLimit } from "../../../utils/discordLimits";
+import { joinLinesWithinLimit } from "presentation-bot-kit/discordLimits";
 
 const EMBED_DESCRIPTION_LIMIT = 4096;
 

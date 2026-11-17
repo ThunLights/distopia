@@ -20,8 +20,10 @@
   },
   "dependencies": {
     "app-schedule": "workspace:*",
+    "feature-acting-owner": "workspace:*",
     "feature-anti-raid": "workspace:*",
     "feature-black-list": "workspace:*",
+    "feature-bump": "workspace:*",
     "feature-friend": "workspace:*",
     "feature-help": "workspace:*",
     "feature-log": "workspace:*",
@@ -32,8 +34,10 @@
     "feature-role-panel": "workspace:*",
     "feature-staff": "workspace:*",
     "feature-stat-channel": "workspace:*",
+    "feature-sticky-message": "workspace:*",
     "feature-ticket": "workspace:*",
     "feature-web": "workspace:*",
+    "feature-welcome-message": "workspace:*",
     "feature-white-list": "workspace:*",
     "presentation-bot-kit": "workspace:*"
   },

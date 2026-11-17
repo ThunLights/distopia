@@ -24,7 +24,15 @@ for (const dir of dirs) {
 
   const commands = [];
 
-  for (const fileName of await fs.readdir(commandDir)) {
+  // A directory empties out (and so vanishes from git) once all its handlers move to features.
+  const fileNames = await fs.readdir(commandDir).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  });
+
+  for (const fileName of fileNames) {
     const filePath = path.join(commandDir, fileName);
     if ((await fs.stat(filePath)).isDirectory()) {
       continue;

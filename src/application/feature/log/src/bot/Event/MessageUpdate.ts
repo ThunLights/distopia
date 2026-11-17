@@ -1,10 +1,11 @@
 import type { Message, OmitPartialGroupDMChannel, PartialMessage } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
 export class MessageUpdateEvent extends FeatureEventBase<"messageUpdate"> {
   public override readonly event = "messageUpdate";
+  public override readonly priority = EventPriority.Logging;
 
   public override async handle(
     oldMessage: OmitPartialGroupDMChannel<Message | PartialMessage>,

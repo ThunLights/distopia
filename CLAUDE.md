@@ -352,14 +352,17 @@ its `BotFeature.settings`, and the bot passes them to `addSettings` at startup. 
 the panel (e.g. after saving), call `settingsPage(core, guild)`.
 
 `BotFeature.events` classes are instantiated once with `core` and invoked by `presentation-bot`'s `emitFeatureEvent`
-(`src/featureEvents.ts`), called from each `EventHandler/*Handler.ts`. A handler is the place
+(`src/featureEvents.ts`), called from each `EventHandler/*Handler.ts`. Listeners run one at a
+time in `priority` order (`EventPriority` in `presentation-bot-kit/base/FeatureEventBase`,
+higher first): `Moderation` for gates that may stop the event (anti-raid), `Default`, then
+`Logging` so logs record what other features did; ties keep loader order (alphabetical). A handler is the place
 for bot-wide gating/middleware before features see the event (e.g. `MessageUpdateHandler`
 skips a message just deleted as spam, `GuildMemberAddHandler` a member banned by the
 blacklist); most handlers just forward. A listener can return `new SkipOtherProcess()`
-(`presentation-bot-kit/feature`) to stop there: later features (loader order, i.e.
-alphabetical) don't run, and the handler skips its remaining work (sticky/TTS on
-`messageCreate`, welcome messages on member add/remove) — except `voiceStateUpdate`, whose
-empty-channel disconnect always runs. When a feature needs an event no handler covers yet,
+(`presentation-bot-kit/feature`) to stop there: later listeners don't run, and the handler skips its remaining work (TTS read-aloud on
+`messageCreate`) — except `voiceStateUpdate`, whose empty-channel disconnect always runs.
+`clientReady` is emitted fire-and-forget from `client.ts` for startup work (e.g.
+`feature-bump` re-arming pending notices). When a feature needs an event no handler covers yet,
 add a handler for it and wire it in `client.ts`.
 
 Logging: `presentation-bot-kit/logging/*` holds only what's shared — `Logger` (sends a
