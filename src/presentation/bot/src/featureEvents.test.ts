@@ -1,6 +1,6 @@
 import type { AppCore } from "app-core";
 import type { Role } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 import { SkipOtherProcess } from "presentation-bot-kit/feature";
 import { describe, expect, it, vi } from "vitest";
 
@@ -83,5 +83,29 @@ describe("emitFeatureEvent", () => {
     expect(cores[0]).toBe(coreA);
     expect(cores[1]).toBe(coreB);
     expect(otherEvent).not.toHaveBeenCalled();
+  });
+
+  it("runs higher priority listeners first, keeping feature order on ties", async () => {
+    const order: string[] = [];
+    const tracked = (name: string, priority: number) =>
+      class extends FeatureEventBase<"roleCreate"> {
+        public override readonly event = "roleCreate";
+        public override readonly priority = priority;
+        public override async handle() {
+          order.push(name);
+        }
+      };
+    features.splice(
+      0,
+      features.length,
+      { events: [tracked("log", EventPriority.Logging)] },
+      { events: [tracked("a", EventPriority.Default)] },
+      { events: [tracked("b", EventPriority.Default)] },
+      { events: [tracked("antiRaid", EventPriority.Moderation)] },
+    );
+
+    await emitFeatureEvent({} as AppCore, "roleCreate", role);
+
+    expect(order).toEqual(["antiRaid", "a", "b", "log"]);
   });
 });

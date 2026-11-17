@@ -1,10 +1,11 @@
 import type { Role } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
 export class RoleUpdateEvent extends FeatureEventBase<"roleUpdate"> {
   public override readonly event = "roleUpdate";
+  public override readonly priority = EventPriority.Logging;
 
   public override async handle(oldRole: Role, newRole: Role) {
     const changes: string[] = [];

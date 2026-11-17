@@ -9,7 +9,10 @@ const listenersByCore = new WeakMap<AppCore, FeatureEventBase[]>();
 function listenersFor(core: AppCore): FeatureEventBase[] {
   let listeners = listenersByCore.get(core);
   if (!listeners) {
-    listeners = features.flatMap((f) => f.events ?? []).map((Listener) => new Listener(core));
+    listeners = features
+      .flatMap((f) => f.events ?? [])
+      .map((Listener) => new Listener(core))
+      .sort((a, b) => b.priority - a.priority);
     listenersByCore.set(core, listeners);
   }
   return listeners;

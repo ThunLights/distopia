@@ -1,10 +1,11 @@
 import type { VoiceState } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
 export class VoiceStateUpdateEvent extends FeatureEventBase<"voiceStateUpdate"> {
   public override readonly event = "voiceStateUpdate";
+  public override readonly priority = EventPriority.Logging;
 
   public override async handle(oldState: VoiceState, newState: VoiceState) {
     if (oldState.channelId === newState.channelId) {

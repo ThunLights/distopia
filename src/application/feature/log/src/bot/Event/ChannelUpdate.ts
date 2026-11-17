@@ -1,10 +1,11 @@
 import type { DMChannel, NonThreadGuildBasedChannel } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 
 import { sendLog } from "../sendLog";
 
 export class ChannelUpdateEvent extends FeatureEventBase<"channelUpdate"> {
   public override readonly event = "channelUpdate";
+  public override readonly priority = EventPriority.Logging;
 
   public override async handle(
     oldChannel: DMChannel | NonThreadGuildBasedChannel,

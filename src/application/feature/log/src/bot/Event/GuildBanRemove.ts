@@ -1,11 +1,12 @@
 import { AuditLogEvent, type GuildBan } from "discord.js";
-import { FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
+import { EventPriority, FeatureEventBase } from "presentation-bot-kit/base/FeatureEventBase";
 import { findRecentAuditLogEntry } from "presentation-bot-kit/logging/auditLog";
 
 import { sendLog } from "../sendLog";
 
 export class GuildBanRemoveEvent extends FeatureEventBase<"guildBanRemove"> {
   public override readonly event = "guildBanRemove";
+  public override readonly priority = EventPriority.Logging;
 
   public override async handle(ban: GuildBan) {
     const entry = await findRecentAuditLogEntry(
