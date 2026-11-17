@@ -52,7 +52,7 @@ jobs:
         run: scripts/ci/install-commit-hook-tools.sh
 
       - name: Run Claude dependency bump
-        uses: anthropics/claude-code-action@61a9c274fa7110a66dfafc1bbbced03833eb25fe # v1.0.269
+        uses: anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc # v1.0.276
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
