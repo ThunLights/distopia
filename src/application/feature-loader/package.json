@@ -34,6 +34,7 @@
     "feature-role-panel": "workspace:*",
     "feature-staff": "workspace:*",
     "feature-stat-channel": "workspace:*",
+    "feature-stats": "workspace:*",
     "feature-sticky-message": "workspace:*",
     "feature-ticket": "workspace:*",
     "feature-web": "workspace:*",

@@ -18,15 +18,6 @@ export class MessageCreateHandler extends BaseHandler<
       return;
     }
 
-    if (message.guildId && message.member?.id) {
-      await this.core.message.increase(
-        message.guildId,
-        message.member.id,
-        message.content,
-        message.author.bot,
-      );
-    }
-
     if ((await emitFeatureEvent(this.core, "messageCreate", message)) instanceof SkipOtherProcess) {
       return;
     }

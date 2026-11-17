@@ -19,8 +19,6 @@ export function schedulerRoutes(router: ConnectRouter) {
   router.service(SchedulerService, {
     async runFiveMinuteTasks() {
       await core.jwt.update();
-      await core.message.syncDB();
-      await core.member.syncDB();
       return {};
     },
 
