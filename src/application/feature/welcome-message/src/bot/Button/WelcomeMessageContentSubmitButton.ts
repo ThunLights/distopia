@@ -16,7 +16,7 @@ import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteracti
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { ModalSended } from "presentation-bot-kit/base/Modal/ModalSended";
 
-import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
+import { WelcomeMessenger } from "../WelcomeMessenger";
 
 const customIdPrefix = "welcomeMessageContentSubmit:";
 

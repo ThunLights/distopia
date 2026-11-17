@@ -16,7 +16,7 @@ import {
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
-import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
+import { WelcomeMessenger } from "../WelcomeMessenger";
 
 export class WelcomeMessageCategorySelectMenu extends StringSelectMenuInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];

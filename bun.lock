@@ -84,8 +84,10 @@
       "name": "app-feature-loader",
       "dependencies": {
         "app-schedule": "workspace:*",
+        "feature-acting-owner": "workspace:*",
         "feature-anti-raid": "workspace:*",
         "feature-black-list": "workspace:*",
+        "feature-bump": "workspace:*",
         "feature-friend": "workspace:*",
         "feature-help": "workspace:*",
         "feature-log": "workspace:*",
@@ -96,9 +98,28 @@
         "feature-role-panel": "workspace:*",
         "feature-staff": "workspace:*",
         "feature-stat-channel": "workspace:*",
+        "feature-sticky-message": "workspace:*",
         "feature-ticket": "workspace:*",
         "feature-web": "workspace:*",
+        "feature-welcome-message": "workspace:*",
         "feature-white-list": "workspace:*",
+        "presentation-bot-kit": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/acting-owner": {
+      "name": "feature-acting-owner",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
         "presentation-bot-kit": "workspace:*",
       },
       "devDependencies": {
@@ -131,6 +152,25 @@
     },
     "src/application/feature/black-list": {
       "name": "feature-black-list",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "domain-model": "workspace:*",
+        "presentation-bot-kit": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/bump": {
+      "name": "feature-bump",
       "dependencies": {
         "app-core": "workspace:*",
         "discord.js": "catalog:",
@@ -323,6 +363,26 @@
         "typescript": "catalog:",
       },
     },
+    "src/application/feature/sticky-message": {
+      "name": "feature-sticky-message",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "domain-model": "workspace:*",
+        "presentation-bot-kit": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+        "vitest": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
     "src/application/feature/ticket": {
       "name": "feature-ticket",
       "dependencies": {
@@ -345,6 +405,25 @@
     },
     "src/application/feature/web": {
       "name": "feature-web",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "domain-model": "workspace:*",
+        "presentation-bot-kit": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/welcome-message": {
+      "name": "feature-welcome-message",
       "dependencies": {
         "app-core": "workspace:*",
         "discord.js": "catalog:",
@@ -2496,9 +2575,13 @@
 
     "fdir": ["fdir@6.5.0", "", { "peerDependencies": { "picomatch": "^3 || ^4" }, "optionalPeers": ["picomatch"] }, "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="],
 
+    "feature-acting-owner": ["feature-acting-owner@workspace:src/application/feature/acting-owner"],
+
     "feature-anti-raid": ["feature-anti-raid@workspace:src/application/feature/anti-raid"],
 
     "feature-black-list": ["feature-black-list@workspace:src/application/feature/black-list"],
+
+    "feature-bump": ["feature-bump@workspace:src/application/feature/bump"],
 
     "feature-friend": ["feature-friend@workspace:src/application/feature/friend"],
 
@@ -2520,9 +2603,13 @@
 
     "feature-stat-channel": ["feature-stat-channel@workspace:src/application/feature/stat-channel"],
 
+    "feature-sticky-message": ["feature-sticky-message@workspace:src/application/feature/sticky-message"],
+
     "feature-ticket": ["feature-ticket@workspace:src/application/feature/ticket"],
 
     "feature-web": ["feature-web@workspace:src/application/feature/web"],
+
+    "feature-welcome-message": ["feature-welcome-message@workspace:src/application/feature/welcome-message"],
 
     "feature-white-list": ["feature-white-list@workspace:src/application/feature/white-list"],
 

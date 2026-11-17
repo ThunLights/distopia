@@ -11,7 +11,7 @@ import { RateLimitError } from "domain-model";
 import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { scheduleBumpNotice } from "../../../utils/bump/notice";
+import { scheduleBumpNotice } from "../notice";
 
 type Options = {};
 
@@ -74,7 +74,7 @@ export class BumpCommand extends ChatInputCommandBase<Options> {
         fireAt: new Date(Date.now() + twoHours).toISOString(),
       };
       // Persisted so a rolling update's restart (which kills the setTimeout below) can
-      // re-arm this from Redis instead of losing the notice -- see utils/bump/notice.ts.
+      // re-arm this from Redis instead of losing the notice -- see notice.ts.
       await this.core.guild.saveBumpNotice(job);
       scheduleBumpNotice(job, interaction.client, this.core);
     }

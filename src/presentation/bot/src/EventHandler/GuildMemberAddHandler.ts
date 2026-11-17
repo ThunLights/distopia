@@ -1,5 +1,4 @@
 import type { GuildMember } from "discord.js";
-import { SkipOtherProcess } from "presentation-bot-kit/feature";
 import { blackListFormat } from "presentation-bot-kit/logging/blackListFormat";
 
 import { emitFeatureEvent } from "../featureEvents";
@@ -16,10 +15,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
     }
 
     await this.applyVerifyPendingRole(member);
-    if ((await emitFeatureEvent(this.core, "guildMemberAdd", member)) instanceof SkipOtherProcess) {
-      return;
-    }
-    await this.welcomeMessenger.send(member.guild, member, "join");
+    await emitFeatureEvent(this.core, "guildMemberAdd", member);
   }
 
   private async applyVerifyPendingRole(member: GuildMember): Promise<void> {
@@ -28,8 +24,8 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       try {
         await this.core.state.discord.role.give(member.guild.id, member.id, setting.pendingRoleId);
       } catch {
-        // Role missing/above the bot's own role/missing permission, etc. -- the join log and
-        // welcome message below must still happen, same reasoning as enforceBlackList's own
+        // Role missing/above the bot's own role/missing permission, etc. -- the feature listeners
+        // (join log, welcome message) must still run, same reasoning as enforceBlackList's own
         // catch for a failed ban.
       }
     }

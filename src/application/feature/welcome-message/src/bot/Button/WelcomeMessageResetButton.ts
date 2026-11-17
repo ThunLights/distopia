@@ -1,34 +1,31 @@
 import {
   InteractionResponse,
   MessageFlags,
+  type ButtonInteraction,
   type CacheType,
-  type ChannelSelectMenuInteraction,
   type InteractionReplyOptions,
   type MessagePayload,
   type PermissionResolvable,
 } from "discord.js";
-import { ChannelSelectMenuInteractionBase } from "presentation-bot-kit/base/ChannelSelectMenuInteractionBase";
+import { ButtonInteractionBase } from "presentation-bot-kit/base/ButtonInteractionBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 
-import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
 import { welcomeMessagePage } from "../Page/WelcomeMessagePage";
+import { WelcomeMessenger } from "../WelcomeMessenger";
 
-const customIdPrefix = "welcomeMessageChannel:";
+const customIdPrefix = "welcomeMessageReset:";
 
-export class WelcomeMessageChannelSelectMenu extends ChannelSelectMenuInteractionBase {
+export class WelcomeMessageResetButton extends ButtonInteractionBase {
   public override requireUserGuildPermissions: PermissionResolvable[] = ["Administrator"];
   public override customId: string = customIdPrefix;
 
-  public override async match(
-    interaction: ChannelSelectMenuInteraction<CacheType>,
-  ): Promise<boolean> {
+  public override async match(interaction: ButtonInteraction<CacheType>): Promise<boolean> {
     return interaction.customId.startsWith(customIdPrefix);
   }
 
   protected override async exec(
-    interaction: ChannelSelectMenuInteraction<CacheType>,
-    options: { channelId: string },
-  ): Promise<string | MessagePayload | InteractionReplyOptions | InteractionResponse> {
+    interaction: ButtonInteraction<CacheType>,
+  ): Promise<string | InteractionReplyOptions | MessagePayload | InteractionResponse> {
     const guild = await this.parseGuild(interaction);
 
     if (guild instanceof GuildParseError) {
@@ -41,9 +38,13 @@ export class WelcomeMessageChannelSelectMenu extends ChannelSelectMenuInteractio
       return { content: `${field}は無効な選択肢です`, flags: [MessageFlags.Ephemeral] };
     }
 
-    const channelField = WelcomeMessenger.labels[field].channelField;
+    const label = WelcomeMessenger.labels[field];
 
-    await this.core.guild.saveSetting({ guildId: guild.id, [channelField]: options.channelId });
+    await this.core.guild.saveSetting({
+      guildId: guild.id,
+      [label.channelField]: null,
+      [label.contentField]: null,
+    });
 
     const welcomeMessagePagePayload = await welcomeMessagePage(this.core, guild);
 

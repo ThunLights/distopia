@@ -10,7 +10,7 @@ import {
 import type { Guild } from "domain-model";
 import { backSettingsPageButton } from "presentation-bot-kit/component/BackSettingsPageButton";
 
-import { WelcomeMessenger } from "../../../utils/welcome/WelcomeMessenger";
+import { WelcomeMessenger } from "../WelcomeMessenger";
 
 export async function welcomeMessagePage(
   core: AppCore,
