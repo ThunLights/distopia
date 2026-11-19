@@ -12,7 +12,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout repository
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ inputs.ref }}
         persist-credentials: false
@@ -23,10 +23,10 @@ runs:
       run: printenv > .env
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v4
+      uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
     - name: Build with GHA cache
-      uses: docker/build-push-action@v7
+      uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
       with:
         context: ./docker
         push: false
@@ -39,10 +39,22 @@ runs:
         # which is what makes buildx fail with "failed to reserve cache". (docker/
         # dockerfile.prod IS multi-stage, but deploy.yml builds it without any GHA cache, so
         # this setting never applied to it.)
-        cache-to: type=gha,mode=min
+        # A pull_request_target run executes fork code in this repo's cache scope -- it must only
+        # read caches, never write ones that later trusted runs on main would restore.
+        cache-to: ${{ github.event_name != 'pull_request_target' && 'type=gha,mode=min' || '' }}
 
     - name: Cache Bun install
-      uses: actions/cache@v6
+      if: github.event_name != 'pull_request_target'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .cache/bun/install
+        key: ${{ runner.os }}-bun-install-${{ hashFiles('**/bun.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-install-
+
+    - name: Restore Bun install cache (read-only for fork PRs)
+      if: github.event_name == 'pull_request_target'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: .cache/bun/install
         key: ${{ runner.os }}-bun-install-${{ hashFiles('**/bun.lock') }}
@@ -50,7 +62,17 @@ runs:
           ${{ runner.os }}-bun-install-
 
     - name: Cache Turbo
-      uses: actions/cache@v6
+      if: github.event_name != 'pull_request_target'
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .cache/turbo
+        key: ${{ runner.os }}-turbo-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-
+
+    - name: Restore Turbo cache (read-only for fork PRs)
+      if: github.event_name == 'pull_request_target'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: .cache/turbo
         key: ${{ runner.os }}-turbo-${{ github.sha }}

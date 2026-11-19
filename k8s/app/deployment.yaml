@@ -42,6 +42,13 @@ spec:
       labels:
         app.kubernetes.io/name: distopia-app
     spec:
+      # oven/bun's non-root `bun` user (uid/gid 1000), matching docker/dockerfile.prod's USER.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       # initContainers run once per new Pod (i.e. once per rollout, since replicas: 1 means
       # the still-running old Pod never restarts its own) -- prisma migrate deploy is
       # idempotent, so re-running it on a crash-loop restart is harmless, just redundant.
@@ -53,6 +60,10 @@ spec:
       initContainers:
         - name: migrate
           image: ghcr.io/thunlights/distopia:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           workingDir: /app/src/infrastructure/database
           command: ["bunx", "prisma", "migrate", "deploy"]
           env:
@@ -74,6 +85,10 @@ spec:
           # it with the actual deployed tag at the Application level (no git write-back).
           # See the annotations on k8s/argocd/app-app.yaml and k8s/README.md.
           image: ghcr.io/thunlights/distopia:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           ports:
             - name: http
               containerPort: 3000

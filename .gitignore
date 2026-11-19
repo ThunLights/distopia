@@ -53,3 +53,5 @@ storybook-static
 
 .cache
 *.auto.ts
+
+docs/security

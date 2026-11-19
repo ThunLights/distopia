@@ -26,6 +26,7 @@ import {
   UserDictionary,
   UserJWTVerifyKey,
   UserOAuth2,
+  VerifyRateLimit,
   VoiceChannelMember,
 } from "repo-redis";
 
@@ -50,6 +51,7 @@ export const memory: AppState["memory"] = {
     bump: new GuildBumpRateLimit(redis, "bot"),
     button: new ButtonRateLimit(redis, "bot"),
     chatInputCommand: new ChatInputCommandRateLimit(redis, "bot"),
+    verify: new VerifyRateLimit(redis, "web"),
   },
   friend: new Friend(redis, "bot"),
   guildBlackList: new GuildBlackList(redis, "bot"),

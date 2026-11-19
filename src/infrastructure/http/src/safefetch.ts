@@ -176,7 +176,7 @@ export async function safeFetch(
         return new HeaderError(`${location} is invalid.`);
       }
 
-      if (options?.detectDiscordProtocol && url.protocol === "discord://") {
+      if (options?.detectDiscordProtocol && url.protocol === "discord:") {
         return response;
       }
 

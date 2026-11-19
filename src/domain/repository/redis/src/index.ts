@@ -28,4 +28,5 @@ export * from "./UrlCacheInMemory";
 export * from "./UserDictionary";
 export * from "./UserJWTVerifyKey";
 export * from "./UserOAuth2";
+export * from "./VerifyRateLimit";
 export * from "./VoiceChannelMember";

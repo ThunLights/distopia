@@ -15,6 +15,13 @@ describe("isLocalIPv4", () => {
     ["100.64.0.0", "100.64.0.0/10 CGNAT lower bound"],
     ["100.127.255.255", "100.64.0.0/10 CGNAT upper bound"],
     ["100.100.100.100", "100.64.0.0/10 CGNAT mid-range"],
+    ["192.0.0.8", "192.0.0.0/24 IETF protocol assignments"],
+    ["198.18.0.1", "198.18.0.0/15 benchmarking"],
+    ["198.19.255.255", "198.18.0.0/15 upper bound"],
+    ["203.0.113.5", "TEST-NET-3"],
+    ["224.0.0.1", "multicast"],
+    ["240.0.0.1", "reserved"],
+    ["255.255.255.255", "broadcast"],
   ])("returns true for %s (%s)", (host) => {
     expect(isLocalIPv4(host)).toBe(true);
   });
@@ -29,6 +36,8 @@ describe("isLocalIPv4", () => {
     ["192.169.0.1", "not 192.168"],
     ["169.255.0.1", "not 169.254"],
     ["11.0.0.1", "not 10.x"],
+    ["198.20.0.1", "just above 198.18.0.0/15"],
+    ["223.255.255.255", "just below multicast"],
   ])("returns false for public address %s (%s)", (host) => {
     expect(isLocalIPv4(host)).toBe(false);
   });
@@ -56,18 +65,29 @@ describe("isLocalIPv6", () => {
     ["fd12:3456::1", "fd unique-local"],
     ["::ffff:127.0.0.1", "IPv4-mapped (dotted)"],
     ["::ffff:7f00:1", "IPv4-mapped (hex form, as the URL parser normalizes it)"],
+    ["::7f00:1", "IPv4-compatible loopback ([::127.0.0.1] as the URL parser normalizes it)"],
+    ["::2", "IPv4-compatible 0.0.0.2"],
+    ["::ffff:0:7f00:1", "IPv4-translated loopback"],
+    ["64:ff9b::a9fe:a9fe", "NAT64 of 169.254.169.254"],
+    ["64:ff9b:1::1", "local-use NAT64"],
+    ["2002:7f00:1::", "6to4 of 127.0.0.1"],
+    ["2001::1", "Teredo"],
+    ["fec0::1", "fec0::/10 deprecated site-local"],
+    ["ff02::1", "multicast"],
+    ["not-an-ip", "malformed input fails closed"],
   ])("returns true for %s (%s)", (addr) => {
     expect(isLocalIPv6(addr)).toBe(true);
   });
 
   test.each([
-    ["::2", "not loopback"],
     ["2001:4860:4860::8888", "public (Google DNS)"],
-    ["fec0::1", "fec0 is outside fe80::/10"],
     ["fb00::1", "fb is outside fc00::/7"],
     ["fe70::1", "fe70 is outside fe80::/10"],
     ["::ffff:8.8.8.8", "IPv4-mapped public (dotted)"],
     ["::ffff:0808:0808", "IPv4-mapped public (hex 8.8.8.8)"],
+    ["64:ff9b::808:808", "NAT64 of public 8.8.8.8"],
+    ["2002:808:808::1", "6to4 of public 8.8.8.8"],
+    ["2606:4700:4700::1111", "public (Cloudflare DNS)"],
   ])("returns false for %s (%s)", (addr) => {
     expect(isLocalIPv6(addr)).toBe(false);
   });

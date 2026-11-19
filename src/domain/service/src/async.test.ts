@@ -11,4 +11,10 @@ describe("useAsync", async () => {
     const func = useAsync((a: number, b: number) => a + b);
     expect(await func(1, 3)).toBe(4);
   });
+  test("rejects when the wrapped function throws", async () => {
+    const func = useAsync(() => {
+      throw new Error("boom");
+    });
+    await expect(func()).rejects.toThrow("boom");
+  });
 });

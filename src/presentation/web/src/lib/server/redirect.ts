@@ -2,9 +2,16 @@
 // e.g. "//evil.com" is parsed by browsers as "https://evil.com") to prevent an open redirect.
 // Browsers also treat "\" the same as "/" while parsing a URL with a special scheme, so
 // "/\evil.com" (and any other mix of slashes/backslashes) normalizes to that same
-// protocol-relative "//evil.com" form -- normalize before checking, not after.
+// protocol-relative "//evil.com" form -- normalize before checking, not after. They also
+// strip ASCII tab/CR/LF anywhere in a URL ("/\t/evil.com" becomes "//evil.com"), so any
+// value containing those is rejected outright.
 export function parseRedirectTo(raw: string | null): string | undefined {
-  if (raw && raw.startsWith("/") && !raw.replace(/\\/g, "/").startsWith("//")) {
+  if (
+    raw &&
+    raw.startsWith("/") &&
+    !/[\t\n\r]/.test(raw) &&
+    !raw.replace(/\\/g, "/").startsWith("//")
+  ) {
     return raw;
   }
   return undefined;

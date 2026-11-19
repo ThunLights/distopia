@@ -14,6 +14,7 @@ import {
   type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from "discord.js";
+import { checkAssignableRole } from "presentation-bot-kit/assignableRole";
 import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 import { GuildParseError } from "presentation-bot-kit/base/Error/GuildParseError";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
@@ -165,6 +166,16 @@ export class VerifyAdminCommand extends ChatInputCommandBase<Options> {
     if (subCommand === "channel" && channelId) {
       await this.core.verify.saveSetting({ guildId, channelId });
       return okReply(`認証案内の投稿先を <#${channelId}> に設定しました。`);
+    }
+
+    if ((subCommand === "role" || subCommand === "pending-role") && roleId) {
+      const role = interaction.guild?.roles.cache.get(roleId);
+      const error = role
+        ? await checkAssignableRole(role, interaction.user.id)
+        : "役職が見つかりませんでした。";
+      if (error) {
+        return errorReply(error);
+      }
     }
 
     if (subCommand === "role" && roleId) {

@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./assignableRole": {
+      "import": "./src/assignableRole.ts"
+    },
     "./base/*": {
       "import": "./src/base/*.ts"
     },

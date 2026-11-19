@@ -149,6 +149,10 @@ export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }
         .replaceAll(PARTYTOWN_DEBUG_PLACEHOLDER, String(dev)),
   });
 
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  // SAMEORIGIN, not DENY: partytown loads its own same-origin sandbox iframe.
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+
   // /~partytown/* sets its own long-lived, version-busted Cache-Control (see its +server.ts) --
   // forcing no-store here would defeat that caching entirely.
   if (!event.url.pathname.startsWith("/~partytown/")) {
