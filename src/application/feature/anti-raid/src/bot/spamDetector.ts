@@ -29,6 +29,14 @@ export async function detectSpamMessage(
   message: OmitPartialGroupDMChannel<Message<boolean>>,
 ): Promise<boolean> {
   const logger = new Logger(core);
+  // The message is already deleted by the time this runs -- a log failure must not turn the
+  // result into "not spam", or later listeners (e.g. TTS read-aloud) would still see it.
+  const logAntiRaid = (inviteLinks: string[]) =>
+    message.guild
+      ? logger
+          .log(message.guild, "logAntiRaid", antiRaidFormat, message, inviteLinks)
+          .catch((error) => console.error("[anti-raid] failed to log spam message", error))
+      : undefined;
   const content = message.content;
 
   if (!message.guildId) {
@@ -53,9 +61,7 @@ export async function detectSpamMessage(
       if (message.deletable) {
         await deleteIgnoringUnknownMessage(message);
       }
-      if (message.guild) {
-        await logger.log(message.guild, "logAntiRaid", antiRaidFormat, message, inviteLinks);
-      }
+      await logAntiRaid(inviteLinks);
       return true;
     }
 
@@ -78,9 +84,7 @@ export async function detectSpamMessage(
         await deleteIgnoringUnknownMessage(message);
       }
 
-      if (message.guild) {
-        await logger.log(message.guild, "logAntiRaid", antiRaidFormat, message, embedInviteLinks);
-      }
+      await logAntiRaid(embedInviteLinks);
 
       return true;
     }
