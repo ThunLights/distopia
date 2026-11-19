@@ -1,3 +1,4 @@
+import { core } from "#lib/server/core.js";
 import { errorJson } from "#lib/server/res.js";
 import { pluginHeaders, submitVerify } from "#lib/server/verifyPlugin.js";
 import {
@@ -36,6 +37,10 @@ export const POST: RequestHandler = async (e) => {
   const { user } = e.locals;
   if (!user) {
     return errorJson("Invalid User");
+  }
+
+  if (!(await core.ratelimit.acquireVerify(user.id))) {
+    return errorJson("しばらく待ってから再度お試しください");
   }
 
   const result = await submitVerify({

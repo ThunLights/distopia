@@ -8,8 +8,8 @@ import {
   type InteractionReplyOptions,
   type PermissionResolvable,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
-  type Role,
 } from "discord.js";
+import { checkAssignableRole } from "presentation-bot-kit/assignableRole";
 import { ChatInputCommandBase } from "presentation-bot-kit/base/ChatInputCommandBase";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
@@ -108,23 +108,6 @@ export class RolePanelCommand extends ChatInputCommandBase<Options> {
   }
 
   // Without this, an administrator could hand out roles above their own via a panel.
-  private async checkRole(
-    interaction: ChatInputCommandInteraction<CacheType>,
-    role: Role,
-  ): Promise<string | null> {
-    if (role.managed || role.id === role.guild.id) {
-      return "この役職はパネルに追加できません。";
-    }
-    if (!role.editable) {
-      return "ボットの役職より上位の役職は追加できません。";
-    }
-    const member = await role.guild.members.fetch(interaction.user.id);
-    if (role.guild.ownerId !== member.id && role.comparePositionTo(member.roles.highest) >= 0) {
-      return "あなたの最上位の役職以上の役職は追加できません。";
-    }
-    return null;
-  }
-
   protected override async exec(
     interaction: ChatInputCommandInteraction<CacheType>,
     options: Options,
@@ -136,7 +119,7 @@ export class RolePanelCommand extends ChatInputCommandBase<Options> {
     }
 
     if (options.subCommand !== "remove") {
-      const error = await this.checkRole(interaction, role);
+      const error = await checkAssignableRole(role, interaction.user.id);
       if (error) {
         return reply(error);
       }

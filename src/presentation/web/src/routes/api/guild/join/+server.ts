@@ -7,6 +7,12 @@ import type { RequestHandler } from "./$types";
 export const POST: RequestHandler = await authAndValidateHandler(
   PostBodySchema,
   async (e, body) => {
+    // The bot can add a user to any guild it's in via guilds.join, so only listed guilds may
+    // be joined this way -- same visibility rule as the /guilds/[id] page.
+    if (!(await core.guild.isPublic(body.guildId))) {
+      return errorJson("サーバーが見つかりませんでした");
+    }
+
     const result = await core.oauth2.joinGuild(e.locals.user.id, body.guildId);
 
     if (result === "join") {

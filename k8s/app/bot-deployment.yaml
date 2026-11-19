@@ -33,12 +33,23 @@ spec:
       labels:
         app.kubernetes.io/name: distopia-bot
     spec:
+      # oven/bun's non-root `bun` user (uid/gid 1000), matching docker/dockerfile.prod's USER.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: distopia-bot
           # Same image as distopia-app (see deployment.yaml's own comment on the :latest
           # bootstrap fallback + Argo CD Image Updater) -- `bun run build` already builds
           # every workspace package into it, so this just overrides the start command.
           image: ghcr.io/thunlights/distopia:latest
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           command: ["bun", "run", "src/presentation/bot/src/index.ts"]
           workingDir: /app
           ports:

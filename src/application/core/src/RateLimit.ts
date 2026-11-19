@@ -27,4 +27,13 @@ export class RateLimit extends Base {
 
     return limit ? limit.getTime() > Date.now() : false;
   }
+
+  // Each verification attempt fans out to Discord, the VPN lookup and Turnstile, and a refusal is
+  // posted to the guild's log channel -- one attempt per user per window, atomically.
+  public async acquireVerify(userId: string): Promise<boolean> {
+    return await this.state.memory.ratelimit.verify.acquire(
+      userId,
+      new Date(Date.now() + threeSecs),
+    );
+  }
 }

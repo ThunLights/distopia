@@ -72,5 +72,6 @@ ENV NODE_ENV=production
 # ARG) to actually be visible to the running process.
 ARG GIT_SHA=unknown
 ENV GIT_SHA=${GIT_SHA}
+USER bun
 EXPOSE 3000
 CMD ["bun", "run", "src/presentation/web/build/index.js"]

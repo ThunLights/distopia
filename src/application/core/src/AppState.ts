@@ -35,6 +35,7 @@ import type {
   UserDictionary,
   UserJWTVerifyKey,
   UserOAuth2,
+  VerifyRateLimit,
   VoiceChannelMember,
 } from "repo-redis";
 import type { SearchEngineClient } from "repo-search";
@@ -59,6 +60,7 @@ export type AppState = {
       chatInputCommand: ChatInputCommandRateLimit;
       messageCreate: MessageCreateRateLimit;
       bump: GuildBumpRateLimit;
+      verify: VerifyRateLimit;
     };
     friend: Friend;
     guildBlackList: GuildBlackList;

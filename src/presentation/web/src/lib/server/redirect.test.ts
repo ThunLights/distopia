@@ -15,6 +15,12 @@ describe("parseRedirectTo", () => {
     expect(parseRedirectTo("\\/evil.com")).toBeUndefined();
   });
 
+  it("rejects tab/CR/LF that browsers strip into a protocol-relative path", () => {
+    expect(parseRedirectTo("/\t/evil.com")).toBeUndefined();
+    expect(parseRedirectTo("/\n/evil.com")).toBeUndefined();
+    expect(parseRedirectTo("/\r/evil.com")).toBeUndefined();
+  });
+
   it("rejects an absolute URL", () => {
     expect(parseRedirectTo("https://evil.com")).toBeUndefined();
   });

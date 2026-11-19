@@ -74,4 +74,11 @@ describe("url.ts", () => {
       "https://example.com",
     ]);
   });
+
+  test("a long space-free message without an invite doesn't backtrack catastrophically", () => {
+    const message = "discord.com".repeat(400);
+    const start = performance.now();
+    expect(findUrlsSync(message).inviteLinks).toEqual([]);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
 });

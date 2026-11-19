@@ -193,6 +193,31 @@ describe("safeFetch", () => {
     expect(result).toBeInstanceOf(HeaderError);
   });
 
+  it("returns the redirect response for a discord: deep link when detectDiscordProtocol is set", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(null, {
+        status: 302,
+        headers: { location: "discord://discord.com/invite/abc" },
+      }),
+    );
+    const result = await safeFetch(url("https://example.com/"), undefined, {
+      detectDiscordProtocol: true,
+    });
+    expect(result).not.toBeInstanceOf(Error);
+    expect((result as Response).headers.get("location")).toBe("discord://discord.com/invite/abc");
+  });
+
+  it("returns HeaderError for a discord: deep link when detectDiscordProtocol is not set", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(null, {
+        status: 302,
+        headers: { location: "discord://discord.com/invite/abc" },
+      }),
+    );
+    const result = await safeFetch(url("https://example.com/"));
+    expect(result).toBeInstanceOf(HeaderError);
+  });
+
   it("returns HeaderError when the redirect uses the javascript: protocol", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(null, { status: 302, headers: { location: "javascript:alert(1)" } }),

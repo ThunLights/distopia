@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { StringSelectMenuInteractionBase } from "presentation-bot-kit/base/StringSelectMenuInteractionBase";
 
-import { ROLE_PANEL_CUSTOM_ID } from "../../rolePanel";
+import { ROLE_PANEL_CUSTOM_ID, rolePanelRoleIds } from "../../rolePanel";
 
 const BOT_PERMISSION_HINT =
   "\nサーバー管理者に、ボットの「ロールの管理」権限と役職の順位を確認するよう伝えてください。";
@@ -39,8 +39,13 @@ export class RolePanelSelectMenu extends StringSelectMenuInteractionBase {
     }
 
     const member = await guild.members.fetch(interaction.user.id);
+    // Only roles this panel actually offers -- never trust submitted values on their own.
+    const panelRoleIds = rolePanelRoleIds(interaction.message) ?? [];
     const lines: string[] = [];
     for (const roleId of interaction.values) {
+      if (!panelRoleIds.includes(roleId)) {
+        continue;
+      }
       const role = guild.roles.cache.get(roleId);
       if (!role || role.managed) {
         lines.push(`⚠️ <@&${roleId}> は付与できません。`);

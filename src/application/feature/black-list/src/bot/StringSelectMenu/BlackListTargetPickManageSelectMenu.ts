@@ -43,6 +43,13 @@ export class BlackListTargetPickManageSelectMenu extends StringSelectMenuInterac
     const userId = options.value;
     const requesterId = interaction.user.id;
 
+    if (!(await this.core.blackList.isOwnerOrEditor(blackListId, requesterId))) {
+      return {
+        content: "このブラックリストを閲覧する権限がありません。",
+        flags: [MessageFlags.Ephemeral],
+      };
+    }
+
     const [target, canEdit, canRemove] = await Promise.all([
       this.core.blackList.findTarget(blackListId, userId),
       this.core.blackList.hasPermission(blackListId, requesterId, "EditTarget"),
