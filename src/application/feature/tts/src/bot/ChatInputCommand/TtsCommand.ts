@@ -19,7 +19,7 @@ import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
 import { ttsEmbed as embed } from "../embed";
-import { isJoined, join, leave } from "../session";
+import { getSession, join, leave } from "../session";
 
 const OptionsSchema = z.object({
   subCommandGroup: z.string().nullable(),
@@ -217,8 +217,22 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
     }
 
     if (subCommand === "leave") {
-      if (!isJoined(guild.id)) {
+      const session = getSession(guild.id);
+      if (!session) {
         return embed("Red", "エラー", "読み上げは開始されていません。");
+      }
+      // Otherwise any member anywhere in the guild could cut off a reading session they aren't
+      // even listening to -- only its listeners, or someone who could move them out anyway.
+      const member = await interaction.guild?.members.fetch(interaction.user.id);
+      if (
+        member?.voice.channelId !== session.voiceChannelId &&
+        !member?.permissions.has(PermissionFlagsBits.MoveMembers)
+      ) {
+        return embed(
+          "Red",
+          "エラー",
+          "読み上げ中のボイスチャンネルに参加しているメンバーのみ終了できます。",
+        );
       }
       await leave(guild.id, this.core);
       return embed("Green", "読み上げ終了", "読み上げを終了しました。");
