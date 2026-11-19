@@ -562,8 +562,8 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
 - `Tts.saveVoiceSession`/`clearVoiceSession` (`src/application/core/src/Tts.ts`) keep a
   `tts:voice-session:<guildId>` key in Redis in sync with the in-memory session, on every
   join/leave, regardless of which caller triggers it (`/tts join`, `/tts leave`, or
-  `VoiceStateUpdateHandler`'s auto-leave when a channel empties out) — see
-  `src/presentation/bot/src/utils/tts/session.ts`.
+  `feature-tts`'s `VoiceStateUpdateEvent` auto-leave when a channel empties out) — see
+  `src/application/feature/tts/src/bot/session.ts`.
 - On `clientReady`, `restoreSessions` reads every persisted session from Redis and rejoins
   each one (re-checking Connect/Speak permissions, same as a fresh `/tts join`) — fire-and-
   forget, so a slow voice reconnect never blocks command registration.
@@ -575,7 +575,7 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
 
 > **Known gap:** `clearVoiceSession` deletes `tts:voice-session:<guildId>` unconditionally,
 > with no owner/lease check. During the old-pod/new-pod overlap `RollingUpdate` already
-> accepts (see "Notes" below), it's possible for the old pod's `VoiceStateUpdateHandler` to
+> accepts (see "Notes" below), it's possible for the old pod's `VoiceStateUpdateEvent` to
 > delete a pointer the new pod just wrote (e.g. the old pod's channel empties out right after
 > the new pod already rejoined and persisted). Worst case, that one guild simply doesn't
 > auto-resume on the *next* restart — the same already-accepted "no PVC" degradation above,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { isConfirmedEmptyOfHumans } from "./VoiceStateUpdateHandler";
+import { isConfirmedEmptyOfHumans } from "./VoiceStateUpdate";
 
 describe("isConfirmedEmptyOfHumans", () => {
   test("true when every occupant resolved and all are bots", () => {

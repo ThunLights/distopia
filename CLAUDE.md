@@ -356,13 +356,13 @@ the panel (e.g. after saving), call `settingsPage(core, guild)`.
 time in `priority` order (`EventPriority` in `presentation-bot-kit/base/FeatureEventBase`,
 higher first): `Moderation` for gates that may stop the event (anti-raid), `Default`, then
 `Logging` so logs record what other features did; ties keep loader order (alphabetical). A handler is the place
-for bot-wide gating/middleware before features see the event (e.g. `MessageUpdateHandler`
-skips a message just deleted as spam, `GuildMemberAddHandler` a member banned by the
-blacklist); most handlers just forward. A listener can return `new SkipOtherProcess()`
-(`presentation-bot-kit/feature`) to stop there: later listeners don't run, and the handler skips its remaining work (TTS read-aloud on
-`messageCreate`) — except `voiceStateUpdate`, whose empty-channel disconnect always runs.
+for bot-wide gating/middleware before features see the event (e.g. `GuildMemberAddHandler`
+skips a member banned by the blacklist); most handlers just forward. A listener can return
+`new SkipOtherProcess()` (`presentation-bot-kit/feature`) to stop there: later listeners don't
+run (e.g. `feature-anti-raid`'s `Moderation`-priority spam check on `messageCreate`/
+`messageUpdate` deletes the message and stops `feature-tts`'s read-aloud and the logs).
 `clientReady` is emitted fire-and-forget from `client.ts` for startup work (e.g.
-`feature-bump` re-arming pending notices). When a feature needs an event no handler covers yet,
+`feature-bump` re-arming pending notices, `feature-tts` rejoining voice channels). When a feature needs an event no handler covers yet,
 add a handler for it and wire it in `client.ts`.
 
 Logging: `presentation-bot-kit/logging/*` holds only what's shared — `Logger` (sends a
@@ -385,7 +385,7 @@ turbo rejects; anything a feature needs from the bot belongs in `presentation-bo
 Adding a feature: create `src/application/feature/<name>/` (copy `stat-channel`'s
 `package.json`/`tsconfig.json`), then `sudo bun run build` (adds it to the loader's deps) and
 `sudo bun install` (links it). `feature-stat-channel` is the reference implementation; the
-rest of the bot handlers and `app-core` services are still being migrated into features.
+`app-core` services are still being migrated into features.
 
 ---
 

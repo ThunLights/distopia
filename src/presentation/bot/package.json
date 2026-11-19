@@ -21,25 +21,19 @@
   "dependencies": {
     "@connectrpc/connect": "catalog:",
     "@connectrpc/connect-node": "catalog:",
-    "@discordjs/voice": "catalog:",
-    "@noble/ciphers": "catalog:",
     "app-core": "workspace:*",
     "app-feature-loader": "workspace:*",
     "discord.js": "catalog:",
     "domain-model": "workspace:*",
-    "ffmpeg-static": "catalog:",
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "infra-http": "workspace:*",
     "infra-rankcard": "workspace:*",
     "infra-redis": "workspace:*",
     "infra-rpc": "workspace:*",
-    "opusscript": "catalog:",
     "presentation-bot-kit": "workspace:*",
-    "prism-media": "catalog:",
     "repo-redis": "workspace:*",
-    "repo-search": "workspace:*",
-    "zod": "catalog:"
+    "repo-search": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

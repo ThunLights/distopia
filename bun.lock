@@ -101,6 +101,8 @@
         "feature-stats": "workspace:*",
         "feature-sticky-message": "workspace:*",
         "feature-ticket": "workspace:*",
+        "feature-tts": "workspace:*",
+        "feature-verify": "workspace:*",
         "feature-web": "workspace:*",
         "feature-welcome-message": "workspace:*",
         "feature-white-list": "workspace:*",
@@ -408,6 +410,49 @@
         "app-core": "workspace:*",
         "discord.js": "catalog:",
         "domain-model": "workspace:*",
+        "presentation-bot-kit": "workspace:*",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+        "vitest": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/tts": {
+      "name": "feature-tts",
+      "dependencies": {
+        "@discordjs/voice": "catalog:",
+        "@noble/ciphers": "catalog:",
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
+        "ffmpeg-static": "catalog:",
+        "opusscript": "catalog:",
+        "presentation-bot-kit": "workspace:*",
+        "prism-media": "catalog:",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+        "bun": "catalog:",
+        "oxfmt": "catalog:",
+        "oxlint": "catalog:",
+        "vitest": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
+    "src/application/feature/verify": {
+      "name": "feature-verify",
+      "dependencies": {
+        "app-core": "workspace:*",
+        "discord.js": "catalog:",
         "presentation-bot-kit": "workspace:*",
         "zod": "catalog:",
       },
@@ -753,25 +798,19 @@
       "dependencies": {
         "@connectrpc/connect": "catalog:",
         "@connectrpc/connect-node": "catalog:",
-        "@discordjs/voice": "catalog:",
-        "@noble/ciphers": "catalog:",
         "app-core": "workspace:*",
         "app-feature-loader": "workspace:*",
         "discord.js": "catalog:",
         "domain-model": "workspace:*",
-        "ffmpeg-static": "catalog:",
         "infra-database": "workspace:*",
         "infra-discord": "workspace:*",
         "infra-http": "workspace:*",
         "infra-rankcard": "workspace:*",
         "infra-redis": "workspace:*",
         "infra-rpc": "workspace:*",
-        "opusscript": "catalog:",
         "presentation-bot-kit": "workspace:*",
-        "prism-media": "catalog:",
         "repo-redis": "workspace:*",
         "repo-search": "workspace:*",
-        "zod": "catalog:",
       },
       "devDependencies": {
         "@types/node": "catalog:",
@@ -2518,7 +2557,7 @@
 
     "entities": ["entities@7.0.1", "", {}, "sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA=="],
 
-    "env-paths": ["env-paths@4.0.0", "", { "dependencies": { "is-safe-filename": "^0.1.0" } }, "sha512-pxP8eL2SwwaTRi/KHYwLYXinDs7gL3jxFcBYmEdYfZmZXbaVDvdppd0XBU8qVz03rDfKZMXg1omHCbsJjZrMsw=="],
+    "env-paths": ["env-paths@2.2.1", "", {}, "sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A=="],
 
     "es-define-property": ["es-define-property@1.0.1", "", {}, "sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g=="],
 
@@ -2627,6 +2666,10 @@
     "feature-sticky-message": ["feature-sticky-message@workspace:src/application/feature/sticky-message"],
 
     "feature-ticket": ["feature-ticket@workspace:src/application/feature/ticket"],
+
+    "feature-tts": ["feature-tts@workspace:src/application/feature/tts"],
+
+    "feature-verify": ["feature-verify@workspace:src/application/feature/verify"],
 
     "feature-web": ["feature-web@workspace:src/application/feature/web"],
 
@@ -3808,8 +3851,6 @@
 
     "execa/signal-exit": ["signal-exit@3.0.7", "", {}, "sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ=="],
 
-    "ffmpeg-static/env-paths": ["env-paths@2.2.1", "", {}, "sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A=="],
-
     "flat-cache/flatted": ["flatted@3.4.2", "", {}, "sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA=="],
 
     "glob/minimatch": ["minimatch@10.2.5", "", { "dependencies": { "brace-expansion": "^5.0.5" } }, "sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg=="],
@@ -3819,6 +3860,8 @@
     "http-response-object/@types/node": ["@types/node@10.17.60", "", {}, "sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw=="],
 
     "is-reference/@types/estree": ["@types/estree@1.0.8", "", {}, "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w=="],
+
+    "javascript-obfuscator/env-paths": ["env-paths@4.0.0", "", { "dependencies": { "is-safe-filename": "^0.1.0" } }, "sha512-pxP8eL2SwwaTRi/KHYwLYXinDs7gL3jxFcBYmEdYfZmZXbaVDvdppd0XBU8qVz03rDfKZMXg1omHCbsJjZrMsw=="],
 
     "jsonwebtoken/semver": ["semver@7.7.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA=="],
 
@@ -3889,6 +3932,8 @@
     "@discordjs/ws/@discordjs/rest/undici": ["undici@6.24.1", "", {}, "sha512-sC+b0tB1whOCzbtlx20fx3WgCXwkW627p4EA9uM+/tNNPkSS+eSEld6pAs9nDv7WbY1UUljBMYPtu9BCOrCWKA=="],
 
     "@eslint/config-array/minimatch/brace-expansion": ["brace-expansion@5.0.5", "", { "dependencies": { "balanced-match": "^4.0.2" } }, "sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ=="],
+
+    "@fjst/core/javascript-obfuscator/env-paths": ["env-paths@4.0.0", "", { "dependencies": { "is-safe-filename": "^0.1.0" } }, "sha512-pxP8eL2SwwaTRi/KHYwLYXinDs7gL3jxFcBYmEdYfZmZXbaVDvdppd0XBU8qVz03rDfKZMXg1omHCbsJjZrMsw=="],
 
     "@fjst/sveltekit/@sveltejs/kit/@sveltejs/acorn-typescript": ["@sveltejs/acorn-typescript@1.0.10", "", { "peerDependencies": { "acorn": "^8.9.0" } }, "sha512-4WfKk68eTih+MiJD4fSbxN7E8kVBmTMPWHUPYjvl2N0rMs53YLTT8/YjKU5Dtnz5LqDjl7LEw4U7lXR2W3J5WA=="],
 
