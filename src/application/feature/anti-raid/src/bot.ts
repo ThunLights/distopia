@@ -5,6 +5,8 @@ import { BackAntiRaidPageButton } from "./bot/Button/BackAntiRaidPageButton";
 import { InviteLinkBlockOff } from "./bot/Button/InviteLinkBlockOff";
 import { InviteLinkBlockOn } from "./bot/Button/InviteLinkBlockOn";
 import { AntiRaidLogChannelSelectMenu } from "./bot/ChannelSelectMenu/AntiRaidLogChannelSelectMenu";
+import { MessageCreateEvent } from "./bot/Event/MessageCreate";
+import { MessageUpdateEvent } from "./bot/Event/MessageUpdate";
 import { antiRaidPage } from "./bot/Page/AntiRaidPage";
 import { AntiRaidSettingSelectMenu } from "./bot/StringSelectMenu/AntiRaidSettingSelectMenu";
 
@@ -28,6 +30,7 @@ const feature: BotFeature = {
       },
     },
   ],
+  events: [MessageCreateEvent, MessageUpdateEvent],
 };
 
 export default feature;

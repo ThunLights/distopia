@@ -18,8 +18,8 @@ import { joinLinesWithinLimit } from "presentation-bot-kit/discordLimits";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ttsEmbed as embed } from "../../../utils/tts/embed";
-import { isJoined, join, leave } from "../../../utils/tts/session";
+import { ttsEmbed as embed } from "../embed";
+import { isJoined, join, leave } from "../session";
 
 const OptionsSchema = z.object({
   subCommandGroup: z.string().nullable(),

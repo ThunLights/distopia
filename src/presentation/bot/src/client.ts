@@ -19,7 +19,6 @@ import { RoleUpdateHandler } from "./EventHandler/RoleUpdateHandler";
 import { VoiceStateUpdateHandler } from "./EventHandler/VoiceStateUpdateHandler";
 import { emitFeatureEvent } from "./featureEvents";
 import { registerSettings } from "./settings";
-import { restoreSessions } from "./utils/tts/session";
 
 export function handleClient(client: Client, core: AppCore) {
   registerSettings();
@@ -44,14 +43,8 @@ export function handleClient(client: Client, core: AppCore) {
   client.on("clientReady", async (client) => {
     await core.user.setActivity();
 
-    // Fire-and-forget: rejoining voice channels can take a few seconds per guild and must
-    // not block (or fail) command registration below.
-    void restoreSessions(client, core).catch((error) =>
-      console.error("[tts] failed to restore voice sessions", error),
-    );
-
-    // Fire-and-forget, same reasoning: features' startup work (e.g. re-arming pending bump
-    // notices) must not block command registration below.
+    // Fire-and-forget: features' startup work (e.g. re-arming pending bump notices,
+    // rejoining TTS voice channels) must not block command registration below.
     void emitFeatureEvent(core, "clientReady", client);
 
     const commands = interactionCreateHandler.commands.chatInput

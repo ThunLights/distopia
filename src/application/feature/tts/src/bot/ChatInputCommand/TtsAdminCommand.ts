@@ -21,7 +21,7 @@ import { joinLinesWithinLimit } from "presentation-bot-kit/discordLimits";
 import { validator, type ValidateResult } from "presentation-bot-kit/validator";
 import z from "zod";
 
-import { ttsEmbed as embed } from "../../../utils/tts/embed";
+import { ttsEmbed as embed } from "../embed";
 
 const formatOption: APIApplicationCommandStringOption = {
   type: ApplicationCommandOptionType.String,

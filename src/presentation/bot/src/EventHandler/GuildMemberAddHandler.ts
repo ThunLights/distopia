@@ -12,21 +12,7 @@ export class GuildMemberAddHandler extends BaseHandler<(member: GuildMember) => 
       return;
     }
 
-    await this.applyVerifyPendingRole(member);
     await emitFeatureEvent(this.core, "guildMemberAdd", member);
-  }
-
-  private async applyVerifyPendingRole(member: GuildMember): Promise<void> {
-    const setting = await this.core.verify.getSetting(member.guild.id);
-    if (setting?.enabled && setting.pendingRoleId) {
-      try {
-        await this.core.state.discord.role.give(member.guild.id, member.id, setting.pendingRoleId);
-      } catch {
-        // Role missing/above the bot's own role/missing permission, etc. -- the feature listeners
-        // (join log, welcome message) must still run, same reasoning as enforceBlackList's own
-        // catch for a failed ban.
-      }
-    }
   }
 
   private async enforceBlackList(member: GuildMember): Promise<boolean> {

@@ -37,6 +37,8 @@
     "feature-stats": "workspace:*",
     "feature-sticky-message": "workspace:*",
     "feature-ticket": "workspace:*",
+    "feature-tts": "workspace:*",
+    "feature-verify": "workspace:*",
     "feature-web": "workspace:*",
     "feature-welcome-message": "workspace:*",
     "feature-white-list": "workspace:*",

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { isMediaOnlyMessage, resolveMentions } from "./MessageCreateHandler";
+import { isMediaOnlyMessage, resolveMentions } from "./MessageCreate";
 
 describe("resolveMentions", () => {
   const mentions = {

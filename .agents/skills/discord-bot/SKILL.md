@@ -19,7 +19,7 @@ handleClient(client, core)          ← entry point (called from hooks.server.ts
   │   ├── UserSelectMenu/
   │   ├── RoleSelectMenu/
   │   └── StringSelectMenu/
-  ├── MessageCreateHandler          ← message events (invite link blocking, activity tracking)
+  ├── MessageCreateHandler          ← message events (forwarded to features: anti-raid, tts, ...)
   └── GuildMemberAddHandler         ← new member events
 ```
 
