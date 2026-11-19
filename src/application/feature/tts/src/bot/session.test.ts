@@ -22,7 +22,7 @@ import {
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 
-import { isJoined, join } from "./session";
+import { getSession, isJoined, join, leave } from "./session";
 
 class FakeConnection extends EventEmitter {
   public state: { status: VoiceConnectionStatus } = { status: VoiceConnectionStatus.Ready };
@@ -174,5 +174,37 @@ describe("voice connection Disconnected handling", () => {
 
     expect(isJoined(guildId)).toBe(true);
     expect(current.destroy).not.toHaveBeenCalled();
+  });
+});
+
+describe("leave with an authorized session", () => {
+  test("does not tear down a session that replaced the authorized one", async () => {
+    const guildId = "guild-leave-replaced";
+    const core = fakeCore();
+    const first = new FakeConnection();
+    const replacement = new FakeConnection();
+    mockEntersState({ reconnecting: false });
+
+    await joinWith(guildId, first, core);
+    const authorized = getSession(guildId);
+    // A /tts join lands between the caller's authorization check and its leave().
+    await joinWith(guildId, replacement, core);
+
+    expect(await leave(guildId, core, authorized)).toBe(false);
+    expect(isJoined(guildId)).toBe(true);
+    expect(replacement.destroy).not.toHaveBeenCalled();
+  });
+
+  test("tears down the authorized session when it is still current", async () => {
+    const guildId = "guild-leave-current";
+    const core = fakeCore();
+    const connection = new FakeConnection();
+    mockEntersState({ reconnecting: false });
+
+    await joinWith(guildId, connection, core);
+
+    expect(await leave(guildId, core, getSession(guildId))).toBe(true);
+    expect(isJoined(guildId)).toBe(false);
+    expect(connection.destroy).toHaveBeenCalled();
   });
 });

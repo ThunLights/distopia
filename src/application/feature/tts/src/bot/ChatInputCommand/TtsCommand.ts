@@ -224,8 +224,12 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
       // Otherwise any member anywhere in the guild could cut off a reading session they aren't
       // even listening to -- only its listeners, or someone who could move them out anyway.
       const member = await interaction.guild?.members.fetch(interaction.user.id);
+      // The bot's live voice channel, not session.voiceChannelId: a moderator may have moved
+      // the bot since it joined, and that stored id isn't updated when that happens.
+      const readingChannelId =
+        interaction.guild?.members.me?.voice.channelId ?? session.voiceChannelId;
       if (
-        member?.voice.channelId !== session.voiceChannelId &&
+        member?.voice.channelId !== readingChannelId &&
         !member?.permissions.has(PermissionFlagsBits.MoveMembers)
       ) {
         return embed(
@@ -234,7 +238,11 @@ export class TtsCommand extends ChatInputCommandBase<Options> {
           "読み上げ中のボイスチャンネルに参加しているメンバーのみ終了できます。",
         );
       }
-      await leave(guild.id, this.core);
+      // Pass the authorized session: a /tts join that lands during the fetch above replaces it,
+      // and that new session (possibly in another channel) must not be torn down by this call.
+      if (!(await leave(guild.id, this.core, session))) {
+        return embed("Red", "エラー", "読み上げの状態が変わったため、もう一度お試しください。");
+      }
       return embed("Green", "読み上げ終了", "読み上げを終了しました。");
     }
 

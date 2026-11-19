@@ -18,7 +18,7 @@ import { PermissionFlagsBits, type Client, type VoiceBasedChannel } from "discor
 // process's WebSocket/UDP connections, which can't survive (or be meaningfully persisted
 // across) a restart, so they stay a plain local Map here rather than moving to Redis like
 // the rest of the app's formerly-in-memory state (see repo-redis).
-type TtsSession = {
+export type TtsSession = {
   voiceChannelId: string;
   textChannelId: string;
   connection: VoiceConnection;
@@ -183,14 +183,16 @@ async function joinNow(
   return true;
 }
 
-export function leave(guildId: string, core: AppCore): Promise<void> {
-  return withLifecycleLock(guildId, () => leaveNow(guildId, core));
+// `expected` is the session a caller already authorized against: if a concurrent /tts join
+// replaced it while this call waited for the lock, nothing is torn down and false is returned.
+export function leave(guildId: string, core: AppCore, expected?: TtsSession): Promise<boolean> {
+  return withLifecycleLock(guildId, () => leaveNow(guildId, core, expected));
 }
 
-async function leaveNow(guildId: string, core: AppCore): Promise<void> {
+async function leaveNow(guildId: string, core: AppCore, expected?: TtsSession): Promise<boolean> {
   const session = sessions.get(guildId);
-  if (!session) {
-    return;
+  if (!session || (expected && session !== expected)) {
+    return false;
   }
 
   // Cleared before local teardown, not after -- clearing it after meant a rejection here
@@ -206,6 +208,7 @@ async function leaveNow(guildId: string, core: AppCore): Promise<void> {
   session.player.stop(true);
   session.connection.destroy();
   sessions.delete(guildId);
+  return true;
 }
 
 // Called once from index.ts's `clientReady` handler to rejoin every guild's TTS session
