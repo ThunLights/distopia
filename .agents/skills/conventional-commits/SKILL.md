@@ -55,12 +55,13 @@ way to flag it.
 
 ## Footer: `Co-Authored-By`
 
-Commits made via `/open-pr` or `/auto-commit-and-push` end with:
+Commits made via `/open-pr` or `/auto-commit-and-push` end with the co-author trailer the
+harness specifies, if it specifies one — e.g.:
 
 ```text
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Co-Authored-By: Claude <model> <noreply@anthropic.com>
 ```
 
-This is appended automatically by those commands — see
-`.agents/skills/open-pr/SKILL.md`/`.agents/skills/auto-commit-and-push/SKILL.md`. Don't add it to
-commits made outside that flow.
+There's no fixed model name; use exactly what the harness gives, and omit the trailer when it
+gives none (see `.agents/skills/open-pr/SKILL.md`/`.agents/skills/auto-commit-and-push/SKILL.md`).
+Don't add it to commits made outside that flow.
