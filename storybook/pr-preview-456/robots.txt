@@ -1,5 +1,0 @@
-Sitemap: https://distopia.top/sitemap.xml
-User-agent: *
-Disallow: /api/*
-Disallow: /auth/*
-Disallow: /user/*
