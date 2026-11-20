@@ -36,6 +36,11 @@ export const supportersKeyValue = {
     invite: "https://discord.gg/8v43tgwvfQ",
     guildId: "957886649583415296",
   },
+  shachiku: {
+    name: "社畜鯖",
+    invite: "https://discord.gg/2dubpdHwW3",
+    guildId: "1522862392424272022",
+  },
   sumire: {
     name: "☾.*·̩͙ Sumire's cafe˖⊹",
     invite: "https://discord.gg/eNwcThMeZZ",

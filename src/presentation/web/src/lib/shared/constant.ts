@@ -7,6 +7,7 @@ import breadIcon from "#lib/assets/supporter/bread.webp";
 import bykIcon from "#lib/assets/supporter/byk.webp";
 import cappuccinoIcon from "#lib/assets/supporter/cappuccino.webp";
 import himaIcon from "#lib/assets/supporter/hima.webp";
+import shachikuIcon from "#lib/assets/supporter/shachiku.webp";
 import sumireCafeIcon from "#lib/assets/supporter/sumire.webp";
 import { PUBLIC_BOT_ID, PUBLIC_URL } from "$app/env/public";
 import {
@@ -81,6 +82,10 @@ export const supporters = [
   {
     ...baseSupporters.hima,
     icon: himaIcon,
+  },
+  {
+    ...baseSupporters.shachiku,
+    icon: shachikuIcon,
   },
   {
     ...baseSupporters.sumire,
