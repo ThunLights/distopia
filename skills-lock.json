@@ -1,6 +1,24 @@
 {
   "version": 1,
   "skills": {
+    "auto-commit-and-push": {
+      "source": "ro80t/github-skills",
+      "sourceType": "github",
+      "skillPath": "skills/auto-commit-and-push/SKILL.md",
+      "computedHash": "f808ada330944f3f83657d85080fd6c07f77893e490b5b87f4280362bf22e75c"
+    },
+    "fix-coderabbit": {
+      "source": "ro80t/github-skills",
+      "sourceType": "github",
+      "skillPath": "skills/fix-coderabbit/SKILL.md",
+      "computedHash": "62c0ddb55bcae88f05faf91bdbff2829150beedbd1ab0200ef929bdd4d3f3de2"
+    },
+    "git-policy": {
+      "source": "ro80t/github-skills",
+      "sourceType": "github",
+      "skillPath": "skills/git-policy/SKILL.md",
+      "computedHash": "ccc2caeb0c56b116f142ef8d87443d871810ef67929c6a32ee6490cb93464d4a"
+    },
     "hallmark": {
       "source": "nutlope/hallmark",
       "sourceType": "github",
@@ -24,6 +42,12 @@
       "sourceType": "github",
       "skillPath": "skills/hush-review/SKILL.md",
       "computedHash": "bfe62505e9a31b5b69bf864bed945ae8ef02b9542f555854977a78b17b9ab035"
+    },
+    "open-pr": {
+      "source": "ro80t/github-skills",
+      "sourceType": "github",
+      "skillPath": "skills/open-pr/SKILL.md",
+      "computedHash": "9651ca41fbb1598d8a776f878376a3c2e9c9c98c5fcc417eb3a9b35a4630eaab"
     },
     "stack-diagram": {
       "source": "caru-ini/stack-diagram",

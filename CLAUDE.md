@@ -18,9 +18,15 @@ sufficient — if asked in plain language, tell the user which of the two comman
 instead of acting on the request directly. A prior invocation of either command does not
 carry forward to later turns either; each commit/push needs its own fresh invocation.
 
-- `/open-pr` (`.claude/commands/open-pr.md`) — commit, push, and open/update a pull request.
-- `/auto-commit-and-push` (`.claude/commands/auto-commit-and-push.md`) — commit and push
+- `/open-pr` (`.agents/skills/open-pr/SKILL.md`) — commit, push, and open/update a pull request.
+- `/auto-commit-and-push` (`.agents/skills/auto-commit-and-push/SKILL.md`) — commit and push
   only, no PR.
+
+Both come from `ro80t/github-skills` (`skills-lock.json`; update with `npx skills update`, don't
+edit them in place). Repo-specific: the pre-commit hook (`trufflehog` + `gitleaks` in
+`.husky/pre-commit`) calls `sudo`, which is disabled on the host, so commit through the
+devcontainer — `cd docker && docker compose exec app sh -c "cd /workspaces/distopia && git commit -m '<message>'"`.
+If the devcontainer isn't running, say so; never commit from the host and bypass the hook.
 
 ---
 

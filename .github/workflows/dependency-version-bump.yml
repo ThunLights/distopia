@@ -1,6 +1,6 @@
 name: Scheduled Dependency Version Bump
 
-# Runs /bump-version + /open-pr (see .claude/commands/) on a schedule to keep
+# Runs /bump-version + /open-pr (see .claude/commands/ and .agents/skills/) on a schedule to keep
 # pinned dependency versions (package.json, workspaces.catalog, packageManager,
 # lib/distopia/jsr.json, docker/dockerfile ARGs, workflow bun-version pins — see
 # the "Dependency Version Pins" table in CLAUDE.md) up to date. Dependabot does
@@ -67,7 +67,7 @@ jobs:
 
             You are running directly on an ephemeral GitHub Actions runner, NOT inside the
             project's devcontainer. Passwordless sudo is already available here and bun/git/gh
-            are already on PATH, so ignore any instruction in .claude/commands/ or CLAUDE.md to
+            are already on PATH, so ignore any instruction in .claude/commands/, .agents/skills/ or CLAUDE.md to
             wrap commands in `docker compose exec app ...` — run the plain command instead
             (e.g. `bun install` not `docker compose exec app sudo bun install`,
             `bun run typecheck` not `docker compose exec app sudo bun run typecheck`). Every
@@ -119,7 +119,7 @@ jobs:
                dropped package and why in the final summary. If nothing survives (removing
                each package one at a time never gets verification to pass), discard the
                branch and end without opening a PR.
-            7. Follow the `/open-pr` instructions in `.claude/commands/open-pr.md` to commit
+            7. Follow the `/open-pr` instructions in `.agents/skills/open-pr/SKILL.md` to commit
                (message: `chore(deps): bump N packages` listing each `<package>
                <old-version> -> <new-version>` on its own line) and open ONE PR against
                `main` titled `chore(deps): scheduled dependency bump` (or, if only one

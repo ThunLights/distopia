@@ -1,0 +1,8 @@
+interface:
+  display_name: auto-commit-and-push
+  short_description: Only runs when the user explicitly invokes $auto-commit-and-push.
+
+policy:
+  allow_implicit_invocation: false
+
+dependencies: []
