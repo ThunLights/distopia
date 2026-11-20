@@ -62,5 +62,5 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 
 This is appended automatically by those commands — see
-`.claude/commands/open-pr.md`/`.claude/commands/auto-commit-and-push.md`. Don't add it to
+`.agents/skills/open-pr/SKILL.md`/`.agents/skills/auto-commit-and-push/SKILL.md`. Don't add it to
 commits made outside that flow.

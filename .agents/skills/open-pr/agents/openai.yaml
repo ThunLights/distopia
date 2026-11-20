@@ -1,0 +1,8 @@
+interface:
+  display_name: open-pr
+  short_description: Only runs when the user explicitly invokes $open-pr.
+
+policy:
+  allow_implicit_invocation: false
+
+dependencies: []
