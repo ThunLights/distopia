@@ -2,12 +2,12 @@
   import Footer from "#lib/components/Footer.svelte";
   import Header from "#lib/components/Header.svelte";
   import "../app.css";
-  import { SvelteToast } from "@zerodevx/svelte-toast";
+  import { Toaster } from "svelte-sonner";
 
   let { children, data } = $props();
 </script>
 
-<SvelteToast />
+<Toaster richColors />
 <svelte:head>
   <script>
     // partytown.js defaults to its debug (unminified) build unless `debug` is explicitly false --
