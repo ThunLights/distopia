@@ -1,4 +1,4 @@
-import { ActivityType } from "discord.js";
+import { ActivityType, DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
 
 import type { User } from "../types/User";
 import { Base } from "./Base";
@@ -7,7 +7,12 @@ export class UserController extends Base {
   public async find(userId: string): Promise<User | null> {
     const user =
       this.client.users.cache.get(userId) ??
-      (await this.client.users.fetch(userId, { cache: true }));
+      (await this.client.users.fetch(userId, { cache: true }).catch((error: unknown) => {
+        if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownUser) {
+          return null;
+        }
+        throw error;
+      }));
 
     if (!user) {
       return null;
