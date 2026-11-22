@@ -7,10 +7,10 @@ export async function page(core: AppCore): Promise<InteractionReplyOptions> {
   const embed = new EmbedBuilder()
     .setTitle("ユーザーランキング: Bump")
     .setDescription(
-      `ここでは20位までしか表示されません。追加で見たい場合は[こちら](${core.state.url}/ranking?type=userBump)にアクセスお願いします。`,
+      `ここでは20位までしか表示されません。追加で見たい場合は[こちら](${core.state.url}/ranking?t=userbump)にアクセスお願いします。`,
     )
     .setColor("Purple")
-    .setURL(`${core.state.url}/ranking?type=userBump`)
+    .setURL(`${core.state.url}/ranking?t=userbump`)
     .setFooter({ text: `最終更新: ${date}` });
 
   for (const { user, rank } of (await core.ranking.fetchUser("userBump")).map((user, index) => ({

@@ -8,10 +8,10 @@ export async function page(core: AppCore): Promise<InteractionReplyOptions> {
   const embed = new EmbedBuilder()
     .setTitle("サーバーランキング: アクティブレート")
     .setDescription(
-      `ここでは20位までしか表示されません。追加で見たい場合は[こちら](${core.state.url}/ranking?type=activeRate)にアクセスお願いします。`,
+      `ここでは20位までしか表示されません。追加で見たい場合は[こちら](${core.state.url}/ranking?t=rate)にアクセスお願いします。`,
     )
     .setColor("Purple")
-    .setURL(`${core.state.url}/ranking?type=activeRate`)
+    .setURL(`${core.state.url}/ranking?t=rate`)
     .setFooter({ text: `最終更新: ${date}` });
 
   for (const { guild, rank } of (await core.ranking.fetchGuild("activeRate")).map(
