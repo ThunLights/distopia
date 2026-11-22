@@ -1,6 +1,10 @@
 import type { UserAuth } from "#lib/shared/types/UserAuth.js";
 import type { Guild as SearchGuild } from "#lib/shared/types/routes/api/guild/search.js";
-import type { GuildRanking, UserRanking } from "#lib/shared/types/routes/api/ranking.js";
+import type {
+  GuildRanking,
+  UserLevelRanking,
+  UserRanking,
+} from "#lib/shared/types/routes/api/ranking.js";
 
 export const mockUser: UserAuth = {
   id: "123456789012345678",
@@ -121,6 +125,17 @@ export const mockUserRankings: UserRanking[] = [
     avatarUrl: undefined,
   },
 ];
+
+export const mockUserLevelRankings: UserLevelRanking[] = mockUserRankings.map(
+  ({ id, displayName, username, avatarUrl }, index) => ({
+    id,
+    displayName,
+    username,
+    avatarUrl,
+    level: 30 - index * 5,
+    point: 120,
+  }),
+);
 
 export const mockUserGuilds = [
   {

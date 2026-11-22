@@ -69,6 +69,14 @@ const USER_BUMP_2: UserRanking = {
   bumpCounter: 500,
 };
 
+const USER_LEVEL_1 = {
+  id: "300000000000000003",
+  displayName: "Top Chatter",
+  username: "topchatter_user",
+  level: 21,
+  point: 77,
+};
+
 const FULL_RANKING = {
   guild: {
     level: [GUILD_LEVEL_1, GUILD_LEVEL_2],
@@ -76,6 +84,7 @@ const FULL_RANKING = {
   },
   user: {
     bump: [USER_BUMP_1, USER_BUMP_2],
+    level: [USER_LEVEL_1],
   },
 };
 
@@ -107,11 +116,12 @@ test("renders the ランキング heading", async ({ page }) => {
   await expect(page.locator("main").getByText("ランキング", { exact: true })).toBeVisible();
 });
 
-test("dropdown contains all three ranking-type options", async ({ page }) => {
+test("dropdown contains all four ranking-type options", async ({ page }) => {
   await page.goto("/ranking");
   const select = page.locator("select");
   await expect(select.locator("option[value='level']")).toBeAttached();
   await expect(select.locator("option[value='rate']")).toBeAttached();
+  await expect(select.locator("option[value='userlevel']")).toBeAttached();
   await expect(select.locator("option[value='userbump']")).toBeAttached();
 });
 
@@ -190,6 +200,25 @@ test("?t=level pre-selects the level tab and shows level data immediately", asyn
   await expect(page.getByText("1: Level Leader Guild")).toBeVisible();
 });
 
+// ── User level tab ────────────────────────────────────────────────────────────
+
+test("switching to userlevel tab shows level-ranked users", async ({ page }) => {
+  await mockRanking(page);
+  await page.goto("/ranking");
+  await page.locator("select").selectOption("userlevel");
+
+  await expect(page.getByText("1: Top Chatter")).toBeVisible();
+  await expect(page.getByText("Lv.21 77pt")).toBeVisible();
+});
+
+test("?t=userlevel pre-selects the userlevel tab", async ({ page }) => {
+  await mockRanking(page);
+  await page.goto("/ranking?t=userlevel");
+
+  await expect(page.locator("select")).toHaveValue("userlevel");
+  await expect(page.getByText("1: Top Chatter")).toBeVisible();
+});
+
 // ── Userbump tab ──────────────────────────────────────────────────────────────
 
 test("switching to userbump tab shows user rankings", async ({ page }) => {
@@ -255,7 +284,7 @@ test("switching tabs hides the previous tab's content", async ({ page }) => {
 // ── Edge cases ────────────────────────────────────────────────────────────────
 
 test("all empty ranking arrays render without a crash", async ({ page }) => {
-  await mockRanking(page, { guild: { level: [], activeRate: [] }, user: { bump: [] } });
+  await mockRanking(page, { guild: { level: [], activeRate: [] }, user: { bump: [], level: [] } });
   await page.goto("/ranking");
 
   await expect(page.locator("select")).toBeVisible();

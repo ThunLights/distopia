@@ -38,6 +38,14 @@ async function build(): Promise<ResponseMethodGet> {
         bumpCounter,
         username: name,
       })),
+      level: user.level.map(({ id, displayName, name, avatarUrl, level, point }) => ({
+        id,
+        displayName,
+        avatarUrl,
+        level: Number(level),
+        point: Number(point),
+        username: name,
+      })),
     },
   };
 }

@@ -17,6 +17,11 @@ export type UserRanking = {
   avatarUrl?: string;
 };
 
+export type UserLevelRanking = Omit<UserRanking, "bumpCounter"> & {
+  level: number;
+  point: number;
+};
+
 export type ResponseMethodGet = {
   guild: {
     level: GuildRanking[];
@@ -24,5 +29,6 @@ export type ResponseMethodGet = {
   };
   user: {
     bump: UserRanking[];
+    level: UserLevelRanking[];
   };
 };

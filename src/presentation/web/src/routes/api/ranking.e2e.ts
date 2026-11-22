@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 // GET /api/ranking
 //
-// Returns 200 + { guild: { level, activeRate }, user: { bump } }.
+// Returns 200 + { guild: { level, activeRate }, user: { bump, level } }.
 // No authentication required.
 
 const ENDPOINT = "/api/ranking";
@@ -22,6 +22,7 @@ test("response contains the expected top-level shape", async ({ request }) => {
   // user rankings
   expect(body).toHaveProperty("user");
   expect(Array.isArray(body.user.bump)).toBe(true);
+  expect(Array.isArray(body.user.level)).toBe(true);
 });
 
 test("guild level entries have the required fields when data exists", async ({ request }) => {

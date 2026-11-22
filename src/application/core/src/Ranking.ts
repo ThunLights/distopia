@@ -3,6 +3,7 @@ import type { GuildRecordRanking } from "infra-database/types";
 import { Base } from "./Base";
 import type { RankingFetchOptions } from "./types/RankingFetchOptions";
 import type { UserBumpRanking } from "./types/UserBumpRanking";
+import type { UserLevelRanking } from "./types/UserLevelRanking";
 
 const WARM_NUM = 100;
 
@@ -10,6 +11,7 @@ export class Ranking extends Base {
   private guildLevel = new Map<number, (GuildRecordRanking & { name: string })[]>();
   private guildActiveRate = new Map<number, (GuildRecordRanking & { name: string })[]>();
   private userBump = new Map<number, UserBumpRanking[]>();
+  private userLevel = new Map<number, UserLevelRanking[]>();
 
   public async fetchAll(num: number) {
     return {
@@ -19,6 +21,11 @@ export class Ranking extends Base {
       },
       user: {
         bump: await this.fetchUser("userBump", { num }),
+        // Profile lookups can hit Discord REST; their failure must not take down the other rankings.
+        level: await this.fetchUserLevel({ num }).catch((error: unknown) => {
+          console.error("[ranking] user level lookup failed", error);
+          return [];
+        }),
       },
     };
   }
@@ -104,6 +111,32 @@ export class Ranking extends Base {
     );
   }
 
+  public async fetchUserLevel(options?: RankingFetchOptions): Promise<UserLevelRanking[]> {
+    const num = options?.num ?? 20;
+    const cache = this.userLevel.get(num);
+
+    if (cache) {
+      return cache;
+    }
+
+    const users = await this.loadUserLevel(num);
+    this.userLevel.set(num, users);
+    return users;
+  }
+
+  private async loadUserLevel(num: number) {
+    const users: UserLevelRanking[] = [];
+    const rows = await this.state.database.memberLevel.findGlobalTop(num);
+
+    // Sequential because a cache miss in the bot is a rate-limited Discord REST call.
+    for (const { userId, level, point } of rows) {
+      const { name, displayName, avatarUrl } = await this.findProfile(userId);
+      users.push({ id: userId, name, displayName, avatarUrl, level, point });
+    }
+
+    return users;
+  }
+
   private generation = 0;
 
   // Rebuild in place and swap, so readers keep getting the old data instead of a cold miss.
@@ -135,6 +168,9 @@ export class Ranking extends Base {
       ),
       ...[...nums(this.userBump)].map((num) =>
         refresh(this.userBump, num, () => this.loadUser(num)),
+      ),
+      ...[...nums(this.userLevel)].map((num) =>
+        refresh(this.userLevel, num, () => this.loadUserLevel(num)),
       ),
     ]);
   }

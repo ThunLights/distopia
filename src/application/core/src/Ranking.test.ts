@@ -10,6 +10,7 @@ function setup() {
   const guildFetch = vi.fn(async (id: string): Promise<{ name: string } | null> => ({
     name: `name-${id}`,
   }));
+  const userLevelRanking = vi.fn(async () => [{ userId: "u1", level: 7n, point: 4n }]);
   const userFind = vi.fn(async (id: string): Promise<object | null> => ({
     id,
     name: "n",
@@ -23,6 +24,7 @@ function setup() {
     database: {
       guildRecord: { rankingAll: guildRanking },
       user: { ranking: userRanking },
+      memberLevel: { findGlobalTop: userLevelRanking },
     },
     discord: {
       guild: { fetch: guildFetch },
@@ -34,6 +36,7 @@ function setup() {
     guildRanking,
     guildFetch,
     userRanking,
+    userLevelRanking,
     userFind,
   };
 }
@@ -60,6 +63,14 @@ describe("Ranking size", () => {
     guildFetch.mockResolvedValueOnce(null);
     expect(await ranking.fetchGuild("level", { num: 100 })).toHaveLength(1);
   });
+
+  it("keeps a user-level position whose Discord profile is gone", async () => {
+    const { ranking, userFind } = setup();
+    userFind.mockResolvedValueOnce(null);
+    expect(await ranking.fetchUserLevel({ num: 100 })).toEqual([
+      { id: "u1", name: "unknown", displayName: "不明なユーザー", level: 7n, point: 4n },
+    ]);
+  });
 });
 
 describe("User bump ranking", () => {
@@ -72,6 +83,20 @@ describe("User bump ranking", () => {
   });
 });
 
+describe("Ranking failure isolation", () => {
+  it("serves the other rankings when user-level lookup fails, then retries", async () => {
+    const { ranking, userRanking, userFind } = setup();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    userRanking.mockResolvedValueOnce([]);
+    userFind.mockRejectedValueOnce(new Error("bot unavailable"));
+
+    const failed = await ranking.fetchAll(100);
+    expect(failed.guild.level).toHaveLength(2);
+    expect(failed.user.level).toEqual([]);
+    expect((await ranking.fetchAll(100)).user.level).toHaveLength(1);
+  });
+});
+
 describe("Ranking cache", () => {
   it("serves repeated reads from cache", async () => {
     const { ranking, guildRanking } = setup();
@@ -81,14 +106,16 @@ describe("Ranking cache", () => {
   });
 
   it("cleanCache warms the 100-entry lists even when never read", async () => {
-    const { ranking, guildRanking, userRanking } = setup();
+    const { ranking, guildRanking, userRanking, userLevelRanking } = setup();
     await ranking.cleanCache();
     expect(guildRanking).toHaveBeenCalledTimes(2);
     expect(userRanking).toHaveBeenCalledTimes(1);
+    expect(userLevelRanking).toHaveBeenCalledTimes(1);
 
     await ranking.fetchAll(100);
     expect(guildRanking).toHaveBeenCalledTimes(2);
     expect(userRanking).toHaveBeenCalledTimes(1);
+    expect(userLevelRanking).toHaveBeenCalledTimes(1);
   });
 
   it("cleanCache keeps serving the old value while rebuilding", async () => {
