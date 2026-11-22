@@ -15,6 +15,10 @@ export class Ranking extends Base {
   private guilds = new Map<GuildRankingType, (GuildRecordRanking & { name: string })[]>();
   // Outlives an evicted list, so a failed refresh doesn't report every guild as unranked.
   private guildRanks = new Map<GuildRankingType, Map<string, number>>();
+  private coldGuildLoads = new Map<
+    GuildRankingType,
+    Promise<(GuildRecordRanking & { name: string })[]>
+  >();
   private userBump = new Map<number, UserBumpRanking[]>();
   private userLevel = new Map<number, UserLevelRanking[]>();
 
@@ -37,16 +41,31 @@ export class Ranking extends Base {
 
   public async fetchGuild(rankingType: GuildRankingType, options?: RankingFetchOptions) {
     const num = options?.num ?? 20;
-    const cache = this.guilds.get(rankingType);
+    const guilds = this.guilds.get(rankingType) ?? (await this.loadColdGuilds(rankingType));
+    return guilds.slice(0, num);
+  }
 
-    if (cache) {
-      return cache.slice(0, num);
+  // One load per type, since each looks up every guild. Like a refresh in cleanCache, it must not
+  // overwrite the result of a refresh that started after it.
+  private loadColdGuilds(rankingType: GuildRankingType) {
+    const pending = this.coldGuildLoads.get(rankingType);
+    if (pending) {
+      return pending;
     }
 
-    const data = await this.loadGuild(rankingType);
-    this.guilds.set(rankingType, data);
-    this.indexRanks(rankingType);
-    return data.slice(0, num);
+    const generation = this.generation;
+    const load = this.loadGuild(rankingType)
+      .then((guilds) => {
+        if (generation !== this.generation) {
+          return this.guilds.get(rankingType) ?? guilds;
+        }
+        this.guilds.set(rankingType, guilds);
+        this.indexRanks(rankingType);
+        return guilds;
+      })
+      .finally(() => this.coldGuildLoads.delete(rankingType));
+    this.coldGuildLoads.set(rankingType, load);
+    return load;
   }
 
   public getGuildRank(rankingType: GuildRankingType, guildId: string) {

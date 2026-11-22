@@ -149,6 +149,43 @@ describe("Ranking failure isolation", () => {
   });
 });
 
+describe("Cold guild reads", () => {
+  it("share one load between concurrent callers", async () => {
+    const { ranking, guildRanking } = setup();
+    const [top, all] = await Promise.all([
+      ranking.fetchGuild("level", { num: 1 }),
+      ranking.fetchGuild("level", { num: 100 }),
+    ]);
+
+    expect(guildRanking).toHaveBeenCalledTimes(1);
+    expect(top).toHaveLength(1);
+    expect(all).toHaveLength(2);
+  });
+
+  it("don't replace a refresh that started after them", async () => {
+    const { ranking, guildRanking } = setup();
+    let release!: (guilds: { guildId: string }[]) => void;
+    guildRanking.mockImplementationOnce(() => new Promise((resolve) => (release = resolve)));
+    const coldRead = ranking.fetchGuild("level");
+
+    guildRanking.mockResolvedValue([{ guildId: "newer" }]);
+    await ranking.cleanCache();
+    release([{ guildId: "madePrivateSince" }]);
+
+    expect((await coldRead)[0]?.guildId).toBe("newer");
+    expect((await ranking.fetchGuild("level"))[0]?.guildId).toBe("newer");
+    expect(ranking.getGuildRank("level", "madePrivateSince")).toBeUndefined();
+  });
+
+  it("retry after a shared load failed", async () => {
+    const { ranking, guildRanking } = setup();
+    guildRanking.mockRejectedValueOnce(new Error("boom"));
+
+    await expect(ranking.fetchGuild("level")).rejects.toThrow("boom");
+    expect(await ranking.fetchGuild("level")).toHaveLength(2);
+  });
+});
+
 describe("Ranking cache", () => {
   it("serves repeated reads from cache", async () => {
     const { ranking, guildRanking } = setup();
