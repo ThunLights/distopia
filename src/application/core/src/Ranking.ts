@@ -38,14 +38,21 @@ export class Ranking extends Base {
   }
 
   private async loadGuild(rankingType: "level" | "activeRate", num: number) {
-    return (
-      await Promise.all(
-        (await this.state.database.guildRecord.ranking(rankingType, num)).map(async (guild) => {
+    const records = await this.state.database.guildRecord.rankingAll(rankingType);
+    const guilds: (GuildRecordRanking & { name: string })[] = [];
+
+    // Guilds the bot has left still have records, so `num` can only be applied after the lookup.
+    for (let start = 0; start < records.length && guilds.length < num; start += num) {
+      const batch = await Promise.all(
+        records.slice(start, start + num).map(async (guild) => {
           const meta = await this.state.discord.guild.fetch(guild.guildId);
           return meta ? { ...guild, name: meta.name } : null;
         }),
-      )
-    ).filter((guild) => guild !== null);
+      );
+      guilds.push(...batch.filter((guild) => guild !== null));
+    }
+
+    return guilds.slice(0, num);
   }
 
   public async fetchUser(

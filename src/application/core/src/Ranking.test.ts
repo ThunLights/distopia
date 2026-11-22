@@ -4,14 +4,20 @@ import type { AppState } from "./AppState";
 import { Ranking } from "./Ranking";
 
 function setup() {
-  const guildRanking = vi.fn(async (_type: string, num: number) =>
-    Array.from({ length: Math.min(num, 2) }, (_, i) => ({ guildId: `g${i}` })),
+  const guildRanking = vi.fn(async (_type: string) =>
+    Array.from({ length: 2 }, (_, i) => ({ guildId: `g${i}` })),
   );
+  const guildFetch = vi.fn(async (id: string): Promise<{ name: string } | null> => ({
+    name: `name-${id}`,
+  }));
   const userRanking = vi.fn(async () => [{ userId: "u1", bumpCounter: 3 }]);
   const state = {
-    database: { guildRecord: { ranking: guildRanking }, user: { ranking: userRanking } },
+    database: {
+      guildRecord: { rankingAll: guildRanking },
+      user: { ranking: userRanking },
+    },
     discord: {
-      guild: { fetch: vi.fn(async (id: string) => ({ name: `name-${id}` })) },
+      guild: { fetch: guildFetch },
       user: {
         find: vi.fn(async (id: string) => ({
           id,
@@ -24,8 +30,37 @@ function setup() {
       },
     },
   } as unknown as AppState;
-  return { ranking: new Ranking(state), guildRanking, userRanking };
+  return {
+    ranking: new Ranking(state),
+    guildRanking,
+    guildFetch,
+    userRanking,
+  };
 }
+
+describe("Ranking size", () => {
+  it.each(["level", "activeRate"] as const)(
+    "fills the %s ranking to 100 past guilds the bot left",
+    async (type) => {
+      const { ranking, guildRanking, guildFetch } = setup();
+      const ids = Array.from({ length: 250 }, (_, i) => `g${i}`);
+      const left = new Set(["g0", "g99", ...ids.slice(101, 200)]);
+      guildRanking.mockResolvedValue(ids.map((guildId) => ({ guildId })));
+      guildFetch.mockImplementation(async (id) => (left.has(id) ? null : { name: id }));
+
+      const result = await ranking.fetchGuild(type, { num: 100 });
+      expect(result.map((guild) => guild.guildId)).toEqual(
+        ids.filter((id) => !left.has(id)).slice(0, 100),
+      );
+    },
+  );
+
+  it("returns every resolvable guild when there are fewer than requested", async () => {
+    const { ranking, guildFetch } = setup();
+    guildFetch.mockResolvedValueOnce(null);
+    expect(await ranking.fetchGuild("level", { num: 100 })).toHaveLength(1);
+  });
+});
 
 describe("Ranking cache", () => {
   it("serves repeated reads from cache", async () => {
@@ -81,7 +116,7 @@ describe("Ranking cache", () => {
 
     const resolvers: ((v: unknown) => void)[] = [];
     guildRanking.mockImplementation(
-      (_t, num) => new Promise((r) => resolvers.push(() => r([{ guildId: `old${num}` }]))) as never,
+      () => new Promise((r) => resolvers.push(() => r([{ guildId: "old" }]))) as never,
     );
     const first = ranking.cleanCache();
     await vi.waitFor(() => expect(resolvers.length).toBe(3));
