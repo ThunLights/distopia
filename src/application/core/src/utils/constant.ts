@@ -53,6 +53,7 @@ export const supporters = [
   supportersKeyValue.bread,
   supportersKeyValue.cappuccino,
   supportersKeyValue.hima,
+  supportersKeyValue.shachiku,
   supportersKeyValue.sumire,
 ] as const satisfies Array<SupporterServer>;
 
