@@ -10,6 +10,14 @@ function setup() {
   const guildFetch = vi.fn(async (id: string): Promise<{ name: string } | null> => ({
     name: `name-${id}`,
   }));
+  const userFind = vi.fn(async (id: string): Promise<object | null> => ({
+    id,
+    name: "n",
+    displayName: "d",
+    globalName: null,
+    avatarUrl: "a",
+    bannerUrl: null,
+  }));
   const userRanking = vi.fn(async () => [{ userId: "u1", bumpCounter: 3 }]);
   const state = {
     database: {
@@ -18,16 +26,7 @@ function setup() {
     },
     discord: {
       guild: { fetch: guildFetch },
-      user: {
-        find: vi.fn(async (id: string) => ({
-          id,
-          name: "n",
-          displayName: "d",
-          globalName: null,
-          avatarUrl: "a",
-          bannerUrl: null,
-        })),
-      },
+      user: { find: userFind },
     },
   } as unknown as AppState;
   return {
@@ -35,6 +34,7 @@ function setup() {
     guildRanking,
     guildFetch,
     userRanking,
+    userFind,
   };
 }
 
@@ -59,6 +59,16 @@ describe("Ranking size", () => {
     const { ranking, guildFetch } = setup();
     guildFetch.mockResolvedValueOnce(null);
     expect(await ranking.fetchGuild("level", { num: 100 })).toHaveLength(1);
+  });
+});
+
+describe("User bump ranking", () => {
+  it("keeps a position whose Discord profile is gone", async () => {
+    const { ranking, userFind } = setup();
+    userFind.mockResolvedValueOnce(null);
+    expect(await ranking.fetchUser("userBump", { num: 100 })).toEqual([
+      { id: "u1", name: "unknown", displayName: "不明なユーザー", bumpCounter: 3 },
+    ]);
   });
 });
 
