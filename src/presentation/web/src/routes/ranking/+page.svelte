@@ -7,13 +7,17 @@
   import type {
     GuildRanking,
     ResponseMethodGet,
+    UserLevelRanking,
     UserRanking,
   } from "#lib/shared/types/routes/api/ranking.js";
   import { onMount } from "svelte";
 
+  type RankingType = "userbump" | "userlevel" | "level" | "rate";
+
   const { data } = $props();
-  let rankingType = $derived<"userbump" | "level" | "rate">(parseRankingType(data.rankingType));
+  let rankingType = $derived<RankingType>(parseRankingType(data.rankingType));
   let userBump = $state<UserRanking[]>([]);
+  let userLevel = $state<UserLevelRanking[]>([]);
   let guildLevel = $state<GuildRanking[]>([]);
   let guildActiveRate = $state<GuildRanking[]>([]);
 
@@ -24,6 +28,7 @@
     if (response.status === 200) {
       const { guild, user } = (await response.json()) as ResponseMethodGet;
       userBump = user.bump;
+      userLevel = user.level;
       guildLevel = guild.level;
       guildActiveRate = guild.activeRate;
     } else if (response.status) {
@@ -31,8 +36,8 @@
     }
   });
 
-  function parseRankingType(ty: string | null) {
-    return ty === "userbump" ? "userbump" : ty === "level" ? "level" : "rate";
+  function parseRankingType(ty: string | null): RankingType {
+    return ty === "userbump" || ty === "userlevel" || ty === "level" ? ty : "rate";
   }
 </script>
 
@@ -45,6 +50,7 @@
       <select bind:value={rankingType}>
         <option value="level">レベル</option>
         <option value="rate">アクティブレート</option>
+        <option value="userlevel">ユーザーレベルランキング</option>
         <option value="userbump">ユーザーBumpランキング</option>
       </select>
     </div>
@@ -54,6 +60,12 @@
       {#each userBump as user, index (user.id)}
         <User {...user} {index}>
           <p>合計: {user.bumpCounter ?? 0}回</p>
+        </User>
+      {/each}
+    {:else if rankingType === "userlevel"}
+      {#each userLevel as user, index (user.id)}
+        <User {...user} {index}>
+          <p>Lv.{user.level} {user.point}pt</p>
         </User>
       {/each}
     {:else if rankingType === "level"}

@@ -3,13 +3,24 @@ import type { GuildRecordRanking } from "infra-database/types";
 import { Base } from "./Base";
 import type { RankingFetchOptions } from "./types/RankingFetchOptions";
 import type { UserBumpRanking } from "./types/UserBumpRanking";
+import type { UserLevelRanking } from "./types/UserLevelRanking";
 
 const WARM_NUM = 100;
+const LOOKUP_BATCH_SIZE = 100;
+const GUILD_RANKING_TYPES = ["level", "activeRate"] as const;
+
+type GuildRankingType = (typeof GUILD_RANKING_TYPES)[number];
 
 export class Ranking extends Base {
-  private guildLevel = new Map<number, (GuildRecordRanking & { name: string })[]>();
-  private guildActiveRate = new Map<number, (GuildRecordRanking & { name: string })[]>();
+  private guilds = new Map<GuildRankingType, (GuildRecordRanking & { name: string })[]>();
+  // Outlives an evicted list, so a failed refresh doesn't report every guild as unranked.
+  private guildRanks = new Map<GuildRankingType, Map<string, number>>();
+  private coldGuildLoads = new Map<
+    GuildRankingType,
+    Promise<(GuildRecordRanking & { name: string })[]>
+  >();
   private userBump = new Map<number, UserBumpRanking[]>();
+  private userLevel = new Map<number, UserLevelRanking[]>();
 
   public async fetchAll(num: number) {
     return {
@@ -19,33 +30,75 @@ export class Ranking extends Base {
       },
       user: {
         bump: await this.fetchUser("userBump", { num }),
+        // Profile lookups can hit Discord REST; their failure must not take down the other rankings.
+        level: await this.fetchUserLevel({ num }).catch((error: unknown) => {
+          console.error("[ranking] user level lookup failed", error);
+          return [];
+        }),
       },
     };
   }
 
-  public async fetchGuild(rankingType: "level" | "activeRate", options?: RankingFetchOptions) {
+  public async fetchGuild(rankingType: GuildRankingType, options?: RankingFetchOptions) {
     const num = options?.num ?? 20;
-    const map = rankingType === "level" ? this.guildLevel : this.guildActiveRate;
-    const cache = map.get(num);
-
-    if (cache) {
-      return cache;
-    }
-
-    const data = await this.loadGuild(rankingType, num);
-    map.set(num, data);
-    return data;
+    const guilds = this.guilds.get(rankingType) ?? (await this.loadColdGuilds(rankingType));
+    return guilds.slice(0, num);
   }
 
-  private async loadGuild(rankingType: "level" | "activeRate", num: number) {
-    return (
-      await Promise.all(
-        (await this.state.database.guildRecord.ranking(rankingType, num)).map(async (guild) => {
+  // One load per type, since each looks up every guild. Like a refresh in cleanCache, it must not
+  // overwrite the result of a refresh that started after it.
+  private loadColdGuilds(rankingType: GuildRankingType) {
+    const pending = this.coldGuildLoads.get(rankingType);
+    if (pending) {
+      return pending;
+    }
+
+    const generation = this.generation;
+    const load = this.loadGuild(rankingType)
+      .then((guilds) => {
+        if (generation !== this.generation) {
+          return this.guilds.get(rankingType) ?? guilds;
+        }
+        this.guilds.set(rankingType, guilds);
+        this.indexRanks(rankingType);
+        return guilds;
+      })
+      .finally(() => this.coldGuildLoads.delete(rankingType));
+    this.coldGuildLoads.set(rankingType, load);
+    return load;
+  }
+
+  public getGuildRank(rankingType: GuildRankingType, guildId: string) {
+    return this.guildRanks.get(rankingType)?.get(guildId);
+  }
+
+  private indexRanks(rankingType: GuildRankingType) {
+    const guilds = this.guilds.get(rankingType);
+    if (guilds) {
+      this.guildRanks.set(
+        rankingType,
+        new Map(guilds.map(({ guildId }, index) => [guildId, index + 1])),
+      );
+    }
+  }
+
+  private async loadGuild(rankingType: GuildRankingType) {
+    const records = await this.state.database.guildRecord.rankingAll(rankingType);
+    const guilds: (GuildRecordRanking & { name: string })[] = [];
+
+    // Guilds the bot has left still have records. Dropping them before anything is cut or
+    // numbered is what keeps every list and every displayed rank in agreement.
+    for (let start = 0; start < records.length; start += LOOKUP_BATCH_SIZE) {
+      const batch = await Promise.all(
+        records.slice(start, start + LOOKUP_BATCH_SIZE).map(async (guild) => {
           const meta = await this.state.discord.guild.fetch(guild.guildId);
           return meta ? { ...guild, name: meta.name } : null;
         }),
-      )
-    ).filter((guild) => guild !== null);
+      );
+      guilds.push(...batch.filter((guild) => guild !== null));
+    }
+
+    return guilds;
   }
 
   public async fetchUser(
@@ -70,19 +123,54 @@ export class Ranking extends Base {
     const dbUsers = await this.state.database.user.ranking("userBump", num);
 
     for (const user of dbUsers) {
-      const discordUserData = await this.state.discord.user.find(user.userId);
-      if (discordUserData) {
-        const { id, name, displayName, globalName, avatarUrl, bannerUrl } = discordUserData;
-        users.push({
-          id,
-          name,
-          displayName,
-          globalName,
-          avatarUrl,
-          bannerUrl,
-          bumpCounter: user.bumpCounter,
-        });
+      const { id, name, displayName, globalName, avatarUrl, bannerUrl } = await this.findProfile(
+        user.userId,
+      );
+      users.push({
+        id,
+        name,
+        displayName,
+        globalName,
+        avatarUrl,
+        bannerUrl,
+        bumpCounter: user.bumpCounter,
+      });
+    }
+
+    return users;
+  }
+
+  private async findProfile(userId: string): Promise<Omit<UserBumpRanking, "bumpCounter">> {
+    return (
+      (await this.state.discord.user.find(userId)) ?? {
+        id: userId,
+        name: "unknown",
+        displayName: "不明なユーザー",
       }
+    );
+  }
+
+  public async fetchUserLevel(options?: RankingFetchOptions): Promise<UserLevelRanking[]> {
+    const num = options?.num ?? 20;
+    const cache = this.userLevel.get(num);
+
+    if (cache) {
+      return cache;
+    }
+
+    const users = await this.loadUserLevel(num);
+    this.userLevel.set(num, users);
+    return users;
+  }
+
+  private async loadUserLevel(num: number) {
+    const users: UserLevelRanking[] = [];
+    const rows = await this.state.database.memberLevel.findGlobalTop(num);
+
+    // Sequential because a cache miss in the bot is a rate-limited Discord REST call.
+    for (const { userId, level, point } of rows) {
+      const { name, displayName, avatarUrl } = await this.findProfile(userId);
+      users.push({ id: userId, name, displayName, avatarUrl, level, point });
     }
 
     return users;
@@ -96,29 +184,30 @@ export class Ranking extends Base {
   // key so the next read retries instead of serving stale data until the next tick.
   public async cleanCache() {
     const generation = ++this.generation;
-    const refresh = async <T>(map: Map<number, T>, num: number, load: () => Promise<T>) => {
+    const refresh = async <K, T>(map: Map<K, T>, key: K, load: () => Promise<T>) => {
       try {
         const data = await load();
         if (generation === this.generation) {
-          map.set(num, data);
+          map.set(key, data);
         }
       } catch (error) {
         console.error("[ranking] cache refresh failed", error);
         if (generation === this.generation) {
-          map.delete(num);
+          map.delete(key);
         }
       }
     };
     const nums = (map: Map<number, unknown>) => new Set([...map.keys(), WARM_NUM]);
     await Promise.all([
-      ...[...nums(this.guildLevel)].map((num) =>
-        refresh(this.guildLevel, num, () => this.loadGuild("level", num)),
-      ),
-      ...[...nums(this.guildActiveRate)].map((num) =>
-        refresh(this.guildActiveRate, num, () => this.loadGuild("activeRate", num)),
-      ),
+      ...GUILD_RANKING_TYPES.map(async (type) => {
+        await refresh(this.guilds, type, () => this.loadGuild(type));
+        this.indexRanks(type);
+      }),
       ...[...nums(this.userBump)].map((num) =>
         refresh(this.userBump, num, () => this.loadUser(num)),
+      ),
+      ...[...nums(this.userLevel)].map((num) =>
+        refresh(this.userLevel, num, () => this.loadUserLevel(num)),
       ),
     ]);
   }

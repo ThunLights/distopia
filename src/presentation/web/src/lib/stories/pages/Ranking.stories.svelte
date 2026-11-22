@@ -12,4 +12,6 @@
 
 <Story name="アクティブレートランキング" args={{ data: { rankingType: "rate", user: null } }} />
 
+<Story name="ユーザーレベルランキング" args={{ data: { rankingType: "userlevel", user: null } }} />
+
 <Story name="ユーザーBumpランキング" args={{ data: { rankingType: "userbump", user: null } }} />

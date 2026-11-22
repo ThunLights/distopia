@@ -1,7 +1,13 @@
 import type { ResponseMethodPost } from "#lib/shared/types/routes/api/guild/search.js";
 import type { ResponseMethodGet } from "#lib/shared/types/routes/api/ranking.js";
 import type { ResponseBodyTypeGuild } from "#lib/shared/types/routes/api/user/cache.js";
-import { mockGuildCards, mockGuildRankings, mockUserGuilds, mockUserRankings } from "./data";
+import {
+  mockGuildCards,
+  mockGuildRankings,
+  mockUserGuilds,
+  mockUserLevelRankings,
+  mockUserRankings,
+} from "./data";
 import { spyOn } from "storybook/test";
 
 const jsonResponse = <T>(data: T, status = 200): Response =>
@@ -25,7 +31,7 @@ export async function globalFetchMock(
           (a, b) => (b.activeRate ?? 0) - (a.activeRate ?? 0),
         ),
       },
-      user: { bump: mockUserRankings },
+      user: { bump: mockUserRankings, level: mockUserLevelRankings },
     } satisfies ResponseMethodGet);
   }
 

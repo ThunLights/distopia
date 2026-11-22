@@ -1,4 +1,6 @@
+import type { AppState } from "./AppState";
 import { Base } from "./Base";
+import type { Ranking } from "./Ranking";
 
 export type SaveGuildInput = {
   guildId: string;
@@ -7,9 +9,17 @@ export type SaveGuildInput = {
   maxRate: bigint | null;
 };
 
+function numberGuilds(guilds: { guildId: string }[]) {
+  return new Map(guilds.map(({ guildId }, index) => [guildId, index + 1]));
+}
+
 export class Record extends Base {
-  private readonly levelRanking = new Map<string, number>();
-  private readonly activeRateRanking = new Map<string, number>();
+  constructor(
+    state: AppState,
+    private readonly ranking: Ranking,
+  ) {
+    super(state);
+  }
 
   private isNewRecord(
     guildId: string,
@@ -39,11 +49,11 @@ export class Record extends Base {
   }
 
   public getLevelRank(guildId: string) {
-    return this.levelRanking.get(guildId);
+    return this.ranking.getGuildRank("level", guildId);
   }
 
   public getActiveRateRanking(guildId: string) {
-    return this.activeRateRanking.get(guildId);
+    return this.ranking.getGuildRank("activeRate", guildId);
   }
 
   public async saveGuilds(inputs: SaveGuildInput[]) {
@@ -82,22 +92,16 @@ export class Record extends Base {
 
   public async update() {
     const query: SaveGuildInput[] = [];
-    const levelRanking = await this.state.database.guildRecord.rankingAll("level");
-    const activeRateRanking = await this.state.database.guildRecord.rankingAll("activeRate");
-
-    this.activeRateRanking.clear();
-    this.levelRanking.clear();
-
-    for (const [index, guild] of levelRanking.entries()) {
-      this.levelRanking.set(guild.guildId, index + 1);
-    }
-    for (const [index, guild] of activeRateRanking.entries()) {
-      this.activeRateRanking.set(guild.guildId, index + 1);
-    }
+    // Deliberately not getLevelRank/getActiveRateRanking: those skip guilds the bot left, and
+    // saving them would overwrite every stored best with a rank counted on a different basis.
+    const levelRanks = numberGuilds(await this.state.database.guildRecord.rankingAll("level"));
+    const activeRateRanks = numberGuilds(
+      await this.state.database.guildRecord.rankingAll("activeRate"),
+    );
 
     for (const record of await this.state.database.guildRecord.findAll()) {
-      const newLevelRank = this.getLevelRank(record.guildId);
-      const newActiveRateRank = this.getActiveRateRanking(record.guildId);
+      const newLevelRank = levelRanks.get(record.guildId);
+      const newActiveRateRank = activeRateRanks.get(record.guildId);
 
       query.push({
         guildId: record.guildId,

@@ -22,8 +22,8 @@ import { Verify } from "./Verify";
 import { VoiceChannel } from "./VoiceChannel";
 
 export class AppCore extends Base {
-  public readonly record = new Record(this.state);
   public readonly ranking = new Ranking(this.state);
+  public readonly record = new Record(this.state, this.ranking);
   public readonly guild = new Guild(this.state, this.record, this.ranking);
   public readonly activeRate = new ActiveRate(this.state, this.guild);
   public readonly blackList = new BlackList(this.state);

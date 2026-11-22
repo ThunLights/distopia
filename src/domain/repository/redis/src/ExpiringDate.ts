@@ -29,9 +29,13 @@ export class ExpiringDate {
       : `${this.owner}:${this.store}:${id}`;
   }
 
+  // Override when get() still has to see the Date after it has passed.
+  protected ttlSeconds(limit: Date): number {
+    return Math.max(1, Math.ceil((limit.getTime() - Date.now()) / 1000));
+  }
+
   public async set(id: string, limit: Date): Promise<void> {
-    const ttlSeconds = Math.max(1, Math.ceil((limit.getTime() - Date.now()) / 1000));
-    await this.redis.set(this.key(id), limit.toISOString(), "EX", ttlSeconds);
+    await this.redis.set(this.key(id), limit.toISOString(), "EX", this.ttlSeconds(limit));
   }
 
   // Atomic "acquire if absent" -- unlike get()-then-set(), which leaves a window between the
@@ -39,8 +43,13 @@ export class ExpiringDate {
   // proceed, this succeeds for at most one caller per id. Callers that need to gate an action
   // on "was a limit already active" (e.g. Guild.bump) should use this instead of get()+set().
   public async acquire(id: string, limit: Date): Promise<boolean> {
-    const ttlSeconds = Math.max(1, Math.ceil((limit.getTime() - Date.now()) / 1000));
-    const result = await this.redis.set(this.key(id), limit.toISOString(), "EX", ttlSeconds, "NX");
+    const result = await this.redis.set(
+      this.key(id),
+      limit.toISOString(),
+      "EX",
+      this.ttlSeconds(limit),
+      "NX",
+    );
     return result === "OK";
   }
 

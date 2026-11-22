@@ -53,6 +53,16 @@ export class MemberLevelTable extends Base {
     });
   }
 
+  public async findGlobalTop(limit: number): Promise<UserLevelRow[]> {
+    return await this.prisma.user.findMany({
+      // User rows are also created by bump and TTS settings; those stay at level 0.
+      where: { level: { gt: 0 } },
+      select: { userId: true, level: true, point: true },
+      orderBy: [{ level: "desc" }, { point: "desc" }, { userId: "asc" }],
+      take: limit,
+    });
+  }
+
   public async findGuildStanding(
     guildId: string,
     userId: string,
