@@ -9,6 +9,10 @@ export type SaveGuildInput = {
   maxRate: bigint | null;
 };
 
+function numberGuilds(guilds: { guildId: string }[]) {
+  return new Map(guilds.map(({ guildId }, index) => [guildId, index + 1]));
+}
+
 export class Record extends Base {
   constructor(
     state: AppState,
@@ -88,10 +92,16 @@ export class Record extends Base {
 
   public async update() {
     const query: SaveGuildInput[] = [];
+    // Deliberately not getLevelRank/getActiveRateRanking: those skip guilds the bot left, and
+    // saving them would overwrite every stored best with a rank counted on a different basis.
+    const levelRanks = numberGuilds(await this.state.database.guildRecord.rankingAll("level"));
+    const activeRateRanks = numberGuilds(
+      await this.state.database.guildRecord.rankingAll("activeRate"),
+    );
 
     for (const record of await this.state.database.guildRecord.findAll()) {
-      const newLevelRank = this.getLevelRank(record.guildId);
-      const newActiveRateRank = this.getActiveRateRanking(record.guildId);
+      const newLevelRank = levelRanks.get(record.guildId);
+      const newActiveRateRank = activeRateRanks.get(record.guildId);
 
       query.push({
         guildId: record.guildId,

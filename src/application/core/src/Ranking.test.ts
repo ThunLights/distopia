@@ -90,26 +90,28 @@ describe("Guild ranks", () => {
     expect((await ranking.fetchGuild("level", { num: 100 }))[99]?.guildId).toBe("g100");
   });
 
-  it("saves best ranks without counting guilds the bot left", async () => {
+  it("does not overwrite best ranks when a left guild moves the displayed rank up", async () => {
     const { state, ranking, guildFetch } = setup();
     guildFetch.mockImplementation(async (id) => (id === "g0" ? null : { name: id }));
     const upsertAll = vi.fn();
     Object.assign(state.database.guildRecord, {
       findAll: async () =>
-        ["g0", "g1"].map((guildId) => ({
+        ["g0", "g1"].map((guildId, index) => ({
           guildId,
-          maxLevelRank: 2n,
-          maxRateRank: 2n,
+          maxLevelRank: BigInt(index + 1),
+          maxRateRank: BigInt(index + 1),
           maxRate: null,
         })),
       upsertAll,
     });
     await ranking.cleanCache();
-    await new Record(state, ranking).update();
+    const record = new Record(state, ranking);
+    await record.update();
 
+    expect(record.getLevelRank("g1")).toBe(1);
     expect(upsertAll).toHaveBeenCalledWith([
       { guildId: "g0", maxLevelRank: undefined, maxRateRank: undefined, maxRate: undefined },
-      { guildId: "g1", maxLevelRank: 1n, maxRateRank: 1n, maxRate: undefined },
+      { guildId: "g1", maxLevelRank: undefined, maxRateRank: undefined, maxRate: undefined },
     ]);
   });
 
