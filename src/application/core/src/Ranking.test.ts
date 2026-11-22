@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { AppState } from "./AppState";
 import { Ranking } from "./Ranking";
+import { Record } from "./Record";
 
 function setup() {
   const guildRanking = vi.fn(async (_type: string) =>
@@ -32,6 +33,7 @@ function setup() {
     },
   } as unknown as AppState;
   return {
+    state,
     ranking: new Ranking(state),
     guildRanking,
     guildFetch,
@@ -70,6 +72,54 @@ describe("Ranking size", () => {
     expect(await ranking.fetchUserLevel({ num: 100 })).toEqual([
       { id: "u1", name: "unknown", displayName: "不明なユーザー", level: 7n, point: 4n },
     ]);
+  });
+});
+
+describe("Guild ranks", () => {
+  it("numbers guilds exactly like the list, including past the cut", async () => {
+    const { state, ranking, guildRanking, guildFetch } = setup();
+    const ids = Array.from({ length: 250 }, (_, i) => `g${i}`);
+    guildRanking.mockResolvedValue(ids.map((guildId) => ({ guildId })));
+    guildFetch.mockImplementation(async (id) => (id === "g0" ? null : { name: id }));
+    await ranking.cleanCache();
+
+    const record = new Record(state, ranking);
+    expect(record.getLevelRank("g0")).toBeUndefined();
+    expect(record.getActiveRateRanking("g100")).toBe(100);
+    expect(record.getLevelRank("g249")).toBe(249);
+    expect((await ranking.fetchGuild("level", { num: 100 }))[99]?.guildId).toBe("g100");
+  });
+
+  it("saves best ranks without counting guilds the bot left", async () => {
+    const { state, ranking, guildFetch } = setup();
+    guildFetch.mockImplementation(async (id) => (id === "g0" ? null : { name: id }));
+    const upsertAll = vi.fn();
+    Object.assign(state.database.guildRecord, {
+      findAll: async () =>
+        ["g0", "g1"].map((guildId) => ({
+          guildId,
+          maxLevelRank: 2n,
+          maxRateRank: 2n,
+          maxRate: null,
+        })),
+      upsertAll,
+    });
+    await ranking.cleanCache();
+    await new Record(state, ranking).update();
+
+    expect(upsertAll).toHaveBeenCalledWith([
+      { guildId: "g0", maxLevelRank: undefined, maxRateRank: undefined, maxRate: undefined },
+      { guildId: "g1", maxLevelRank: 1n, maxRateRank: 1n, maxRate: undefined },
+    ]);
+  });
+
+  it("keeps the last known ranks when a refresh fails", async () => {
+    const { ranking, guildRanking } = setup();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await ranking.cleanCache();
+    guildRanking.mockRejectedValueOnce(new Error("boom"));
+    await ranking.cleanCache();
+    expect(ranking.getGuildRank("level", "g1")).toBe(2);
   });
 });
 
@@ -127,7 +177,7 @@ describe("Ranking cache", () => {
       () => new Promise((resolve) => (release = () => resolve([{ guildId: "new" }]))) as never,
     );
     const refreshing = ranking.cleanCache();
-    expect(await ranking.fetchGuild("level", { num: 5 })).toBe(old);
+    expect(await ranking.fetchGuild("level", { num: 5 })).toEqual(old);
 
     await vi.waitFor(() => expect(release).toBeTypeOf("function"));
     release();
@@ -156,7 +206,7 @@ describe("Ranking cache", () => {
       () => new Promise((r) => resolvers.push(() => r([{ guildId: "old" }]))) as never,
     );
     const first = ranking.cleanCache();
-    await vi.waitFor(() => expect(resolvers.length).toBe(3));
+    await vi.waitFor(() => expect(resolvers.length).toBe(2));
     const firstResolvers = resolvers.splice(0);
 
     guildRanking.mockImplementation(async () => [{ guildId: "newer" }]);

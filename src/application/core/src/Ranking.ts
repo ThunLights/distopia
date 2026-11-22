@@ -6,10 +6,15 @@ import type { UserBumpRanking } from "./types/UserBumpRanking";
 import type { UserLevelRanking } from "./types/UserLevelRanking";
 
 const WARM_NUM = 100;
+const LOOKUP_BATCH_SIZE = 100;
+const GUILD_RANKING_TYPES = ["level", "activeRate"] as const;
+
+type GuildRankingType = (typeof GUILD_RANKING_TYPES)[number];
 
 export class Ranking extends Base {
-  private guildLevel = new Map<number, (GuildRecordRanking & { name: string })[]>();
-  private guildActiveRate = new Map<number, (GuildRecordRanking & { name: string })[]>();
+  private guilds = new Map<GuildRankingType, (GuildRecordRanking & { name: string })[]>();
+  // Outlives an evicted list, so a failed refresh doesn't report every guild as unranked.
+  private guildRanks = new Map<GuildRankingType, Map<string, number>>();
   private userBump = new Map<number, UserBumpRanking[]>();
   private userLevel = new Map<number, UserLevelRanking[]>();
 
@@ -30,28 +35,43 @@ export class Ranking extends Base {
     };
   }
 
-  public async fetchGuild(rankingType: "level" | "activeRate", options?: RankingFetchOptions) {
+  public async fetchGuild(rankingType: GuildRankingType, options?: RankingFetchOptions) {
     const num = options?.num ?? 20;
-    const map = rankingType === "level" ? this.guildLevel : this.guildActiveRate;
-    const cache = map.get(num);
+    const cache = this.guilds.get(rankingType);
 
     if (cache) {
-      return cache;
+      return cache.slice(0, num);
     }
 
-    const data = await this.loadGuild(rankingType, num);
-    map.set(num, data);
-    return data;
+    const data = await this.loadGuild(rankingType);
+    this.guilds.set(rankingType, data);
+    this.indexRanks(rankingType);
+    return data.slice(0, num);
   }
 
-  private async loadGuild(rankingType: "level" | "activeRate", num: number) {
+  public getGuildRank(rankingType: GuildRankingType, guildId: string) {
+    return this.guildRanks.get(rankingType)?.get(guildId);
+  }
+
+  private indexRanks(rankingType: GuildRankingType) {
+    const guilds = this.guilds.get(rankingType);
+    if (guilds) {
+      this.guildRanks.set(
+        rankingType,
+        new Map(guilds.map(({ guildId }, index) => [guildId, index + 1])),
+      );
+    }
+  }
+
+  private async loadGuild(rankingType: GuildRankingType) {
     const records = await this.state.database.guildRecord.rankingAll(rankingType);
     const guilds: (GuildRecordRanking & { name: string })[] = [];
 
-    // Guilds the bot has left still have records, so `num` can only be applied after the lookup.
-    for (let start = 0; start < records.length && guilds.length < num; start += num) {
+    // Guilds the bot has left still have records. Dropping them before anything is cut or
+    // numbered is what keeps every list and every displayed rank in agreement.
+    for (let start = 0; start < records.length; start += LOOKUP_BATCH_SIZE) {
       const batch = await Promise.all(
-        records.slice(start, start + num).map(async (guild) => {
+        records.slice(start, start + LOOKUP_BATCH_SIZE).map(async (guild) => {
           const meta = await this.state.discord.guild.fetch(guild.guildId);
           return meta ? { ...guild, name: meta.name } : null;
         }),
@@ -59,7 +79,7 @@ export class Ranking extends Base {
       guilds.push(...batch.filter((guild) => guild !== null));
     }
 
-    return guilds.slice(0, num);
+    return guilds;
   }
 
   public async fetchUser(
@@ -145,27 +165,25 @@ export class Ranking extends Base {
   // key so the next read retries instead of serving stale data until the next tick.
   public async cleanCache() {
     const generation = ++this.generation;
-    const refresh = async <T>(map: Map<number, T>, num: number, load: () => Promise<T>) => {
+    const refresh = async <K, T>(map: Map<K, T>, key: K, load: () => Promise<T>) => {
       try {
         const data = await load();
         if (generation === this.generation) {
-          map.set(num, data);
+          map.set(key, data);
         }
       } catch (error) {
         console.error("[ranking] cache refresh failed", error);
         if (generation === this.generation) {
-          map.delete(num);
+          map.delete(key);
         }
       }
     };
     const nums = (map: Map<number, unknown>) => new Set([...map.keys(), WARM_NUM]);
     await Promise.all([
-      ...[...nums(this.guildLevel)].map((num) =>
-        refresh(this.guildLevel, num, () => this.loadGuild("level", num)),
-      ),
-      ...[...nums(this.guildActiveRate)].map((num) =>
-        refresh(this.guildActiveRate, num, () => this.loadGuild("activeRate", num)),
-      ),
+      ...GUILD_RANKING_TYPES.map(async (type) => {
+        await refresh(this.guilds, type, () => this.loadGuild(type));
+        this.indexRanks(type);
+      }),
       ...[...nums(this.userBump)].map((num) =>
         refresh(this.userBump, num, () => this.loadUser(num)),
       ),

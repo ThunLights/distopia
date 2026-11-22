@@ -92,9 +92,6 @@ async function start() {
     console.error("Failed to update friend cache:", error);
   }
 
-  await core.record.update();
-  console.log("Updated guild records.");
-
   try {
     await core.guild.updateRootPage();
     console.log("Updated root page guilds.");
@@ -120,6 +117,10 @@ async function start() {
   } catch (error) {
     console.error("Failed to warm ranking cache:", error);
   }
+
+  // Must follow the warm-up above: the ranks it saves come from that cache.
+  await core.record.update();
+  console.log("Updated guild records.");
 
   startSchedulerRpcServer();
   console.log("Scheduler RPC server started.");
