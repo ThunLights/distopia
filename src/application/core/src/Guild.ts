@@ -132,8 +132,24 @@ export class Guild extends Base {
   }
 
   public async removeUnJoinedGuildData() {
-    for (const { guildId } of await this.state.database.guild.findAll()) {
-      if (!(await this.state.discord.guild.isJoined(guildId))) {
+    const guilds = await this.state.database.guild.findAll();
+    const joined = new Set<string>();
+    for (const { guildId } of guilds) {
+      if (await this.state.discord.guild.isJoined(guildId)) {
+        joined.add(guildId);
+      }
+    }
+
+    // Deletion can't be undone, and "left every guild at once" means a broken bot (e.g. wrong token).
+    if (guilds.length > 0 && joined.size === 0) {
+      console.error("[guild] bot reports no joined guilds, skipping removal of left guilds");
+      return;
+    }
+
+    for (const { guildId } of guilds) {
+      if (joined.has(guildId)) {
+        await this.state.memory.unJoinedGuild.delete(guildId);
+      } else {
         const limit = await this.state.memory.unJoinedGuild.get(guildId);
         if (limit) {
           if (Date.now() > limit.getTime()) {
