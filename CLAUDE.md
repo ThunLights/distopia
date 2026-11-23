@@ -95,7 +95,7 @@ distopia/
 │   │   ├── bot/               # Discord bot (discord.js v14)
 │   │   ├── bot-kit/           # Bot handler base classes + BotFeature contract (shared with features)
 │   │   ├── help/              # VitePress help site (docs.distopia.top, GitHub Pages)
-│   │   ├── schedulemanager/   # Cron ticker; calls web's Scheduler RPC on each tick
+│   │   ├── schedulemanager/   # Runs every cron job (its own AppCore)
 │   │   ├── searchengine/      # Orama search index; serves SearchEngine RPC to web
 │   │   ├── verify/            # Optional; serves VerifyService by delegating to a plugin file
 │   │   └── web/               # Web frontend (SvelteKit / Svelte 5)
@@ -350,7 +350,7 @@ contract type:
 | Export | Contract | Loaded by |
 |---|---|---|
 | `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries + `events` (`FeatureEventBase` subclasses from `presentation-bot-kit/base/FeatureEventBase`: `event` names the `ClientEvents` key, `handle(...args)` receives its arguments) | `presentation-bot` |
-| `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-web` runs the tasks (`RunFeatureTasks` RPC); `presentation-schedulemanager` ticks each cron key |
+| `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-schedulemanager` runs each task on its cron key, with its own `AppCore` |
 
 `/settings` panel entries go through `presentation-bot-kit/settings`: a feature lists
 `SettingsEntry`s (`label`, `value`, `page`, optional `fields` shown on the panel embed) in
@@ -696,19 +696,22 @@ call each other, now that distopia has split from one process into independent `
 `schedulemanager`/`searchengine` services. Four services are built this way so far — follow
 the same shape for the next one, and note that they don't all share one direction:
 
-- `presentation-schedulemanager` — a standalone cron-ticker process that **calls**
-  `presentation-web`'s internal RPC port on each tick (see `k8s/README.md`'s "Scheduler RPC"
-  section).
+- `presentation-schedulemanager` — runs every cron job itself with its own `AppCore` (DB and
+  Redis directly, Discord and search through the bot/searchengine RPCs, like web). It never
+  calls `presentation-web`; after its 20-minute jobs it publishes on the Redis channel
+  `web:cache-refresh` (`WEB_CACHE_REFRESH_CHANNEL`), and every web pod refreshes its own
+  in-memory read caches on receipt (`hooks.server.ts`), so web can run any number of replicas (see `k8s/README.md`'s
+  "Scheduler" section).
 - `presentation-searchengine` — owns the Orama index (`repo-search`'s `SearchEngine`) and
   **serves** it to `presentation-web`, which holds only a Connect client
-  (`web/src/lib/server/search.ts`) exposing the same method surface, so `AppCore`'s call
+  (`createRemoteSearchEngine` in `app-core/remote`) exposing the same method surface, so `AppCore`'s call
   sites are unchanged (`AppState.searchEngine` is typed `SearchEngineClient`, the structural
   subset of that class). See `k8s/README.md`'s "Search engine RPC" section — including why
   that Deployment is `replicas: 1` and what still does not re-index after a restart.
 - `presentation-bot` — the mirror image of the searchengine split: it owns the one real,
   logged-in discord.js `Client` (guild/member/channel cache included) and **serves** the
   live-cache-dependent half of `infra-discord`'s `Controller` to `presentation-web`
-  (`web/src/lib/server/discord.ts`), which holds only a Connect client typed
+  (`createRemoteDiscordClient` in `app-core/remote`), which holds only a Connect client typed
   `DiscordClient` (`infra-discord`'s structural subset of `Controller` — `AppState.discord`).
   The pure/stateless half (`oauth2`, `embed`, `guild.iconUrl` — no live cache needed) stays a
   plain local implementation on both sides instead of going over RPC. See `k8s/README.md`'s
@@ -775,17 +778,17 @@ the same shape for the next one, and note that they don't all share one directio
 3. Any package that implements or calls the service adds `"infra-rpc": "workspace:*"` — `build:
    { dependsOn: ["^build"] }` (`turbo.json`) already builds `infra-rpc` first, no turbo.json
    change needed.
-4. Server side: register the service on a `ConnectRouter` (see
-   `src/presentation/web/src/lib/server/schedulerRpcServer.ts`), then serve it with
-   `connectNodeAdapter` from `@connectrpc/connect-node` (see `schedulerRpcListener.ts`) — this
+4. Server side: register the service on a `ConnectRouter`, then serve it with
+   `connectNodeAdapter` from `@connectrpc/connect-node` (see
+   `src/presentation/bot/src/server/rpc.ts`) — this
    returns a plain `http.RequestListener`, so it can run standalone (`http.createServer(...)`)
    on its own internal-only port, separate from any public-facing server in the same process.
 5. Client side: `createClient(ServiceDesc, createConnectTransport({ baseUrl, interceptors }))`
-   (see `presentation-schedulemanager/src/index.ts`).
+   (see `app-core`'s `src/remote.ts`).
 6. Auth: `infra-rpc`'s `createBearerAuthInterceptor`/`requireBearerAuth` (`src/auth.ts`) add a
    shared-secret bearer token to the client and enforce it on the server — pair this with a
    NetworkPolicy restricting which pod can even reach the port (see
-   `k8s/app/schedulemanager-networkpolicy.yaml`); the token is defense in depth, not a
+   `k8s/app/bot-networkpolicy.yaml`); the token is defense in depth, not a
    substitute for the NetworkPolicy.
 
 A new internal RPC port is fine to commit as a plain literal (`k8s/app/configmap.yaml`,

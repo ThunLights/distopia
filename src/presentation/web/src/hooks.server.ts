@@ -1,12 +1,14 @@
 import { deleteToken, setToken, verifyToken } from "#lib/server/auth.js";
 import { core } from "#lib/server/core.js";
 import { redis } from "#lib/server/redis.js";
-import { startSchedulerRpcServer } from "#lib/server/schedulerRpcListener.js";
 import { uploadSourceMapsOnce } from "#lib/server/sourcemaps.js";
 import { dev } from "$app/env";
+import { REDIS_URL } from "$app/env/private";
 import { dependencies } from "../package.json";
 import * as Sentry from "@sentry/sveltekit";
 import { sequence, type Handle, type HandleServerError } from "@sveltejs/kit/hooks";
+import { WEB_CACHE_REFRESH_CHANNEL } from "app-core/remote";
+import { subscribeRedis } from "infra-redis";
 import { resetEphemeralMemory } from "repo-redis";
 
 // +layout.svelte embeds these literal tokens in its partytown <script> tags; substituted below
@@ -69,17 +71,17 @@ async function start() {
   console.log("JWT keys is imported.");
 
   // Best-effort: friend.updateCache() and guild.updateRootPage() both now call out to
-  // presentation-bot over RPC (see lib/server/discord.ts) instead of a local discord.js
+  // presentation-bot over RPC (see app-core's remote.ts) instead of a local discord.js
   // cache, so a bot pod that isn't reachable yet (mid-rollout, mid-Discord-login) must not
   // crash this process's own startup -- that would turn one slow dependency into a
   // crash-looping web pod too.
   //
-  // friend.updateCache() fully self-heals: it's retried every 20 minutes by
-  // runTwentyMinuteTasks (schedulerRpcServer.ts), so a boot-time failure here just leaves
+  // friend.updateCache() fully self-heals: refreshCaches (below) re-runs it after every
+  // 20-minute schedulemanager run, so a boot-time failure here just leaves
   // the Friend page on its last-cached data until that next tick.
   //
   // guild.updateRootPage() only partially self-heals: its `activeGuilds` half gets
-  // refreshed as a side effect of activeRate.update() on that same 20-minute tick, but its
+  // refreshed by refreshCaches on that same 20-minute run, but its
   // `latestGuilds` half (the root page's "newest bumped guilds" list) isn't re-run by
   // anything else -- a boot-time failure leaves it at its empty initial value until the
   // next actual bump() call updates it incrementally. Acceptable: a stale/empty display
@@ -102,10 +104,10 @@ async function start() {
     console.error("Failed to update root page guilds:", error);
   }
 
-  // Best-effort: the index now lives in presentation-searchengine (see lib/server/search.ts),
+  // Best-effort: the index now lives in presentation-searchengine (see app-core's remote.ts),
   // so a search outage must not take the whole site down with it -- an empty index just
   // returns 0 hits (repo-search's SearchEngine short-circuits on an empty index).
-  // schedulerRpcServer.ts's runTwentyMinuteTasks re-indexes, so a failure here recovers on
+  // presentation-schedulemanager re-indexes every 20 minutes, so a failure here recovers on
   // its own rather than lasting until the next restart.
   try {
     await core.guild.loadSearchEngine();
@@ -121,8 +123,23 @@ async function start() {
     console.error("Failed to warm ranking cache:", error);
   }
 
-  startSchedulerRpcServer();
-  console.log("Scheduler RPC server started.");
+  // Every web replica refreshes its own in-memory caches when presentation-schedulemanager
+  // announces its 20-minute jobs are done.
+  try {
+    await subscribeRedis(REDIS_URL!, WEB_CACHE_REFRESH_CHANNEL, () => void refreshCaches());
+  } catch (error) {
+    console.error("Failed to subscribe to cache refreshes:", error);
+  }
+}
+
+async function refreshCaches() {
+  for (const [name, refresh] of [
+    ["friend cache", () => core.friend.updateCache()],
+    ["root page active guilds", () => core.guild.updateActiveGuilds()],
+    ["ranking cache", () => core.ranking.cleanCache()],
+  ] as const) {
+    await refresh().catch((error) => console.error(`Failed to refresh ${name}:`, error));
+  }
 }
 
 export const handle = sequence(Sentry.sentryHandle(), (async ({ event, resolve }) => {

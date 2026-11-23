@@ -32,6 +32,7 @@ function fakeRedis(): RedisClient & { store: Map<string, string> } {
     hget: vi.fn(async () => null),
     hgetall: vi.fn(async () => ({})),
     hdel: vi.fn(async () => 1),
+    publish: vi.fn(async () => 0),
   };
 }
 

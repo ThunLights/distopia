@@ -4,7 +4,7 @@ package distopia.bot.v1;
 
 // Implemented by presentation-bot, which owns the live, logged-in discord.js Client (and
 // therefore its gateway-populated guild/member/channel cache), and called by
-// presentation-web through lib/server/discord.ts -- a 1:1 mirror of infra-discord's
+// presentation-web through app-core's remote.ts -- a 1:1 mirror of infra-discord's
 // DiscordClient, so AppCore's call sites (AppState.discord) stay unchanged. Only one process
 // can hold the real gateway session, which is why presentation-bot stays at replicas: 1 (see
 // k8s/README.md), the same reason presentation-searchengine does for its in-memory index.

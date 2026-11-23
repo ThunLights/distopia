@@ -5,20 +5,16 @@
 # env var at Pod start, sourced from k8s Secrets/ConfigMaps that are never part of the image
 # or the in-cluster registry.
 #
-# replicas still stays at 1, now simply the default posture for a single-node cluster (see
-# k8s/README.md's "Notes" section) rather than a Discord-gateway constraint -- that
-# constraint moved to distopia-bot's own replicas: 1. RollingUpdate with
-# maxSurge:1/maxUnavailable:0 keeps this zero-downtime regardless.
+# replicas: 1 is just the default posture for a single-node cluster (see k8s/README.md's
+# "Notes" section); nothing here depends on it. Every pod keeps its own read caches and
+# refreshes them on schedulemanager's Redis Pub/Sub message (hooks.server.ts), cron jobs run only in
+# distopia-schedulemanager, and all other state is in Postgres/Redis. RollingUpdate with
+# maxSurge:1/maxUnavailable:0 keeps this zero-downtime.
 #
-# Also serves a small internal Connect RPC server (the `rpc` port) that
-# presentation-schedulemanager calls on a cron tick -- see schedulerRpcListener.ts and
-# schedulemanager-networkpolicy.yaml, which restricts ingress on that port to the
-# schedulemanager pod only.
-#
-# Conversely, this pod is the *client* of both distopia-searchengine's internal RPC port
-# (the Orama index moved out of this process -- see lib/server/search.ts and
+# This pod is the *client* of both distopia-searchengine's internal RPC port
+# (the Orama index moved out of this process -- see app-core's remote.ts and
 # searchengine-deployment.yaml) and distopia-bot's (the live Discord guild/member/channel
-# cache moved out of this process too -- see lib/server/discord.ts and
+# cache moved out of this process too -- see app-core's remote.ts and
 # bot-deployment.yaml).
 apiVersion: apps/v1
 kind: Deployment
@@ -49,9 +45,9 @@ spec:
         runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      # initContainers run once per new Pod (i.e. once per rollout, since replicas: 1 means
-      # the still-running old Pod never restarts its own) -- prisma migrate deploy is
-      # idempotent, so re-running it on a crash-loop restart is harmless, just redundant.
+      # initContainers run once per new Pod -- prisma migrate deploy is idempotent and takes
+      # an advisory lock, so re-running it per replica or on a crash-loop restart is harmless,
+      # just redundant.
       # Runs from this same image (built by .github/workflows/deploy.yml) rather than a
       # separate clone+install, so the schema applied is always exactly what this image was
       # built against -- see infra-database's build step for why the schema must be current
@@ -92,20 +88,16 @@ spec:
           ports:
             - name: http
               containerPort: 3000
-            - name: rpc
-              containerPort: 8081
           envFrom:
             - configMapRef:
-                # PORT (default "3000"), SCHEDULEMANAGER_RPC_PORT (default "8081") -- read
-                # directly by @sveltejs/adapter-node and schedulerRpcListener.ts respectively,
-                # plus SEARCHENGINE_RPC_URL, the address lib/server/search.ts calls (served by
-                # searchengine-deployment.yaml, not by this pod).
-                # If you change either port, update the matching `containerPort` above and
+                # PORT (default "3000"), read directly by @sveltejs/adapter-node, plus
+                # SEARCHENGINE_RPC_URL/BOT_RPC_URL, the addresses app-core's remote.ts calls.
+                # If you change PORT, update the matching `containerPort` above and
                 # `service.yaml`'s targetPort to match -- plain Kubernetes YAML can't
                 # cross-reference a ConfigMap value into another field.
                 name: distopia-config
             - secretRef:
-                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_*, SCHEDULEMANAGER_RPC_TOKEN,
+                # BOT_TOKEN, BOT_SECRET, PUBLIC_*, SENTRY_*, BOT_RPC_TOKEN,
                 # SEARCHENGINE_RPC_TOKEN -- see k8s/README.md for the kubectl create secret
                 # command.
                 name: distopia-env

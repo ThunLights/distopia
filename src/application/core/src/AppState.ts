@@ -87,7 +87,7 @@ export type AppState = {
   };
   searchEngine: SearchEngineClient;
   // The live-Discord-cache subset lives in presentation-bot now; see infra-discord's
-  // DiscordClient and presentation-web's lib/server/discord.ts (the RPC client standing in
+  // DiscordClient and app-core's remote.ts (the RPC client standing in
   // for it there).
   discord: DiscordClient;
   database: DatabaseClient;

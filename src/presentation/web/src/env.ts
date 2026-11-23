@@ -25,8 +25,6 @@ export const variables = defineEnvVars({
   BOT_RPC_TOKEN: { schema: (input) => input ?? "" },
   SEARCHENGINE_RPC_URL: { schema: (input) => input ?? "" },
   SEARCHENGINE_RPC_TOKEN: { schema: (input) => input ?? "" },
-  SCHEDULEMANAGER_RPC_PORT: { schema: (input) => input ?? "" },
-  SCHEDULEMANAGER_RPC_TOKEN: { schema: (input) => input ?? "" },
   VERIFY_RPC_URL: { schema: (input) => input ?? "" },
   VERIFY_RPC_TOKEN: { schema: (input) => input ?? "" },
 });

@@ -1,11 +1,9 @@
-# presentation-schedulemanager: a lightweight process that only ticks two node-cron
-# schedules and calls distopia-app's internal Connect RPC port (see
-# src/presentation/web/src/lib/server/schedulerRpcServer.ts) -- it never touches the
-# database, Redis, or Discord directly, and never receives inbound traffic itself, so it
-# has no Service of its own.
+# presentation-schedulemanager: runs every cron job itself, against the database and Redis
+# directly and Discord/search through distopia-bot's and distopia-searchengine's RPCs (as
+# distopia-app does). It never calls distopia-app, and never receives inbound traffic itself,
+# so it has no Service of its own.
 #
-# replicas stays at 1 for the same reason as distopia-app's own node-cron jobs used to
-# (see k8s/README.md): a second replica would double-fire every RPC call. Recreate (not
+# replicas stays at 1 (see k8s/README.md): a second replica would run every job twice. Recreate (not
 # RollingUpdate) for the same reason -- RollingUpdate's maxSurge:1 would let the new pod
 # start ticking before the old one stops, which is exactly the double-fire this Deployment
 # otherwise avoids. Unlike distopia-app, a brief gap in scheduling during a rollout is fine
@@ -48,21 +46,23 @@ spec:
               drop: ["ALL"]
           command: ["bun", "run", "src/presentation/schedulemanager/src/index.ts"]
           workingDir: /app
+          envFrom:
+            # REDIS_URL, SEARCHENGINE_RPC_URL, BOT_RPC_URL from distopia-config; BOT_TOKEN,
+            # BOT_SECRET, PUBLIC_*, BOT_RPC_TOKEN, SEARCHENGINE_RPC_TOKEN from distopia-env.
+            - configMapRef:
+                name: distopia-config
+            - secretRef:
+                name: distopia-env
           env:
-            # distopia-app:8081 (in-cluster DNS, matching distopia-config's
-            # SCHEDULEMANAGER_RPC_PORT + service.yaml's `rpc` port) -- update together if
-            # either port changes.
-            - name: SCHEDULEMANAGER_RPC_URL
-              value: "http://distopia-app:8081"
-            - name: SCHEDULEMANAGER_RPC_TOKEN
+            - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: distopia-env
-                  key: SCHEDULEMANAGER_RPC_TOKEN
+                  name: distopia-db-credentials
+                  key: url
           resources:
             requests:
               cpu: 50m
               memory: 64Mi
             limits:
-              cpu: 250m
-              memory: 128Mi
+              cpu: 500m
+              memory: 256Mi

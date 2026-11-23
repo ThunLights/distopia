@@ -25,3 +25,7 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: distopia-verify
+        # distopia-schedulemanager runs the cron jobs (voice channels, roles, panels, ...).
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: distopia-schedulemanager
