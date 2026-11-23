@@ -54,24 +54,28 @@ await manager.add(
 await manager.add(
   "*/20 * * * *",
   serialized("twenty-minute tasks", async () => {
-    await core.oauth2.updateTokens();
-    await core.guild.removeUnJoinedGuildData();
-    // Also the recovery path for the index itself: presentation-searchengine keeps it in
-    // process memory, so a restart there leaves it empty until something re-indexes.
-    await core.guild.loadSearchEngine();
-    await core.voice.update();
-    await core.activeRate.update();
-    await core.ranking.cleanCache();
-    await core.updateHomeGuildRoles(
-      PUBLIC_HOME_SERVER_ID!,
-      PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
-      PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
-      PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
-    );
-    await core.record.update();
-    await updatePanels();
-    await core.user.setActivity();
-    await redis.publish(WEB_CACHE_REFRESH_CHANNEL, "");
+    try {
+      await core.oauth2.updateTokens();
+      await core.guild.removeUnJoinedGuildData();
+      // Also the recovery path for the index itself: presentation-searchengine keeps it in
+      // process memory, so a restart there leaves it empty until something re-indexes.
+      await core.guild.loadSearchEngine();
+      await core.voice.update();
+      await core.activeRate.update();
+      await core.ranking.cleanCache();
+      await core.updateHomeGuildRoles(
+        PUBLIC_HOME_SERVER_ID!,
+        PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID!,
+        PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID!,
+      );
+      await core.record.update();
+      await updatePanels();
+      await core.user.setActivity();
+    } finally {
+      // A failed step (e.g. a panel edit without permission) must not leave web caches stale.
+      await redis.publish(WEB_CACHE_REFRESH_CHANNEL, "");
+    }
   }),
   { noOverlap: true },
 );
