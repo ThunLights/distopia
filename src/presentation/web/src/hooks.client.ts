@@ -41,17 +41,4 @@ if (typeof requestIdleCallback === "function") {
   setTimeout(loadReplay, 4000);
 }
 
-// A deploy replaces the hashed chunks, so a tab opened before it fails to lazy-load the next
-// route ("Failed to fetch dynamically imported module" / "Unable to preload CSS"). Reloading
-// picks up the new build's HTML instead of surfacing the error.
-window.addEventListener("vite:preloadError", (event) => {
-  // Reload at most once a minute so a chunk that is genuinely missing can't loop the page.
-  const key = "distopia:preloadErrorReloadAt";
-  const last = Number(sessionStorage.getItem(key) ?? 0);
-  if (Date.now() - last < 60_000) return;
-  sessionStorage.setItem(key, String(Date.now()));
-  event.preventDefault();
-  location.reload();
-});
-
 export const handleError = handleErrorWithSentry();
