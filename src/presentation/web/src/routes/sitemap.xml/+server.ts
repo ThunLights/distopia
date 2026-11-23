@@ -2,7 +2,15 @@ import { database } from "#lib/server/database.js";
 import type { RequestHandler } from "@sveltejs/kit";
 import * as sitemap from "super-sitemap/sveltekit";
 
-const excludeRoutePatterns = [/^\/api.*/, /^\/user.*/, /^\/auth.*/];
+const excludeRoutePatterns = [
+  /^\/api.*/,
+  /^\/user.*/,
+  /^\/auth.*/,
+  /^\/verify.*/,
+  /^\/immutable.*/,
+  /^\/help.*/,
+  /^\/~partytown.*/,
+];
 
 export const GET: RequestHandler = async () => {
   const publicGuildIds = (await database.guild.findAll())
