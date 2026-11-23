@@ -13,6 +13,8 @@ type BulkUpsertOptions<T extends Row> = {
   rows: readonly T[];
   // SET expression for a non-key column on conflict (default: take the new value).
   onConflict?: (column: string) => Prisma.Sql;
+  // On conflict, rows where this is false are left untouched.
+  updateWhere?: Prisma.Sql;
   // Folds two rows with the same key (default: later fields win, like sequential upserts).
   merge?: (a: T, b: T) => T;
 };
@@ -24,6 +26,10 @@ const quote = (name: string) => Prisma.raw(`"${name}"`);
  * row. Rows are merged per key (one statement can't touch a row twice) and sorted by key so
  * overlapping batches take row locks in the same order, avoiding Postgres deadlocks (40P01).
  * `undefined` fields stay untouched, as with Prisma's upsert.
+ *
+ * @returns One statement per run of key-sorted rows that set the same columns (at most 1000 rows
+ * each); execute them in order inside one transaction.
+ * @throws {Error} When a row sets a column not listed in `columns`.
  *
  * @example
  * await prisma.$transaction(
@@ -37,6 +43,7 @@ export function buildBulkUpserts<T extends Row>({
   columns,
   rows,
   onConflict = (column) => Prisma.sql`EXCLUDED.${quote(column)}`,
+  updateWhere,
   merge = (a, b) => ({ ...a, ...b }),
 }: BulkUpsertOptions<T>): Prisma.Sql[] {
   const keyOf = (row: T) => JSON.stringify(keys.map((key) => toParam(row[key])));
@@ -77,7 +84,7 @@ export function buildBulkUpserts<T extends Row>({
       .filter((column) => !(keys as readonly string[]).includes(column))
       .map((column) => Prisma.sql`${quote(column)} = ${onConflict(column)}`);
     const conflict = updates.length
-      ? Prisma.sql`DO UPDATE SET ${Prisma.join(updates)}`
+      ? Prisma.sql`DO UPDATE SET ${Prisma.join(updates)}${updateWhere ? Prisma.sql` WHERE ${updateWhere}` : Prisma.empty}`
       : Prisma.sql`DO NOTHING`;
     const values = runRows.map(
       (row) => Prisma.sql`(${Prisma.join(runColumns.map((column) => toParam(row[column])))})`,

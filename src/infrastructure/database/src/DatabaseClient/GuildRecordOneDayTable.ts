@@ -128,6 +128,8 @@ export class GuildRecordOneDayTable extends Base {
         rows: inputs.map(({ guildId, vcMember }) => ({ guildId, date, vcMembers: [vcMember] })),
         onConflict: () =>
           Prisma.sql`ARRAY(SELECT DISTINCT unnest("GuildRecordOneDay"."vcMembers" || EXCLUDED."vcMembers"))`,
+        // Already-recorded members: skip the write instead of rewriting an unchanged row.
+        updateWhere: Prisma.sql`NOT ("GuildRecordOneDay"."vcMembers" @> EXCLUDED."vcMembers")`,
         merge: (a, b) => ({ ...a, vcMembers: [...new Set([...a.vcMembers, ...b.vcMembers])] }),
       }),
     );
