@@ -11,7 +11,9 @@ Spec forms:
   name:aws/Service  -> official AWS icon     (e.g. lambda:aws/AWS-Lambda)
   name:gcp/Product  -> official Google Cloud icon (e.g. run:gcp/Cloud-Run)
   name:azure/Service -> official Azure icon  (e.g. vault:azure/Key-Vaults)
+  name:databricks/Product -> Databricks product icon (e.g. uc:databricks/unity-catalog)
   name:k8s/Resource -> official Kubernetes icon (e.g. pod:k8s/pod, web:k8s/deployment, lb:k8s/ingress)
+  name:cncf/Project -> official CNCF project icon (e.g. cilium:cncf/cilium, argo:cncf/argo, otel:cncf/opentelemetry)
 
 Sources tried in order:
   1. svgl              api.svgl.app?search={s} -> route (light variant when split)
@@ -30,9 +32,17 @@ gcp/ specs and the slugs gcp-* and google-cloud-* do the same with Google's pack
 azure/ specs and the slugs azure, microsoft-azure and azure-* do the same with Microsoft's package
 (learn.microsoft.com/azure/architecture/icons).
 
+databricks/ specs and the slugs databricks-* read a community catalog, pinned to one commit, that maps
+each product to its SVG on databricks.com (github.com/oieduardorabelo/databricks-architecture-icons,
+MIT). The icon downloads from databricks.com, or from the catalog's copy if that file has moved.
+Databricks publishes no icon package. The bare slug databricks is the Databricks mark, through the chain.
+
 k8s/ specs and the slugs k8s-* and kubernetes-* read official Kubernetes community
 icons (github.com/kubernetes/community/tree/master/icons). The slugs k8s and kubernetes
 fetch the Kubernetes mark through the chain.
+
+cncf/ specs and the slugs cncf-* read official CNCF project artwork
+(github.com/cncf/artwork). Bare names in CNCF_PROJECTS try CNCF artwork first, before the chain.
 
 svgl is matched by normalized title equality (search is fuzzy — a loose match would
 silently ship the wrong brand's logo, so non-exact hits fall through to next source).
@@ -149,6 +159,10 @@ AZURE_ALIASES = {
     "datafactory": "Data-Factories", "synapse": "Azure-Synapse-Analytics", "resourcegroup": "Resource-Groups",
     "rg": "Resource-Groups", "managedidentity": "Managed-Identities",
 }
+# Databricks has no icon package; this community catalog maps products to their databricks.com files.
+# Icons download from databricks.com, with the catalog's pinned copy as fallback if a file moves.
+DATABRICKS_ICONS = ("https://raw.githubusercontent.com/oieduardorabelo/databricks-architecture-icons/"
+                    "5a8e0da62193ad374e860c9887d17a266e003131/")
 K8S_ICON_BASE = "https://raw.githubusercontent.com/kubernetes/community/307ae50e8e4246de172f195c73e3f026b4f0c7ff/icons/svg/"
 K8S_RESOURCES = ("c-role", "cm", "crb", "crd", "cronjob", "deploy", "ds", "ep", "group", "hpa", "ing", "job",
                  "limits", "netpol", "ns", "pod", "psp", "pv", "pvc", "quota", "rb", "role", "rs", "sa", "sc",
@@ -195,6 +209,48 @@ K8S_ALIASES = {
     "user": "user", "users": "user",
     "group": "group", "groups": "group",
     "master": "controlplane",
+}
+CNCF_ICON_BASE = "https://raw.githubusercontent.com/cncf/artwork/bffd512a8b625f15cf5f8e0427469380b5768e90/projects/"
+CNCF_PROJECTS = {
+    "antrea": ("antrea", "antrea-icon"),
+    "argo": ("argo", "argo-icon"),
+    "argocd": ("argo", "argo-icon"),
+    "backstage": ("backstage", "backstage-icon"),
+    "certmanager": ("cert-manager", "cert-manager-icon"),
+    "cilium": ("cilium", "cilium_icon"),
+    "cloudevents": ("cloudevents", "cloudevents-icon"),
+    "cni": ("cni", "cni-icon"),
+    "containerd": ("containerd", "containerd-icon"),
+    "coredns": ("coredns", "coredns-icon"),
+    "cortex": ("cortex", "cortex-icon"),
+    "crossplane": ("crossplane", "crossplane-icon"),
+    "dapr": ("dapr", "dapr-icon"),
+    "envoy": ("envoy", "envoy-icon"),
+    "etcd": ("etcd", "etcd-icon"),
+    "falco": ("falco", "falco-icon"),
+    "fluentd": ("fluentd", "fluentd-icon"),
+    "flux": ("flux", "flux-icon"),
+    "fluxcd": ("flux", "flux-icon"),
+    "gatekeeper": ("open-policy-agent", "opa-icon"),
+    "harbor": ("harbor", "harbor-icon"),
+    "helm": ("helm", "helm-icon"),
+    "jaeger": ("jaeger", "jaeger-icon"),
+    "keda": ("keda", "keda-icon"),
+    "linkerd": ("linkerd", "linkerd-icon"),
+    "longhorn": ("longhorn", "longhorn-icon"),
+    "opa": ("open-policy-agent", "opa-icon"),
+    "openpolicyagent": ("open-policy-agent", "opa-icon"),
+    "opentelemetry": ("opentelemetry", "opentelemetry-icon"),
+    "otel": ("opentelemetry", "opentelemetry-icon"),
+    "prometheus": ("prometheus", "prometheus-icon"),
+    "prom": ("prometheus", "prometheus-icon"),
+    "rook": ("rook", "rook-icon"),
+    "spiffe": ("spiffe", "spiffe-icon"),
+    "spire": ("spire", "spire-icon"),
+    "strimzi": ("strimzi", "strimzi-icon"),
+    "tekton": ("tekton", "tekton-icon"),
+    "thanos": ("thanos", "thanos-icon"),
+    "vitess": ("vitess", "vitess-icon"),
 }
 PACKAGES = {}
 
@@ -353,6 +409,38 @@ def azure_sources(query):
     print(f"Azure {query!r} is not a name in the package. Names: {', '.join(sorted(v[0] for v in index.values()))}")
     return []
 
+@functools.lru_cache(maxsize=1)
+def databricks_index():
+    """The catalog as {normalized name: (slug, databricks.com url, pinned copy)}, keyed by slug, name
+    and former names."""
+    catalog = json.loads(get(DATABRICKS_ICONS + "icons/catalog.json"))
+    index = {}
+    for p in catalog["products"]:
+        # aka reads like "formerly Databricks Vector Search / Mosaic AI Vector Search"; a bare slash
+        # stays, so "AI/BI Genie spaces" does not yield the name "AI"
+        aka = re.split(r"\s/\s|[.()]|\bformerly\b", p.get("aka") or "", flags=re.IGNORECASE)
+        for n in [p["slug"], p["name"], *aka]:
+            if n.strip():
+                index.setdefault(norm(n), (p["slug"], p.get("sourceUrl"), DATABRICKS_ICONS + p["source"]))
+    return index
+
+def databricks_sources(query):
+    """Exact match on a product's slug, name or former name, with the Databricks / Mosaic AI prefix
+    optional. A miss lists every slug, as for AWS."""
+    try:
+        index = databricks_index()
+    except (OSError, ValueError, KeyError, http.client.HTTPException) as e:
+        print(f"Databricks icon catalog unavailable: {e}")
+        return []
+    short = lambda s: re.sub(r"^(databricks|mosaicai)", "", s)
+    q = norm(query)
+    # a bare prefix ("mosaic-ai") strips to nothing and must not match the Databricks logo
+    hit = index.get(q) or (short(q) and next((v for k, v in index.items() if short(k) == short(q)), None))
+    if hit:
+        return [("databricks", url, None) for url in hit[1:] if url]
+    print(f"Databricks {query!r} is not a product name. Slugs: {', '.join(sorted({v[0] for v in index.values()}))}")
+    return []
+
 def k8s_index():
     index = {norm(n): f"resources/unlabeled/{n}.svg" for n in K8S_RESOURCES}
     index.update({norm(n): f"infrastructure_components/unlabeled/{n}.svg" for n in K8S_INFRASTRUCTURE})
@@ -373,6 +461,20 @@ def k8s_sources(query):
     print(f"Kubernetes {query!r} is not an icon name. Names: {', '.join(sorted({*index, *K8S_ALIASES}))}")
     return []
 
+def cncf_sources(query):
+    query = (query or "").strip()
+    if not query:
+        return []
+    key = norm(query)
+    hit = CNCF_PROJECTS.get(key)
+    if hit:
+        proj, base = hit
+        color = f"{CNCF_ICON_BASE}{proj}/icon/color/{base}-color.svg"
+        white = f"{CNCF_ICON_BASE}{proj}/icon/white/{base}-white.svg"
+        return [("cncf", color, white)]
+    print(f"CNCF {query!r} is not an icon name. Names: {', '.join(sorted(CNCF_PROJECTS))}")
+    return []
+
 def sources(slug):
     # concept icons: slug "lucide/<icon-name>" -> Lucide line icon (browse: lucide.dev/icons)
     if slug.startswith("lucide/"):
@@ -388,17 +490,25 @@ def sources(slug):
     azure = re.fullmatch(r"azure[/-](.+)", slug, re.IGNORECASE)
     if azure:
         return azure_sources(azure.group(1))
+    databricks = re.fullmatch(r"databricks[/-](.+)", slug, re.IGNORECASE)
+    if databricks:
+        return databricks_sources(databricks.group(1))
     if norm(slug) == "k8s":
         slug = "kubernetes"
     k8s = re.fullmatch(r"(?:k8s|kubernetes)[/-](.+)", slug, re.IGNORECASE)
     if k8s:
         return k8s_sources(k8s.group(1))
+    cncf = re.fullmatch(r"cncf[/-](.+)", slug, re.IGNORECASE)
+    if cncf:
+        return cncf_sources(cncf.group(1))
     if norm(slug) in ("gcp", "googlecloudplatform"):
         slug = "google-cloud"
     gcp = re.fullmatch(r"(?:gcp/|gcp-|google-cloud-)(.+)", slug, re.IGNORECASE)
     if gcp:
         return gcp_sources(gcp.group(1))
     out = []
+    if norm(slug) in CNCF_PROJECTS:
+        out.extend(cncf_sources(slug))
     svgl = svgl_lookup(slug)
     if svgl:
         out.append(("svgl", *svgl))

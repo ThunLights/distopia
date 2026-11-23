@@ -11,7 +11,8 @@ submit  checks the inputs, solves the gallery's proof-of-work challenge, uploads
         ~/.config/stack-diagram/gallery.json (mode 0600). Everything sent becomes public.
         --stack lists the technologies; "Name=key" attaches the logo saved under key in
         DIR/manifest.json, the icons dir fetch_icons.py wrote, passed as --icons DIR.
-        Only logos from svgl, gilbarbara/logos and devicon are sent.
+        Only logos from svgl, gilbarbara/logos, devicon, the Kubernetes icons and CNCF
+        artwork are sent.
 delete  deletes a post with the key saved there. If the gallery could confirm the post's
         GitHub login, signing in with that account on the gallery site deletes it too.
 list    shows the posts saved there
@@ -28,7 +29,9 @@ UA = {"User-Agent": "Mozilla/5.0 (stack-diagram-skill)"}
 STORE = pathlib.Path.home() / ".config" / "stack-diagram" / "gallery.json"
 LOGIN_RE = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?")
 ICON_PREFIXES = ("https://svgl.app/library/", "https://cdn.jsdelivr.net/gh/gilbarbara/logos/logos/",
-                 "https://raw.githubusercontent.com/devicons/devicon/master/icons/")
+                 "https://raw.githubusercontent.com/devicons/devicon/master/icons/",
+                 "https://raw.githubusercontent.com/kubernetes/community/307ae50e8e4246de172f195c73e3f026b4f0c7ff/icons/svg/",
+                 "https://raw.githubusercontent.com/cncf/artwork/bffd512a8b625f15cf5f8e0427469380b5768e90/projects/")
 MAX_SIDE, MAX_PIXELS, MAX_BITS = 4000, 8_000_000, 26   # a 27+ bit challenge outlives its 10 minutes
 
 def usage():
