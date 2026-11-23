@@ -2,9 +2,21 @@
   import Footer from "#lib/components/Footer.svelte";
   import Header from "#lib/components/Header.svelte";
   import "../app.css";
+  import { onMount } from "svelte";
   import { Toaster } from "svelte-sonner";
 
   let { children, data } = $props();
+
+  // AdSense auto ads inject nodes into the page; loading it before hydration makes Svelte's
+  // hydration walk those foreign nodes and throw (HierarchyRequestError on appendChild).
+  onMount(() => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src =
+      "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9010324670720699";
+    document.head.append(script);
+  });
 </script>
 
 <Toaster richColors />
@@ -16,12 +28,6 @@
     window.partytown = { forward: ["dataLayer.push"], debug: "%partytown.debug%" };
   </script>
   <script src="/~partytown/partytown.js?v=%partytown.version%"></script>
-  <script
-    async
-    fetchpriority="low"
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9010324670720699"
-    crossorigin="anonymous"
-  ></script>
   <script
     type="text/partytown"
     src="https://www.googletagmanager.com/gtag/js?id=G-XZSXC8MQPZ"

@@ -101,6 +101,14 @@ async function mockRanking(page: Page, data = FULL_RANKING) {
   });
 }
 
+/**
+ * Navigates and waits for the page's onMount fetch, i.e. until hydration has finished. A
+ * selectOption() before that is lost: hydration resets the <select> to the bound value.
+ */
+async function gotoHydrated(page: Page, url: string) {
+  await Promise.all([page.waitForResponse("**/api/ranking"), page.goto(url)]);
+}
+
 // ── Page-level rendering (no mock) ───────────────────────────────────────────
 
 test("has the correct page title", async ({ page }) => {
@@ -176,7 +184,7 @@ test("active-rate guild entry has a link to the guild detail page", async ({ pag
 
 test("switching to level tab shows level-ranked guilds", async ({ page }) => {
   await mockRanking(page);
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
   await page.locator("select").selectOption("level");
 
   await expect(page.getByText("1: Level Leader Guild")).toBeVisible();
@@ -185,7 +193,7 @@ test("switching to level tab shows level-ranked guilds", async ({ page }) => {
 
 test("level entry shows level and points", async ({ page }) => {
   await mockRanking(page);
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
   await page.locator("select").selectOption("level");
 
   // Same template line-break issue as activeRate — use \s+ between Lv.42 and 100pt.
@@ -204,7 +212,7 @@ test("?t=level pre-selects the level tab and shows level data immediately", asyn
 
 test("switching to userlevel tab shows level-ranked users", async ({ page }) => {
   await mockRanking(page);
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
   await page.locator("select").selectOption("userlevel");
 
   await expect(page.getByText("1: Top Chatter")).toBeVisible();
@@ -223,7 +231,7 @@ test("?t=userlevel pre-selects the userlevel tab", async ({ page }) => {
 
 test("switching to userbump tab shows user rankings", async ({ page }) => {
   await mockRanking(page);
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
   await page.locator("select").selectOption("userbump");
 
   // User.svelte renders: "{index+1}: {displayName}"
@@ -233,7 +241,7 @@ test("switching to userbump tab shows user rankings", async ({ page }) => {
 
 test("userbump entry shows the username and Discord ID", async ({ page }) => {
   await mockRanking(page);
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
   await page.locator("select").selectOption("userbump");
 
   // Expected text: "ユーザーネーム: {username} (ID: {id})" — "username" label in Japanese
@@ -243,7 +251,7 @@ test("userbump entry shows the username and Discord ID", async ({ page }) => {
 
 test("userbump entry shows the bump count in the children slot", async ({ page }) => {
   await mockRanking(page);
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
   await page.locator("select").selectOption("userbump");
 
   // ranking/+page.svelte injects a snippet: <p>合計: {bumpCounter}回</p> ("Total: N times" in Japanese)
@@ -285,7 +293,7 @@ test("switching tabs hides the previous tab's content", async ({ page }) => {
 
 test("all empty ranking arrays render without a crash", async ({ page }) => {
   await mockRanking(page, { guild: { level: [], activeRate: [] }, user: { bump: [], level: [] } });
-  await page.goto("/ranking");
+  await gotoHydrated(page, "/ranking");
 
   await expect(page.locator("select")).toBeVisible();
   await page.locator("select").selectOption("level");
