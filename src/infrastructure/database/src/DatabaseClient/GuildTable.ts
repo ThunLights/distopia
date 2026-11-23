@@ -13,13 +13,13 @@ export class GuildTable extends Base {
   }
 
   public async findMany(guildIds: string[]) {
-    return await this.prisma.$transaction(
-      guildIds.map((guildId) => this.prisma.guild.findUnique({ where: { guildId } })),
-    );
+    const rows = await this.prisma.guild.findMany({ where: { guildId: { in: guildIds } } });
+    const byId = new Map(rows.map((row) => [row.guildId, row]));
+    return guildIds.map((guildId) => byId.get(guildId) ?? null);
   }
 
   public async findWithRecord(guildId: string) {
-    const [guild, record] = await this.prisma.$transaction([
+    const [guild, record] = await Promise.all([
       this.prisma.guild.findUnique({ where: { guildId } }),
       this.prisma.guildRecord.findUnique({ where: { guildId } }),
     ]);
@@ -39,7 +39,9 @@ export class GuildTable extends Base {
     recordOneDays: GuildRecordOneDay[];
     reviews: GuildReview[];
   }> {
-    const [guild, record, settings, recordOneDays, reviews] = await this.prisma.$transaction([
+    // Plain reads: a batch $transaction would wait for a transaction slot behind the cron's
+    // long upsert batches and time out (P2028) under load.
+    const [guild, record, settings, recordOneDays, reviews] = await Promise.all([
       this.prisma.guild.findUnique({ where: { guildId } }),
       this.prisma.guildRecord.findUnique({ where: { guildId } }),
       this.prisma.guildSetting.findUnique({ where: { guildId } }),
