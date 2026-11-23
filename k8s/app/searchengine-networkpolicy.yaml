@@ -1,6 +1,6 @@
 # Defense-in-depth alongside the SEARCHENGINE_RPC_TOKEN bearer check
 # (src/presentation/searchengine/src/index.ts): the searchengine pod serves nothing public,
-# so its only ingress rule is "the app and bot pods, on the rpc port" -- selecting the pod at
+# so its only ingress rule is "the app, bot and schedulemanager pods, on the rpc port" -- selecting the pod at
 # all switches it to default-deny for everything else. Mirrors
 # schedulemanager-networkpolicy.yaml, with the direction reversed (there distopia-app is the
 # server; here it is a client, alongside distopia-bot -- see
@@ -27,3 +27,7 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: distopia-bot
+        # distopia-schedulemanager re-indexes every 20 minutes (loadSearchEngine).
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: distopia-schedulemanager

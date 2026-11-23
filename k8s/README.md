@@ -86,9 +86,10 @@ those hops carry a credential:
 | Hop | What travels in the clear |
 |---|---|
 | `distopia-schedulemanager` → `distopia-app:rpc` | `SCHEDULEMANAGER_RPC_TOKEN` bearer token |
-| `distopia-app` → `distopia-searchengine:rpc` | `SEARCHENGINE_RPC_TOKEN` bearer token |
-| `distopia-app` → `distopia-db-rw:5432` | the `DATABASE_URL` password — the strongest of these |
-| `distopia-app` → `distopia-redis:6379` | no credential, because Redis has no AUTH at all (`k8s/redis/redis.yaml`) — so reachability *is* the only control |
+| `distopia-app`/`distopia-bot`/`distopia-schedulemanager` → `distopia-searchengine:rpc` | `SEARCHENGINE_RPC_TOKEN` bearer token |
+| `distopia-app`/`distopia-schedulemanager`/`distopia-verify` → `distopia-bot:rpc` | `BOT_RPC_TOKEN` bearer token |
+| `distopia-app`/`distopia-bot`/`distopia-schedulemanager` → `distopia-db-rw:5432` | the `DATABASE_URL` password — the strongest of these |
+| `distopia-app`/`distopia-bot`/`distopia-schedulemanager` → `distopia-redis:6379` | no credential, because Redis has no AUTH at all (`k8s/redis/redis.yaml`) — so reachability *is* the only control |
 
 **On a single node that is not an exposure.** Pod-to-pod traffic never leaves the host's
 kernel, so reading any of it already requires root on that node — and root there can read the
@@ -585,17 +586,20 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
 
 ## Scheduler RPC (schedulemanager)
 
-`distopia-schedulemanager` (`schedulemanager-deployment.yaml`) is a separate, lightweight
-Deployment built from the same image as `distopia-app`, just with its `command` overridden to
-run `presentation-schedulemanager` instead of the SvelteKit server. It owns the two
-`node-cron` schedules that used to run in-process inside `hooks.server.ts` (via the retired
-`app-schedule` package) and, on each tick, calls a small internal Connect RPC server
-`distopia-app` now exposes (`src/presentation/web/src/lib/server/schedulerRpcListener.ts`,
-implementing `SchedulerService` from `infra-rpc`) — the actual job bodies (`core.jwt.update()`,
-`updatePanels()`, ...) are unchanged, only the trigger moved from an in-process timer to an RPC
-call. This was stage 1 of splitting the monolith into independent `web`/`bot`/
-`schedulemanager`/`searchengine` services; `searchengine` and `bot` have both since followed
-(see below) -- `distopia-app` itself no longer hosts the Discord client or the Orama index.
+`distopia-schedulemanager` (`schedulemanager-deployment.yaml`) is a separate Deployment built
+from the same image as `distopia-app`, just with its `command` overridden to run
+`presentation-schedulemanager` instead of the SvelteKit server. It runs every cron job itself
+(`core.jwt.update()`, `updatePanels()`, the features' `./schedule` tasks, ...) with its own
+`AppCore`: the database and Redis directly, Discord through `distopia-bot`'s RPC and the search
+index through `distopia-searchengine`'s, exactly as `distopia-app` does. So it needs the same
+`distopia-config`/`distopia-env`/`distopia-db-credentials` as the app, and the bot, searchengine
+and Redis NetworkPolicies admit it.
+
+Its only call into `distopia-app` is `RefreshCaches`, after the 20-minute jobs, on the small
+internal Connect RPC server `distopia-app` exposes
+(`src/presentation/web/src/lib/server/schedulerRpcListener.ts`, implementing `SchedulerService`
+from `infra-rpc`). It refreshes the read caches that live in that pod's memory and nowhere else
+(ranking, the root page's active guilds, the friends list).
 
 Reachability is restricted two ways, neither a substitute for the other:
 
@@ -626,7 +630,7 @@ can't cross-reference a ConfigMap value into another field.
 schedulemanager split: same image, `command` overridden to run `presentation-searchengine`,
 but here it is the **server** and `distopia-app` the client. It owns the Orama index
 (`repo-search`'s `SearchEngine`, which used to be instantiated in-process by
-`src/presentation/web/src/lib/server/search.ts`) and serves it as `SearchEngineService` from
+`src/application/core/src/remote.ts`) and serves it as `SearchEngineService` from
 `infra-rpc`; `search.ts` is now just a Connect client exposing that same method surface, so
 every `AppCore` call site (`core.guild.save`, `loadSearchEngine`, `search`, …) is unchanged.
 
@@ -649,9 +653,9 @@ Two things follow from the index being in-process memory only:
 
 - `replicas: 1` + `Recreate` are load-bearing (see that Deployment's own comment): a second
   pod would answer searches from its own, differently-populated index.
-- A restart loses the index, so `distopia-app` populates it from two places:
-  `core.guild.loadSearchEngine()` at boot (`hooks.server.ts`) and again on every
-  `runTwentyMinuteTasks` tick (`schedulerRpcServer.ts`). A `distopia-searchengine` pod that
+- A restart loses the index, so it is populated from two places:
+  `core.guild.loadSearchEngine()` at `distopia-app`'s boot (`hooks.server.ts`) and again on
+  every 20-minute tick of `distopia-schedulemanager`. A `distopia-searchengine` pod that
   restarts alone therefore comes back empty for at most one tick — searches return 0 hits
   during that window, never an error. Repeating the load is cheap: one
   `database.guild.findAll()` plus `distopia-bot`'s cache (over the Bot RPC below), no Discord
@@ -809,9 +813,8 @@ it, or be skipped entirely (no plugin mounted is also a fully valid state).
   causes duplicate event handling. Same `RollingUpdate` posture as `distopia-app` for the
   same zero-downtime reason.
 - `distopia-schedulemanager`'s `replicas: 1` (`schedulemanager-deployment.yaml`) is
-  load-bearing for a different reason: it only ticks two `node-cron` schedules and calls
-  `distopia-app`'s internal RPC port (see "Scheduler RPC (schedulemanager)" below) — a
-  second replica would double-fire every call.
+  load-bearing for a different reason: it runs every cron job (see "Scheduler RPC
+  (schedulemanager)" below) — a second replica would run each of them twice.
 - `distopia-searchengine`'s `replicas: 1` (`searchengine-deployment.yaml`) is load-bearing
   too, for yet another reason: its Orama index lives in process memory, so a second replica
   would serve searches from an index neither caller (`distopia-app` nor `distopia-bot`) ever
@@ -841,13 +844,14 @@ it, or be skipped entirely (no plugin mounted is also a fully valid state).
   `migrate` initContainer (it reads `distopia-db-credentials` too, same as the main
   container), but never a rebuild — the build-time database `deploy.yml` migrates is a
   separate, throwaway one, unrelated to the real `distopia-db-credentials` value.
-  Rotating `SEARCHENGINE_RPC_TOKEN` needs `distopia-app`, `distopia-bot`, and
-  `distopia-searchengine` all restarted together (both callers, plus the server), for
+  Rotating `SEARCHENGINE_RPC_TOKEN` needs `distopia-app`, `distopia-bot`,
+  `distopia-schedulemanager` and `distopia-searchengine` all restarted together (every caller,
+  plus the server), for
   exactly the same reason as the schedulemanager token below. Rotating `BOT_RPC_TOKEN` needs
-  `distopia-app` and `distopia-bot` restarted together, same reason again. Rotating
+  `distopia-app`, `distopia-schedulemanager` and `distopia-bot` restarted together, same reason
+  again. Rotating
   `SCHEDULEMANAGER_RPC_TOKEN` specifically needs **both** Deployments restarted
-  (`... distopia-app` and `... distopia-schedulemanager`) — it's the one `distopia-env` key
-  `distopia-schedulemanager` also reads, and a still-running Pod keeps its old
+  (`... distopia-app` and `... distopia-schedulemanager`) — a still-running Pod keeps its old
   Secret-backed env var value until restarted, so a one-sided restart leaves the two
   processes with mismatched tokens and every RPC call failing auth.
 - `distopia-db`'s Argo CD Application (`k8s/argocd/app-db.yaml`) runs with `prune: false`,

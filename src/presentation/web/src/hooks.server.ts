@@ -69,17 +69,17 @@ async function start() {
   console.log("JWT keys is imported.");
 
   // Best-effort: friend.updateCache() and guild.updateRootPage() both now call out to
-  // presentation-bot over RPC (see lib/server/discord.ts) instead of a local discord.js
+  // presentation-bot over RPC (see app-core's remote.ts) instead of a local discord.js
   // cache, so a bot pod that isn't reachable yet (mid-rollout, mid-Discord-login) must not
   // crash this process's own startup -- that would turn one slow dependency into a
   // crash-looping web pod too.
   //
   // friend.updateCache() fully self-heals: it's retried every 20 minutes by
-  // runTwentyMinuteTasks (schedulerRpcServer.ts), so a boot-time failure here just leaves
+  // refreshCaches (schedulerRpcServer.ts), so a boot-time failure here just leaves
   // the Friend page on its last-cached data until that next tick.
   //
   // guild.updateRootPage() only partially self-heals: its `activeGuilds` half gets
-  // refreshed as a side effect of activeRate.update() on that same 20-minute tick, but its
+  // refreshed by refreshCaches on that same 20-minute tick, but its
   // `latestGuilds` half (the root page's "newest bumped guilds" list) isn't re-run by
   // anything else -- a boot-time failure leaves it at its empty initial value until the
   // next actual bump() call updates it incrementally. Acceptable: a stale/empty display
@@ -102,10 +102,10 @@ async function start() {
     console.error("Failed to update root page guilds:", error);
   }
 
-  // Best-effort: the index now lives in presentation-searchengine (see lib/server/search.ts),
+  // Best-effort: the index now lives in presentation-searchengine (see app-core's remote.ts),
   // so a search outage must not take the whole site down with it -- an empty index just
   // returns 0 hits (repo-search's SearchEngine short-circuits on an empty index).
-  // schedulerRpcServer.ts's runTwentyMinuteTasks re-indexes, so a failure here recovers on
+  // presentation-schedulemanager re-indexes every 20 minutes, so a failure here recovers on
   // its own rather than lasting until the next restart.
   try {
     await core.guild.loadSearchEngine();

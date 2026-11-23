@@ -2,7 +2,7 @@ import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-node";
 import { BotService, createBearerAuthInterceptor } from "infra-rpc";
 
-// Same reasoning as presentation-web's lib/server/discord.ts BOT_RPC_TIMEOUT_MS.
+// Same reasoning as app-core's remote.ts RPC_TIMEOUT_MS.
 const BOT_RPC_TIMEOUT_MS = 10_000;
 
 // The three presentation-bot RPCs a verification attempt needs -- the role grant and the log

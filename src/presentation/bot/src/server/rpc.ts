@@ -13,7 +13,7 @@ if (!BOT_RPC_PORT || !BOT_RPC_TOKEN) {
 // ClusterIP-only (see k8s/app/bot-networkpolicy.yaml) -- only distopia-app is allowed to
 // reach this port. The bearer token is defense in depth on top of that NetworkPolicy, not a
 // substitute for it. Serves the live-cache-dependent subset of infra-discord's Controller
-// (see its DiscordClient type) to presentation-web's lib/server/discord.ts.
+// (see its DiscordClient type) to app-core's remote.ts.
 const handler = connectNodeAdapter({
   routes: (router) =>
     router.service(BotService, {

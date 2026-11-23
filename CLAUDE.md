@@ -350,7 +350,7 @@ contract type:
 | Export | Contract | Loaded by |
 |---|---|---|
 | `./bot` | `BotFeature` (`presentation-bot-kit/feature`) — handler classes per interaction type + `/settings` menu entries + `events` (`FeatureEventBase` subclasses from `presentation-bot-kit/base/FeatureEventBase`: `event` names the `ClientEvents` key, `handle(...args)` receives its arguments) | `presentation-bot` |
-| `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-web` runs the tasks (`RunFeatureTasks` RPC); `presentation-schedulemanager` ticks each cron key |
+| `./schedule` | `ScheduleFeature` (`app-schedule/feature`) — `{ [cron]: ((core) => Promise)[] }` | `presentation-schedulemanager` runs each task on its cron key, with its own `AppCore` |
 
 `/settings` panel entries go through `presentation-bot-kit/settings`: a feature lists
 `SettingsEntry`s (`label`, `value`, `page`, optional `fields` shown on the panel embed) in
@@ -696,19 +696,20 @@ call each other, now that distopia has split from one process into independent `
 `schedulemanager`/`searchengine` services. Four services are built this way so far — follow
 the same shape for the next one, and note that they don't all share one direction:
 
-- `presentation-schedulemanager` — a standalone cron-ticker process that **calls**
-  `presentation-web`'s internal RPC port on each tick (see `k8s/README.md`'s "Scheduler RPC"
-  section).
+- `presentation-schedulemanager` — runs every cron job itself with its own `AppCore` (DB and
+  Redis directly, Discord and search through the bot/searchengine RPCs, like web). Its only
+  call into `presentation-web` is `RefreshCaches` after the 20-minute jobs, for the read caches
+  web keeps in process memory (see `k8s/README.md`'s "Scheduler RPC" section).
 - `presentation-searchengine` — owns the Orama index (`repo-search`'s `SearchEngine`) and
   **serves** it to `presentation-web`, which holds only a Connect client
-  (`web/src/lib/server/search.ts`) exposing the same method surface, so `AppCore`'s call
+  (`createRemoteSearchEngine` in `app-core/remote`) exposing the same method surface, so `AppCore`'s call
   sites are unchanged (`AppState.searchEngine` is typed `SearchEngineClient`, the structural
   subset of that class). See `k8s/README.md`'s "Search engine RPC" section — including why
   that Deployment is `replicas: 1` and what still does not re-index after a restart.
 - `presentation-bot` — the mirror image of the searchengine split: it owns the one real,
   logged-in discord.js `Client` (guild/member/channel cache included) and **serves** the
   live-cache-dependent half of `infra-discord`'s `Controller` to `presentation-web`
-  (`web/src/lib/server/discord.ts`), which holds only a Connect client typed
+  (`createRemoteDiscordClient` in `app-core/remote`), which holds only a Connect client typed
   `DiscordClient` (`infra-discord`'s structural subset of `Controller` — `AppState.discord`).
   The pure/stateless half (`oauth2`, `embed`, `guild.iconUrl` — no live cache needed) stays a
   plain local implementation on both sides instead of going over RPC. See `k8s/README.md`'s

@@ -1,8 +1,7 @@
 # Defense-in-depth: even with no Ingress/NodePort/LoadBalancer, restrict ingress to only the
-# two Deployments that actually talk to this Redis (distopia-app and, now that
-# presentation-bot owns its own AppState["memory"] stores too -- see
-# src/presentation/bot/src/server/memory.ts -- distopia-bot) rather than every pod in the
-# namespace. The CNPG-managed database has no reason to reach an unauthenticated Redis
+# Deployments that actually talk to this Redis (distopia-app, distopia-bot and
+# distopia-schedulemanager, which all build AppState["memory"] -- see app-core's remote.ts)
+# rather than every pod in the namespace. The CNPG-managed database has no reason to reach an unauthenticated Redis
 # holding TTS session pointers, so it's deliberately not included here.
 #
 # Label selector matches what OT-CONTAINER-KIT/redis-operator actually stamps on the pod it
@@ -30,3 +29,6 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: distopia-bot
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: distopia-schedulemanager

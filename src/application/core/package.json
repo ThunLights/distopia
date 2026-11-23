@@ -40,6 +40,9 @@
     },
     "./blank": {
       "import": "./src/utils/blank.ts"
+    },
+    "./remote": {
+      "import": "./src/remote.ts"
     }
   },
   "scripts": {
@@ -50,12 +53,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@connectrpc/connect": "catalog:",
+    "@connectrpc/connect-node": "catalog:",
     "domain-model": "workspace:*",
     "domain-service": "workspace:*",
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "infra-http": "workspace:*",
     "infra-redis": "workspace:*",
+    "infra-rpc": "workspace:*",
     "infra-sakura": "workspace:*",
     "infra-voicevox": "workspace:*",
     "repo-redis": "workspace:*",

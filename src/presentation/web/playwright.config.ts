@@ -13,7 +13,7 @@ export default defineConfig({
       reuseExistingServer: true,
     },
     // /api/guild/search now calls presentation-searchengine over Connect RPC (see
-    // lib/server/search.ts), so it has to be up for that endpoint to answer 200.
+    // app-core's remote.ts), so it has to be up for that endpoint to answer 200.
     {
       command: "bun run dev",
       cwd: "../searchengine",

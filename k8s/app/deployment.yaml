@@ -16,9 +16,9 @@
 # schedulemanager pod only.
 #
 # Conversely, this pod is the *client* of both distopia-searchengine's internal RPC port
-# (the Orama index moved out of this process -- see lib/server/search.ts and
+# (the Orama index moved out of this process -- see app-core's remote.ts and
 # searchengine-deployment.yaml) and distopia-bot's (the live Discord guild/member/channel
-# cache moved out of this process too -- see lib/server/discord.ts and
+# cache moved out of this process too -- see app-core's remote.ts and
 # bot-deployment.yaml).
 apiVersion: apps/v1
 kind: Deployment
@@ -98,7 +98,7 @@ spec:
             - configMapRef:
                 # PORT (default "3000"), SCHEDULEMANAGER_RPC_PORT (default "8081") -- read
                 # directly by @sveltejs/adapter-node and schedulerRpcListener.ts respectively,
-                # plus SEARCHENGINE_RPC_URL, the address lib/server/search.ts calls (served by
+                # plus SEARCHENGINE_RPC_URL, the address app-core's remote.ts calls (served by
                 # searchengine-deployment.yaml, not by this pod).
                 # If you change either port, update the matching `containerPort` above and
                 # `service.yaml`'s targetPort to match -- plain Kubernetes YAML can't

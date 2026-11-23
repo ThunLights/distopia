@@ -2,23 +2,12 @@ syntax = "proto3";
 
 package distopia.schedulemanager.v1;
 
-// Implemented by presentation-web (which still hosts AppCore + the Discord client) and called
-// by presentation-schedulemanager on a node-cron tick -- see setSchedulerRpcServer.ts and
-// presentation-schedulemanager/src/index.ts.
+// Implemented by presentation-web and called by presentation-schedulemanager after its own
+// 20-minute jobs. Those jobs run in schedulemanager itself; this only refreshes the read
+// caches web keeps in process memory (ranking, root page, friends), which no other process can.
 service SchedulerService {
-  rpc RunFiveMinuteTasks(RunFiveMinuteTasksRequest) returns (RunFiveMinuteTasksResponse);
-  rpc RunTwentyMinuteTasks(RunTwentyMinuteTasksRequest) returns (RunTwentyMinuteTasksResponse);
-  // Runs every src/application/feature/* "./schedule" task registered under `cron`.
-  rpc RunFeatureTasks(RunFeatureTasksRequest) returns (RunFeatureTasksResponse);
+  rpc RefreshCaches(RefreshCachesRequest) returns (RefreshCachesResponse);
 }
 
-message RunFiveMinuteTasksRequest {}
-message RunFiveMinuteTasksResponse {}
-
-message RunTwentyMinuteTasksRequest {}
-message RunTwentyMinuteTasksResponse {}
-
-message RunFeatureTasksRequest {
-  string cron = 1;
-}
-message RunFeatureTasksResponse {}
+message RefreshCachesRequest {}
+message RefreshCachesResponse {}
