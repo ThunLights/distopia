@@ -120,18 +120,28 @@ spec:
                 secretKeyRef:
                   name: distopia-db-credentials
                   key: url
+          # /healthz never touches the DB or the bot RPC: probing `/` (which refreshes the
+          # guild list) timed out whenever those were slow and got a healthy pod restarted.
+          # hooks.server.ts finishes start() (cache warm-up) before it listens, so the
+          # startupProbe gives boot up to 5 minutes before liveness takes over.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
-            initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 10
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
-            initialDelaySeconds: 15
             periodSeconds: 20
+            timeoutSeconds: 10
           resources:
             requests:
               cpu: 250m

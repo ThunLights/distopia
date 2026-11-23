@@ -7,5 +7,7 @@ Sentry.init({
 
   tracesSampleRate: 1.0,
 
+  ignoreTransactions: ["GET /healthz"],
+
   dataCollection: SENTRY_DATA_COLLECTION,
 });
