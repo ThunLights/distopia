@@ -1,11 +1,8 @@
 # Defense-in-depth alongside the SEARCHENGINE_RPC_TOKEN bearer check
 # (src/presentation/searchengine/src/index.ts): the searchengine pod serves nothing public,
-# so its only ingress rule is "the app, bot and schedulemanager pods, on the rpc port" -- selecting the pod at
-# all switches it to default-deny for everything else. Mirrors
-# schedulemanager-networkpolicy.yaml, with the direction reversed (there distopia-app is the
-# server; here it is a client, alongside distopia-bot -- see
-# src/presentation/bot/src/server/search.ts, needed for its own guild-profile-editing
-# commands).
+# so its only ingress rule is "the app, bot and schedulemanager pods, on the rpc port" --
+# selecting the pod at all switches it to default-deny for everything else. distopia-bot needs
+# it for its own guild-profile-editing commands, distopia-schedulemanager to re-index.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

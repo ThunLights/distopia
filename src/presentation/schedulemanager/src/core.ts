@@ -11,7 +11,7 @@ if (!env.DATABASE_URL || !env.REDIS_URL) {
   throw new Error("DATABASE_URL and REDIS_URL are required");
 }
 
-const redis = createRedisClient(env.REDIS_URL);
+export const redis = createRedisClient(env.REDIS_URL);
 
 export const discord = createRemoteDiscordClient(
   new Controller(genClient(), {

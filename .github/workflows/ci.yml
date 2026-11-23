@@ -33,16 +33,12 @@ env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   REDIS_URL: redis://distopia-redis:6379
 
-  # Internal schedulemanager<->web RPC auth -- self-contained to this one CI container (the
+  # Internal web<->searchengine RPC auth -- self-contained to this one CI container (the
   # "Setup" composite action's `printenv > .env` step is what makes vite preview's
   # hooks.server.ts see these), never a real secret, so a literal value is fine here the same
-  # way REDIS_URL above is.
-  SCHEDULEMANAGER_RPC_PORT: "8081"
-  SCHEDULEMANAGER_RPC_TOKEN: ci-schedulemanager-rpc-token
-
-  # Same deal for the web<->searchengine RPC (direction reversed: the searchengine process
-  # serves the port, vite preview's search client (app-core's remote.ts) calls it -- playwright.config.ts
-  # starts that process alongside `vite preview`).
+  # way REDIS_URL above is. The searchengine process serves the port and vite preview's
+  # search client (app-core's remote.ts) calls it; playwright.config.ts starts that process
+  # alongside `vite preview`.
   SEARCHENGINE_RPC_PORT: "8082"
   SEARCHENGINE_RPC_TOKEN: ci-searchengine-rpc-token
   SEARCHENGINE_RPC_URL: http://localhost:8082

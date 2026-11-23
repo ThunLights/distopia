@@ -38,6 +38,7 @@ export type RedisClient = {
   hget(key: string, field: string): Promise<string | null>;
   hgetall(key: string): Promise<Record<string, string>>;
   hdel(key: string, field: string): Promise<number>;
+  publish(channel: string, message: string): Promise<number>;
 };
 
 // ioredis (not Bun's own native RedisClient) on purpose -- Bun's client only resolves under
@@ -62,4 +63,23 @@ export function createRedisClient(url: string): RedisClient {
   // methods) -- this only replaces the noisy default log, it doesn't swallow the failure.
   client.on("error", (error) => console.error("[redis] connection error", error));
   return client;
+}
+
+/**
+ * Calls `onMessage` for every message published to `channel`. A subscribed connection can't
+ * run other commands, so this opens its own; ioredis re-subscribes after a reconnect.
+ */
+export async function subscribeRedis(
+  url: string,
+  channel: string,
+  onMessage: (message: string) => void,
+): Promise<void> {
+  const client = new Redis(url);
+  client.on("error", (error) => console.error("[redis] subscriber connection error", error));
+  client.on("message", (received: string, message: string) => {
+    if (received === channel) {
+      onMessage(message);
+    }
+  });
+  await client.subscribe(channel);
 }

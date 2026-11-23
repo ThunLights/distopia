@@ -1,8 +1,7 @@
 # presentation-schedulemanager: runs every cron job itself, against the database and Redis
-# directly and Discord through distopia-bot's RPC (as distopia-app does). Its only call into
-# distopia-app is RefreshCaches after the 20-minute jobs, for the read caches that live in
-# that pod's memory (see src/presentation/web/src/lib/server/schedulerRpcServer.ts). It never
-# receives inbound traffic itself, so it has no Service of its own.
+# directly and Discord/search through distopia-bot's and distopia-searchengine's RPCs (as
+# distopia-app does). It never calls distopia-app, and never receives inbound traffic itself,
+# so it has no Service of its own.
 #
 # replicas stays at 1 (see k8s/README.md): a second replica would run every job twice. Recreate (not
 # RollingUpdate) for the same reason -- RollingUpdate's maxSurge:1 would let the new pod
@@ -60,16 +59,6 @@ spec:
                 secretKeyRef:
                   name: distopia-db-credentials
                   key: url
-            # distopia-app:8081 (in-cluster DNS, matching distopia-config's
-            # SCHEDULEMANAGER_RPC_PORT + service.yaml's `rpc` port) -- update together if
-            # either port changes.
-            - name: SCHEDULEMANAGER_RPC_URL
-              value: "http://distopia-app:8081"
-            - name: SCHEDULEMANAGER_RPC_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: distopia-env
-                  key: SCHEDULEMANAGER_RPC_TOKEN
           resources:
             requests:
               cpu: 50m

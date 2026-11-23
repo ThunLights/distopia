@@ -1,35 +1,19 @@
-import { createClient } from "@connectrpc/connect";
-import { createConnectTransport } from "@connectrpc/connect-node";
+import { WEB_CACHE_REFRESH_CHANNEL } from "app-core/remote";
 import { features } from "app-feature-loader/schedule";
 import { ScheduleTaskManager } from "app-schedule";
 import { mergeScheduleFeatures } from "app-schedule/feature";
-import { createBearerAuthInterceptor, SchedulerService } from "infra-rpc";
 import { page as levelRatePage } from "presentation-bot-kit/page/Ranking/Level";
 import { page as activeRatePage } from "presentation-bot-kit/page/Ranking/Rate";
 import { page as userBumpPage } from "presentation-bot-kit/page/Ranking/UserBump";
 
-import { core, discord } from "./core";
+import { core, discord, redis } from "./core";
 
 const {
-  SCHEDULEMANAGER_RPC_URL,
-  SCHEDULEMANAGER_RPC_TOKEN,
   PUBLIC_HOME_SERVER_ID,
   PUBLIC_SPECIAL_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_BOARD_OF_DIRECTORS_ROLE_ID,
   PUBLIC_SUB_BOARD_OF_DIRECTORS_ROLE_ID,
 } = process.env;
-if (!SCHEDULEMANAGER_RPC_URL || !SCHEDULEMANAGER_RPC_TOKEN) {
-  throw new Error("SCHEDULEMANAGER_RPC_URL and SCHEDULEMANAGER_RPC_TOKEN are required");
-}
-
-const web = createClient(
-  SchedulerService,
-  createConnectTransport({
-    baseUrl: SCHEDULEMANAGER_RPC_URL,
-    httpVersion: "1.1",
-    interceptors: [createBearerAuthInterceptor(SCHEDULEMANAGER_RPC_TOKEN)],
-  }),
-);
 
 async function updatePanels() {
   for (const panel of await core.panel.findAll()) {
@@ -87,7 +71,7 @@ await manager.add(
     await core.record.update();
     await updatePanels();
     await core.user.setActivity();
-    await web.refreshCaches({});
+    await redis.publish(WEB_CACHE_REFRESH_CHANNEL, "");
   }),
   { noOverlap: true },
 );

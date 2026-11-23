@@ -865,15 +865,12 @@
     "src/presentation/schedulemanager": {
       "name": "presentation-schedulemanager",
       "dependencies": {
-        "@connectrpc/connect": "catalog:",
-        "@connectrpc/connect-node": "catalog:",
         "app-core": "workspace:*",
         "app-feature-loader": "workspace:*",
         "app-schedule": "workspace:*",
         "infra-database": "workspace:*",
         "infra-discord": "workspace:*",
         "infra-redis": "workspace:*",
-        "infra-rpc": "workspace:*",
         "node-cron": "4.6.0",
         "presentation-bot-kit": "workspace:*",
       },

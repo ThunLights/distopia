@@ -36,6 +36,10 @@ import type { SearchEngineClient } from "repo-search";
 
 import type { AppState } from "./AppState";
 
+// Published by presentation-schedulemanager after its 20-minute jobs; every web pod refreshes
+// the read caches it keeps in its own memory (ranking, root page, friends) on receipt.
+export const WEB_CACHE_REFRESH_CHANNEL = "web:cache-refresh";
+
 type RpcTarget = { url: string | undefined; token: string | undefined };
 
 // Connect applies no deadline of its own: without one, a peer that accepts the connection but
