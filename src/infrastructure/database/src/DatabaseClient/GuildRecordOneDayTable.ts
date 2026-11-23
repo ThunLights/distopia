@@ -1,8 +1,10 @@
+import { Prisma } from "../prisma-client/client";
 import type {
   GuildRecordOneDayUpdateInput,
   GuildRecordOneDayUpsertInput,
 } from "../types/GuildRecordOneDay";
 import { Base } from "./Base";
+import { buildBulkUpserts } from "./bulkUpsert";
 
 export class GuildRecordOneDayTable extends Base {
   public async find(guildId: string, date: Date) {
@@ -36,21 +38,25 @@ export class GuildRecordOneDayTable extends Base {
     });
   }
 
-  public async upsertAll(inputs: GuildRecordOneDayUpsertInput[]) {
-    // Sort by the unique key so concurrent batches always acquire row locks in
-    // the same order, avoiding Postgres deadlocks (40P01) between overlapping
-    // cron jobs that upsert overlapping guildId/date sets.
-    const sorted = [...inputs].sort(
-      (a, b) => a.guildId.localeCompare(b.guildId) || a.date.getTime() - b.date.getTime(),
-    );
-    return await this.prisma.$transaction(
-      sorted.map((value) =>
-        this.prisma.guildRecordOneDay.upsert({
-          where: { guildId_date: { guildId: value.guildId, date: value.date } },
-          update: value,
-          create: value,
-        }),
-      ),
+  public async upsertAll(inputs: GuildRecordOneDayUpsertInput[]): Promise<void> {
+    await this.executeAll(
+      buildBulkUpserts({
+        table: "GuildRecordOneDay",
+        keys: ["guildId", "date"],
+        columns: [
+          "guildId",
+          "date",
+          "vcMembers",
+          "newMembers",
+          "newMessages",
+          "vcMemberUpperTwo",
+          "memberCount",
+          "activeRate",
+          "level",
+          "point",
+        ],
+        rows: inputs,
+      }),
     );
   }
 
@@ -63,27 +69,26 @@ export class GuildRecordOneDayTable extends Base {
       level: bigint;
       point: bigint;
     }[],
-  ) {
-    // Sort by the unique key so concurrent batches always acquire row locks in
-    // the same order, avoiding Postgres deadlocks (40P01) between overlapping
-    // cron jobs. The GREATEST() comparison happens atomically in the DB on
-    // conflict, so overlapping ActiveRate.update() runs can never overwrite a
-    // larger value already recorded for the day with a smaller/stale one.
-    const sorted = [...inputs].sort(
-      (a, b) => a.guildId.localeCompare(b.guildId) || a.date.getTime() - b.date.getTime(),
-    );
-    return await this.prisma.$transaction(
-      sorted.map(
-        ({ guildId, date, memberCount, activeRate, level, point }) => this.prisma.$executeRaw`
-          INSERT INTO "GuildRecordOneDay" ("guildId", "date", "memberCount", "activeRate", "level", "point")
-          VALUES (${guildId}, ${date}, ${memberCount}, ${activeRate}, ${level}, ${point})
-          ON CONFLICT ("guildId", "date") DO UPDATE SET
-            "memberCount" = GREATEST("GuildRecordOneDay"."memberCount", EXCLUDED."memberCount"),
-            "activeRate" = GREATEST("GuildRecordOneDay"."activeRate", EXCLUDED."activeRate"),
-            "level" = GREATEST("GuildRecordOneDay"."level", EXCLUDED."level"),
-            "point" = GREATEST("GuildRecordOneDay"."point", EXCLUDED."point")
-        `,
-      ),
+  ): Promise<void> {
+    // GREATEST() runs atomically in the DB on conflict, so overlapping ActiveRate.update() runs
+    // can never overwrite a larger value already recorded for the day with a smaller/stale one.
+    const max = <V extends number | bigint>(a: V, b: V) => (a > b ? a : b);
+    await this.executeAll(
+      buildBulkUpserts({
+        table: "GuildRecordOneDay",
+        keys: ["guildId", "date"],
+        columns: ["guildId", "date", "memberCount", "activeRate", "level", "point"],
+        rows: inputs,
+        onConflict: (column) =>
+          Prisma.sql`GREATEST(${Prisma.raw(`"GuildRecordOneDay"."${column}"`)}, ${Prisma.raw(`EXCLUDED."${column}"`)})`,
+        merge: (a, b) => ({
+          ...a,
+          memberCount: max(a.memberCount, b.memberCount),
+          activeRate: max(a.activeRate, b.activeRate),
+          level: max(a.level, b.level),
+          point: max(a.point, b.point),
+        }),
+      }),
     );
   }
 
@@ -109,46 +114,22 @@ export class GuildRecordOneDayTable extends Base {
     });
   }
 
-  public async upsertVcMembersAll(inputs: { guildId: string; vcMember: string }[], date: Date) {
-    const query: GuildRecordOneDayUpsertInput[] = [];
-    const records = new Map(
-      (await this.prisma.guildRecordOneDay.findMany({ where: { date } })).map((value) => [
-        value.guildId,
-        value,
-      ]),
-    );
-
-    for (const input of inputs) {
-      const record = records.get(input.guildId);
-      const vcMembers = record
-        ? [...new Set(record.vcMembers).add(input.vcMember)]
-        : [input.vcMember];
-      if (!(record && record.vcMembers.length === vcMembers.length)) {
-        query.push({
-          guildId: input.guildId,
-          date,
-          vcMembers,
-        });
-      }
-    }
-
-    // Sort by guildId so concurrent batches always acquire row locks in the
-    // same order, avoiding Postgres deadlocks (40P01) between overlapping
-    // cron jobs.
-    query.sort((a, b) => a.guildId.localeCompare(b.guildId));
-
-    return await this.prisma.$transaction(
-      query.map(({ guildId, date, vcMembers }) =>
-        this.prisma.guildRecordOneDay.upsert({
-          where: { guildId_date: { guildId, date } },
-          update: {
-            vcMembers: {
-              set: vcMembers,
-            },
-          },
-          create: { guildId, date, vcMembers },
-        }),
-      ),
+  public async upsertVcMembersAll(
+    inputs: { guildId: string; vcMember: string }[],
+    date: Date,
+  ): Promise<void> {
+    // Union in the DB instead of read-modify-write, so members seen by a concurrent writer (or
+    // several members of one guild in the same batch) aren't overwritten.
+    await this.executeAll(
+      buildBulkUpserts({
+        table: "GuildRecordOneDay",
+        keys: ["guildId", "date"],
+        columns: ["guildId", "date", "vcMembers"],
+        rows: inputs.map(({ guildId, vcMember }) => ({ guildId, date, vcMembers: [vcMember] })),
+        onConflict: () =>
+          Prisma.sql`ARRAY(SELECT DISTINCT unnest("GuildRecordOneDay"."vcMembers" || EXCLUDED."vcMembers"))`,
+        merge: (a, b) => ({ ...a, vcMembers: [...new Set([...a.vcMembers, ...b.vcMembers])] }),
+      }),
     );
   }
 
@@ -186,23 +167,21 @@ export class GuildRecordOneDayTable extends Base {
     });
   }
 
-  public async upsertVcMemberUpperTwoAll(guildIds: string[], date: Date, num: number = 1) {
-    // Sort by guildId so concurrent batches always acquire row locks in the
-    // same order, avoiding Postgres deadlocks (40P01) between overlapping
-    // cron jobs.
-    const sortedGuildIds = [...guildIds].sort((a, b) => a.localeCompare(b));
-    return await this.prisma.$transaction(
-      sortedGuildIds.map((guildId) =>
-        this.prisma.guildRecordOneDay.upsert({
-          where: { guildId_date: { guildId, date } },
-          update: {
-            vcMemberUpperTwo: {
-              increment: num,
-            },
-          },
-          create: { guildId, date, vcMemberUpperTwo: num },
-        }),
-      ),
+  public async upsertVcMemberUpperTwoAll(
+    guildIds: string[],
+    date: Date,
+    num: number = 1,
+  ): Promise<void> {
+    await this.executeAll(
+      buildBulkUpserts({
+        table: "GuildRecordOneDay",
+        keys: ["guildId", "date"],
+        columns: ["guildId", "date", "vcMemberUpperTwo"],
+        rows: guildIds.map((guildId) => ({ guildId, date, vcMemberUpperTwo: num })),
+        onConflict: () =>
+          Prisma.sql`"GuildRecordOneDay"."vcMemberUpperTwo" + EXCLUDED."vcMemberUpperTwo"`,
+        merge: (a, b) => ({ ...a, vcMemberUpperTwo: a.vcMemberUpperTwo + b.vcMemberUpperTwo }),
+      }),
     );
   }
 

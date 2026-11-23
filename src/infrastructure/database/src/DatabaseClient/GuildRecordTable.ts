@@ -9,6 +9,7 @@ import type {
   GuildRecordUpsertInput,
 } from "../types/GuildRecord";
 import { Base } from "./Base";
+import { buildBulkUpserts } from "./bulkUpsert";
 
 export class GuildRecordTable extends Base {
   public async find(guildId: string): Promise<GuildRecord | null> {
@@ -36,20 +37,23 @@ export class GuildRecordTable extends Base {
     });
   }
 
-  public async upsertAll(input: GuildRecordUpsertInput[]) {
-    // Sort by guildId so concurrent batches always acquire row locks in the
-    // same order, avoiding Postgres deadlocks (40P01) between overlapping
-    // cron jobs (e.g. VoiceChannel.update, ActiveRate.update, Record.update
-    // all upsert into guildRecord independently).
-    const sorted = [...input].sort((a, b) => a.guildId.localeCompare(b.guildId));
-    return await this.prisma.$transaction(
-      sorted.map((value) =>
-        this.prisma.guildRecord.upsert({
-          where: { guildId: value.guildId },
-          update: value,
-          create: value,
-        }),
-      ),
+  public async upsertAll(input: GuildRecordUpsertInput[]): Promise<void> {
+    await this.executeAll(
+      buildBulkUpserts({
+        table: "GuildRecord",
+        keys: ["guildId"],
+        columns: [
+          "guildId",
+          "maxLevelRank",
+          "maxRateRank",
+          "maxRate",
+          "bumpCounter",
+          "activeRate",
+          "level",
+          "point",
+        ],
+        rows: input,
+      }),
     );
   }
 

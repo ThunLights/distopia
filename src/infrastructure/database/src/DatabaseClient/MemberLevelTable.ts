@@ -1,5 +1,6 @@
 import type { GuildMemberLevelRow, MemberLevelStanding, UserLevelRow } from "../types/MemberLevel";
 import { Base } from "./Base";
+import { buildBulkUpserts } from "./bulkUpsert";
 
 export class MemberLevelTable extends Base {
   public async findGuildRows(
@@ -19,29 +20,20 @@ export class MemberLevelTable extends Base {
     });
   }
 
-  // Sorted so overlapping batches take row locks in the same order (see
-  // GuildRecordTable.upsertAll for the deadlock this avoids).
   public async saveAll(guildRows: GuildMemberLevelRow[], userRows: UserLevelRow[]): Promise<void> {
-    const guilds = [...guildRows].sort(
-      (a, b) => a.guildId.localeCompare(b.guildId) || a.userId.localeCompare(b.userId),
-    );
-    const users = [...userRows].sort((a, b) => a.userId.localeCompare(b.userId));
-
-    await this.prisma.$transaction([
-      ...guilds.map((row) =>
-        this.prisma.guildMemberLevel.upsert({
-          where: { guildId_userId: { guildId: row.guildId, userId: row.userId } },
-          update: { level: row.level, point: row.point },
-          create: row,
-        }),
-      ),
-      ...users.map((row) =>
-        this.prisma.user.upsert({
-          where: { userId: row.userId },
-          update: { level: row.level, point: row.point },
-          create: row,
-        }),
-      ),
+    await this.executeAll([
+      ...buildBulkUpserts({
+        table: "GuildMemberLevel",
+        keys: ["guildId", "userId"],
+        columns: ["guildId", "userId", "level", "point"],
+        rows: guildRows,
+      }),
+      ...buildBulkUpserts({
+        table: "User",
+        keys: ["userId"],
+        columns: ["userId", "level", "point"],
+        rows: userRows,
+      }),
     ]);
   }
 
