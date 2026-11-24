@@ -1,0 +1,16 @@
+(function(){try{var e=typeof window<`u`?window:typeof global<`u`?global:typeof globalThis<`u`?globalThis:typeof self<`u`?self:{};e.SENTRY_RELEASE={id:`2955eca6566e4fdea5265aac611f468d340dae9b`};var t=new e.Error().stack;t&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[t]=`3bb917cd-450f-4bd8-b194-2f0bd3f7f268`,e._sentryDebugIdIdentifier=`sentry-dbid-3bb917cd-450f-4bd8-b194-2f0bd3f7f268`)}catch{}})();import{n as e}from"./rolldown-runtime-XU_hY1si.js";import{$ as t,Cn as n,Dt as r,Gt as i,Ht as a,J as o,Lt as s,Vt as c,Wt as l,_t as u,an as d,en as f,gn as p,ht as m,in as h,lt as g,t as _,v}from"./client-BZSGJn2m.js";import{n as y,t as b}from"./MarkDown-ul_D85o9.js";import{i as x,n as S}from"./constant-74Q7ubA7.js";import{i as C,n as w,r as T,t as E}from"./create-runtime-stories-oWXspSh-.js";import{n as D,t as O}from"./Block-6yIFabUL.js";import{n as k,t as A}from"./Meta-B2aPIAdm.js";import{n as j,t as M}from"./Title-dlyDW_vk.js";function N(e,n){d(n,!0);var r=F(),a=c(r),o=l(a),u=i(a,2),f=c(u),_=l(f,!0),y=i(f,2),b=e=>{var t=P(),r=c(t),i=l(r,!0);p(t),s(()=>{v(r,`href`,n.supporter.invite),g(i,n.supporter.invite)}),m(e,t)};t(y,e=>{n.supporter.invite&&e(b)}),p(u),p(r),s(()=>{v(o,`src`,n.supporter.icon),g(_,n.supporter.name)}),m(e,r),h()}var P,F;function I(){return(I=e((()=>{n(),_(),P=u(`<p><a rel="external"> </a></p>`),F=u(`<div class="supporter svelte-86u3rm"><div><img class="icon svelte-86u3rm" alt=""/></div> <div><p> </p> <!></div></div>`),N.__docgen={data:[{name:`supporter`,visibility:`public`,keywords:[{name:`required`,description:``}],kind:`let`,type:{kind:`type`,type:`object`,text:`Supporter`},static:!1,readonly:!1}],name:`Content.svelte`}})))()}var L;function R(){return(R=e((()=>{L=`# 支援団体って何をするの?
+
+- 新しい機能の事前テストやデバッグなどへの協力
+- Distopiaの新バージョンリリース時にサーバーでの宣伝
+- 新機能の提案や既存機能の改善案の提出
+
+## どうやったら支援団体になれるの?
+
+サーバーのメンバー数などが比較的多く、アクティブに活動をされているサーバーが支援団体に入ることが出来ます。
+
+応募サーバーがDistopiaの支援団体に適しているかどうかはDistopia運営が実際にサーバーに赴き判断させていただきます。
+
+判断基準はサーバーメンバー数、アクティブ率、サーバーコンセプト、民度、などです。
+
+支援団体になりたいサーバーがありましたら[公式Discordサーバー](DISCORD_INVITE_LINK)にて問い合わせお願いします。
+`})))()}function z(e){b(e,{get content(){return L}})}function B(){return(B=e((()=>{n(),_(),y(),R(),z.__docgen={data:[],name:`Explain.svelte`}})))()}function V(e,t){d(t,!0);var n=U(),s=a(n);{let e=f(()=>`サポートサーバーに関する説明です。支援団体等が記載されています。`);A(s,{title:`Supporter`,get description(){return r(e)}})}var c=i(s,2);O(c,{children:(e,t)=>{var n=H(),r=a(n);M(r,{content:`現在の支援団体一覧`});var s=i(r,2);o(s,16,()=>x,e=>e,(e,t)=>{N(e,{get supporter(){return t}})}),m(e,n)},$$slots:{default:!0}});var l=i(c,2);O(l,{children:(e,t)=>{z(e,{})},$$slots:{default:!0}}),m(e,n),h()}var H,U;function W(){return(W=e((()=>{n(),_(),D(),k(),I(),B(),j(),S(),H=u(`<!> <!>`,1),U=u(`<!> <!> <!>`,1),V.__docgen={data:[],name:`+page.svelte`}})))()}function G(e,t){d(t,!0),q(e,{name:`支援団体一覧`,parameters:{__svelteCsf:{rawCode:`<Page {...args} />`}}}),h()}var K,q,J,Y,X;function Z(){return(Z=e((()=>{n(),W(),C(),_(),w(),K={title:`Pages/Supporter`,component:V},{Story:q}=T(K),G.__docgen={data:[],name:`Supporter.stories.svelte`},J=E(G,K),Y=[`支援団体一覧`],X={...J.支援団体一覧,tags:[`svelte-csf-v5`]}})))()}Z();export{Y as __namedExportsOrder,K as default,X as 支援団体一覧};
