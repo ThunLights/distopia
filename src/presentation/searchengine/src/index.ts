@@ -1,3 +1,4 @@
+import "infra-sentry";
 import { createServer } from "node:http";
 
 import { connectNodeAdapter } from "@connectrpc/connect-node";

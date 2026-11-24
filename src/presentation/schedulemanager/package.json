@@ -22,6 +22,7 @@
     "infra-database": "workspace:*",
     "infra-discord": "workspace:*",
     "infra-redis": "workspace:*",
+    "infra-sentry": "workspace:*",
     "node-cron": "4.6.0",
     "presentation-bot-kit": "workspace:*"
   },

@@ -31,6 +31,7 @@
     "infra-rankcard": "workspace:*",
     "infra-redis": "workspace:*",
     "infra-rpc": "workspace:*",
+    "infra-sentry": "workspace:*",
     "presentation-bot-kit": "workspace:*",
     "repo-redis": "workspace:*",
     "repo-search": "workspace:*"

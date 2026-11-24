@@ -62,6 +62,12 @@ spec:
                 secretKeyRef:
                   name: distopia-env
                   key: SEARCHENGINE_RPC_TOKEN
+            - name: PUBLIC_SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: distopia-env
+                  key: PUBLIC_SENTRY_DSN
+                  optional: true
           resources:
             requests:
               cpu: 100m
