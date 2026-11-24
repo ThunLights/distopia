@@ -21,4 +21,15 @@ Sentry.init({
     queues: false,
     graphQL: { document: false, variables: false },
   },
+  // CaptureConsole ships the raw console arguments as `extra.arguments`, and normalizing an
+  // Error there keeps its own properties -- e.g. DiscordAPIError's `url`, which embeds the
+  // interaction token, and `requestBody`. Keep only the string labels (the "[feature] ...
+  // failed" context); the exception itself still carries message and stack.
+  beforeSend(event) {
+    const args = event.extra?.arguments;
+    if (Array.isArray(args)) {
+      event.extra!.arguments = args.filter((arg) => typeof arg === "string");
+    }
+    return event;
+  },
 });
