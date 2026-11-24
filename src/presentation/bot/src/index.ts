@@ -1,3 +1,4 @@
+import "infra-sentry";
 import { resetEphemeralMemory } from "repo-redis";
 
 import { handleClient } from "./client";

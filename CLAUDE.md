@@ -115,6 +115,7 @@ distopia/
 │       ├── js-obf/       # Shared JS obfuscation (wraps javascript-obfuscator)
 │       ├── rankcard/     # Rank card image rendering (@napi-rs/canvas)
 │       ├── rpc/          # Connect/Protobuf contracts shared across services
+│       ├── sentry/       # Sentry init for the Bun services (bot, schedulemanager, searchengine)
 │       ├── stripe/       # Stripe client factory
 │       ├── verify/       # Generic plugin-folder loader for presentation-verify
 │       └── voicevox/     # VOICEVOX TTS Quest API client
@@ -148,6 +149,7 @@ distopia/
 | `src/infrastructure/js-obf` | `infra-js-obf` |
 | `src/infrastructure/rankcard` | `infra-rankcard` |
 | `src/infrastructure/rpc` | `infra-rpc` |
+| `src/infrastructure/sentry` | `infra-sentry` |
 | `src/infrastructure/stripe` | `infra-stripe` |
 | `src/infrastructure/verify` | `infra-verify` |
 | `src/infrastructure/voicevox` | `infra-voicevox` |

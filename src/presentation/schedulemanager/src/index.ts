@@ -1,3 +1,4 @@
+import "infra-sentry";
 import { WEB_CACHE_REFRESH_CHANNEL } from "app-core/remote";
 import { features } from "app-feature-loader/schedule";
 import { ScheduleTaskManager } from "app-schedule";

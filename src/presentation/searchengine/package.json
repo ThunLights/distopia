@@ -19,6 +19,7 @@
     "@connectrpc/connect": "catalog:",
     "@connectrpc/connect-node": "catalog:",
     "infra-rpc": "workspace:*",
+    "infra-sentry": "workspace:*",
     "repo-search": "workspace:*"
   },
   "devDependencies": {

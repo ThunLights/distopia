@@ -757,6 +757,18 @@
         "typescript": "catalog:",
       },
     },
+    "src/infrastructure/sentry": {
+      "name": "infra-sentry",
+      "dependencies": {
+        "@sentry/bun": "11.4.0",
+      },
+      "devDependencies": {
+        "@types/node": "catalog:",
+      },
+      "peerDependencies": {
+        "typescript": "catalog:",
+      },
+    },
     "src/infrastructure/stripe": {
       "name": "infra-stripe",
       "dependencies": {
@@ -811,6 +823,7 @@
         "infra-rankcard": "workspace:*",
         "infra-redis": "workspace:*",
         "infra-rpc": "workspace:*",
+        "infra-sentry": "workspace:*",
         "presentation-bot-kit": "workspace:*",
         "repo-redis": "workspace:*",
         "repo-search": "workspace:*",
@@ -871,6 +884,7 @@
         "infra-database": "workspace:*",
         "infra-discord": "workspace:*",
         "infra-redis": "workspace:*",
+        "infra-sentry": "workspace:*",
         "node-cron": "4.6.0",
         "presentation-bot-kit": "workspace:*",
       },
@@ -890,6 +904,7 @@
         "@connectrpc/connect": "catalog:",
         "@connectrpc/connect-node": "catalog:",
         "infra-rpc": "workspace:*",
+        "infra-sentry": "workspace:*",
         "repo-search": "workspace:*",
       },
       "devDependencies": {
@@ -1862,6 +1877,8 @@
 
     "@sentry/browser-utils": ["@sentry/browser-utils@11.4.0", "", { "dependencies": { "@sentry/conventions": "^0.25.0", "@sentry/core": "11.4.0", "web-vitals": "^6.1.1" } }, "sha512-RPQefmLDslO8KsRiSuXNXcReAhJy0rEVi2pbez5HpEn2adipuhgebwDMulac6RYoIUa8liFcBueru0ancW1vhA=="],
 
+    "@sentry/bun": ["@sentry/bun@11.4.0", "", { "dependencies": { "@sentry/conventions": "^0.25.0", "@sentry/core": "11.4.0", "@sentry/node": "11.4.0", "@sentry/server-utils": "11.4.0" } }, "sha512-yRHk3f7ofNiKZuQQFOdNDLYgQ1mcaXw7w7DNDJ0sj1GVyTfFsnpG0d/EdLQ0HrSRMAuALF5KSSy/WScAPDNoLg=="],
+
     "@sentry/bundler-plugins": ["@sentry/bundler-plugins@11.4.0", "", { "dependencies": { "@sentry/core": "11.4.0", "dotenv": "^17.4.2", "glob": "^13.0.6", "magic-string": "~0.30.8 || ^1.0.0", "oxc-parser": "^0.152.0", "sentry": "^0.45.0", "supports-color": "^8.1.1" }, "peerDependencies": { "@babel/core": "^7.18.5", "rollup": ">=3.2.0", "webpack": ">=5.1.0" }, "optionalPeers": ["@babel/core", "rollup", "webpack"] }, "sha512-THgOMIaA0AMVF4TiCIbugK2jlLYCBIhRF0gclrj7Fte3RMZytkXeH8XeoaR6C6MJTyLCNkEOEccwX9Jj2xOc8g=="],
 
     "@sentry/cli": ["@sentry/cli@3.8.0", "", { "dependencies": { "progress": "^2.0.3", "proxy-from-env": "^1.1.0", "undici": "^6.22.0", "which": "^2.0.2" }, "optionalDependencies": { "@sentry/cli-darwin": "3.8.0", "@sentry/cli-linux-arm": "3.8.0", "@sentry/cli-linux-arm64": "3.8.0", "@sentry/cli-linux-i686": "3.8.0", "@sentry/cli-linux-x64": "3.8.0", "@sentry/cli-win32-arm64": "3.8.0", "@sentry/cli-win32-i686": "3.8.0", "@sentry/cli-win32-x64": "3.8.0" }, "bin": { "sentry-cli": "bin/sentry-cli" } }, "sha512-P/Zq0QEXnBbNX8oxd1maHKD06oAH5fxHsxt8QjEzi2J14w4hvwUi6FcMDf7eyuUkdQs8+OvOKeq/9pLuZxVVxQ=="],
@@ -2817,6 +2834,8 @@
     "infra-rpc": ["infra-rpc@workspace:src/infrastructure/rpc"],
 
     "infra-sakura": ["infra-sakura@workspace:src/infrastructure/sakura"],
+
+    "infra-sentry": ["infra-sentry@workspace:src/infrastructure/sentry"],
 
     "infra-stripe": ["infra-stripe@workspace:src/infrastructure/stripe"],
 
