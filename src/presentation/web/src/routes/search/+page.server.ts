@@ -12,5 +12,6 @@ export const load: PageServerLoad = async (e) => {
 
   return {
     word,
+    serverTag: e.url.searchParams.get("tag") === "1",
   };
 };

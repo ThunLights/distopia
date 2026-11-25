@@ -10,19 +10,31 @@
     PostBody,
     ResponseMethodPost,
   } from "#lib/shared/types/routes/api/guild/search.js";
+  import { untrack } from "svelte";
 
   const { data } = $props();
   const { user } = $derived(data);
   let word = $derived(data.word ?? "");
+  let serverTag = $derived(data.serverTag);
   let guilds = $state<Guild[]>([]);
+  let lastTerm = "";
 
   function search(term: string) {
     return async () => {
+      lastTerm = term;
+      // Untracked so the $effect below re-runs on `word` only; the checkbox re-searches itself.
+      const tagOnly = untrack(() => serverTag);
       const url = new URL(window.location.href);
       url.searchParams.set("w", encodeURIComponent(term));
+      if (tagOnly) {
+        url.searchParams.set("tag", "1");
+      } else {
+        url.searchParams.delete("tag");
+      }
       window.history.pushState({}, "", url);
 
-      if (!term.length) {
+      // Tag mode lists every tagged server when no term is given, like /guilds/tags.
+      if (!term.length && !tagOnly) {
         guilds = [];
         return;
       }
@@ -35,6 +47,7 @@
         body: JSON.stringify({
           term,
           type: "all",
+          serverTag: tagOnly,
         } satisfies PostBody),
       });
 
@@ -65,6 +78,10 @@
 
 <Block>
   <Search searchWord={word} func={search} />
+  <label class="option">
+    <input type="checkbox" bind:checked={serverTag} onchange={() => search(lastTerm)()} />
+    サーバータグのあるサーバーのみ
+  </label>
   <div class="guilds-count">
     <p>{guilds.length}件のサーバーがヒット</p>
   </div>
@@ -76,6 +93,13 @@
 </Block>
 
 <style>
+  .option {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    color: white;
+  }
   .guilds-count {
     text-align: right;
   }

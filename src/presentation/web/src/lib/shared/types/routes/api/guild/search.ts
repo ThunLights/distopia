@@ -4,6 +4,7 @@ import { z } from "zod";
 export const PostBodySchema = z.object({
   term: z.string().max(CHARACTER_LIMIT.searchTerm),
   type: z.union([z.literal("normal"), z.literal("nsfw"), z.literal("all")]),
+  serverTag: z.boolean().optional(),
 });
 
 export type PostBody = z.infer<typeof PostBodySchema>;
@@ -18,6 +19,8 @@ export type Guild = {
   boostCount: number;
   iconUrl: string | null;
   rank: number | null;
+  serverTag: string | null;
+  serverTagBadgeUrl: string | null;
 };
 
 export type ResponseMethodPost = {

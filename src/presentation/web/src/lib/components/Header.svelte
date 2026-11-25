@@ -51,6 +51,10 @@
       </div>
 
       <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
+        <a href={resolve("guilds/tags")}><p class="header-other-content">サーバータグ</p></a>
+      </div>
+
+      <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
         <a href={resolve("friends")}><p class="header-other-content">フレンド募集</p></a>
       </div>
 
