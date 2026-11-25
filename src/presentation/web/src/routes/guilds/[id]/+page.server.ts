@@ -36,6 +36,8 @@ export const load: PageServerLoad = async (e) => {
       boostCount: meta.serverBoostCount,
       tags: guild.tags,
       iconUrl: meta.iconUrl,
+      serverTag: meta.tag,
+      serverTagBadgeUrl: meta.tagBadgeUrl,
       activeRate: Number(record?.activeRate ?? 0n),
       activeRateRank: record?.rank.activeRate ?? undefined,
       level: record?.level ?? undefined,
