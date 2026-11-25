@@ -45,6 +45,8 @@ message BotGuild {
   optional string banner = 6;
   optional string icon_url = 7;
   optional string banner_url = 8;
+  optional string tag = 9;
+  optional string tag_badge_url = 10;
 }
 
 message User {

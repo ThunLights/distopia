@@ -8,4 +8,6 @@ export type GuildMetaData = {
   banner?: string | undefined;
   iconUrl?: string | undefined;
   bannerUrl?: string | undefined;
+  tag?: string | undefined;
+  tagBadgeUrl?: string | undefined;
 };

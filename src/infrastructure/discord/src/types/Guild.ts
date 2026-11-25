@@ -7,4 +7,6 @@ export type Guild = {
   banner?: string;
   iconUrl?: string;
   bannerUrl?: string;
+  tag?: string;
+  tagBadgeUrl?: string;
 };
