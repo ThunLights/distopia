@@ -208,3 +208,23 @@ describe("leave with an authorized session", () => {
     expect(connection.destroy).toHaveBeenCalled();
   });
 });
+
+describe("voice connection error logging", () => {
+  test("logs a handshake interrupted by a takeover as a warning, other errors as errors", async () => {
+    const connection = new FakeConnection();
+    mockEntersState({ reconnecting: false });
+    await joinWith("guild-error-logging", connection, fakeCore());
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    connection.emit("error", new Error("Cannot perform IP discovery - socket closed"));
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(error).not.toHaveBeenCalled();
+
+    connection.emit("error", new Error("something else"));
+    expect(error).toHaveBeenCalledTimes(1);
+
+    warn.mockRestore();
+    error.mockRestore();
+  });
+});

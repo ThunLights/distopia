@@ -7,6 +7,13 @@ import { client } from "./server/discord";
 import { startBotRpcServer } from "./server/rpc";
 
 process.on("uncaughtException", (error) => {
+  // @discordjs/voice's VoiceUDPSocket.destroy() doesn't cancel its first keep-alive
+  // (setImmediate), so a socket destroyed right after creation (a voice connection taken over
+  // mid-handshake) sends on a closed socket. Harmless; only dgram's voice socket can raise it.
+  if ((error as NodeJS.ErrnoException).code === "ERR_SOCKET_DGRAM_NOT_RUNNING") {
+    console.warn("[voice] keep-alive sent on a destroyed UDP socket", error);
+    return;
+  }
   console.error(error);
 });
 

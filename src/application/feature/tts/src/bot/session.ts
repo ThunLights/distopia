@@ -87,7 +87,16 @@ async function joinNow(
   const player = createAudioPlayer();
   connection.subscribe(player);
 
-  connection.on("error", (error) => console.error("[tts] voice connection error", error));
+  connection.on("error", (error) => {
+    // Another connection taking over this guild's voice session (the other pod during a rolling
+    // update, or a newer /tts join) closes the UDP socket mid-handshake. Expected, and the
+    // Disconnected handler below cleans up, so it isn't worth an error-level (Sentry) report.
+    if (error.message === "Cannot perform IP discovery - socket closed") {
+      console.warn("[tts] voice connection replaced during handshake", error);
+      return;
+    }
+    console.error("[tts] voice connection error", error);
+  });
   player.on("error", (error) => console.error("[tts] audio player error", error));
 
   // @discordjs/voice does not recover from every Disconnected state on its own. Without this
