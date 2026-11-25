@@ -133,4 +133,14 @@ describe("Search Engine", async () => {
     expect(hit).not.toHaveProperty("tagText");
     expect(hit?.guildId).toBe("66666666666");
   });
+
+  test("an unset nsfw filter returns both nsfw and non-nsfw guilds", async () => {
+    const engine = new SearchEngine();
+    const guild = { name: "雑談部屋", description: "", tags: [] };
+    await engine.upsert({ ...guild, guildId: "56565656565", nsfw: true });
+    await engine.upsert({ ...guild, guildId: "78787878787", nsfw: false });
+
+    expect((await engine.search("雑談")).count).toBe(2);
+    expect((await engine.search("雑談", { filter: { nsfw: true } })).count).toBe(1);
+  });
 });

@@ -69,7 +69,8 @@ export class SearchEngine {
     } = await search<typeof this.guildDb, GuildDocument>(this.guildDb, {
       term,
       properties: "*",
-      where: { nsfw },
+      // Orama reads a where key set to undefined as false, so only set the filters in use.
+      where: { ...(nsfw !== undefined && { nsfw }) },
       exact: alg?.includes("exact") ?? undefined,
       preflight: alg?.includes("preflight") ?? undefined,
     });
