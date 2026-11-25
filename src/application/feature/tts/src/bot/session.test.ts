@@ -22,7 +22,7 @@ import {
   VoiceConnectionStatus,
 } from "@discordjs/voice";
 
-import { getSession, isJoined, join, leave } from "./session";
+import { getSession, isJoined, join, leave, releaseAll } from "./session";
 
 class FakeConnection extends EventEmitter {
   public state: { status: VoiceConnectionStatus } = { status: VoiceConnectionStatus.Ready };
@@ -226,5 +226,30 @@ describe("voice connection error logging", () => {
 
     warn.mockRestore();
     error.mockRestore();
+  });
+});
+
+describe("releaseAll", () => {
+  test("waits for a join still connecting and tears it down, keeping the Redis pointer", async () => {
+    const guildId = "guild-release-pending";
+    const core = fakeCore();
+    const connection = new FakeConnection();
+    let reachReady = () => {};
+    vi.mocked(entersState).mockImplementation(
+      () => new Promise((resolve) => (reachReady = () => resolve(undefined as never))),
+    );
+
+    const joining = joinWith(guildId, connection, core);
+    await vi.waitFor(() => expect(entersState).toHaveBeenCalled());
+    let released = false;
+    const releasing = releaseAll().then(() => (released = true));
+    await Promise.resolve();
+    expect(released).toBe(false);
+
+    reachReady();
+    await Promise.all([joining, releasing]);
+    expect(isJoined(guildId)).toBe(false);
+    expect(connection.destroy).toHaveBeenCalled();
+    expect(core.tts.clearVoiceSession).not.toHaveBeenCalled();
   });
 });

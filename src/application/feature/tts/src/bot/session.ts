@@ -220,11 +220,18 @@ async function leaveNow(guildId: string, core: AppCore, expected?: TtsSession): 
   return true;
 }
 
+// Set once another process has taken over, so a restoreSessions still running here stops
+// rejoining guilds the new process now owns.
+let relinquished = false;
+
 // Drops every live connection for a process that is taking over (see handover.ts). The Redis
-// pointers stay, since the new process rejoins from them.
+// pointers stay, since the new process rejoins from them. Goes through every guild that has a
+// lifecycle lock, not just `sessions`, so a join still waiting for Ready finishes first and is
+// torn down too instead of going live after the release is acknowledged.
 export async function releaseAll(): Promise<void> {
+  relinquished = true;
   await Promise.all(
-    [...sessions.keys()].map((guildId) =>
+    [...lifecycleLocks.keys()].map((guildId) =>
       withLifecycleLock(guildId, async () => {
         const session = sessions.get(guildId);
         if (!session) {
@@ -270,6 +277,11 @@ export async function restoreSessions(client: Client<true>, core: AppCore): Prom
         continue;
       }
 
+      // Checked right before join() with no await in between: join() registers its lifecycle
+      // lock synchronously, so a releaseAll() either sees that lock or has already set this.
+      if (relinquished) {
+        return;
+      }
       const joined = await join(channel, textChannelId, core);
       if (!joined) {
         // Transient failure (e.g. a voice server hiccup) -- leave the pointer in place so
