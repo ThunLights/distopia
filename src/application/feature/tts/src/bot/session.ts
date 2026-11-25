@@ -220,6 +220,26 @@ async function leaveNow(guildId: string, core: AppCore, expected?: TtsSession): 
   return true;
 }
 
+// Drops every live connection for a process that is taking over (see handover.ts). The Redis
+// pointers stay, since the new process rejoins from them.
+export async function releaseAll(): Promise<void> {
+  await Promise.all(
+    [...sessions.keys()].map((guildId) =>
+      withLifecycleLock(guildId, async () => {
+        const session = sessions.get(guildId);
+        if (!session) {
+          return;
+        }
+        sessions.delete(guildId);
+        session.player.stop(true);
+        if (session.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+          session.connection.destroy();
+        }
+      }),
+    ),
+  );
+}
+
 // Called once from index.ts's `clientReady` handler to rejoin every guild's TTS session
 // that survived a restart -- a rolling update kills the old pod's process (and with it every
 // live voice connection), but the Redis-backed pointer (see Tts.saveVoiceSession) tells the

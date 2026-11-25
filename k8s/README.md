@@ -559,6 +559,12 @@ pod starts with no memory of who it should be connected to. `distopia-redis` clo
 - On `clientReady`, `restoreSessions` reads every persisted session from Redis and rejoins
   each one (re-checking Connect/Speak permissions, same as a fresh `/tts join`) — fire-and-
   forget, so a slow voice reconnect never blocks command registration.
+- Before that, `takeOverVoiceSessions` (`feature-tts`'s `src/bot/handover.ts`) publishes on
+  the `tts:handover` channel; every other running bot process (the old pod during the
+  overlap) drops its voice connections, keeping the Redis pointers, and replies, and the new
+  pod rejoins once they all have (or after 5 seconds). Without it, both pods rejoin the same
+  channels and take the voice session from each other until the old one exits. With no other
+  subscriber (one process, outside Kubernetes too) it rejoins at once.
 - No AUTH (see `k8s/redis/redis.yaml`'s own comment for why) — a PVC does persist the
   other repo-redis-backed state this Redis now also holds (rate limits, caches, sessions;
   see `src/domain/repository/redis`), but TTS voice session pointers specifically still
