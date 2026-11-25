@@ -30,6 +30,9 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-docs"),
   ],
   framework: getAbsolutePath("@storybook/sveltekit"),
+  // `storybook dev --host 0.0.0.0` with an empty list skips Host checks entirely (DNS rebinding).
+  // Loopback names are always allowed; a non-empty list turns the check back on.
+  core: { allowedHosts: ["localhost"] },
   viteFinal: async (config) => {
     return defineConfig({
       ...config,
