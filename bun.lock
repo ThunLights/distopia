@@ -435,6 +435,7 @@
         "app-core": "workspace:*",
         "discord.js": "catalog:",
         "ffmpeg-static": "catalog:",
+        "infra-redis": "workspace:*",
         "opusscript": "catalog:",
         "presentation-bot-kit": "workspace:*",
         "prism-media": "catalog:",

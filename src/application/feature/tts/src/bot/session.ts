@@ -87,7 +87,16 @@ async function joinNow(
   const player = createAudioPlayer();
   connection.subscribe(player);
 
-  connection.on("error", (error) => console.error("[tts] voice connection error", error));
+  connection.on("error", (error) => {
+    // Another connection taking over this guild's voice session (the other pod during a rolling
+    // update, or a newer /tts join) closes the UDP socket mid-handshake. Expected, and the
+    // Disconnected handler below cleans up, so it isn't worth an error-level (Sentry) report.
+    if (error.message === "Cannot perform IP discovery - socket closed") {
+      console.warn("[tts] voice connection replaced during handshake", error);
+      return;
+    }
+    console.error("[tts] voice connection error", error);
+  });
   player.on("error", (error) => console.error("[tts] audio player error", error));
 
   // @discordjs/voice does not recover from every Disconnected state on its own. Without this
@@ -211,6 +220,33 @@ async function leaveNow(guildId: string, core: AppCore, expected?: TtsSession): 
   return true;
 }
 
+// Set once another process has taken over, so a restoreSessions still running here stops
+// rejoining guilds the new process now owns.
+let relinquished = false;
+
+// Drops every live connection for a process that is taking over (see handover.ts). The Redis
+// pointers stay, since the new process rejoins from them. Goes through every guild that has a
+// lifecycle lock, not just `sessions`, so a join still waiting for Ready finishes first and is
+// torn down too instead of going live after the release is acknowledged.
+export async function releaseAll(): Promise<void> {
+  relinquished = true;
+  await Promise.all(
+    [...lifecycleLocks.keys()].map((guildId) =>
+      withLifecycleLock(guildId, async () => {
+        const session = sessions.get(guildId);
+        if (!session) {
+          return;
+        }
+        sessions.delete(guildId);
+        session.player.stop(true);
+        if (session.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+          session.connection.destroy();
+        }
+      }),
+    ),
+  );
+}
+
 // Called once from index.ts's `clientReady` handler to rejoin every guild's TTS session
 // that survived a restart -- a rolling update kills the old pod's process (and with it every
 // live voice connection), but the Redis-backed pointer (see Tts.saveVoiceSession) tells the
@@ -241,6 +277,11 @@ export async function restoreSessions(client: Client<true>, core: AppCore): Prom
         continue;
       }
 
+      // Checked right before join() with no await in between: join() registers its lifecycle
+      // lock synchronously, so a releaseAll() either sees that lock or has already set this.
+      if (relinquished) {
+        return;
+      }
       const joined = await join(channel, textChannelId, core);
       if (!joined) {
         // Transient failure (e.g. a voice server hiccup) -- leave the pointer in place so
