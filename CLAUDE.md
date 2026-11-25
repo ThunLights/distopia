@@ -194,7 +194,8 @@ docker compose exec app sudo bun run deploy-db    # Apply DB migrations
 ### Production Deploy
 
 Production runs on k3s and is deployed via GitOps (Argo CD + Argo CD Image Updater), not by
-hand. A push to `main` triggers `.github/workflows/deploy.yml` (GitHub Actions), which builds
+hand. A push to `main` runs `.github/workflows/deploy.yml` (GitHub Actions, called from `ci.yml`
+only after its kind E2E job passes), which builds
 and pushes the image to `ghcr.io/thunlights/distopia`; Argo CD Image Updater polls that
 registry directly and rolls out the new image via Argo CD. See `k8s/README.md` for the full
 pipeline and one-time cluster bootstrap steps.

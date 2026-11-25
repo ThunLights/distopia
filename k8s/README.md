@@ -312,7 +312,8 @@ for your install) — not required for correctness, just latency.
 
 ## Shipping a new build
 
-Every push to `main` runs `.github/workflows/deploy.yml`: migrate a throwaway database (just
+Every push to `main` runs `.github/workflows/deploy.yml` -- called from `ci.yml` only after
+its kind E2E job (`e2e-prod`) passes: migrate a throwaway database (just
 for `prisma generate --sql` to introspect at build time -- see the workflow's own comment),
 build the production image, and push `ghcr.io/thunlights/distopia:<run-number>-<short-sha>`
 (and `:latest`). That workflow never touches the cluster or writes back to git -- nothing
@@ -346,7 +347,7 @@ transformer patches every container referencing that image, so the `migrate` ini
 (see "Database migrations" below) always runs from the same new image as the main container.
 
 The tag's leading `<run-number>` (`github.run_number`, a 10-digit zero-padded counter GitHub
-itself assigns each run of `deploy.yml` in strict event-processing order — computed by the
+itself assigns each run of `ci.yml`, the caller, in strict event-processing order — computed by the
 workflow's `Compute image tags` step, not by anything build-related) is what makes this safe
 against two pushes landing on `main` close together, which spawn separate workflow runs with
 unordered build durations — an older commit's image can finish building (and get pushed)
