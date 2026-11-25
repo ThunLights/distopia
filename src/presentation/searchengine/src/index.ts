@@ -35,9 +35,9 @@ const handler = connectNodeAdapter({
         return {};
       },
 
-      async search({ term, nsfw, alg }) {
+      async search({ term, nsfw, alg, serverTag }) {
         return await engine.search(term, {
-          filter: { nsfw },
+          filter: { nsfw, serverTag },
           alg: alg.length > 0 ? (alg as SearchOptions["alg"]) : undefined,
         });
       },

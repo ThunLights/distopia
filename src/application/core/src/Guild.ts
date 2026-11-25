@@ -124,7 +124,7 @@ export class Guild extends Base {
     for (const guild of guilds) {
       const meta = await this.fetchMetaData(guild.guildId);
       if (meta) {
-        insertQuery.push({ ...guild, name: meta.name });
+        insertQuery.push({ ...guild, name: meta.name, serverTag: meta.tag });
       }
     }
 
@@ -306,6 +306,7 @@ export class Guild extends Base {
       await this.state.searchEngine.upsert({
         guildId: input.guildId,
         name: meta.name,
+        serverTag: meta.tag,
         description: input.description ?? "",
         tags: input.tags ?? [],
         nsfw: input.nsfw ?? false,
@@ -319,7 +320,7 @@ export class Guild extends Base {
     return await this.state.database.guild.find(guildId);
   }
 
-  public async findManySortedBumpTime(take: number) {
+  public async findManySortedBumpTime(take?: number) {
     const guilds = await this.state.database.guild.findAllSortedBumpTime(take);
     const guildsWithMeta = (
       await Promise.all(

@@ -134,6 +134,33 @@ describe("Search Engine", async () => {
     expect(hit?.guildId).toBe("66666666666");
   });
 
+  test("matches the server tag text and can limit hits to tagged guilds", async () => {
+    const engine = new SearchEngine();
+    await engine.upsert({
+      guildId: "12121212121",
+      name: "雑談部屋",
+      description: "",
+      nsfw: false,
+      tags: [],
+      serverTag: "ALPH",
+    });
+    await engine.upsert({
+      guildId: "34343434343",
+      name: "雑談広場",
+      description: "",
+      nsfw: false,
+      tags: [],
+    });
+
+    expect((await engine.search("ALPH")).hits.map(({ guildId }) => guildId)).toEqual([
+      "12121212121",
+    ]);
+    expect((await engine.search("雑談")).count).toBe(2);
+    const tagged = await engine.search("雑談", { filter: { serverTag: true } });
+    expect(tagged.hits.map(({ guildId }) => guildId)).toEqual(["12121212121"]);
+    expect(tagged.hits[0]).not.toHaveProperty("hasServerTag");
+  });
+
   test("an unset nsfw filter returns both nsfw and non-nsfw guilds", async () => {
     const engine = new SearchEngine();
     const guild = { name: "雑談部屋", description: "", tags: [] };

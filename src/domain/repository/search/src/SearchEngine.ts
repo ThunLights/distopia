@@ -12,10 +12,17 @@ import type { SearchResult } from "./types/SearchResult";
 // Tags are indexed as one joined string: Orama 3.1.18 corrupts a string[] field's average
 // length to NaN when it removes a document with 2+ entries, which poisons every later tag
 // score. The array itself is still stored (unindexed) so hits return it unchanged.
-type GuildDocument = GuildDBValue & { id: string; tagText: string };
+// The server tag joins tagText rather than getting its own string field: most guilds have none,
+// and an indexed field left empty skews Orama's length average for every other document.
+type GuildDocument = GuildDBValue & { id: string; tagText: string; hasServerTag: boolean };
 
 function toDocument(value: GuildDBValue): GuildDocument {
-  return { ...value, id: value.guildId, tagText: value.tags.join(" ") };
+  return {
+    ...value,
+    id: value.guildId,
+    tagText: [value.serverTag ?? "", ...value.tags].join(" ").trim(),
+    hasServerTag: Boolean(value.serverTag),
+  };
 }
 
 export class SearchEngine {
@@ -26,6 +33,7 @@ export class SearchEngine {
       description: "string",
       nsfw: "boolean",
       tagText: "string",
+      hasServerTag: "boolean",
     },
     components: {
       tokenizer: createTokenizer({
@@ -70,13 +78,19 @@ export class SearchEngine {
       term,
       properties: "*",
       // Orama reads a where key set to undefined as false, so only set the filters in use.
-      where: { ...(nsfw !== undefined && { nsfw }) },
+      where: {
+        ...(nsfw !== undefined && { nsfw }),
+        ...(options?.filter.serverTag && { hasServerTag: true }),
+      },
       exact: alg?.includes("exact") ?? undefined,
       preflight: alg?.includes("preflight") ?? undefined,
     });
 
     return {
-      hits: hits.map(({ document: { id: _id, tagText: _tagText, ...guild } }) => guild),
+      hits: hits.map(
+        ({ document: { id: _id, tagText: _tagText, hasServerTag: _hasServerTag, ...guild } }) =>
+          guild,
+      ),
       count: hitCount,
       time: elapsed.formatted,
     };

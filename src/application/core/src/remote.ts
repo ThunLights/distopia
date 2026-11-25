@@ -135,6 +135,7 @@ export function createRemoteSearchEngine(target: RpcTarget): SearchEngineClient 
       const { hits, count, time } = await rpc().search({
         term,
         nsfw: options?.filter.nsfw,
+        serverTag: options?.filter.serverTag,
         alg: options?.alg,
       });
       return { hits, count, time };
