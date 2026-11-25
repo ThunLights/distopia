@@ -12,7 +12,7 @@
     "oxfmt": "npm:oxfmt@0.74.0",
     "oxlint": "npm:oxlint@1.89.0",
     "tsdown": "npm:tsdown@0.23.0",
-    "zod": "npm:zod@4.6.5"
+    "zod": "npm:zod@4.6.7"
   },
   "exports": {
     ".": "./dist/index.mjs"
