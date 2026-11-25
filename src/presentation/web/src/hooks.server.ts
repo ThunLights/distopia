@@ -2,6 +2,7 @@ import { deleteToken, setToken, verifyToken } from "#lib/server/auth.js";
 import { core } from "#lib/server/core.js";
 import { redis } from "#lib/server/redis.js";
 import { uploadSourceMapsOnce } from "#lib/server/sourcemaps.js";
+import { refreshTaggedGuildIds } from "#lib/server/taggedGuilds.js";
 import { dev } from "$app/env";
 import { REDIS_URL } from "$app/env/private";
 import { dependencies } from "../package.json";
@@ -137,6 +138,7 @@ async function refreshCaches() {
     ["friend cache", () => core.friend.updateCache()],
     ["root page active guilds", () => core.guild.updateActiveGuilds()],
     ["ranking cache", () => core.ranking.cleanCache()],
+    ["tagged guilds", () => refreshTaggedGuildIds()],
   ] as const) {
     await refresh().catch((error) => console.error(`Failed to refresh ${name}:`, error));
   }

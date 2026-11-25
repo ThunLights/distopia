@@ -6,6 +6,7 @@
   import PrimaryButton from "../Button/PrimaryButton.svelte";
   import LinkTagsLayout from "../Layout/LinkTagsLayout.svelte";
   import Icon from "./Icon.svelte";
+  import ServerTag from "./ServerTag.svelte";
   import { omitLineSync } from "app-core/omit";
 
   type Props = {
@@ -19,10 +20,24 @@
     iconUrl: string | null;
     rank: number | null;
     user: UserAuth | null;
+    serverTag?: string | null;
+    serverTagBadgeUrl?: string | null;
   };
 
-  const { guildId, name, invite, description, tags, iconUrl, user, rank, boostCount, nsfw }: Props =
-    $props();
+  const {
+    guildId,
+    name,
+    invite,
+    description,
+    tags,
+    iconUrl,
+    user,
+    rank,
+    boostCount,
+    nsfw,
+    serverTag,
+    serverTagBadgeUrl,
+  }: Props = $props();
 
   async function join() {
     await joinGuild(guildId, name, invite, user !== null);
@@ -40,6 +55,9 @@
           <div>
             <p class="guild-name">
               {name}
+              {#if serverTag}
+                <ServerTag tag={serverTag} badgeUrl={serverTagBadgeUrl} />
+              {/if}
               {#if nsfw}
                 <small class="nsfw">NSFW!!</small>
               {/if}

@@ -26,6 +26,8 @@
     maxLevelRank,
     maxActiveRate,
     maxActiveRateRank,
+    serverTag,
+    serverTagBadgeUrl,
   } = $derived(guild);
 
   const reviewStars = $derived(data.reviews.map(({ star }) => star));
@@ -52,6 +54,8 @@
   {maxLevelRank}
   {user}
   {invite}
+  {serverTag}
+  {serverTagBadgeUrl}
 />
 <Graph data={recordOneDays} />
 <Evaluation reviews={reviewStars} />

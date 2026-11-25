@@ -11,6 +11,8 @@
     boostCount: number;
     tags: string[];
     iconUrl: string | undefined;
+    serverTag: string | undefined;
+    serverTagBadgeUrl: string | undefined;
     activeRate: number;
     activeRateRank: number | undefined;
     level: bigint | undefined;
@@ -47,6 +49,8 @@
     boostCount: 5,
     tags: ["ゲーム", "コミュニティ", "雑談"],
     iconUrl: undefined,
+    serverTag: "ALPH",
+    serverTagBadgeUrl: undefined,
     activeRate: 85,
     activeRateRank: 2,
     level: 25 as unknown as bigint,

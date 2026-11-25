@@ -19,6 +19,8 @@ message Guild {
   string description = 3;
   bool nsfw = 4;
   repeated string tags = 5;
+  // Discord server tag; empty when the guild has none.
+  string server_tag = 6;
 }
 
 message UpsertRequest {
@@ -43,6 +45,8 @@ message SearchRequest {
   optional bool nsfw = 2;
   // "exact" / "preflight" -- empty means neither.
   repeated string alg = 3;
+  // true limits hits to guilds with a server tag; unset/false means no filter.
+  optional bool server_tag = 4;
 }
 message SearchResponse {
   repeated Guild hits = 1;

@@ -11,11 +11,11 @@
   });
 </script>
 
-<Story name="検索結果あり" args={{ data: { word: "テスト", user: null } }} />
+<Story name="検索結果あり" args={{ data: { word: "テスト", user: null, serverTag: false } }} />
 
 <Story
   name="検索結果なし"
-  args={{ data: { word: "テスト", user: null } }}
+  args={{ data: { word: "テスト", user: null, serverTag: false } }}
   beforeEach={() => {
     const spy = spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
       if (String(input).includes("/api/guild/search")) {
@@ -37,4 +37,6 @@
   }}
 />
 
-<Story name="キーワードなし" args={{ data: { word: null, user: null } }} />
+<Story name="サーバータグ検索" args={{ data: { word: "テスト", user: null, serverTag: true } }} />
+
+<Story name="キーワードなし" args={{ data: { word: null, user: null, serverTag: false } }} />

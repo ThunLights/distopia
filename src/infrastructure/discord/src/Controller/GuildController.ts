@@ -56,6 +56,14 @@ export class GuildController extends Base {
 
   public async fetch(guildId: string): Promise<Guild | null> {
     const guild = this.client.guilds.cache.get(guildId);
+    // Discord exposes a server tag only on users who wear it, so read it off a cached member.
+    // ponytail: only members in the gateway cache are seen, so a tag nobody online wears is missed.
+    const tagWearer = guild?.members.cache.find(
+      ({ user }) =>
+        user.primaryGuild?.identityGuildId === guildId &&
+        user.primaryGuild.identityEnabled &&
+        user.primaryGuild.tag,
+    )?.user;
     return guild
       ? {
           id: guildId,
@@ -66,6 +74,8 @@ export class GuildController extends Base {
           banner: guild.banner ?? undefined,
           iconUrl: guild.iconURL() ?? undefined,
           bannerUrl: guild.bannerURL() ?? undefined,
+          tag: tagWearer?.primaryGuild?.tag ?? undefined,
+          tagBadgeUrl: tagWearer?.guildTagBadgeURL() ?? undefined,
         }
       : null;
   }

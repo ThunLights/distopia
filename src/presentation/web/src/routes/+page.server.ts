@@ -15,6 +15,8 @@ export const load: PageServerLoad = async () => {
       tags: guild.tags,
       iconUrl: meta.iconUrl,
       boostCount: meta.serverBoostCount,
+      serverTag: meta.tag ?? null,
+      serverTagBadgeUrl: meta.tagBadgeUrl ?? null,
       rank: core.record.getActiveRateRanking(guild.guildId) ?? null,
     })),
     activeGuilds: activeGuilds.map(({ guild, meta }) => ({
@@ -26,6 +28,8 @@ export const load: PageServerLoad = async () => {
       tags: guild.tags,
       iconUrl: meta.iconUrl,
       boostCount: meta.serverBoostCount,
+      serverTag: meta.tag ?? null,
+      serverTagBadgeUrl: meta.tagBadgeUrl ?? null,
       rank: core.record.getActiveRateRanking(guild.guildId) ?? null,
     })),
   };

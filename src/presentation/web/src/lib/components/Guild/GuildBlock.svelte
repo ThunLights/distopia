@@ -5,6 +5,7 @@
   import BlockTitle from "./BlockTitle.svelte";
   import Icon from "./Icon.svelte";
   import JoinButton from "./JoinButton.svelte";
+  import ServerTag from "./ServerTag.svelte";
 
   type Props = {
     guildId: string;
@@ -24,6 +25,8 @@
     maxLevelRank?: bigint;
     user: UserAuth | null;
     invite: string;
+    serverTag?: string;
+    serverTagBadgeUrl?: string;
   };
 
   const {
@@ -44,6 +47,8 @@
     maxLevelRank,
     user,
     invite,
+    serverTag,
+    serverTagBadgeUrl,
   }: Props = $props();
 </script>
 
@@ -55,6 +60,9 @@
     <div>
       <p class="guild-name">
         {name}
+        {#if serverTag}
+          <ServerTag tag={serverTag} badgeUrl={serverTagBadgeUrl} />
+        {/if}
         {#if nsfw}
           <small class="nsfw">NSFW!!</small>
         {/if}

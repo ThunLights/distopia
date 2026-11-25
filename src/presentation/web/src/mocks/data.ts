@@ -23,6 +23,8 @@ export const mockGuildCards: SearchGuild[] = [
     boostCount: 5,
     iconUrl: null,
     rank: 1,
+    serverTag: "ALPH",
+    serverTagBadgeUrl: null,
   },
   {
     guildId: "222222222222222222",
@@ -34,6 +36,8 @@ export const mockGuildCards: SearchGuild[] = [
     boostCount: 2,
     iconUrl: null,
     rank: 3,
+    serverTag: null,
+    serverTagBadgeUrl: null,
   },
   {
     guildId: "333333333333333333",
@@ -45,6 +49,8 @@ export const mockGuildCards: SearchGuild[] = [
     boostCount: 8,
     iconUrl: null,
     rank: 2,
+    serverTag: null,
+    serverTagBadgeUrl: null,
   },
   {
     guildId: "444444444444444444",
@@ -56,6 +62,8 @@ export const mockGuildCards: SearchGuild[] = [
     boostCount: 1,
     iconUrl: null,
     rank: null,
+    serverTag: null,
+    serverTagBadgeUrl: null,
   },
 ];
 
