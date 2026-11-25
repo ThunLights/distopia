@@ -336,3 +336,12 @@ jobs:
             sudo bun run build
             sudo bun run lint
             sudo bun run test
+
+  deploy:
+    name: Deploy (after kind E2E)
+    needs: e2e-prod
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/deploy.yml

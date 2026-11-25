@@ -9,10 +9,13 @@ name: Deploy
 # k8s/app/deployment.yaml's initContainer runs the real migration against the actual
 # production database right before the new Pod's main container starts. See
 # k8s/README.md's "Shipping a new build" for the full flow.
+#
+# A push to main doesn't trigger this directly: ci.yml calls it (workflow_call) only after
+# its kind E2E job passes, so a commit that breaks the real manifests is never shipped.
+# github.event_name/run_number are then the caller's (push / CI's counter), which is why the
+# push-gated steps below still match and the tags keep sorting in push order.
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
   pull_request:
   # Lets `gh workflow run deploy.yml --ref main` (see k8s/README.md's bootstrap section and
   # the `argo` skill) actually start a run -- GitHub refuses a manual dispatch on a workflow
