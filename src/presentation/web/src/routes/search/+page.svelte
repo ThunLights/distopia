@@ -18,11 +18,14 @@
   let serverTag = $derived(data.serverTag);
   let guilds = $state<Guild[]>([]);
   let lastTerm = "";
+  // Only the newest search may write `guilds`; an older response can resolve after it.
+  let generation = 0;
 
   function search(term: string) {
     return async () => {
       lastTerm = term;
-      // Untracked so the $effect below re-runs on `word` only; the checkbox re-searches itself.
+      const current = ++generation;
+      // Untracked so the $effect below re-runs on navigation only; the checkbox re-searches itself.
       const tagOnly = untrack(() => serverTag);
       const url = new URL(window.location.href);
       url.searchParams.set("w", encodeURIComponent(term));
@@ -53,17 +56,21 @@
 
       if (response.status === 200) {
         const res = (await response.json()) as ResponseMethodPost;
-        guilds = res.guilds;
+        if (current === generation) {
+          guilds = res.guilds;
+        }
       } else if (response.status === 400) {
         await parseErrRes(response);
       }
     };
   }
 
-  // Tag links navigate client-side (component isn't remounted), so onMount alone
-  // wouldn't re-fetch when `word` changes. React to it instead.
+  // Tag links navigate client-side (component isn't remounted), so onMount alone wouldn't
+  // re-fetch. Every navigation brings a new `data`, even when only `tag` changed, so search
+  // the URL's term and filter on each one.
   $effect(() => {
-    search(word)();
+    const term = data.word ?? "";
+    untrack(() => search(term)());
   });
 </script>
 

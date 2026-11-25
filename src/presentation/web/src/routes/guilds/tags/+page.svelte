@@ -3,13 +3,14 @@
   import CardLayout from "#lib/components/Layout/CardLayout.svelte";
   import Meta from "#lib/components/Meta.svelte";
   import Search from "#lib/components/Search.svelte";
+  import { resolve } from "$app/paths";
 
   const { data } = $props();
   const { guilds, user } = $derived(data);
 
   function search(term: string) {
     return () => {
-      location.href = `/search?w=${encodeURIComponent(term)}&tag=1`;
+      location.href = `${resolve("/search")}?w=${encodeURIComponent(term)}&tag=1`;
     };
   }
 </script>

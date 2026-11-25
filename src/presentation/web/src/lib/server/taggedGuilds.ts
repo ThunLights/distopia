@@ -62,5 +62,9 @@ export async function getTaggedGuilds(): Promise<Guild[]> {
       cached = null;
     });
   }
-  return await cached.guilds;
+  const guilds = await cached.guilds;
+  // Going private is saved by the bot process, which can't clear this cache, so recheck here.
+  // ponytail: one DB read per tagged guild per request; batch it if tagged guilds grow large.
+  const isPublic = await Promise.all(guilds.map(({ guildId }) => core.guild.isPublic(guildId)));
+  return guilds.filter((_, index) => isPublic[index]);
 }
