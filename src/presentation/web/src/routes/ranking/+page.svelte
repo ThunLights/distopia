@@ -4,6 +4,7 @@
   import Meta from "#lib/components/Meta.svelte";
   import Guild from "#lib/components/Ranking/Guild.svelte";
   import User from "#lib/components/Ranking/User.svelte";
+  import { setQuery } from "#lib/shared/query.js";
   import type {
     GuildRanking,
     ResponseMethodGet,
@@ -47,7 +48,7 @@
   <div class="menu">
     <p class="title">ランキング</p>
     <div class="search-type-changer">
-      <select bind:value={rankingType}>
+      <select value={rankingType} onchange={(e) => setQuery({ t: e.currentTarget.value })}>
         <option value="level">レベル</option>
         <option value="rate">アクティブレート</option>
         <option value="userlevel">ユーザーレベルランキング</option>

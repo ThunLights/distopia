@@ -5,72 +5,63 @@
   import CardLayout from "#lib/components/Layout/CardLayout.svelte";
   import Meta from "#lib/components/Meta.svelte";
   import Search from "#lib/components/Search.svelte";
+  import { setQuery } from "#lib/shared/query.js";
   import type {
     Guild,
     PostBody,
     ResponseMethodPost,
   } from "#lib/shared/types/routes/api/guild/search.js";
-  import { untrack } from "svelte";
 
   const { data } = $props();
   const { user } = $derived(data);
   let word = $derived(data.word ?? "");
-  let serverTag = $derived(data.serverTag);
   let guilds = $state<Guild[]>([]);
-  let lastTerm = "";
   // Only the newest search may write `guilds`; an older response can resolve after it.
   let generation = 0;
 
-  function search(term: string) {
-    return async () => {
-      lastTerm = term;
-      const current = ++generation;
-      // Untracked so the $effect below re-runs on navigation only; the checkbox re-searches itself.
-      const tagOnly = untrack(() => serverTag);
-      const url = new URL(window.location.href);
-      url.searchParams.set("w", encodeURIComponent(term));
-      if (tagOnly) {
-        url.searchParams.set("tag", "1");
-      } else {
-        url.searchParams.delete("tag");
-      }
-      window.history.pushState({}, "", url);
-
-      // Tag mode lists every tagged server when no term is given, like /guilds/tags.
-      if (!term.length && !tagOnly) {
-        guilds = [];
-        return;
-      }
-
-      const response = await fetch("/api/guild/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          term,
-          type: "all",
-          serverTag: tagOnly,
-        } satisfies PostBody),
-      });
-
-      if (response.status === 200) {
-        const res = (await response.json()) as ResponseMethodPost;
-        if (current === generation) {
-          guilds = res.guilds;
-        }
-      } else if (response.status === 400) {
-        await parseErrRes(response);
-      }
-    };
+  function navigate(term: string, tagOnly: boolean) {
+    return setQuery({ w: encodeURIComponent(term), tag: tagOnly ? "1" : null });
   }
 
-  // Tag links navigate client-side (component isn't remounted), so onMount alone wouldn't
-  // re-fetch. Every navigation brings a new `data`, even when only `tag` changed, so search
-  // the URL's term and filter on each one.
+  function search(term: string) {
+    return () => navigate(term, data.serverTag);
+  }
+
+  async function fetchGuilds(term: string, tagOnly: boolean) {
+    const current = ++generation;
+
+    // Tag mode lists every tagged server when no term is given, like /guilds/tags.
+    if (!term.length && !tagOnly) {
+      guilds = [];
+      return;
+    }
+
+    const response = await fetch("/api/guild/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        term,
+        type: "all",
+        serverTag: tagOnly,
+      } satisfies PostBody),
+    });
+
+    if (response.status === 200) {
+      const res = (await response.json()) as ResponseMethodPost;
+      if (current === generation) {
+        guilds = res.guilds;
+      }
+    } else if (response.status === 400) {
+      await parseErrRes(response);
+    }
+  }
+
+  // The URL is the single source of truth: searching, the checkbox, tag links and back/forward
+  // all navigate, and each navigation brings a new `data`.
   $effect(() => {
-    const term = data.word ?? "";
-    untrack(() => search(term)());
+    void fetchGuilds(data.word ?? "", data.serverTag);
   });
 </script>
 
@@ -86,7 +77,11 @@
 <Block>
   <Search searchWord={word} func={search} />
   <label class="option">
-    <input type="checkbox" bind:checked={serverTag} onchange={() => search(lastTerm)()} />
+    <input
+      type="checkbox"
+      checked={data.serverTag}
+      onchange={(e) => navigate(word, e.currentTarget.checked)}
+    />
     サーバータグのあるサーバーのみ
   </label>
   <div class="guilds-count">
