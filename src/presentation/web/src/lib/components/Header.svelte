@@ -149,7 +149,7 @@
     text-decoration: none;
   }
   .brand {
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 900;
     letter-spacing: -0.02em;
     user-select: none;
@@ -165,7 +165,7 @@
     padding: 8px 12px;
     border-radius: 6px;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
     color: rgb(207, 207, 207);
     transition: color 0.15s;
   }
@@ -194,7 +194,7 @@
     border-radius: 25px;
     background-color: #5865f2;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
     white-space: nowrap;
     transition: background-color 0.15s;
   }
@@ -220,7 +220,7 @@
   }
   .profile span {
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -333,6 +333,10 @@
     .brand {
       font-size: 22px;
       margin-right: auto;
+    }
+    .login,
+    .profile span {
+      font-size: 15px;
     }
     /* Header stays above the drawer so the toggle doubles as the close button. */
     header.menu-open {
