@@ -13,5 +13,5 @@ export function setQuery(params: Record<string, string | null>) {
   }
   // `url` is the current page's own (already resolved) URL; only the query changes.
   // eslint-disable-next-line svelte/no-navigation-without-resolve
-  return goto(url, { keepFocus: true, noScroll: true });
+  return goto(url, { reset: false });
 }

@@ -19,12 +19,20 @@
   // Only the newest search may write `guilds`; an older response can resolve after it.
   let generation = 0;
 
+  // The user's latest intent; ahead of `data` while a navigation is still pending.
+  let latest = { term: "", tagOnly: false };
+
   function navigate(term: string, tagOnly: boolean) {
+    latest = { term, tagOnly };
+    // goto to the committed URL reuses its load data, so the $effect wouldn't re-fetch.
+    if (term === word && tagOnly === data.serverTag) {
+      return fetchGuilds(term, tagOnly);
+    }
     return setQuery({ w: encodeURIComponent(term), tag: tagOnly ? "1" : null });
   }
 
   function search(term: string) {
-    return () => navigate(term, data.serverTag);
+    return () => navigate(term, latest.tagOnly);
   }
 
   async function fetchGuilds(term: string, tagOnly: boolean) {
@@ -61,7 +69,8 @@
   // The URL is the single source of truth: searching, the checkbox, tag links and back/forward
   // all navigate, and each navigation brings a new `data`.
   $effect(() => {
-    void fetchGuilds(data.word ?? "", data.serverTag);
+    latest = { term: data.word ?? "", tagOnly: data.serverTag };
+    void fetchGuilds(latest.term, latest.tagOnly);
   });
 </script>
 
@@ -80,7 +89,7 @@
     <input
       type="checkbox"
       checked={data.serverTag}
-      onchange={(e) => navigate(word, e.currentTarget.checked)}
+      onchange={(e) => navigate(latest.term, e.currentTarget.checked)}
     />
     サーバータグのあるサーバーのみ
   </label>
