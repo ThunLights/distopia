@@ -8,6 +8,7 @@
   import "@fontsource/inter/900.css";
   import "@fontsource/open-sans/800-italic.css";
   import { prefersReducedMotion } from "svelte/motion";
+  import { MediaQuery } from "svelte/reactivity";
   import { fade, fly } from "svelte/transition";
 
   type Props = {
@@ -35,6 +36,13 @@
   let open = $state(false);
   let menuButton = $state<HTMLButtonElement>();
   const duration = $derived(prefersReducedMotion.current ? 0 : 250);
+  // Must match the 840px breakpoint in <style>.
+  const mobile = new MediaQuery("max-width: 840px");
+
+  // Rotating/resizing to desktop hides the toggle; close so the scroll lock is released.
+  $effect(() => {
+    if (!mobile.current) open = false;
+  });
 
   // SSR renders resolve() as a relative path ("./ranking"), so compare resolved pathnames.
   function isCurrent(href: string) {
@@ -287,6 +295,7 @@
     background-color: rgb(0 0 0 / 50%);
   }
   .drawer {
+    overflow-y: auto;
     position: fixed;
     top: 0;
     bottom: 0;

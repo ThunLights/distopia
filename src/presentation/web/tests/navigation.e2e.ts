@@ -58,6 +58,18 @@ test("mobile menu opens a drawer, navigates, and closes", async ({ page }) => {
   await expect(drawer).toBeHidden();
 });
 
+test("mobile menu closes when the viewport widens to desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "メニューを開く" }).click();
+  const drawer = page.getByRole("navigation", { name: "メニュー" });
+  await expect(drawer).toBeVisible();
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(drawer).toBeHidden();
+  await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+});
+
 // ── Login flow ────────────────────────────────────────────────────────────────
 
 test("Login button initiates the Discord OAuth2 redirect", async ({ page }) => {
