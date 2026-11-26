@@ -36,7 +36,7 @@
   let open = $state(false);
   let menuButton = $state<HTMLButtonElement>();
   const duration = $derived(prefersReducedMotion.current ? 0 : 250);
-  // Must match the 840px breakpoint in <style>.
+  // Must match the 840px CSS breakpoint below.
   const mobile = new MediaQuery("max-width: 840px");
 
   // Rotating/resizing to desktop hides the toggle; close so the scroll lock is released.
