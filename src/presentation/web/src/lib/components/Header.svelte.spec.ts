@@ -1,7 +1,10 @@
 import Header from "./Header.svelte";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-svelte";
 import { page } from "vitest/browser";
+
+// Rendered outside SvelteKit's router, `page.url` is never populated.
+vi.mock("$app/state", () => ({ page: { url: new URL("http://localhost/") } }));
 
 describe("Header", () => {
   test("Login Button", async () => {

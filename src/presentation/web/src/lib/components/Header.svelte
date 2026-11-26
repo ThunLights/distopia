@@ -3,9 +3,13 @@
   import DiscordIcon from "#lib/assets/icon/discord.webp";
   import type { UserAuth } from "#lib/shared/types/UserAuth.js";
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import type { ResolvedPathname } from "$app/types";
   import "@fontsource/inter/900.css";
   import "@fontsource/open-sans/800-italic.css";
+  import { prefersReducedMotion } from "svelte/motion";
+  import { MediaQuery } from "svelte/reactivity";
+  import { fade, fly } from "svelte/transition";
 
   type Props = {
     title?: string;
@@ -21,232 +25,340 @@
     userData = null,
   }: Props = $props();
 
-  let showBagerContent = $state(false);
+  const links = [
+    { href: resolve("ranking"), label: "ランキング" },
+    { href: resolve("guilds/tags"), label: "サーバータグ" },
+    { href: resolve("friends"), label: "フレンド募集" },
+    { href: "https://docs.distopia.top", label: "ヘルプ", external: true },
+    { href: resolve("other"), label: "その他" },
+  ];
 
-  function bagerSwitcher() {
-    showBagerContent = !showBagerContent;
+  let open = $state(false);
+  let menuButton = $state<HTMLButtonElement>();
+  const duration = $derived(prefersReducedMotion.current ? 0 : 250);
+  // Must match the 840px CSS breakpoint below.
+  const mobile = new MediaQuery("max-width: 840px");
+
+  // Rotating/resizing to desktop hides the toggle; close so the scroll lock is released.
+  $effect(() => {
+    if (!mobile.current) open = false;
+  });
+
+  // SSR renders resolve() as a relative path ("./ranking"), so compare resolved pathnames.
+  function isCurrent(href: string) {
+    const target = new URL(href, page.url.href);
+    return target.origin === page.url.origin && page.url.pathname.startsWith(target.pathname);
   }
+
+  function close() {
+    open = false;
+  }
+
+  $effect(() => {
+    if (!open) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  });
 </script>
 
-<header>
-  <div>
-    <div class="bager">
-      <input
-        id="drawer_input"
-        class="drawer_hidden drawer-input-hidden"
-        type="checkbox"
-        onchange={bagerSwitcher}
-      />
-      <label for="drawer_input" class="drawer_open"><span></span></label>
-    </div>
-    <nav class="bager-content">
-      <div class="header-title"><a href={titleLink}><p>{title}</p></a></div>
+<svelte:window
+  onkeydown={(e) => {
+    if (open && e.key === "Escape") {
+      close();
+      menuButton?.focus();
+    }
+  }}
+/>
 
-      <div class="header-other" style="display: {showBagerContent ? 'block' : 'none'};">
-        <a href={resolve("/")}><p class="header-other-content">ホーム</p></a>
-      </div>
+<header class:menu-open={open}>
+  <button
+    bind:this={menuButton}
+    class="menu-button"
+    class:open
+    type="button"
+    aria-label={open ? "メニューを閉じる" : "メニューを開く"}
+    aria-expanded={open}
+    aria-controls="mobile-menu"
+    onclick={() => (open = !open)}
+  >
+    <span></span>
+  </button>
 
-      <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("ranking")}><p class="header-other-content">ランキング</p></a>
-      </div>
+  <a class="brand" href={titleLink}>{title}</a>
 
-      <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("guilds/tags")}><p class="header-other-content">サーバータグ</p></a>
-      </div>
+  <nav class="desktop-nav" aria-label="メイン">
+    {#each links as link (link.href)}
+      <a href={link.href} aria-current={isCurrent(link.href) ? "page" : undefined}>{link.label}</a>
+    {/each}
+  </nav>
 
-      <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("friends")}><p class="header-other-content">フレンド募集</p></a>
-      </div>
-
-      <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href="https://docs.distopia.top"><p class="header-other-content">ヘルプ</p></a>
-      </div>
-
-      <div class="header-other" style={showBagerContent ? "display: block;" : ""}>
-        <a href={resolve("other")}><p class="header-other-content">その他</p></a>
-      </div>
-    </nav>
-  </div>
   {#if loginBlock}
-    <div>
-      {#if userData === null}
-        <div class="discord-login">
-          <a href={resolve("login")} rel="external"
-            ><div class="login-block">
-              <p class="discord-login-content login-text-inline">Login</p>
-            </div></a
-          >
-        </div>
-      {:else}
-        <a href={resolve("user")}>
-          <div class="discord-profile">
-            <img src={userData.avatarUrl ?? DiscordIcon} alt="" />
-            <p class="discord-logined-content">{userData.username}</p>
-          </div>
-        </a>
-      {/if}
-    </div>
+    {#if userData === null}
+      <a class="login" href={resolve("login")} rel="external">Login</a>
+    {:else}
+      <a class="profile" href={resolve("user")}>
+        <img src={userData.avatarUrl ?? DiscordIcon} alt="" />
+        <span>{userData.username}</span>
+      </a>
+    {/if}
   {/if}
 </header>
 
+{#if open}
+  <button
+    class="backdrop"
+    type="button"
+    tabindex="-1"
+    aria-label="メニューを閉じる"
+    onclick={close}
+    transition:fade={{ duration }}
+  ></button>
+  <nav
+    id="mobile-menu"
+    class="drawer"
+    aria-label="メニュー"
+    transition:fly={{ x: -280, duration, opacity: 1 }}
+  >
+    <a
+      href={resolve("/")}
+      onclick={close}
+      aria-current={page.url.pathname === "/" ? "page" : undefined}>ホーム</a
+    >
+    {#each links as link (link.href)}
+      <a
+        href={link.href}
+        onclick={close}
+        aria-current={isCurrent(link.href) ? "page" : undefined}
+        rel={link.external ? "external" : undefined}>{link.label}</a
+      >
+    {/each}
+  </nav>
+{/if}
+
 <style>
-  #drawer_input:checked ~ .drawer_open span {
-    background: rgba(255, 255, 255, 0);
-  }
-  #drawer_input:checked ~ .drawer_open span::before {
-    bottom: 0;
-    transform: rotate(45deg);
-  }
-  #drawer_input:checked ~ .drawer_open span::after {
-    top: 0;
-    transform: rotate(-45deg);
-  }
-  .drawer_open {
-    display: flex;
-    height: 60px;
-    width: 60px;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    z-index: 100;
-    cursor: pointer;
-  }
-  .drawer_open span,
-  .drawer_open span:before,
-  .drawer_open span:after {
-    content: "";
-    display: block;
-    height: 3px;
-    width: 25px;
-    border-radius: 3px;
-    background: white;
-    transition: 0.5s;
-    position: absolute;
-  }
-  .drawer_open span:before {
-    bottom: 8px;
-  }
-  .drawer_open span:after {
-    top: 8px;
-  }
-  .bager {
-    display: none;
-  }
-
-  .drawer-input-hidden {
-    display: none;
-  }
-
   header {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    background-color: rgb(41, 39, 50);
-    align-items: center;
     position: sticky;
     top: 0;
-    z-index: 1;
-    width: 100%;
-  }
-  .header-title p,
-  .header-other {
-    user-select: none;
-    font-family: "Inter";
-  }
-  .header-other {
-    margin-right: 12px;
-  }
-  .header-other-content {
-    font-weight: 700;
-  }
-  .header-title {
-    font-size: 30px;
-    padding: 20px;
-  }
-  .login-text-inline {
-    display: inline-block;
-  }
-  .login-block {
-    display: block;
-  }
-  .discord-login {
-    padding: 5px 15px;
-    border-radius: 25px;
-    background-color: #5865f2;
-  }
-  .discord-logined-content,
-  .discord-login-content {
-    font-family: "Inter";
-    margin: auto 0;
-    font-size: 16px;
-  }
-  .discord-profile,
-  .discord-login {
-    margin: auto 20px auto 0;
-  }
-  .discord-profile {
-    cursor: pointer;
+    z-index: 30;
     display: flex;
-    padding: 3px 6px;
-  }
-  .discord-profile:hover {
-    border-radius: 25px;
-    background-color: rgb(107, 107, 107);
-  }
-  .discord-profile img {
-    border-radius: 25px;
-    height: 25px;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    position: relative;
-  }
-  .discord-profile p {
-    line-height: 25px;
-    margin: 0 0 0 5px;
-    padding: 0;
-  }
-  div {
-    display: inline-block;
+    align-items: center;
+    gap: 24px;
+    height: 64px;
+    padding: 0 20px;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid rgb(66, 66, 66);
+    font-family: "Inter", sans-serif;
   }
   a {
+    color: white;
     text-decoration: none;
+  }
+  .brand {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    user-select: none;
+  }
+
+  .desktop-nav {
+    display: flex;
+    gap: 4px;
+    margin-right: auto;
+  }
+  .desktop-nav a {
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 16px;
+    color: rgb(207, 207, 207);
+    transition: color 0.15s;
+  }
+  .desktop-nav a:hover,
+  .desktop-nav a:focus-visible {
+    color: white;
+    background-color: var(--body-background-color);
+  }
+  .desktop-nav a[aria-current="page"] {
     color: white;
   }
-  p {
-    color: white !important;
+  /* The thick-over-thin double rule echoes the banner logo's underline and h1's border. */
+  .desktop-nav a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 0;
+    height: 2px;
+    border-top: 3px solid white;
+    border-bottom: 1px solid white;
   }
+
+  .login {
+    padding: 8px 18px;
+    border-radius: 25px;
+    background-color: #5865f2;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+  }
+  .login:hover {
+    background-color: #4752c4;
+  }
+  .profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    border-radius: 999px;
+    max-width: 220px;
+    transition: background-color 0.2s;
+  }
+  .profile:hover {
+    background-color: var(--body-background-color);
+  }
+  .profile img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }
+  .profile span {
+    font-weight: 700;
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .menu-button {
+    display: none;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+  }
+  .menu-button:hover {
+    background-color: var(--body-background-color);
+  }
+  .menu-button span,
+  .menu-button span::before,
+  .menu-button span::after {
+    position: absolute;
+    left: 50%;
+    width: 22px;
+    height: 2px;
+    margin-left: -11px;
+    border-radius: 2px;
+    background-color: white;
+    transition:
+      transform 0.25s,
+      background-color 0.25s;
+  }
+  .menu-button span {
+    top: 50%;
+    margin-top: -1px;
+  }
+  .menu-button span::before,
+  .menu-button span::after {
+    content: "";
+    left: 0;
+    margin-left: 0;
+  }
+  .menu-button span::before {
+    transform: translateY(-7px);
+  }
+  .menu-button span::after {
+    transform: translateY(7px);
+  }
+  .menu-button.open span {
+    background-color: transparent;
+  }
+  .menu-button.open span::before {
+    transform: rotate(45deg);
+  }
+  .menu-button.open span::after {
+    transform: rotate(-45deg);
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    border: none;
+    background-color: rgb(0 0 0 / 50%);
+  }
+  .drawer {
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    width: min(280px, 80vw);
+    padding-top: 66px;
+    background-color: var(--surface-color);
+    border-right: 1px solid rgb(66, 66, 66);
+    font-family: "Inter", sans-serif;
+  }
+  .drawer a {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--body-background-color);
+    border-left: 4px solid transparent;
+    font-size: 17px;
+    font-weight: 700;
+    color: rgb(207, 207, 207);
+  }
+  .drawer a:hover,
+  .drawer a:focus-visible {
+    color: white;
+    background-color: var(--body-background-color);
+  }
+  .drawer a[aria-current="page"] {
+    color: white;
+    border-left-color: white;
+    background-color: var(--body-background-color);
+  }
+
   @media (max-width: 840px) {
-    .bager {
+    header {
+      gap: 8px;
+      padding: 0 12px;
+    }
+    .menu-button {
       display: block;
     }
-    .bager-content {
-      position: fixed;
-      z-index: 20;
-      opacity: 0.85;
-      background: #282828;
-      transition: 0.5s;
-    }
-    .header-other-content {
-      padding: 6px 10px;
-      font-size: 18px;
-    }
-    .header-other {
+    .desktop-nav {
       display: none;
     }
-    .header-title {
-      display: none;
+    .brand {
+      font-size: 22px;
+      margin-right: auto;
+    }
+    .login,
+    .profile span {
+      font-size: 15px;
+    }
+    /* Header stays above the drawer so the toggle doubles as the close button. */
+    header.menu-open {
+      z-index: 60;
     }
   }
-  @media (max-width: 650px) {
-    .discord-logined-content,
-    .discord-login-content {
-      font-size: 14px;
+  @media (max-width: 480px) {
+    .login,
+    .profile span {
+      font-size: 13px;
     }
-  }
-  @media (max-width: 540px) {
-    .discord-logined-content,
-    .discord-login-content {
-      font-size: 12px;
+    .profile {
+      max-width: 140px;
     }
   }
 </style>

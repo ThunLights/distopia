@@ -10,10 +10,7 @@ test("header title 'Distopia' links back to the home page", async ({ page }) => 
   await expect(page).toHaveTitle(/Home \/ Discordサーバー用掲示板/);
 });
 
-// The "ホーム" ("Home") link in the header uses `style="display: none"` by default on desktop
-// (it is only revealed when the hamburger menu is open, unlike the other nav links which
-// use an empty inline style and remain visible via CSS).  Testing it via a click is
-// therefore not meaningful; navigating home via the title link is already tested above.
+// The "ホーム" ("Home") link only exists in the mobile drawer; see the drawer test below.
 
 test("ランキング nav link navigates to /ranking", async ({ page }) => {
   await page.goto("/");
@@ -41,6 +38,36 @@ test("その他 nav link navigates to /other", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "その他" }).click();
   await expect(page).toHaveURL(/\/other/);
+});
+
+test("mobile menu opens a drawer, navigates, and closes", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "メニューを開く" });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+
+  const drawer = page.getByRole("navigation", { name: "メニュー" });
+  await expect(drawer).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(drawer).toBeHidden();
+
+  await toggle.click();
+  await drawer.getByRole("link", { name: "ランキング" }).click();
+  await expect(page).toHaveURL(/\/ranking/);
+  await expect(drawer).toBeHidden();
+});
+
+test("mobile menu closes when the viewport widens to desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "メニューを開く" }).click();
+  const drawer = page.getByRole("navigation", { name: "メニュー" });
+  await expect(drawer).toBeVisible();
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(drawer).toBeHidden();
+  await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
 });
 
 // ── Login flow ────────────────────────────────────────────────────────────────

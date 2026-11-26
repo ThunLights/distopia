@@ -22,7 +22,7 @@
 
 <style>
   footer {
-    background-color: #212227;
+    background-color: var(--surface-color);
     padding: 12px 16px;
     text-align: center;
     color: #9ca3af;
