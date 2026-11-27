@@ -268,3 +268,50 @@ test("clicking a tag re-searches with the tag as the term", async ({ page }) => 
   await expect(page.getByText(GUILD_NSFW.name)).toBeVisible();
   await expect(page.getByText(GUILD_NORMAL.name)).not.toBeVisible();
 });
+
+// ── Query encoding and pagination ─────────────────────────────────────────────
+
+test("a searched term is encoded once in the URL", async ({ page }) => {
+  await mockSearch(page, []);
+  await page.goto("/search");
+
+  await page.locator("#search-input").fill("100%");
+  await page.locator("#search-input").press("Enter");
+
+  await expect(page).toHaveURL(/\?w=100%25(&|$)/);
+  await page.reload();
+  await expect(page.locator("#search-input")).toHaveValue("100%");
+});
+
+test("pager moves between pages through the ?p query", async ({ page }) => {
+  const requested: number[] = [];
+  await page.route("**/api/guild/search", async (route) => {
+    const body = (await route.request().postDataJSON()) as { page: number };
+    requested.push(body.page);
+    const guild = { ...GUILD_NORMAL, name: `Guild page ${body.page}` };
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ guilds: [guild], count: 31, time: "0ms" }),
+    });
+  });
+
+  await page.goto("/search?w=guild");
+  await expect(page.getByText("1 / 3")).toBeVisible();
+  await expect(page.getByRole("button", { name: "前へ" })).toBeDisabled();
+
+  await page.getByRole("button", { name: "次へ" }).click();
+  await expect(page).toHaveURL(/[?&]p=2/);
+  await expect(page.getByText("Guild page 2")).toBeVisible();
+
+  await page.goBack();
+  await expect(page.getByText("Guild page 1")).toBeVisible();
+
+  // A new search starts over at page 1.
+  await page.goto("/search?w=guild&p=3");
+  await expect(page.getByRole("button", { name: "次へ" })).toBeDisabled();
+  await page.locator("#search-input").fill("other");
+  await page.locator("#search-input").press("Enter");
+  await expect(page).not.toHaveURL(/[?&]p=/);
+  expect(requested).toContain(3);
+});

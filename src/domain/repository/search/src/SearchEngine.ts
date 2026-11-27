@@ -84,6 +84,8 @@ export class SearchEngine {
       },
       exact: alg?.includes("exact") ?? undefined,
       preflight: alg?.includes("preflight") ?? undefined,
+      limit: options?.limit,
+      offset: options?.offset,
     });
 
     return {
