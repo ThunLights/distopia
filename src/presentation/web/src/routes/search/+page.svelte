@@ -45,10 +45,11 @@
 
   async function fetchGuilds(term: string, tagOnly: boolean, page: number) {
     const current = ++generation;
+    // Cards from the previous term or page must not sit under the new page label.
+    guilds = [];
 
     // Tag mode lists every tagged server when no term is given, like /guilds/tags.
     if (!term.length && !tagOnly) {
-      guilds = [];
       total = 0;
       return;
     }
@@ -72,8 +73,13 @@
         guilds = res.guilds;
         total = res.count;
       }
-    } else if (response.status === 400) {
-      await parseErrRes(response);
+    } else {
+      if (current === generation) {
+        total = 0;
+      }
+      if (response.status === 400) {
+        await parseErrRes(response);
+      }
     }
   }
 
