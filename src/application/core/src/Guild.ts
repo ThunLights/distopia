@@ -448,15 +448,12 @@ export class Guild extends Base {
   }
 
   public async search(term: string, options?: SearchOptions) {
-    const { time, hits } = await this.state.searchEngine.search(term, options);
+    const { time, hits, count } = await this.state.searchEngine.search(term, options);
 
     const guilds = await this.findAllWithMetaData(hits.map(({ guildId }) => guildId));
 
-    return {
-      guilds,
-      time,
-      count: guilds.length,
-    };
+    // `count` is every hit, not just this page's.
+    return { guilds, time, count };
   }
 
   public async isPublic(guildId: string) {

@@ -137,6 +137,8 @@ export function createRemoteSearchEngine(target: RpcTarget): SearchEngineClient 
         nsfw: options?.filter.nsfw,
         serverTag: options?.filter.serverTag,
         alg: options?.alg,
+        limit: options?.limit,
+        offset: options?.offset,
       });
       return { hits, count, time };
     },

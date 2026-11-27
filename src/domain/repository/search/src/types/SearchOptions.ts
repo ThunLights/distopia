@@ -4,4 +4,6 @@ export type SearchOptions = {
     serverTag?: boolean;
   };
   alg?: ("exact" | "preflight")[];
+  limit?: number;
+  offset?: number;
 };

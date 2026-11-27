@@ -3,6 +3,7 @@ import { validateHandler } from "#lib/server/handler.js";
 import { getTaggedGuilds } from "#lib/server/taggedGuilds.js";
 import {
   PostBodySchema,
+  SEARCH_PAGE_SIZE,
   type ResponseMethodPost,
 } from "#lib/shared/types/routes/api/guild/search.js";
 import type { RequestHandler } from "./$types";
@@ -10,6 +11,7 @@ import { json } from "@sveltejs/kit";
 
 export const POST: RequestHandler = await validateHandler(PostBodySchema, async (e, body) => {
   const nsfw = body.type === "all" ? undefined : body.type === "nsfw";
+  const offset = (body.page - 1) * SEARCH_PAGE_SIZE;
 
   // An empty term has nothing for the engine to match, so list every tagged guild by bump.
   if (body.serverTag && !body.term.trim()) {
@@ -19,7 +21,7 @@ export const POST: RequestHandler = await validateHandler(PostBodySchema, async 
     );
     return json(
       {
-        guilds,
+        guilds: guilds.slice(offset, offset + SEARCH_PAGE_SIZE),
         count: guilds.length,
         time: `${Math.round(performance.now() - started)}ms`,
       } satisfies ResponseMethodPost,
@@ -29,6 +31,8 @@ export const POST: RequestHandler = await validateHandler(PostBodySchema, async 
 
   const { guilds, count, time } = await core.guild.search(body.term, {
     filter: { nsfw, serverTag: body.serverTag },
+    limit: SEARCH_PAGE_SIZE,
+    offset,
   });
 
   return json(

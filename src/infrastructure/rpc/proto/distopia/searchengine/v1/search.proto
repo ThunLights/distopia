@@ -47,6 +47,9 @@ message SearchRequest {
   repeated string alg = 3;
   // true limits hits to guilds with a server tag; unset/false means no filter.
   optional bool server_tag = 4;
+  // Unset falls back to Orama's defaults (limit 10, offset 0).
+  optional uint32 limit = 5;
+  optional uint32 offset = 6;
 }
 message SearchResponse {
   repeated Guild hits = 1;
