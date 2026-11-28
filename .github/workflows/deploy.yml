@@ -126,5 +126,5 @@ jobs:
       - name: Push production image
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
         run: |
-          docker push "ghcr.io/thunlights/distopia:${{ steps.tag.outputs.run_number }}-${{ steps.tag.outputs.sha }}"
-          docker push ghcr.io/thunlights/distopia:latest
+          docker push "ghcr.io/studio-distopia/distopia:${{ steps.tag.outputs.run_number }}-${{ steps.tag.outputs.sha }}"
+          docker push ghcr.io/studio-distopia/distopia:latest

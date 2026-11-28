@@ -55,7 +55,7 @@ spec:
       # live database at build time, not just at migrate time).
       initContainers:
         - name: migrate
-          image: ghcr.io/thunlights/distopia:latest
+          image: ghcr.io/studio-distopia/distopia:latest
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -80,7 +80,7 @@ spec:
           # This :latest is only the bootstrap fallback -- Argo CD Image Updater overrides
           # it with the actual deployed tag at the Application level (no git write-back).
           # See the annotations on k8s/argocd/app-app.yaml and k8s/README.md.
-          image: ghcr.io/thunlights/distopia:latest
+          image: ghcr.io/studio-distopia/distopia:latest
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

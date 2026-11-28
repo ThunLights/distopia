@@ -1,7 +1,7 @@
 // The Connect RPC contract for the optional, private member-verification service (see
 // proto/distopia/verify/v1/verify.proto and k8s/README.md's "Verify RPC" section). Generated
 // and defined here (not infra-rpc) so a private, closed-source implementation of
-// VerifyService can depend on this package alone -- no access to the thunlights/distopia
+// VerifyService can depend on this package alone -- no access to the studio-distopia/distopia
 // monorepo needed. infra-rpc re-exports these same symbols for in-monorepo consumers
 // (presentation-verify, presentation-web) instead of generating its own copy.
 export {

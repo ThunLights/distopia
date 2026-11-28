@@ -3,13 +3,12 @@
   "version": "0.7.0",
   "description": "Library for Distopia.",
   "keywords": [
-    "distopia",
-    "thunlights"
+    "distopia"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ThunLights/distopia.git",
+    "url": "git+https://github.com/studio-distopia/distopia.git",
     "directory": "lib/distopia"
   },
   "files": [

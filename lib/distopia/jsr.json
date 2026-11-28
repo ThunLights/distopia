@@ -1,6 +1,6 @@
 {
   "$schema": "https://jsr.io/schema/config-file.v1.json",
-  "name": "@thunlights/distopia",
+  "name": "@distopia/distopia",
   "version": "0.7.0",
   "license": "MIT",
   "imports": {

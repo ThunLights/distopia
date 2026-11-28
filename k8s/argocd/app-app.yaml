@@ -23,7 +23,7 @@
 # hard way: the controller logged "No ImageUpdater CRs to process" and did nothing until
 # that CR existed.
 #
-# No pull-secret annotation -- ghcr.io/thunlights/distopia is a public package (verify this
+# No pull-secret annotation -- ghcr.io/studio-distopia/distopia is a public package (verify this
 # under the package's own Settings after the first push; GHCR packages don't always inherit
 # the repository's public visibility automatically), so Image Updater polls it anonymously.
 # If it's ever made private, both this annotation and k8s/app/deployment.yaml's
@@ -34,14 +34,14 @@ metadata:
   name: distopia-app
   namespace: argocd
   annotations:
-    argocd-image-updater.argoproj.io/image-list: distopia=ghcr.io/thunlights/distopia
+    argocd-image-updater.argoproj.io/image-list: distopia=ghcr.io/studio-distopia/distopia
     argocd-image-updater.argoproj.io/distopia.update-strategy: alphabetical
     argocd-image-updater.argoproj.io/distopia.allow-tags: regexp:^[0-9]{10}-[0-9a-f]{7,10}$
     argocd-image-updater.argoproj.io/write-back-method: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/thunlights/distopia.git
+    repoURL: https://github.com/studio-distopia/distopia.git
     targetRevision: main
     path: k8s/app
   destination:

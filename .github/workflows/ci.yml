@@ -250,7 +250,7 @@ jobs:
       - name: Deploy app (k8s/app, image tag set directly -- no Argo CD Image Updater in this kind cluster)
         run: |
           cd k8s/app
-          kustomize edit set image ghcr.io/thunlights/distopia=distopia:e2e
+          kustomize edit set image ghcr.io/studio-distopia/distopia=distopia:e2e
           cd ../..
           kubectl apply -k k8s/app
           kubectl rollout status deployment/distopia-app -n distopia --timeout=180s

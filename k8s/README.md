@@ -13,7 +13,7 @@ by you — nothing here is applied automatically by me.
 | `k8s/network/` | `distopia-network` | `hostNetwork` relay so the host's Cloudflare Tunnel can reach `distopia-app` via a loopback port you choose yourself |
 
 The build pipeline lives outside `k8s/` entirely now: `.github/workflows/deploy.yml` builds
-the production image and pushes it to `ghcr.io/thunlights/distopia` on every push to `main`.
+the production image and pushes it to `ghcr.io/studio-distopia/distopia` on every push to `main`.
 Nothing here builds or pushes an image — see "Shipping a new build" below.
 
 ## 0. Prerequisites (cluster-level, not managed by this repo)
@@ -40,7 +40,7 @@ CRDs cluster-wide by default, so it picks up `k8s/redis/redis.yaml` in the `dist
 namespace with no extra per-namespace config.
 
 Image Updater needs no special configuration for `ghcr.io` — it's a well-known registry
-Image Updater already knows how to poll, and `ghcr.io/thunlights/distopia` is a public
+Image Updater already knows how to poll, and `ghcr.io/studio-distopia/distopia` is a public
 package (see "Shipping a new build" below), so no `registries.conf` entry or pull-secret
 credential is needed at all — a real simplification over the old self-hosted-registry setup
 this replaced, which needed both plus an `insecure: true` HTTP escape hatch.
@@ -155,11 +155,11 @@ kubectl create namespace distopia
 kubectl apply -k k8s/argocd
 
 # 4. distopia-app will show "Degraded"/ImagePullBackOff at first -- expected, there is no
-#    image at ghcr.io/thunlights/distopia yet (deployment.yaml's own :latest doesn't exist
+#    image at ghcr.io/studio-distopia/distopia yet (deployment.yaml's own :latest doesn't exist
 #    until the first build). Trigger one build by hand -- either push to main, or:
-gh workflow run deploy.yml --repo thunlights/distopia --ref main
+gh workflow run deploy.yml --repo studio-distopia/distopia --ref main
 
-# 5. Once that run finishes (`gh run watch --repo thunlights/distopia`), :latest exists and
+# 5. Once that run finishes (`gh run watch --repo studio-distopia/distopia`), :latest exists and
 #    distopia-app comes up. Argo CD Image Updater then notices the tagged image
 #    (distopia:<run-number>-<short-sha>) on its own polling cycle (a few minutes) and switches
 #    the Deployment to it automatically -- see "Shipping a new build" below. From here on,
@@ -315,7 +315,7 @@ for your install) — not required for correctness, just latency.
 Every push to `main` runs `.github/workflows/deploy.yml` -- called from `ci.yml` only after
 its kind E2E job (`e2e-prod`) passes: migrate a throwaway database (just
 for `prisma generate --sql` to introspect at build time -- see the workflow's own comment),
-build the production image, and push `ghcr.io/thunlights/distopia:<run-number>-<short-sha>`
+build the production image, and push `ghcr.io/studio-distopia/distopia:<run-number>-<short-sha>`
 (and `:latest`). That workflow never touches the cluster or writes back to git -- nothing
 commits an image tag anywhere.
 
@@ -327,7 +327,7 @@ github.event_name == 'push'`), so a PR never needs registry credentials and neve
 
 > **First-push check:** GHCR packages don't always inherit the repository's public
 > visibility automatically. After the very first push, check the package's own Settings
-> (github.com/thunlights/distopia/pkgs/container/distopia → Package settings) and set
+> (github.com/studio-distopia/distopia/pkgs/container/distopia → Package settings) and set
 > visibility to Public if it isn't already -- Image Updater and the app's `imagePullSecrets`
 > -less pull both assume anonymous access works. If the org's default Actions "Workflow
 > permissions" is set to read-only, the push step will fail with 403/denied -- switch it to
@@ -335,7 +335,7 @@ github.event_name == 'push'`), so a PR never needs registry credentials and neve
 > narrowly for this workflow specifically.
 
 Instead, **Argo CD Image Updater** (installed per section 0, configured via the annotations
-on `k8s/argocd/app-app.yaml`) polls `ghcr.io/thunlights/distopia` directly, on its own
+on `k8s/argocd/app-app.yaml`) polls `ghcr.io/studio-distopia/distopia` directly, on its own
 interval (default ~2 minutes), for tags matching `distopia.allow-tags`'s regexp (the
 `<run-number>-<short-sha>` tags only — `latest` is excluded so it isn't mistaken for a real
 candidate). Its `update-strategy: alphabetical` picks whichever matching tag sorts highest
@@ -380,10 +380,10 @@ constraint the old in-cluster pipeline had.
 ## Registry image retention
 
 Every push to `main` adds a new `<run-number>-<short-sha>` tag and re-pushes `latest` to
-`ghcr.io/thunlights/distopia` — nothing in "Shipping a new build" above ever deletes one.
+`ghcr.io/studio-distopia/distopia` — nothing in "Shipping a new build" above ever deletes one.
 Unlike the old self-hosted registry, there's no CronJob here to write: GitHub Container
 Registry has its own retention, in the package's own Settings
-(github.com/thunlights/distopia/pkgs/container/distopia → Package settings → "Manage
+(github.com/studio-distopia/distopia/pkgs/container/distopia → Package settings → "Manage
 versions" for one-off deletes, or a retention policy for automatic cleanup by age/count).
 Configure whatever policy suits your storage budget there — never delete the tag matching
 `distopia-app`'s currently-running image by hand (`kubectl get deployment distopia-app -n
@@ -419,7 +419,7 @@ regardless.
   running, untouched, indefinitely. In particular, `distopia-registry-data` (the PVC) holds
   every image ever pushed to the old registry — decide on purpose whether you still want
   that image history around (e.g. as a rollback fallback for a few days) before deleting
-  anything. Once you're confident `ghcr.io/thunlights/distopia` is working and you no longer
+  anything. Once you're confident `ghcr.io/studio-distopia/distopia` is working and you no longer
   need the old images:
   ```bash
   kubectl delete application distopia-registry -n argocd
@@ -727,9 +727,10 @@ implemented by your plugin file(s), not this repo:
   from that file only. See `plugin/.wasm` for a template.
 - **Body obfuscation is plugin-loaded, not built in.** A plugin's `getClientScript()` may
   serve a module that optionally exports `encrypt(json): string` (`distopia`'s
-  `VerifyClientPlugin`) -- e.g. a private R25A/R25B-style cipher like
-  `thunlights/discord-verify` uses on its own verify endpoint (see `.anti-scraping`'s own
-  comments for this exact split). When it does, `lib/client/verify.ts` sends the encrypted
+  `VerifyClientPlugin`) -- e.g. a private symmetric cipher whose key/algorithm ships only
+  inside the obfuscated client script, so a scraper replaying `/api/verify` without running
+  that script can't produce a body the server accepts (see `.anti-scraping`'s own comments
+  for this exact split). When it does, `lib/client/verify.ts` sends the encrypted
   string instead of plain JSON (flagged with the `X-Verify-Body-Encoding: plugin` header) and
   `routes/api/verify/+server.ts` forwards it as-is and `VerifyService.Submit` reverses it with
   your plugin's `decrypt()`. No `encrypt()` on the client plugin (the default,

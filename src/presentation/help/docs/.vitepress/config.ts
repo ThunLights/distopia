@@ -26,7 +26,7 @@ export default defineConfig({
       { text: "コマンド一覧", link: "/commands" },
       { text: "Distopia", link: "https://distopia.top" },
     ],
-    socialLinks: [{ icon: "github", link: "https://github.com/ThunLights/distopia" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/studio-distopia/distopia" }],
     search: {
       provider: "local",
       options: {
@@ -56,7 +56,8 @@ export default defineConfig({
     returnToTopLabel: "トップへ戻る",
     darkModeSwitchLabel: "外観",
     editLink: {
-      pattern: "https://github.com/ThunLights/distopia/edit/main/src/presentation/help/docs/:path",
+      pattern:
+        "https://github.com/studio-distopia/distopia/edit/main/src/presentation/help/docs/:path",
       text: "このページを編集",
     },
     sidebar: [

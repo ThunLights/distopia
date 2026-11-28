@@ -31,8 +31,8 @@
   </div>
   <div>
     <SubTitle content="GitHubリポジトリ" />
-    <a href="https://github.com/ThunLights/distopia" rel="external"
-      >https://github.com/ThunLights/distopia</a
+    <a href="https://github.com/studio-distopia/distopia" rel="external"
+      >https://github.com/studio-distopia/distopia</a
     >
   </div>
 </Block>

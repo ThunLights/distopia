@@ -166,7 +166,7 @@ docker build -f docker/dockerfile.prod -t distopia:local .
 
 Production runs on k3s and deploys via GitOps (Argo CD + Argo CD Image Updater) on every
 push to `main` — `.github/workflows/deploy.yml` (GitHub Actions, not the cluster) builds
-`docker/dockerfile.prod` and pushes it to `ghcr.io/thunlights/distopia`; Argo CD Image
+`docker/dockerfile.prod` and pushes it to `ghcr.io/studio-distopia/distopia`; Argo CD Image
 Updater detects the new tag and rolls the Deployment, whose `migrate` initContainer runs the
 real `prisma migrate deploy` against production. See `k8s/README.md` for the full pipeline,
 secrets, and one-time cluster bootstrap; the `argo` skill for the Argo CD/Image Updater side

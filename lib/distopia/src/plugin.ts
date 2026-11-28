@@ -1,5 +1,5 @@
 // Type only -- no runtime code. presentation-verify (an optional service in the
-// thunlights/distopia monorepo, see k8s/README.md's "Verify RPC" section) implements
+// studio-distopia/distopia monorepo, see k8s/README.md's "Verify RPC" section) implements
 // VerifyService generically by loading a plugin file and delegating to it -- the actual
 // anti-bot/fingerprinting logic never has to live in this repo. These two interfaces are
 // that plugin file's contract (server-side) and the browser-side script it may optionally
@@ -53,8 +53,9 @@ export interface VerifyClientPlugin {
   collect(): Promise<unknown> | unknown;
 
   // Optional: obfuscate/encrypt the JSON body before it's POSTed to /api/verify -- e.g. a
-  // private R25A/R25B-style cipher (see thunlights/discord-verify's own
-  // src/lib/Crypto/R25A.ts/R25B.ts for the kind of thing this is for). Omit this entirely to
+  // private symmetric cipher (XOR/AES with a key embedded in this obfuscated script, plus a
+  // timestamp/nonce so a captured body can't be replayed), so a bot that calls /api/verify
+  // directly without executing this script can't forge a valid body. Omit this entirely to
   // send the body as plain JSON. When provided, presentation-web reverses it by calling the
   // same VerifyServerPlugin's decrypt -- encrypt() and decrypt() must agree on the scheme
   // since they're two halves of the one plugin.

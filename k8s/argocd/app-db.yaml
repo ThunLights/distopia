@@ -13,7 +13,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/thunlights/distopia.git
+    repoURL: https://github.com/studio-distopia/distopia.git
     targetRevision: main
     path: k8s/db
   destination:

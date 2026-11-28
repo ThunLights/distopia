@@ -28,6 +28,4 @@
   <meta name="format-detection" content="telephone=no,email=no,address=no" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@thunlights" />
-  <meta name="twitter:creator" content="@thunlights" />
 </svelte:head>
