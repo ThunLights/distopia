@@ -129,7 +129,7 @@ echo '{"key":"value"}' | jq .
 # Extract a field
 cat package.json | jq '.name'
 
-# Used in scripts/npm-publish.sh to read package.json fields
+# Read a package.json field
 node -p "require('./package.json').version"
 ```
 

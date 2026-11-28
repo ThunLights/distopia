@@ -13,22 +13,22 @@ This project uses **Bun** as the primary package manager for development. npm is
 |---|---|
 | Install dependencies | `bun install` / `bun ci` |
 | Run scripts | `bun run <script>` |
-| Publish `lib/distopia` to npm registry | `npm publish` (via `scripts/npm-publish.sh`) |
-| Publish `lib/distopia` to JSR | `bunx jsr publish` (via `scripts/jsr-version.sh`) |
+| Publish `lib/distopia` to npm registry | `npm publish` (via `changeset publish` in CI) |
+| Publish `lib/distopia` to JSR | `npx jsr publish` (CI; `scripts/jsr-version.sh` syncs `jsr.json`'s version) |
 | Bootstrap global tools in Dockerfile | `npm i -g bun npm@<version> @antfu/ni` |
 
 ## Publishing `lib/distopia`
 
-```bash
-# From the project root (handled by CI / release maintainers)
-scripts/npm-publish.sh [--dry-run]
-```
+Driven by `changesets/action` v2 in `.github/workflows/release.yml`, with no publish script of
+our own. On `main` it opens the "Version Packages" PR while changesets are pending; after that PR
+merges it runs `npx changeset publish`, which `npm publish`es every version not yet on npm
+(trusted publishing via OIDC, no token; provenance is automatic) and reports the new git tags
+through `CHANGESETS_OUTPUT`, so the action pushes them and creates the GitHub Releases. A
+following step runs `npx jsr publish` (it skips a version already on JSR). PRs only run
+`npm pack --dry-run` and `npx jsr publish --dry-run --allow-dirty`.
 
-The script:
-1. Reads `name` and `version` from `lib/distopia/package.json`
-2. Checks if `<name>@<version>` already exists on the npm registry — skips if so
-3. Packs with `bun pm pack`
-4. Publishes with `npm publish --provenance --access public`
+Because `changeset publish` uses plain `npm publish`, which does not rewrite `catalog:` or
+`workspace:` ranges, `lib/distopia/package.json` pins concrete versions instead of `catalog:`.
 
 ## Workspace Protocol
 

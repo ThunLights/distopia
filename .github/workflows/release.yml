@@ -9,88 +9,23 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  changesets:
+  # On main, changesets/action either opens/updates the "Version Packages" PR (pending
+  # changesets) or, once that PR is merged, runs `changeset publish` (npm + git tag + GitHub
+  # Release), followed by the JSR publish. On a PR, both registries are only dry-run.
+  release:
     name: Changesets
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
       contents: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Node Modules Cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ hashFiles('bun.lock') }}
-
-      - name: Checkout nodejs
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24.22.3'
-          registry-url: 'https://registry.npmjs.org'
-
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: '1.4.4'
-
-      - name: Install Deps
-        run: bun ci
-
-      - name: Install tools
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/v3.96.0/scripts/install.sh | sh -s -- -b /usr/local/bin v3.96.0
-          git clone -b v8.30.1 --depth 1 https://github.com/gitleaks/gitleaks.git "$RUNNER_TEMP/gitleaks"
-          cd "$RUNNER_TEMP/gitleaks" && make build
-          sudo mv gitleaks /usr/local/bin
-          sudo curl -o /usr/local/bin/jq -L https://github.com/stedolan/jq/releases/download/jq-1.8.2/jq-linux64 && sudo chmod +x /usr/local/bin/jq
-
-      - name: Check tools
-        run: |
-          which trufflehog
-          which gitleaks
-          which jq
-
-      - name: Version script
-        if: github.event_name == 'pull_request'
-        # changeset version (CLI v3) now exits 1 when there are no unreleased changesets --
-        # normal for a PR that doesn't add one (see CLAUDE.md) -- so only run version:jsr
-        # when there was actually something to version, instead of failing every PR. `turbo`
-        # must go through `bunx` here (unlike `bun run build` etc. elsewhere in this repo's
-        # scripts, which get node_modules/.bin on PATH for free) since this step is a raw
-        # shell script, not a `bun run <script>` invocation.
-        run: |
-          if npx changeset version; then
-            bunx turbo run version:jsr
-          fi
-
-      - name: Create Tag
-        if: github.event_name == 'push'
-        run: |
-          npx changeset git-tag
-          git push --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release Pull Request
-        if: github.event_name == 'push'
-        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
-        with:
-          version-script: npm run version
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  npm:
-    name: npmjs.com
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
+      pull-requests: write
       id-token: write
 
     steps:
+      # Tags are needed so `changeset git-tag` skips versions that are already tagged.
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-tags: true
 
       - name: Node Modules Cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -108,6 +43,7 @@ jobs:
         with:
           bun-version: '1.4.4'
 
+      # npm >= 11.5 for trusted publishing (OIDC) -- no NPM_TOKEN secret exists.
       - name: Update NPM
         run: npm i -g npm@11.18.0
 
@@ -121,56 +57,43 @@ jobs:
       - name: Build
         run: bun run build -- --filter=distopia
 
-      - name: Publish
-        continue-on-error: true
-        id: publish
-        run: scripts/npm-publish.sh ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
-        env:
-          NPM_TOKEN: ''
-
-      - name: Dump npm debug log
-        if: steps.publish.outcome == 'failure'
+      # changeset version (CLI v3) exits 1 when there are no unreleased changesets -- normal
+      # for a PR that doesn't add one -- so only run version:jsr when it versioned something.
+      - name: Check versioning
+        if: github.event_name == 'pull_request'
         run: |
-          cat /home/runner/.npm/_logs/*-debug-0.log || true
-          exit 1
+          if npx changeset version; then
+            bunx turbo run version:jsr
+          fi
 
-  jsr:
-    name: jsr.io
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Node Modules Cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ hashFiles('bun.lock') }}
-
-      - name: Checkout nodejs
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24.22.3'
-          registry-url: 'https://registry.npmjs.org'
-
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: '1.4.4'
-
-      - name: Update NPM
-        run: npm i -g npm@11.18.0
-
-      - name: Install Deps
-        run: bun ci
-
-      # See the npm job's own comment on this step -- same reason.
-      - name: Build
-        run: bun run build -- --filter=distopia
-
-      - name: Publish
+      # `npm pack`, not `npm publish --dry-run`: the latter rejects an already-published version.
+      - name: Dry-run npm
+        if: github.event_name == 'pull_request'
         working-directory: ./lib/distopia
-        run: npx jsr publish ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+        run: npm pack --dry-run
+
+      # --allow-dirty: "Check versioning" has just rewritten versions/changelogs.
+      - name: Dry-run JSR
+        if: github.event_name == 'pull_request'
+        working-directory: ./lib/distopia
+        run: npx jsr publish --dry-run --allow-dirty
+
+      # v2 commits the version PR and pushes tags through the GitHub API (no local commit, so
+      # the husky hook never runs here). `changeset publish` skips versions already on npm,
+      # publishes the rest via trusted publishing (OIDC, provenance included), and reports the
+      # new tags through CHANGESETS_OUTPUT so the action pushes them and creates the Releases.
+      - name: Version PR or publish to npm
+        id: changesets
+        if: github.event_name == 'push'
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          version-script: bun run version
+          publish-script: npx changeset publish
+          create-github-releases: true
+
+      # Runs on every push with no pending changesets, not only when npm published something,
+      # so a failed JSR publish is retried on the next push; jsr skips an existing version.
+      - name: Publish to JSR
+        if: github.event_name == 'push' && steps.changesets.outputs.has-changesets == 'false'
+        working-directory: ./lib/distopia
+        run: npx jsr publish

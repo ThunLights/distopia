@@ -18,7 +18,6 @@ This project primarily runs on **Bun**, but Node.js is used in a few specific co
 |---|---|
 | SvelteKit production server (`src/presentation/web/build/index.js`) | `@sveltejs/adapter-node` compiles to a Node.js-compatible bundle; started with `bun run` |
 | Playwright E2E test runner | Playwright requires Node.js |
-| `scripts/npm-publish.sh` | Uses `node -p "require('./package.json').name"` to read JSON fields |
 | Global npm tooling bootstrap in Dockerfile | `npm i -g bun npm @antfu/ni` |
 
 ## Production Startup

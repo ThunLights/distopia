@@ -971,11 +971,12 @@ Package versions live in more places than each package's `package.json`. When bu
 | Location | What it pins |
 |---|---|
 | `package.json` (per package) | Direct dependency versions |
+| `lib/distopia/package.json` | Concrete versions, never `catalog:` — `changeset publish` ships the manifest via plain `npm publish`, which doesn't rewrite catalog ranges. Keep them equal to the catalog |
 | Root `package.json` → `workspaces.catalog` | Shared versions consumed via `"catalog:"` (e.g. `bun`, `oxfmt`, `oxlint`, `typescript`, `vitest`, `zod`, `discord.js`, `@types/node`, `@bufbuild/*`, `@connectrpc/*`) |
 | Root `package.json` → `packageManager` | Must match the `bun` catalog version |
 | `lib/distopia/jsr.json` → `imports` | Duplicate pins for JSR publishing, one entry per `lib/distopia/package.json` `dependencies` key (currently `@bufbuild/protobuf`, `@connectrpc/connect`, `oxfmt`, `oxlint`, `tsdown`, `jsr`, `zod`, `@types/node`) — must match `lib/distopia/package.json` / the catalog. `devDependencies` (build-time only, e.g. `@bufbuild/buf`) don't need an entry. |
 | `docker/dockerfile` → `ARG ..._VERSION` | Tool versions baked into the devcontainer image. `BUN_VERSION` must match the catalog `bun` version; `PLAYWRIGHT_VERSION` must match `playwright` in `src/presentation/web/package.json` |
-| `.github/workflows/*.yml` → `bun-version` | CI-pinned bun version — must match the catalog `bun` version (`release.yml` currently pins it in 3 places) |
+| `.github/workflows/*.yml` → `bun-version` | CI-pinned bun version — must match the catalog `bun` version (`release.yml` pins it once) |
 
 **Dependabot does not track `catalog:` entries** — it only opens PRs for direct `package.json` versions. Run `bun outdated` to check catalog packages (`bun`, `oxfmt`, `oxlint`, `typescript`, etc.) separately; nothing will surface them otherwise.
 
