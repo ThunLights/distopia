@@ -21,7 +21,7 @@ Full operational runbook: `k8s/README.md`.
 | `k8s/argocd/` | The four Argo CD `Application` objects |
 
 Each directory is its own `kustomization.yaml` (no Helm anywhere in this repo). The image
-this all deploys is built and pushed to `ghcr.io/thunlights/distopia` by
+this all deploys is built and pushed to `ghcr.io/studio-distopia/distopia` by
 `.github/workflows/deploy.yml`, outside the cluster entirely — see the `argo` skill.
 
 ## CloudNativePG (`k8s/db/`)
@@ -94,7 +94,7 @@ db_url=$(printf 'postgresql://%s:%s@%s:5432/distopia' "$user" "$pass" "$db_host"
   `DATABASE_URL` via its own `secretKeyRef` (see above, read by both the main container and
   the `migrate` initContainer) — the app reads all of it through `$env/dynamic/*` + `dotenv`
   at runtime, nothing baked into the image.
-- No `imagePullSecrets` — `ghcr.io/thunlights/distopia` is a public package.
+- No `imagePullSecrets` — `ghcr.io/studio-distopia/distopia` is a public package.
 - No `Ingress`/`NodePort`/`LoadBalancer` anywhere — `k8s/app/service.yaml` is `ClusterIP`
   only, deliberately **not pinning `clusterIP`** (k3s's and kind's service CIDRs don't
   overlap, so a hardcoded address would break one or the other). Public traffic reaches it

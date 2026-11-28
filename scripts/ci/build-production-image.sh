@@ -26,6 +26,6 @@ EOF
 
 docker build --network host -f docker/dockerfile.prod \
   --build-arg GIT_SHA="$IMAGE_TAG_SHA" \
-  -t "ghcr.io/thunlights/distopia:${IMAGE_TAG_RUN_NUMBER}-${IMAGE_TAG_SHA}" \
-  -t ghcr.io/thunlights/distopia:latest .
+  -t "ghcr.io/studio-distopia/distopia:${IMAGE_TAG_RUN_NUMBER}-${IMAGE_TAG_SHA}" \
+  -t ghcr.io/studio-distopia/distopia:latest .
 rm -f .env

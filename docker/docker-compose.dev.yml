@@ -3,7 +3,7 @@ services:
     extends:
       file: docker-compose.yml
       service: app
-    hostname: thunlights
+    hostname: distopia
     container_name: distopia-dev
     working_dir: /workspaces/distopia
     command: sleep infinity

@@ -7,7 +7,7 @@ Library for [Distopia](https://distopia.top).
 ```
 npm install distopia
 
-jsr install @thunlights/distopia
+jsr install @distopia/distopia
 ```
 
 ## Usage

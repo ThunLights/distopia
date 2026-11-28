@@ -45,7 +45,7 @@ spec:
           # Same image as distopia-app (see deployment.yaml's own comment on the :latest
           # bootstrap fallback + Argo CD Image Updater) -- `bun run build` already builds
           # every workspace package into it, so this just overrides the start command.
-          image: ghcr.io/thunlights/distopia:latest
+          image: ghcr.io/studio-distopia/distopia:latest
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

@@ -17,7 +17,7 @@ hero:
       link: /register
     - theme: alt
       text: GitHub
-      link: https://github.com/ThunLights/distopia
+      link: https://github.com/studio-distopia/distopia
 
 features:
   - icon: 📣

@@ -52,8 +52,8 @@ function hashEntry(key: string, value: unknown): string {
 }
 
 // A (private) VerifyClientPlugin may combine multiple independent signals in one collect()
-// result -- e.g. thunlights/discord-verify's own fingerprintjs/canvas/gpu split. Hashing each
-// top-level signal separately (rather than one hash for the whole object) means two accounts
+// result -- e.g. `{ fingerprintjs: visitorId, canvas: canvasHash, gpu: webglRenderer }`.
+// Hashing each top-level signal separately (rather than one hash for the whole object) means two accounts
 // that share just one signal (say, the same GPU) while differing on the rest still match on
 // that signal -- a single combined hash would never match unless every signal agreed.
 // Non-object fingerprints (a bare string/number) hash as a single "value" entry.

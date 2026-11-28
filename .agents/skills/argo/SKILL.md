@@ -6,9 +6,9 @@ description: Argo CD + Argo CD Image Updater GitOps deploy (ghcr.io push detecte
 # Argo (CD + Image Updater) GitOps Guide
 
 Deploys are GitOps-driven: `.github/workflows/deploy.yml` builds the production image and
-pushes it to `ghcr.io/thunlights/distopia` on every push to `main` — **that workflow never
+pushes it to `ghcr.io/studio-distopia/distopia` on every push to `main` — **that workflow never
 touches the cluster or writes back to git**. Argo CD Image Updater then polls
-`ghcr.io/thunlights/distopia` directly and rolls out the new image via Argo CD, with no
+`ghcr.io/studio-distopia/distopia` directly and rolls out the new image via Argo CD, with no
 commit involved anywhere. Everything cluster-side lives under `k8s/argocd/` (the four
 `Application` objects). Full runbook: `k8s/README.md`. For the manifests this deploys, see
 the `k8s` skill.
@@ -39,18 +39,18 @@ exist before `distopia-db`'s `Cluster` first initializes, since
 Driven entirely by annotations on `k8s/argocd/app-app.yaml`:
 
 ```yaml
-argocd-image-updater.argoproj.io/image-list: distopia=ghcr.io/thunlights/distopia
+argocd-image-updater.argoproj.io/image-list: distopia=ghcr.io/studio-distopia/distopia
 argocd-image-updater.argoproj.io/distopia.update-strategy: alphabetical
 argocd-image-updater.argoproj.io/distopia.allow-tags: regexp:^[0-9]{10}-[0-9a-f]{7,10}$
 argocd-image-updater.argoproj.io/write-back-method: argocd
 ```
 
-Image Updater polls `ghcr.io/thunlights/distopia` on its own interval (default ~2 min),
+Image Updater polls `ghcr.io/studio-distopia/distopia` on its own interval (default ~2 min),
 picks whichever matching tag sorts alphabetically highest, and patches that tag into the
 `distopia-app` `Application`'s `spec.source.kustomize.images` directly (`write-back-method:
 argocd` — a live object in the `argocd` namespace, not a git commit). Argo CD's normal
 auto-sync then rolls the `Deployment`. No `pull-secret` annotation and no `registries.conf`
-entry — `ghcr.io/thunlights/distopia` is a public package, so Image Updater polls it
+entry — `ghcr.io/studio-distopia/distopia` is a public package, so Image Updater polls it
 anonymously (verify this under the package's own Settings after the first push).
 
 **`update-strategy: alphabetical` on the run-number-prefixed tag, not `newest-build`, is
@@ -114,10 +114,10 @@ in the job, no PAT needed) — not a k8s Secret either.
 
 ```bash
 # Manually trigger a build (e.g. the very first one, before any image exists)
-gh workflow run deploy.yml --repo thunlights/distopia --ref main
+gh workflow run deploy.yml --repo studio-distopia/distopia --ref main
 
 # Watch the most recent run
-gh run watch --repo thunlights/distopia
+gh run watch --repo studio-distopia/distopia
 
 # Argo CD: check sync/health status of everything
 argocd app list

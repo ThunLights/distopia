@@ -13,4 +13,4 @@ Library for external plugins.
 |registry|name                                                       |
 |--------|-----------------------------------------------------------|
 |npm     |[distopia](https://www.npmjs.com/package/distopia)         |
-|jsr     |[@thunlights/distopia](https://jsr.io/@thunlights/distopia)|
+|jsr     |[@distopia/distopia](https://jsr.io/@distopia/distopia)|

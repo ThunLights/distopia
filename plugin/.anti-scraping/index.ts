@@ -16,8 +16,9 @@ let cachedClientScript: Promise<string> | undefined;
 const plugin: AntiScrapingServerPlugin = {
   decrypt(_encrypted, _request) {
     // TODO: reverse whatever your client-side VerifyClientPlugin.encrypt() produced -- e.g.
-    // a private R25A/R25B-style cipher (see thunlights/discord-verify's own
-    // src/lib/Crypto/R25A.ts/R25B.ts for the kind of thing this is for). _request (headers/
+    // a private symmetric cipher (XOR/AES with a key embedded in the obfuscated client
+    // script, plus a timestamp/nonce to reject replays) -- decrypt with the same key, check
+    // the timestamp/nonce, and JSON-parse the result. _request (headers/
     // ip) is available too, e.g. for IP-based rate limiting ahead of attempting to decrypt.
     // Return null on failure.
     return null;
