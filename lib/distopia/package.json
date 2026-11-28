@@ -1,10 +1,14 @@
 {
   "name": "distopia",
   "version": "0.7.0",
-  "description": "Library for Distopia.",
+  "description": "Shared utilities and the member-verification plugin/RPC contract for Distopia.",
   "keywords": [
     "distopia"
   ],
+  "homepage": "https://github.com/studio-distopia/distopia/tree/main/lib/distopia#readme",
+  "bugs": {
+    "url": "https://github.com/studio-distopia/distopia/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
