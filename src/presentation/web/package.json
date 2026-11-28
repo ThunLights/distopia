@@ -50,7 +50,7 @@
     "globals": "17.14.0",
     "playwright": "1.65.0",
     "prettier": "3.10.1",
-    "prettier-plugin-svelte": "4.1.1",
+    "prettier-plugin-svelte": "4.2.0",
     "prettier-plugin-tailwindcss": "0.8.1",
     "storybook": "10.6.8",
     "svelte": "5.57.2",
