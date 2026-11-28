@@ -56,7 +56,8 @@ export default defineConfig({
     returnToTopLabel: "トップへ戻る",
     darkModeSwitchLabel: "外観",
     editLink: {
-      pattern: "https://github.com/studio-distopia/distopia/edit/main/src/presentation/help/docs/:path",
+      pattern:
+        "https://github.com/studio-distopia/distopia/edit/main/src/presentation/help/docs/:path",
       text: "このページを編集",
     },
     sidebar: [
