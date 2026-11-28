@@ -47,7 +47,7 @@
   "devDependencies": {
     "@bufbuild/buf": "1.75.0",
     "@bufbuild/protoc-gen-es": "2.17.0",
-    "@types/node": "24.13.3",
+    "@types/node": "26.6.10",
     "bun": "1.4.4",
     "jsr": "0.14.3",
     "oxfmt": "0.78.0",
