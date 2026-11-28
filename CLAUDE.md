@@ -94,7 +94,6 @@ distopia/
 │   ├── presentation/
 │   │   ├── bot/               # Discord bot (discord.js v14)
 │   │   ├── bot-kit/           # Bot handler base classes + BotFeature contract (shared with features)
-│   │   ├── help/              # VitePress help site (docs.distopia.top, GitHub Pages)
 │   │   ├── schedulemanager/   # Runs every cron job (its own AppCore)
 │   │   ├── searchengine/      # Orama search index; serves SearchEngine RPC to web
 │   │   ├── verify/            # Optional; serves VerifyService by delegating to a plugin file
@@ -133,7 +132,6 @@ distopia/
 |---|---|
 | `src/presentation/bot` | `presentation-bot` |
 | `src/presentation/bot-kit` | `presentation-bot-kit` |
-| `src/presentation/help` | `presentation-help` |
 | `src/presentation/schedulemanager` | `presentation-schedulemanager` |
 | `src/presentation/searchengine` | `presentation-searchengine` |
 | `src/presentation/verify` | `presentation-verify` |
@@ -330,16 +328,11 @@ All input validation uses Zod 4 (`import { z } from "zod"`). Key patterns:
 
 ---
 
-## Help Site (`presentation-help`)
+## Help Site
 
-VitePress site for `docs.distopia.top`, hosted on Cloudflare Pages (Git integration, not a GitHub
-Actions workflow); the old `/help` routes in `presentation-web` only redirect there. Pages live in
-`src/presentation/help/docs/*.md`. Its build script is `docs:build` (not `build`), so
-`bun run build` and the production image skip it. `PUBLIC_BOT_ID` is required to build (it fills the
-bot invite link). Cloudflare Pages settings: build command
-`bun install --frozen-lockfile && bun run docs:build`, output directory
-`src/presentation/help/docs/.vitepress/dist`, env `PUBLIC_BOT_ID` and `BUN_VERSION`. `gh-pages` is
-only used for Storybook PR previews (`preview.yml`).
+`docs.distopia.top` lives in its own repo, `studio-distopia/docs` (VitePress, Cloudflare Pages);
+the `/help` routes in `presentation-web` only redirect there. `gh-pages` here is only used for
+Storybook PR previews (`preview.yml`).
 
 ---
 
